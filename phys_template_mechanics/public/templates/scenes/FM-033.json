@@ -1,0 +1,118 @@
+{
+  "id": "template-scene-fm-033",
+  "name": "FM-033 弹簧连接",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-block-left",
+      "type": "block",
+      "label": "物块 #1",
+      "position": {
+        "x": -9.26,
+        "y": 0.308
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 1.2,
+      "friction": 0.2,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.8,
+      "height": 0.6
+    },
+    {
+      "id": "body-block-right",
+      "type": "block",
+      "label": "物块 #2",
+      "position": {
+        "x": -0.35999999999999965,
+        "y": 0.308
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 1.2,
+      "friction": 0.2,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.8,
+      "height": 0.6
+    }
+  ],
+  "joints": [
+    {
+      "id": "joint-spring-main",
+      "type": "spring",
+      "label": "弹簧",
+      "bodyIdA": "body-block-left",
+      "bodyIdB": "body-block-right",
+      "anchorA": {
+        "x": 0.45,
+        "y": 0
+      },
+      "anchorB": {
+        "x": -0.45,
+        "y": 0
+      },
+      "springLength": 8,
+      "stiffness": 2.6,
+      "damping": 0.12
+    }
+  ],
+  "forces": [
+    {
+      "id": "body-1775111999254-1",
+      "type": "external",
+      "targetBodyId": "body-block-right",
+      "label": "F1",
+      "magnitude": 10,
+      "direction": 0,
+      "visible": true,
+      "decompose": false,
+      "decomposeAngle": 0
+    }
+  ],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

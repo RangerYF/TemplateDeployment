@@ -1,0 +1,2733 @@
+{
+  "total_solid": 789,
+  "passed": 245,
+  "excluded": 544,
+  "reason_counts": {
+    "no_geometry_keyword": 377,
+    "excluded_keyword": 71,
+    "too_short": 58,
+    "no_task_keyword": 38
+  },
+  "excluded_items": [
+    {
+      "id": "geo-cmm-18475",
+      "reason": "no_geometry_keyword",
+      "detail": "已知三角形面积为 $\\frac{1}{4}$, 外接圆面积为 $\\pi$, 则这个三角形的三边之积为 $($ )"
+    },
+    {
+      "id": "geo-cmm-17893",
+      "reason": "no_geometry_keyword",
+      "detail": "扇形的周长为 $6 \\mathrm{~cm}$, 面积是 $2 \\mathrm{~cm}^{2}$, 则扇形的圆心角的弧度数是"
+    },
+    {
+      "id": "geo-cmm-17963",
+      "reason": "no_geometry_keyword",
+      "detail": "若向量 $\\boldsymbol{a}, \\boldsymbol{b}, \\boldsymbol{c}$ 满足 $\\boldsymbol{a} / / \\bol"
+    },
+    {
+      "id": "geo-cmm-17970",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $|\\boldsymbol{a}|=|\\boldsymbol{b}|=2, \\boldsymbol{a} \\cdot \\boldsymbol{b}=2$,"
+    },
+    {
+      "id": "geo-cmm-18901",
+      "reason": "no_geometry_keyword",
+      "detail": "在 $\\triangle A B C$ 中, 角 $A, B, C$ 的对边分\n\n别为 $a, b, c$, 若 $a=1, \\sqrt{3} \\sin A \\"
+    },
+    {
+      "id": "geo-cmm-18926",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A, B, C$ 是海面上的三座岛屿, 测得 $\\angle A B C=30^{\\circ}, \\angle B A C=105^{\\circ}$, "
+    },
+    {
+      "id": "geo-cmm-18929",
+      "reason": "no_geometry_keyword",
+      "detail": "在 $\\triangle A B C$ 中, 角 $B$ 为 $\\frac{3 \\pi}{4}, B C$ 边上的高恰为 $B C$ 边长的一半, 则 $\\co"
+    },
+    {
+      "id": "geo-cmm-21089",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\mathrm{m}, \\mathrm{n}$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 则下列命题正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-21099",
+      "reason": "no_geometry_keyword",
+      "detail": "设是空间的三条直线, 给出以下五个命题:\n\n(1)若 $\\mathrm{A} \\perp \\mathrm{b}, \\mathrm{b} \\perp \\mathr"
+    },
+    {
+      "id": "geo-cmm-22847",
+      "reason": "excluded_keyword",
+      "detail": "柱坐标"
+    },
+    {
+      "id": "geo-cmm-22859",
+      "reason": "excluded_keyword",
+      "detail": "柱坐标"
+    },
+    {
+      "id": "geo-cmm-22860",
+      "reason": "excluded_keyword",
+      "detail": "球坐标"
+    },
+    {
+      "id": "geo-cmm-20513",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\alpha, \\beta$ 是两个平面, 直线 $l$ 不在平面 $\\alpha$ 内, $l$ 也不在平面 $\\beta$ 内, 设(1) $l \\"
+    },
+    {
+      "id": "geo-cmm-23047",
+      "reason": "no_geometry_keyword",
+      "detail": "用反证法证明“三角形中最多只有一个内角为针角”, 下列假设中正确的是( )"
+    },
+    {
+      "id": "geo-cmm-20827",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间中直线与平面的位置关系依次填入下图的 $M, N, E, F$ 中,顺序较为恰当的是( )\n\n(1)直线在平面内;(2)直线与平面平行;(3)直线在平面外"
+    },
+    {
+      "id": "geo-cmm-21345",
+      "reason": "no_geometry_keyword",
+      "detail": "以 $B C$ 为斜边的 Rt $\\triangle A B C$ 中, $B C^{2}=A B^{2}+A C^{2}$, 由类比推理, 在三棱雉 $P-A"
+    },
+    {
+      "id": "geo-cmm-22669",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-22670",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-22677",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-21254",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间四边形 $O A B C$ 中, $\\overrightarrow{\\mathrm{OA}}+\\overrightarrow{\\mathrm{AB}}-\\"
+    },
+    {
+      "id": "geo-cmm-22671",
+      "reason": "too_short",
+      "detail": "长度=16"
+    },
+    {
+      "id": "geo-cmm-22672",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-15415",
+      "reason": "no_geometry_keyword",
+      "detail": "下列四个选项中的图形表示两个相交平面, 其中画法正确的是( )"
+    },
+    {
+      "id": "geo-cmm-15622",
+      "reason": "no_geometry_keyword",
+      "detail": "用斜二测画法画一个水平放置的平面图形的直观图是如图所示的一个正方形, 则原来的图形是"
+    },
+    {
+      "id": "geo-cmm-15638",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 正方形 $O^{\\prime} A^{\\prime} B^{\\prime} C^{\\prime}$ 的边长为 $1 \\mathrm{~cm}$, 它是水"
+    },
+    {
+      "id": "geo-cmm-15420",
+      "reason": "too_short",
+      "detail": "长度=12"
+    },
+    {
+      "id": "geo-cmm-15421",
+      "reason": "no_geometry_keyword",
+      "detail": "如果空间四点 $A, B, C, D$ 不共面, 那么下列判断中正确的是( )"
+    },
+    {
+      "id": "geo-cmm-15422",
+      "reason": "no_geometry_keyword",
+      "detail": "如果直线 $a \\subset$ 平面 $\\alpha$, 直线 $b \\subset$ 平面 $\\alpha, M \\in a, N \\in b, M \\in"
+    },
+    {
+      "id": "geo-cmm-15424",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\alpha, \\beta$ 为平面, $A, B, M, N$ 为点, $a$ 为直线, 下列推理错误的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15425",
+      "reason": "too_short",
+      "detail": "长度=21"
+    },
+    {
+      "id": "geo-cmm-15426",
+      "reason": "no_geometry_keyword",
+      "detail": "空间中有五个点, 其中有四个点在同一平面内, 但没有任何三点共线, 这样的五个点确定平面的个数最多可以是( )"
+    },
+    {
+      "id": "geo-cmm-15428",
+      "reason": "no_geometry_keyword",
+      "detail": "若空间三条直线 $a, b, c$ 满足 $a \\perp b, b / / c$, 则直线 $a$ 与 $c(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-15433",
+      "reason": "too_short",
+      "detail": "长度=25"
+    },
+    {
+      "id": "geo-cmm-15434",
+      "reason": "too_short",
+      "detail": "长度=17"
+    },
+    {
+      "id": "geo-cmm-15436",
+      "reason": "too_short",
+      "detail": "长度=29"
+    },
+    {
+      "id": "geo-cmm-15437",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $a, b, c$, 下列三个命题:\n\n(1)若 $a$ 与 $b$ 异面, $b$ 与 $c$ 异面, 则 $a$ 与 $c$ 异面;\n\n(2)若 "
+    },
+    {
+      "id": "geo-cmm-15441",
+      "reason": "too_short",
+      "detail": "长度=11"
+    },
+    {
+      "id": "geo-cmm-15445",
+      "reason": "too_short",
+      "detail": "长度=30"
+    },
+    {
+      "id": "geo-cmm-15446",
+      "reason": "too_short",
+      "detail": "长度=11"
+    },
+    {
+      "id": "geo-cmm-15447",
+      "reason": "no_geometry_keyword",
+      "detail": "若平面 $\\alpha / /$ 平面 $\\beta, l \\subset \\alpha$, 则 $l$ 与 $\\beta$ 的位置关系是( )"
+    },
+    {
+      "id": "geo-cmm-15448",
+      "reason": "no_geometry_keyword",
+      "detail": "若平面 $\\alpha$ 与 $\\beta$ 的公共点多于两个, 则( )"
+    },
+    {
+      "id": "geo-cmm-15449",
+      "reason": "no_geometry_keyword",
+      "detail": "若直线 $a \\perp b$, 且直线 $a / /$ 平面 $\\alpha$, 则直线 $b$ 与平面 $\\alpha$ 的位置关系是 ( )"
+    },
+    {
+      "id": "geo-cmm-15450",
+      "reason": "no_geometry_keyword",
+      "detail": "下列命题中, 正确的有 ( )\n\n(1)平行于同一直线的两条直线平行;\n\n(2)平行于同一个平面的两条直线平行;\n\n(3)平行于同一条直线的两个平面平行;\n\n("
+    },
+    {
+      "id": "geo-cmm-15451",
+      "reason": "no_geometry_keyword",
+      "detail": "下列说法中正确的个数是 ( )\n\n(1)平面 $\\alpha$ 与平面 $\\beta, \\gamma$ 都相交, 则这三个平面有 2 条或 3 条交线;\n\n(2"
+    },
+    {
+      "id": "geo-cmm-15453",
+      "reason": "no_geometry_keyword",
+      "detail": "下列条件中能得出直线 $m$ 与平面 $\\alpha$ 平行的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15458",
+      "reason": "no_geometry_keyword",
+      "detail": "若直线 $l$ 不平行于平面 $\\alpha$, 且 $l 4 \\alpha$, 则 ( )"
+    },
+    {
+      "id": "geo-cmm-15459",
+      "reason": "no_geometry_keyword",
+      "detail": "过直线 $l$ 外两点, 作与 $l$ 平行的平面, 则这样的平面 ( )"
+    },
+    {
+      "id": "geo-cmm-15460",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $P$ 为矩形 $A B C D$ 所在平面外一点, 矩形对角线交点为 $O, M$ 为 $P B$ 的中点, 给出五个结论:\n\n(1) $O M "
+    },
+    {
+      "id": "geo-cmm-15461",
+      "reason": "no_geometry_keyword",
+      "detail": "直线 $a, b$ 为异面直线, 过直线 $a$ 与直线 $b$ 平行的平面 ( )"
+    },
+    {
+      "id": "geo-cmm-15474",
+      "reason": "no_geometry_keyword",
+      "detail": "经过平面 $\\alpha$ 外两点, 作与 $\\alpha$ 平行的平面, 则这样的平面可以作 $($ )"
+    },
+    {
+      "id": "geo-cmm-15475",
+      "reason": "no_geometry_keyword",
+      "detail": "已知立方体 $A B C D-A^{\\prime} B^{\\prime} C^{\\prime} D^{\\prime}$, 点 $E, F, G, H$ 分别是棱"
+    },
+    {
+      "id": "geo-cmm-15477",
+      "reason": "no_geometry_keyword",
+      "detail": "如图是四棱雉的平面展开图, 其中四边形 $A B C D$ 为正方形, 点 $E, F, G, H$ 分别为 $P A$, $P D, P C, P B$ 的中"
+    },
+    {
+      "id": "geo-cmm-15479",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 已知 $S$ 为四边形 $A B C D$ 外一点, 点 $G, H$ 分别为 $S B, B D$ 上的点, 若 $G H / /$ 平面 $S C "
+    },
+    {
+      "id": "geo-cmm-15483",
+      "reason": "no_geometry_keyword",
+      "detail": "直线 $a / /$ 平面 $\\alpha, P \\in \\alpha$, 过点 $P$ 平行于 $a$ 的直线( )"
+    },
+    {
+      "id": "geo-cmm-15484",
+      "reason": "no_geometry_keyword",
+      "detail": "对于直线 $m, n$ 和平面 $\\alpha$, 下列命题中正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15486",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间四边形 $A B C D$ 中, $E, F, G, H$ 分别是 $A B, B C, C D, D A$ 上的点, 当 $B D / /$ 平面 $E"
+    },
+    {
+      "id": "geo-cmm-15488",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四棱雉 $S-A B C D$ 的所有的棱长都等于 2 , 点 $E$ 是 $S A$ 的中点, 过 $C, D, E$ 三点的平面与 $S B$ 交于"
+    },
+    {
+      "id": "geo-cmm-15491",
+      "reason": "no_geometry_keyword",
+      "detail": "两个平行平面与另两个平行平面相交所得四条直线的位置关系是 ( )"
+    },
+    {
+      "id": "geo-cmm-15496",
+      "reason": "no_geometry_keyword",
+      "detail": "下列命题:\n\n(1)一条直线与两个平行平面中的一个平面相交, 必与另外一个平面相交;\n\n(2)如果一个平面平行于两个平行平面中的一个平面, 必平行于另一个平面;"
+    },
+    {
+      "id": "geo-cmm-15497",
+      "reason": "no_geometry_keyword",
+      "detail": "平面 $\\alpha / /$ 平面 $\\beta$, 点 $A, C \\in \\alpha, B, D \\in \\beta$, 则直线 $A C / /$ 直"
+    },
+    {
+      "id": "geo-cmm-15498",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $P$ 是三角形 $A B C$ 所在平面外一点, 平面 $\\alpha / /$ 平面 $A B C, \\alpha$ 分别交线段 $P A, P"
+    },
+    {
+      "id": "geo-cmm-15499",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\alpha, \\beta, \\gamma$ 为三个不重合的平面, $a, b, c$ 为三条不同的直线, 则下列命题中不正确的是 ( )\n\n(1) $\\le"
+    },
+    {
+      "id": "geo-cmm-15501",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha / / \\beta, A \\in \\alpha, B \\in \\beta, C$ 是 $A B$ 的中点, 当 $A, B$ 分别在平面 $"
+    },
+    {
+      "id": "geo-cmm-15504",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在正方形 $A B C D$ 中, $E, F$ 分别是 $B C, C D$ 的中点, $G$ 是 $E F$ 的中点, 现在沿 $A E$, $A "
+    },
+    {
+      "id": "geo-cmm-15510",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 如果 $M C \\perp$ 菱形 $A B C D$ 所在平面, 那么 $M A$ 与 $B D$ 的位置关系是 ("
+    },
+    {
+      "id": "geo-cmm-15511",
+      "reason": "no_task_keyword",
+      "detail": "在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, 下面结论错误的是( )"
+    },
+    {
+      "id": "geo-cmm-15512",
+      "reason": "no_geometry_keyword",
+      "detail": "下列说法中, 正确的有 ( )\n\n(1)如果一条直线垂直于平面内的两条直线，那么这条直线和这个平面垂直;\n\n(2)过直线 $l$ 外一点 $P$, 有且仅有一个"
+    },
+    {
+      "id": "geo-cmm-15513",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在三棱雉 $P-A B C$ 中, $P A \\perp$ 平面 $A B C, A B \\perp B C, P A=A B, D$ 为 $P B$ "
+    },
+    {
+      "id": "geo-cmm-15514",
+      "reason": "no_geometry_keyword",
+      "detail": "把正方形 $A B C D$ 沿对角线 $A C$ 折起, 当以 $A, B, C, D$ 四点为顶点棱雉体积最大时, 直线 $B D$ 和平面 $A B C$"
+    },
+    {
+      "id": "geo-cmm-15522",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $m, n$ 与平面 $\\alpha, \\beta$, 给出下列三个结论:\n\n(1)若 $m / / \\alpha, n / / \\alpha$, 则"
+    },
+    {
+      "id": "geo-cmm-15524",
+      "reason": "too_short",
+      "detail": "长度=18"
+    },
+    {
+      "id": "geo-cmm-15527",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在梯形 $A B C D$ 中, $A D / / B C, \\angle A B C=90^{\\circ}, A D: B C: A B=2: 3: "
+    },
+    {
+      "id": "geo-cmm-15530",
+      "reason": "no_geometry_keyword",
+      "detail": "设平面 $\\alpha \\perp$ 平面 $\\beta$, 若平面 $\\alpha$ 内的一条直线 $a$ 垂直于平面 $\\beta$ 内的一条直线 $b$,"
+    },
+    {
+      "id": "geo-cmm-15535",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $m, n$ 为两条不同直线, $\\alpha, \\beta$ 为两个不同平面, 给出下列命题:\n\n(1) $\\left\\{\\begin{array}{l"
+    },
+    {
+      "id": "geo-cmm-15536",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $l \\perp$ 平面 $\\alpha$, 直线 $m \\subset$ 平面 $\\beta$. 有下面四个命题:\n\n(1) $\\alpha / / \\"
+    },
+    {
+      "id": "geo-cmm-15537",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 设平面 $\\alpha \\cap$ 平面 $\\beta=P Q, E G \\perp$ 平面 $\\alpha, F H \\perp$ 平面 $\\alph"
+    },
+    {
+      "id": "geo-cmm-15538",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 三棱雉 $P A B C$ 中, 平面 $A B C \\perp$ 平面 $P A B, P A=P B, A D=D B$, 则( )"
+    },
+    {
+      "id": "geo-cmm-15539",
+      "reason": "no_task_keyword",
+      "detail": "如图所示, 在长方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $A A_{1}=2 A B, A B=B C$, 则下列结论中"
+    },
+    {
+      "id": "geo-cmm-15540",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 平面 $\\alpha \\perp$ 平面 $\\beta, A \\in \\alpha, B \\in \\beta, A B$ 与两平面 $\\alpha,"
+    },
+    {
+      "id": "geo-cmm-15541",
+      "reason": "no_task_keyword",
+      "detail": "如图, 四边形 $A B C D$ 中, $A D / / B C, A D=A B, \\angle B C D=45^{\\circ}, \\angle B A "
+    },
+    {
+      "id": "geo-cmm-17170",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-14356",
+      "reason": "no_geometry_keyword",
+      "detail": "高为 $H$ 、满缸水量为 $V$ 的鱼缸的轴截面如图所示, 现底部有一个小洞, 满缸水从洞中流出, 若鱼缸水深为 $h$ 时水的体积为 $v$, 则函数 $v"
+    },
+    {
+      "id": "geo-cmm-15543",
+      "reason": "too_short",
+      "detail": "长度=13"
+    },
+    {
+      "id": "geo-cmm-18452",
+      "reason": "no_geometry_keyword",
+      "detail": "10. 在 $\\triangle A B C$ 中, $A=60^{\\circ}, b=1, S_{\\triangle A B C}=\\sqrt{3}$, 则 "
+    },
+    {
+      "id": "geo-cmm-18005",
+      "reason": "no_geometry_keyword",
+      "detail": "11. 把同一平面内所有模不小于 1 , 不大于 2 的向量的起点, 移到同一点 $O$, 则这些向量的终点构成的图形的面积等于 \\$ \\qquad \\$"
+    },
+    {
+      "id": "geo-cmm-18015",
+      "reason": "no_geometry_keyword",
+      "detail": "7. 设点 $O$ 是 $\\triangle A B C$ 所在平面上一点, 若 $|\\overrightarrow{O A}|=|\\overrightarro"
+    },
+    {
+      "id": "geo-cmm-21078",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\alpha, \\beta, \\gamma$ 是三个平面, $\\mathrm{m}, \\mathrm{n}$ 是两条直线, 有下列四个命题:\n\n(1)如"
+    },
+    {
+      "id": "geo-cmm-22540",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-22862",
+      "reason": "excluded_keyword",
+      "detail": "柱坐标"
+    },
+    {
+      "id": "geo-cmm-22863",
+      "reason": "excluded_keyword",
+      "detail": "球坐标"
+    },
+    {
+      "id": "geo-cmm-22674",
+      "reason": "too_short",
+      "detail": "长度=24"
+    },
+    {
+      "id": "geo-cmm-15417",
+      "reason": "no_geometry_keyword",
+      "detail": "已知空间四点中无任何三点共线, 那么这四点可以确定平面的个数是"
+    },
+    {
+      "id": "geo-cmm-15418",
+      "reason": "no_geometry_keyword",
+      "detail": "若直线 $l$ 与平面 $\\alpha$ 相交于点 $O, A, B \\in l, C, D \\in \\alpha$, 且 $A C / / B D$, 则 $"
+    },
+    {
+      "id": "geo-cmm-15427",
+      "reason": "no_geometry_keyword",
+      "detail": "线 $l$ 上有两个点在平面 $\\alpha$ 内, 则下列说法中正确的序号为\n\n(1)直线 $l$ 上至少有一个点在平面 $\\alpha$ 外;\n\n(2)直线"
+    },
+    {
+      "id": "geo-cmm-15429",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 空间四边形 $A B C D$ 的对角线 $A C=8, B D=6, M, N$ 分别为 $A B, C D$ 的中点, 并且异面直线 $A C$ 与"
+    },
+    {
+      "id": "geo-cmm-15442",
+      "reason": "no_geometry_keyword",
+      "detail": "若点 $A \\in \\alpha, B \\notin \\alpha, C \\notin \\alpha$, 则平面 $A B C$ 与平面 $\\alpha$ 的位"
+    },
+    {
+      "id": "geo-cmm-15443",
+      "reason": "no_geometry_keyword",
+      "detail": "下列说法中正确的是 \\$ \\qquad \\$ . (填序号)\n\n(1)若直线 $a$ 不在平面 $\\alpha$ 内，则 $a / / \\alpha$;\n\n(2"
+    },
+    {
+      "id": "geo-cmm-15444",
+      "reason": "no_geometry_keyword",
+      "detail": "互不重合的三个平面最多可以把空间分成 \\$ \\qquad \\$个部分."
+    },
+    {
+      "id": "geo-cmm-15452",
+      "reason": "no_geometry_keyword",
+      "detail": "已知下列说法:\n\n(1)若两个平面 $\\alpha / / \\beta, a \\subset \\alpha, b \\subset \\beta$, 则 $a / "
+    },
+    {
+      "id": "geo-cmm-15454",
+      "reason": "no_geometry_keyword",
+      "detail": "三棱雉 $S A B C$ 中, $G$ 为 $\\triangle A B C$ 的重心, $E$ 在棱 $S A$ 上, 且 $A E=2 E S$, 则 $"
+    },
+    {
+      "id": "geo-cmm-15455",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在五面体 $F E-A B C D$ 中, 四边形 $C D E F$ 为矩形, $M, N$ 分别是 $B F, B C$ 的中点,则 $M N$ 与"
+    },
+    {
+      "id": "geo-cmm-15465",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $l, m$ 是两条直线, $\\alpha$ 是平面, 若要得到 “ $l / / \\alpha$ ”, 则需要在条件 “ $m \\subset \\alp"
+    },
+    {
+      "id": "geo-cmm-15468",
+      "reason": "no_task_keyword",
+      "detail": "如图是正方体的平面展开图. 在这个正方体中,\n\n(1) $B M / /$ 平面 $D E$; (2) $C N / /$ 平面 $A F$; (3)平面 $B"
+    },
+    {
+      "id": "geo-cmm-15478",
+      "reason": "no_geometry_keyword",
+      "detail": "已知平面 $\\alpha, \\beta$ 和直线 $a, b, c$, 且 $a / / b / / c, a \\subset \\alpha, b, c \\su"
+    },
+    {
+      "id": "geo-cmm-15480",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 已知 $A, B, C, D$ 四点不共面, 且 $A B / / \\alpha, C D / / \\alpha, A C \\cap \\alpha=E,"
+    },
+    {
+      "id": "geo-cmm-15490",
+      "reason": "no_geometry_keyword",
+      "detail": "直线 $a / /$ 平面 $\\alpha, \\alpha$ 内有 $n$ 条直线交于一点, 则这 $n$ 条直线中与直线 $a$ 平行的直线有_条."
+    },
+    {
+      "id": "geo-cmm-15492",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 平面 $\\alpha / /$ 平面 $\\beta, \\triangle A B C, \\triangle A^{\\prime} B^{\\prime"
+    },
+    {
+      "id": "geo-cmm-15493",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在多面体 $A B C-D E F G$ 中, 平面 $A B C / /$ 平面 $D E F G, A D / / B E, A C / / D G"
+    },
+    {
+      "id": "geo-cmm-15494",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四棱雉 $P-A B C D$ 的底面是平行四边形, $P A=P B=A B=2, E, F$ 分别是 $A B, C D$的中点, 平面 $A G "
+    },
+    {
+      "id": "geo-cmm-15506",
+      "reason": "no_task_keyword",
+      "detail": "在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $M, N$ 分别是棱 $A A_{1}$ 和 $A B$ 上的点, 若 $"
+    },
+    {
+      "id": "geo-cmm-15516",
+      "reason": "no_geometry_keyword",
+      "detail": "所示, $A B$ 是 $\\odot O$ 的直径, $P A \\perp \\odot O$ 所在的平面, $C$ 是圆上一点, 且 $\\angle A B C"
+    },
+    {
+      "id": "geo-cmm-15519",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在四棱雉 $P-A B C D$ 中, $P A \\perp$ 底面 $A B C D$, 且底面各边都相等, $M$ 是 $P C$ 上的一动点,"
+    },
+    {
+      "id": "geo-cmm-15529",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\alpha, \\beta$ 是两个不同的平面, $m, n$ 是平面 $\\alpha$ 及 $\\beta$ 之外的两条不同直线, 给出四个论断:\n\n(1) "
+    },
+    {
+      "id": "geo-cmm-15531",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 平面 $A B C \\perp$ 平面 $A B D, \\angle A C B=90^{\\circ}, C A=C B, \\triangle A B "
+    },
+    {
+      "id": "geo-cmm-15532",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $A B$ 为圆 $O$ 的直径, 点 $C$ 在圆周上(异于点 $A, B$ ), 直线 $P A$ 垂直于圆 $O$ 所在的平面, 点 $M$ "
+    },
+    {
+      "id": "geo-cmm-15542",
+      "reason": "no_geometry_keyword",
+      "detail": "$a, b$ 是异面直线, 直线 $l \\perp a, l \\perp b$, 直线 $m \\perp a, m \\perp b$, 则 $l$ 与 $m$ "
+    },
+    {
+      "id": "geo-cmm-16694",
+      "reason": "no_geometry_keyword",
+      "detail": "四棱雉 $\\mathrm{S}-\\mathrm{ABCD}$ 内任取一点 $\\mathrm{P}$, 则 $V_{P-A B C D}<\\frac{1}{3} "
+    },
+    {
+      "id": "geo-cmm-15628",
+      "reason": "no_geometry_keyword",
+      "detail": "一个等腰直角三角形在一个平面内的平行投影可能是下列图形中的 （把你认为正确的选项代号都填上).(1)等腰直角三角形; (2)直角非等腰三角形; (3)钝角三角形"
+    },
+    {
+      "id": "geo-cmm-15570",
+      "reason": "too_short",
+      "detail": "长度=29"
+    },
+    {
+      "id": "geo-cmm-15571",
+      "reason": "too_short",
+      "detail": "长度=27"
+    },
+    {
+      "id": "geo-cmm-15572",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四边形 $A B C D$ 为直角梯形, 试作出绕其各条边所在的直线旋转所得到的几何体."
+    },
+    {
+      "id": "geo-cmm-15573",
+      "reason": "no_task_keyword",
+      "detail": "一个三棱柱可以分制成几个以三棱柱的顶点为顶点的三棱雉? 试在如图所示的三棱柱 $A B C-A_{1} B_{1} C_{1}$ 中设计出分割方案. (请用尽可"
+    },
+    {
+      "id": "geo-cmm-15590",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 图 (2) 是图 (1) 中实物的主视图和俯视图, 你认为正确吗? 如果不正确, 请找出错误并改正, 然后画出它的左视图."
+    },
+    {
+      "id": "geo-cmm-15591",
+      "reason": "too_short",
+      "detail": "长度=30"
+    },
+    {
+      "id": "geo-cmm-18751",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\triangle A B C$ 的两边长分别为 2,3 , 其夹角的余弦值为 $\\frac{1}{3}$, 则其外接圆的半径为 ( )"
+    },
+    {
+      "id": "geo-cmm-18755",
+      "reason": "no_geometry_keyword",
+      "detail": "在 $\\triangle A B C$ 中, $A B=7, A C=6, M$ 是 $B C$ 的中点, $A M=4$, 则 $B C$ 等于 ( )"
+    },
+    {
+      "id": "geo-cmm-19061",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\triangle A B C$ 中, $a 、 b 、 c$ 分别是角 $A 、 B 、 C$ 所对的边, 已知 $b c=b^{2}-2 c^{2}"
+    },
+    {
+      "id": "geo-cmm-18781",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\triangle A B C$ 的三内角 $A 、 B 、 C$ 所对边的长分别是 $a 、 b 、 c$, 设向量 $\\boldsymbol{p}=(a+"
+    },
+    {
+      "id": "geo-cmm-18790",
+      "reason": "too_short",
+      "detail": "长度=19"
+    },
+    {
+      "id": "geo-cmm-19111",
+      "reason": "no_geometry_keyword",
+      "detail": "【2018 届重庆市高三上学期期中】已知 $I$ 为 $\\triangle A B C$ 的内心, $\\cos A=\\frac{7}{8}$, 若 $\\over"
+    },
+    {
+      "id": "geo-cmm-20166",
+      "reason": "no_geometry_keyword",
+      "detail": "用边长为 $120 \\mathrm{~cm}$ 的正方形铁皮做一个无盖水箱, 先在四周分别截去一个小正方形, 然后把四边翻转 $90^{\\circ}$ 角, 再"
+    },
+    {
+      "id": "geo-cmm-19952",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha, \\beta$ 是两个不同的平面, $m$ 是直线且 $m \\subset \\alpha$. “ $m / / \\beta$ ”是 “ $\\"
+    },
+    {
+      "id": "geo-cmm-19686",
+      "reason": "no_geometry_keyword",
+      "detail": "在 $\\triangle A B C$ 中, 若 $A=\\frac{\\pi}{3}, b=16$, 此三角形面积 $S=220 \\sqrt{3}$, 则 $a$"
+    },
+    {
+      "id": "geo-cmm-19691",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\triangle A B C$ 三边上的高依次为 $\\frac{1}{2}, \\frac{1}{3}, \\frac{1}{4}$, 则 $\\triangle"
+    },
+    {
+      "id": "geo-cmm-18503",
+      "reason": "no_geometry_keyword",
+      "detail": "平行四边形中, $A C=\\sqrt{65}, B D=\\sqrt{17}$, 周长为 18 , 则平行四边形面积是 ( )"
+    },
+    {
+      "id": "geo-cmm-19980",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha, \\beta$ 为两个不同的平面, $m, n$ 为两条不同的直线, $m \\subset \\alpha, n \\subset \\beta$"
+    },
+    {
+      "id": "geo-cmm-20089",
+      "reason": "no_geometry_keyword",
+      "detail": "水以匀速注入如图容器中, 试找出与容器对应的水的高度 $h$ 与时间 $t$ 的函数关系图象 ( )"
+    },
+    {
+      "id": "geo-cmm-17671",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\cos (\\alpha+\\beta)=\\frac{4}{5}, \\cos (\\alpha-\\beta)=-\\frac{4}{5}$, 则 $\\cos "
+    },
+    {
+      "id": "geo-cmm-17673",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\cos \\alpha+\\sin ^{2} \\beta=\\frac{3}{2}, \\sin \\alpha+\\sin \\beta \\cos \\beta=\\"
+    },
+    {
+      "id": "geo-cmm-18239",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $0<\\alpha<\\frac{\\pi}{2}<\\beta<\\pi, \\cos \\alpha=\\frac{3}{5}, \\sin (\\alpha+\\bet"
+    },
+    {
+      "id": "geo-cmm-20210",
+      "reason": "no_geometry_keyword",
+      "detail": "以下三个命题: (1)分别在两个平面内的直线一定是异面直线; (2)过平面 $\\alpha$ 的一条斜线有且只有一个平面与 $\\alpha$ 垂直; (3)平行"
+    },
+    {
+      "id": "geo-cmm-18324",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $O$ 是 $\\triangle \\mathrm{ABC}$ 所在平面内一点, 向量 $\\overrightarrow{\\mathrm{OP}_{1}} "
+    },
+    {
+      "id": "geo-cmm-18336",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A=\\{$ 与 $\\vec{a}$ 共线的向量 $\\}, B=\\{$ 与 $\\vec{a}$ 长度相等的向量 $\\}, C=\\{$ 与 $\\vec{a}"
+    },
+    {
+      "id": "geo-cmm-18343",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $O$ 是 $\\triangle A B C$ 所在平面内一点, $D$ 为 $B C$ 边中点, 且 $2 \\overrightarrow{O A}+\\"
+    },
+    {
+      "id": "geo-cmm-18369",
+      "reason": "no_geometry_keyword",
+      "detail": "已知向量 $\\vec{a} 、 \\vec{b} 、 \\vec{c}$ 满足 $\\vec{a}+\\vec{b}+\\vec{c}=\\overrightarrow{0"
+    },
+    {
+      "id": "geo-cmm-17676",
+      "reason": "too_short",
+      "detail": "长度=12"
+    },
+    {
+      "id": "geo-cmm-17567",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\cos (\\alpha+\\beta)=\\frac{4}{5}, \\cos (\\alpha-\\beta)=-\\frac{4}{5}$, 则 $\\cos "
+    },
+    {
+      "id": "geo-cmm-18422",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $a=\\sqrt{2}\\left(\\cos ^{2} 16^{\\circ}-\\sin ^{2} 16^{\\circ}\\right), b=\\sin 15^{"
+    },
+    {
+      "id": "geo-cmm-21255",
+      "reason": "no_task_keyword",
+      "detail": "在正方体中 $A B C D-A_{1} B_{1} C_{1} D_{1}$, 若 $G$ 点是 $\\triangle B A_{1} D$ 的重心, 且 $"
+    },
+    {
+      "id": "geo-cmm-21260",
+      "reason": "too_short",
+      "detail": "长度=12"
+    },
+    {
+      "id": "geo-cmm-21261",
+      "reason": "no_geometry_keyword",
+      "detail": "两个向量 $\\vec{a}=(2,-1,3), \\vec{b}=(4, m, n)$, 且 $\\vec{a} / / \\vec{b}$, 则 $m+n$ 的值为"
+    },
+    {
+      "id": "geo-cmm-21263",
+      "reason": "no_geometry_keyword",
+      "detail": "已知向量 $\\overrightarrow{\\mathrm{a}}=(1,1,0)$, 则与 $\\overrightarrow{\\mathrm{a}}$ 共线的"
+    },
+    {
+      "id": "geo-cmm-21264",
+      "reason": "no_geometry_keyword",
+      "detail": "已知空间向量 $\\vec{a}=(1, n, 2), \\vec{b}=(-2,1,2)$, 若 $2 \\vec{a}-\\vec{b}$ 与 $\\vec{b}$ "
+    },
+    {
+      "id": "geo-cmm-21266",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\vec{a}=(2,-1,3), \\vec{b}=(-1,4,-2), \\vec{c}=(7,5, \\lambda)$, 若 $\\vec{a}, \\v"
+    },
+    {
+      "id": "geo-cmm-21270",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\overrightarrow{A B}=(1,-1,0), C(0,1,-2)$, 若 $\\overrightarrow{C D}=2 \\overri"
+    },
+    {
+      "id": "geo-cmm-21276",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\vec{a}=(2,-1,2), \\vec{b}=(-4,2, x)$, 且 $\\vec{a} / / \\vec{b}$, 则 $x=(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-21279",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间直角坐标系中, 一定点到三个坐标平面的距离都是 2 , 那么该定点到原点的距离是 ( )"
+    },
+    {
+      "id": "geo-cmm-21280",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A(2,-5,1), B(2,-2,4), C(1,-4,1)$, 则向量 $\\overrightarrow{A B}$ 与 $\\overrightar"
+    },
+    {
+      "id": "geo-cmm-21281",
+      "reason": "no_geometry_keyword",
+      "detail": "已知向量 $\\vec{a}=(1,1,0), \\vec{b}=(-1,0,1)$, 且 $k \\vec{a}+\\vec{b}$ 与 $\\vec{a}$ 互相垂直"
+    },
+    {
+      "id": "geo-cmm-21282",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间直角坐标系中, 点 $A(1,-2,3)$ 关于平面 $x O z$ 的对称点为 $B, A$ 关于 $x$ 轴的对称点为 $C$, 则 $B, C$ 两"
+    },
+    {
+      "id": "geo-cmm-21283",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\triangle A B C$ 的三个顶点为 $A(3,3,2), B(4,-3,7), C(0,5,1)$, 则 $B C$ 边上的中线长为 ( )"
+    },
+    {
+      "id": "geo-cmm-21294",
+      "reason": "no_geometry_keyword",
+      "detail": "空间直角坐标系中, 已知 $A(2,1,3), B(-2,3,1)$, 点 $A$ 关于 ${ }_{X} O_{y}$ 平面对称的点为 $C$, 则 $B, "
+    },
+    {
+      "id": "geo-cmm-21295",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间直角坐标系中, 若以点 $A(4,1,9), B(10,-1,6), C(x, 3,3)$ 为顶点的 $\\triangle A B C$ 是以 $B C$"
+    },
+    {
+      "id": "geo-cmm-21296",
+      "reason": "no_geometry_keyword",
+      "detail": "已知空间向量 $\\vec{m}=(1,3, x), \\vec{n}=\\left(x^{2},-1,2\\right)$, 则 “ $x=1$ ” 是 “ $\\ve"
+    },
+    {
+      "id": "geo-cmm-22689",
+      "reason": "too_short",
+      "detail": "长度=13"
+    },
+    {
+      "id": "geo-cmm-22690",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 过点 $F_{1}$ 作 $F_{1} Q \\perp G_{1} G_{2}, \\triangle Q F_{1} F_{2}$ 为等腰直角三角形, "
+    },
+    {
+      "id": "geo-cmm-22694",
+      "reason": "no_task_keyword",
+      "detail": "工人师傅在如图 1 的一块矩形铁皮上画一条曲线, 沿曲线剪开, 将所得到的两部分卷成圆柱状, 如图 2, 然后将其对接, 可做成一个直角的“拐脖”, 如图 3."
+    },
+    {
+      "id": "geo-cmm-22700",
+      "reason": "no_task_keyword",
+      "detail": "已知平面 $\\alpha$ 与一圆柱的母线成 $60^{\\circ}$ 角,那么该平面与圆柱截口图形的离心率是（）"
+    },
+    {
+      "id": "geo-cmm-22712",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-21299",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $a=(\\lambda+1,0,2), b=(6,2 \\mu-1,2 \\lambda)$, 若 $a \\| b$, 则 $\\lambda$ 与 $\\mu$"
+    },
+    {
+      "id": "geo-cmm-21304",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A(1,0,0), B(0,1,0), C(0,0,1)$, 则平面 $A B C$ 的一个法向量可以是 ( )"
+    },
+    {
+      "id": "geo-cmm-21306",
+      "reason": "no_geometry_keyword",
+      "detail": "若 $\\triangle A B C$ 中, $\\angle C=90^{\\circ}, A(1,2,-3 k), B(-2,1,0), C(4,0,-2 k)"
+    },
+    {
+      "id": "geo-cmm-21310",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $l$ 的一个方向向量为 $\\vec{m}=(-2,-8,1)$, 平面 $\\alpha$ 的一个法向量为 $\\vec{n}=\\left(x, \\fr"
+    },
+    {
+      "id": "geo-cmm-21317",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A(1,0,0), B(0,1,0), C(0,0,1)$ 三点, 则以 $\\vec{n}=(1,1,1)$ 为方向向量的直线与平面 $A B C$的关"
+    },
+    {
+      "id": "geo-cmm-21319",
+      "reason": "no_geometry_keyword",
+      "detail": "已知空间向量 $\\overrightarrow{A B}=(2,4, x)$, 平面 $\\alpha$ 的一个法向量 $\\vec{n}=(1, y, 3)$, "
+    },
+    {
+      "id": "geo-cmm-22713",
+      "reason": "no_task_keyword",
+      "detail": "在圆雉内部嵌入 Dandelin 双球,一个位于平面 $\\pi$ 的上方,一个位于平面 $\\pi$ 的下方, 并且与平面 $\\pi$ 及圆雉均相切.若平面 $\\"
+    },
+    {
+      "id": "geo-cmm-22729",
+      "reason": "no_geometry_keyword",
+      "detail": "圆雉的顶角为 $50^{\\circ}$, 圆雉的截面与轴线所成的角为 $30^{\\circ}$, 则截线是 ( )"
+    },
+    {
+      "id": "geo-cmm-22730",
+      "reason": "no_geometry_keyword",
+      "detail": "平面 $\\pi$ 与圆雉的轴线平行, 圆雉母线与轴线夹角为 $60^{\\circ}$, 则平面与圆雉交线的离心率是 ( )"
+    },
+    {
+      "id": "geo-cmm-22732",
+      "reason": "no_geometry_keyword",
+      "detail": "平面与圆雉轴线夹角为 $45^{\\circ}$, 圆雉母线与轴线夹角为 $60^{\\circ}$, 平面与圆雉面交线的轴长为 2 , 则所得圆雉曲线的焦距为 ("
+    },
+    {
+      "id": "geo-cmm-22733",
+      "reason": "no_geometry_keyword",
+      "detail": "圆雉的顶角为 $60^{\\circ}$, 截面与母线所成的角为 $60^{\\circ}$, 则截面所截得的截线是"
+    },
+    {
+      "id": "geo-cmm-22292",
+      "reason": "no_task_keyword",
+      "detail": "在正方体的 8 个顶点中, 以任意 4 个顶点为顶点的三棱雉, 共有（）"
+    },
+    {
+      "id": "geo-cmm-22741",
+      "reason": "no_geometry_keyword",
+      "detail": "两个相似三角形对应边上的中线之比为 $3: 4$,周长之和是 35 ,那么这两个三角形的周长分别是 ( )"
+    },
+    {
+      "id": "geo-cmm-22747",
+      "reason": "no_geometry_keyword",
+      "detail": "有一块三角形铁片 $\\mathrm{ABC}$,已知 $\\mathrm{BC}=12 \\mathrm{~cm}$, 高 $\\mathrm{AD}=8 \\math"
+    },
+    {
+      "id": "geo-cmm-20997",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间直角坐标系中, 平面 $x O z$ 的一个法向量是 ( )"
+    },
+    {
+      "id": "geo-cmm-21002",
+      "reason": "no_geometry_keyword",
+      "detail": "已知三条直线 $l_{1}, l_{2}, l_{3}$ 的一个方向向量分别为 $\\boldsymbol{a}=(4,-1,0), \\boldsymbol{b}"
+    },
+    {
+      "id": "geo-cmm-21004",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\boldsymbol{u}=(-2,2,5), \\boldsymbol{v}=(6,-4,4), \\boldsymbol{u}, \\boldsymbo"
+    },
+    {
+      "id": "geo-cmm-21005",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-21008",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 已知在矩形 $A B C D$ 中, $A B=4 A D$, 且点 $E, F$ 分别为 $A B, C D$ 的中点, 若将矩形 $A B C D$"
+    },
+    {
+      "id": "geo-cmm-21011",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-20715",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $z \\in \\mathbf{C}$, 且 $|z|=1$, 则 $|z-2-2 i|$ (i 为虚数单位) 的最大值是 ( )"
+    },
+    {
+      "id": "geo-cmm-21020",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $F_{1}, F_{2}$ 分别是双曲线 $x^{2}-\\frac{y^{2}}{9}=1$ 的左、右焦点. 若点 $\\mathrm{P}$ 在双曲线上,"
+    },
+    {
+      "id": "geo-cmm-21916",
+      "reason": "no_geometry_keyword",
+      "detail": "有一段演绎推理是这样的: “若一条直线平行于一个平面, 则此直线平行于这个平面内的所有直线”.已知直线 $b / /$ 平面 $\\alpha$, 直线 $a \\"
+    },
+    {
+      "id": "geo-cmm-20882",
+      "reason": "no_geometry_keyword",
+      "detail": "命题 “若 $\\angle C=90^{\\circ}$, 则 $\\triangle A B C$ 是直角三角形”的逆命题、否命题、逆否命题这三个命题中,真命题的"
+    },
+    {
+      "id": "geo-cmm-20922",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $a, b$ 分别在两个不同的平面 $\\alpha, \\beta$ 内. 则 “直线 $a$ 和直线 $b$ 相交” 是 “平面 $\\alpha$和平"
+    },
+    {
+      "id": "geo-cmm-22673",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-22687",
+      "reason": "too_short",
+      "detail": "长度=26"
+    },
+    {
+      "id": "geo-cmm-20607",
+      "reason": "no_geometry_keyword",
+      "detail": "某单位综合治理领导小组成员之问的领导关系可以用框图表示, 这种框图通常称为 ( )"
+    },
+    {
+      "id": "geo-cmm-20706",
+      "reason": "too_short",
+      "detail": "长度=21"
+    },
+    {
+      "id": "geo-cmm-16433",
+      "reason": "no_geometry_keyword",
+      "detail": "利用斜二测画法, 作出直线 $A B$ 的直观图如图所示, 若 $O^{\\prime} A^{\\prime}=O^{\\prime} B^{\\prime}=1$,"
+    },
+    {
+      "id": "geo-cmm-16097",
+      "reason": "no_geometry_keyword",
+      "detail": "用斜二测画法画水平放置的 $\\triangle A B C$ 时, 若 $\\angle A$ 的两边分别平行于 $x$ 轴、 $y$ 轴, 且 $\\angle "
+    },
+    {
+      "id": "geo-cmm-16098",
+      "reason": "no_geometry_keyword",
+      "detail": "由斜二测画法得到:\n\n(1)相等的线段和角在直观图中仍然相等;\n\n(2)正方形在直观图中是矩形;\n\n(3)等腰三角形在直观图中仍然是等腰三角形;\n\n(4)菱形的"
+    },
+    {
+      "id": "geo-cmm-16103",
+      "reason": "no_geometry_keyword",
+      "detail": "在用斜二测画法画水平放置的 $\\triangle A B C$ 时, 若 $\\angle A$ 的两边分别平行于 $x$ 轴、 $y$ 轴, 则在直观图中 $\\"
+    },
+    {
+      "id": "geo-cmm-16110",
+      "reason": "too_short",
+      "detail": "长度=25"
+    },
+    {
+      "id": "geo-cmm-16111",
+      "reason": "no_task_keyword",
+      "detail": "下列直观图是将正方体模型放置在你的水平视线的左下角而绘制的是 ( )"
+    },
+    {
+      "id": "geo-cmm-16113",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 用斜二测画法画一个水平放置的平面图形的直观图为一个正方形, 则原来图形的形状是( )"
+    },
+    {
+      "id": "geo-cmm-15556",
+      "reason": "no_geometry_keyword",
+      "detail": "圆台的两个底面面积之比为 $4: 9$, 母线与底面的夹角是 $60^{\\circ}$, 轴截面的面积为 $180 \\sqrt{3}$, 则圆台的母线长 $l="
+    },
+    {
+      "id": "geo-cmm-15557",
+      "reason": "too_short",
+      "detail": "长度=27"
+    },
+    {
+      "id": "geo-cmm-15577",
+      "reason": "no_geometry_keyword",
+      "detail": "下列平面图形中, 通过围绕定直线 $l$ 旋转可得到如图所示几何体的是 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-15578",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-15580",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-15584",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15596",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-15597",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, $\\triangle A B C$ 为正三角形, $A A_{1} / / B B_{1} / / C C_{1}, C C_{1} \\perp$ 底面"
+    },
+    {
+      "id": "geo-cmm-15598",
+      "reason": "no_geometry_keyword",
+      "detail": "将右图所示的一个直角三角形 $A B C\\left(\\angle C=90^{\\circ}\\right)$ 绕斜边 $A B$ 旋转一周, 所得到的几何体的正视"
+    },
+    {
+      "id": "geo-cmm-15599",
+      "reason": "no_task_keyword",
+      "detail": "如图, $P$ 为正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中 $A C_{1}$ 与 $B D_{1}$ 的交点, 则 $\\"
+    },
+    {
+      "id": "geo-cmm-15601",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15602",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15603",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15613",
+      "reason": "too_short",
+      "detail": "长度=29"
+    },
+    {
+      "id": "geo-cmm-15615",
+      "reason": "too_short",
+      "detail": "长度=24"
+    },
+    {
+      "id": "geo-cmm-15616",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15617",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15618",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15619",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15620",
+      "reason": "no_geometry_keyword",
+      "detail": "某几何体的正 (主) 视图与侧 (左) 视图均为边长为 1 的正方形, 则下面四个图形中, 可能是该几何体俯视图的个数为 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-15623",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15633",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15635",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 Rt $\\triangle O^{\\prime} A^{\\prime} B^{\\prime}$ 是一个平面图形的直观图, 若 $O^{\\prime} B^"
+    },
+    {
+      "id": "geo-cmm-15641",
+      "reason": "too_short",
+      "detail": "长度=24"
+    },
+    {
+      "id": "geo-cmm-15642",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15643",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-15653",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15655",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-15656",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15657",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15658",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15660",
+      "reason": "no_task_keyword",
+      "detail": "已知三棱柱 $A B C-A_{1} B_{1} C_{1}$ 的 6 个顶点都在球 $O$ 的球面上若 $A B=3, A C=4$, $A B \\perp "
+    },
+    {
+      "id": "geo-cmm-15669",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15673",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15675",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15677",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $a$ 和平面 $\\alpha$, 那么能得出 $a / / \\alpha$ 的一个条件是（）"
+    },
+    {
+      "id": "geo-cmm-15686",
+      "reason": "no_geometry_keyword",
+      "detail": "在空间四边形 $A B C D$ 中, $E, F$ 分别为 $A B, A D$ 上的点, 且 $A E: E B=A F: F D=1: 4, H, G$ "
+    },
+    {
+      "id": "geo-cmm-15688",
+      "reason": "too_short",
+      "detail": "长度=24"
+    },
+    {
+      "id": "geo-cmm-15689",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, $\\triangle A B C$ 的边 $B C$ 在平面 $\\alpha$ 内, $E F$ 是 $\\triangle A B C$ 的中位线, 则"
+    },
+    {
+      "id": "geo-cmm-15690",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $P$ 为矩形 $A B C D$ 所在平面外一点, 矩形对角线的交点为 $O, M$ 为 $P B$ 的中点, 给出五个结论: (1) $O M "
+    },
+    {
+      "id": "geo-cmm-15691",
+      "reason": "no_geometry_keyword",
+      "detail": "下列选项中, 一定能得出直线 $m$ 与平面 $\\alpha$ 平行的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15696",
+      "reason": "too_short",
+      "detail": "长度=20"
+    },
+    {
+      "id": "geo-cmm-15709",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\alpha, \\beta$ 是两个不重合的平面, 下列选项中, 一定能得出平面 $\\alpha$ 与平面 $\\beta$ 平行的是"
+    },
+    {
+      "id": "geo-cmm-15710",
+      "reason": "no_geometry_keyword",
+      "detail": "已知三条互不相同的直线 $l, m, n$ 和三个互不相同的平面 $\\alpha, \\beta, \\gamma$, 现给出下列三个命题:\n\n(1)若 $l$ 与"
+    },
+    {
+      "id": "geo-cmm-15711",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha, \\beta$ 表示两个不同平面, $m$ 表示一条直线, 下列命题正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15712",
+      "reason": "no_geometry_keyword",
+      "detail": "平面 $\\alpha / / \\beta$ 平面的一个充分条件是（ ）"
+    },
+    {
+      "id": "geo-cmm-15713",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $a, b$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 则 $\\alpha / / \\beta$ 的一个充分条件是"
+    },
+    {
+      "id": "geo-cmm-15714",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $m, n$ 为两条不同的直线, $\\alpha, \\beta$ 为两个不同的平面, 对于下列四个命题:\n(1) $m \\subset \\alpha, n"
+    },
+    {
+      "id": "geo-cmm-15715",
+      "reason": "no_geometry_keyword",
+      "detail": "对于不重合的两个平面 $\\alpha$ 与 $\\beta$, 给定下列条件:\n\n(1)存在平面 $\\gamma$ ，使得 $\\alpha, \\beta$ 都平行"
+    },
+    {
+      "id": "geo-cmm-15730",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $l$ 为直线, $\\alpha, \\beta$ 是两个不同的平面, 下列说法中正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15731",
+      "reason": "too_short",
+      "detail": "长度=26"
+    },
+    {
+      "id": "geo-cmm-15732",
+      "reason": "no_geometry_keyword",
+      "detail": "已知平面 $\\boldsymbol{\\alpha}$ 和直线 I, 则 $\\boldsymbol{\\alpha}$ 内至少有一条直线与 I（）"
+    },
+    {
+      "id": "geo-cmm-15735",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $m, n$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 则下列命题不正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15736",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $a$, 两个不重合的平面 $\\alpha, \\beta$. 若 $\\alpha / / \\beta, a \\subset \\alpha$, 则下列四"
+    },
+    {
+      "id": "geo-cmm-15747",
+      "reason": "no_geometry_keyword",
+      "detail": "已知平面 $\\alpha / /$ 平面 $\\beta$, 直线 $m \\subset \\alpha$, 直线 $n \\subset \\beta$, 下列结论中"
+    },
+    {
+      "id": "geo-cmm-15749",
+      "reason": "no_task_keyword",
+      "detail": "已知长方体 $A B C D-A^{\\prime} B^{\\prime} C^{\\prime} D^{\\prime}$, 平面 $\\alpha \\cap$ 平面"
+    },
+    {
+      "id": "geo-cmm-15750",
+      "reason": "no_geometry_keyword",
+      "detail": "设平面 $\\alpha \\perp$ 平面 $\\beta$, 在平面 $\\alpha$ 内的一条直线 $a$ 垂直于平面 $\\beta$ 内的一条直线 $b$,"
+    },
+    {
+      "id": "geo-cmm-15756",
+      "reason": "no_task_keyword",
+      "detail": "如图, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, 直线 $A_{1} C$ 与平面 $A B C D$ 所成角的余弦值"
+    },
+    {
+      "id": "geo-cmm-15757",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 矩形 $A B C D$ 中, $A B=4, B C=2, E$ 为边 $A B$ 的中点, 沿 $D E$ 将 $\\triangle A D E$ "
+    },
+    {
+      "id": "geo-cmm-15767",
+      "reason": "no_task_keyword",
+      "detail": "长方体 $A B C D-A^{\\prime} B^{\\prime} C^{\\prime} D^{\\prime}$ 中, $A B=A D=2, A A^{\\p"
+    },
+    {
+      "id": "geo-cmm-15770",
+      "reason": "no_task_keyword",
+      "detail": "如图, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $A_{1} B_{1}$ 与平面 $A A_{1} C_{1}$ "
+    },
+    {
+      "id": "geo-cmm-15772",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在三棱雉 $P-A B C$ 中, 不能证明 $A P \\perp B C$ 的条件是( )"
+    },
+    {
+      "id": "geo-cmm-15776",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $m, l$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 下列命题中不正确的是"
+    },
+    {
+      "id": "geo-cmm-15777",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15789",
+      "reason": "no_geometry_keyword",
+      "detail": "如图是一个几何体的平面展开图, 其中四边形 $A B C D$ 为正方形, $\\triangle P D C, \\triangle P B C$, $\\tria"
+    },
+    {
+      "id": "geo-cmm-15791",
+      "reason": "no_geometry_keyword",
+      "detail": "如果直线 $l$ 与平面 $\\alpha$ 不垂直, 那么在平面 $\\alpha$ 内"
+    },
+    {
+      "id": "geo-cmm-15793",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $m, n$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 下列命题中正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15794",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在三棱雉 $S-A B C$ 中, $S C=A C, \\angle S C B=\\theta, \\angle A C B=\\pi-\\theta$, 二"
+    },
+    {
+      "id": "geo-cmm-15795",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $I$ 是直线, $\\alpha, \\beta$ 是两个不同的平面, 下列命题正确的是（）"
+    },
+    {
+      "id": "geo-cmm-15796",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $l \\perp$ 平面 $\\alpha$, 直线 $m \\subset \\alpha$, 则 ( )"
+    },
+    {
+      "id": "geo-cmm-15797",
+      "reason": "no_task_keyword",
+      "detail": "如图所示, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $E 、 F$ 分别在 $A_{1} D 、 A C$ 上, 且"
+    },
+    {
+      "id": "geo-cmm-15807",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\triangle A B C$ 所在的平面为 $\\alpha, l, m$ 是两条不同的直线, $l \\perp A B, l \\perp A C, "
+    },
+    {
+      "id": "geo-cmm-15809",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在三棱雉 $P-A B C$ 中, $P O \\perp$ 平面 $A B C, B O \\perp A C, B O$ 的延长线\n交 $A C$ "
+    },
+    {
+      "id": "geo-cmm-15816",
+      "reason": "no_task_keyword",
+      "detail": "已知长方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$, 在平面 $A A_{1} B_{1} B$ 上任取点 $M$, 作 $M E "
+    },
+    {
+      "id": "geo-cmm-15827",
+      "reason": "no_geometry_keyword",
+      "detail": "若平面 $\\alpha \\perp$ 平面 $\\beta$, 平面 $\\beta \\perp$ 平面 $\\gamma$, 则（ ）"
+    },
+    {
+      "id": "geo-cmm-15829",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $a 、 b$ 是两条不同的直线, $\\alpha 、 \\beta$ 是两个不同的平面, 则下列正确的个数为: ( ) (1)若 $a \\perp b, a"
+    },
+    {
+      "id": "geo-cmm-15830",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha, \\beta$ 是两个不同的平面, $l, m$ 是两条不同的直线, 且 $l \\subset \\alpha$, 则下列说法正确的是"
+    },
+    {
+      "id": "geo-cmm-15831",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $l \\perp$ 平面 $\\alpha$, 直线 $m / /$ 平面 $\\beta$, 若 $\\alpha \\perp \\beta$, 则下列结论"
+    },
+    {
+      "id": "geo-cmm-15832",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $a, b, c$ 是三条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 则下列条件中能得出直线 $a \\perp$ 平面 $\\alph"
+    },
+    {
+      "id": "geo-cmm-15833",
+      "reason": "no_geometry_keyword",
+      "detail": "已知三棱雉 $P-A B C$ 中, $O$ 为 $A B$ 中点, $P O \\perp$ 平面 $A B C, \\angle A P B=90^{\\circ"
+    },
+    {
+      "id": "geo-cmm-15834",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $\\alpha, \\beta$ 是两个不同的平面, $l, m$ 是两条不同的直线, 且 $l \\subset \\alpha, m \\subset \\bet"
+    },
+    {
+      "id": "geo-cmm-15835",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\boldsymbol{m}, \\boldsymbol{n}$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面,则下列命题正确的是"
+    },
+    {
+      "id": "geo-cmm-15837",
+      "reason": "no_geometry_keyword",
+      "detail": "如图两正方形 $A B C D, C D F E$ 所在的平面垂直, 将 $\\triangle E F C$ 沿着直线 $F C$ 旋转一周,则直线 $E C$"
+    },
+    {
+      "id": "geo-cmm-15847",
+      "reason": "no_geometry_keyword",
+      "detail": "给出以下四个命题:\n\n(1)依次首尾相接的四条线段必共面;\n\n(2)过不在同一条直线上的三点, 有且只有一个平面;\n\n(3)空间中如果一个角的两边与另一个角的两"
+    },
+    {
+      "id": "geo-cmm-15849",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-15852",
+      "reason": "no_task_keyword",
+      "detail": "在正四棱柱 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $A A_{1}=4, A B=2$, 点 $E, F$ 分别为棱 $B "
+    },
+    {
+      "id": "geo-cmm-15855",
+      "reason": "no_geometry_keyword",
+      "detail": "已知矩形 $A B C D, A B=1, B C=\\sqrt{2}$. 将 $\\triangle A B D$ 沿矩形的对角线 $B D$ 所在的直线进行翻折"
+    },
+    {
+      "id": "geo-cmm-15876",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $l, m$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 且 $l \\| \\alpha, m \\perp \\beta$, 则下"
+    },
+    {
+      "id": "geo-cmm-15889",
+      "reason": "no_geometry_keyword",
+      "detail": "已知空间中的两条直线 $l, m$, 三个平面 $\\alpha, \\beta, \\gamma$, 则下列说法中:\n\n(1)平面 $\\alpha, \\beta, "
+    },
+    {
+      "id": "geo-cmm-15891",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $m 、 n$, 平面 $\\alpha 、 \\beta$, 给出下列命题:\n\n(1)若 $m \\perp \\alpha, n \\perp \\beta$"
+    },
+    {
+      "id": "geo-cmm-15892",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $l, m$ 是两条不同的直线, $\\alpha, \\beta$ 是两个不同的平面, 则下列命题正确的是 ( )"
+    },
+    {
+      "id": "geo-cmm-15893",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $l$ 表示直线, $\\alpha, \\beta, \\gamma$ 表示不同的平面, 则下列命题中正确的是"
+    },
+    {
+      "id": "geo-cmm-15894",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $m, n$ 是两条不同的直线, $\\alpha, \\beta, \\gamma$ 是三个不同的平面, 给出下列四个命题:\n\n(1)若 $m \\perp \\a"
+    },
+    {
+      "id": "geo-cmm-15896",
+      "reason": "too_short",
+      "detail": "长度=21"
+    },
+    {
+      "id": "geo-cmm-15897",
+      "reason": "no_geometry_keyword",
+      "detail": "观察如图 1-1-8 的四个几何体, 其中判断不正确的是( )\n\n(1)\n\n(3)\n\n(2)\n\n(4)\n\n图 1-1-8"
+    },
+    {
+      "id": "geo-cmm-15898",
+      "reason": "too_short",
+      "detail": "长度=15"
+    },
+    {
+      "id": "geo-cmm-15899",
+      "reason": "no_task_keyword",
+      "detail": "纸质的正方体的六个面根据其方位分别标记为上、下、东、南、西、北. 现在沿该正方体的一些棱将正方体剪开, 外面朝上展平得到如图 1-1-10 所示的平面图形, 则"
+    },
+    {
+      "id": "geo-cmm-15904",
+      "reason": "too_short",
+      "detail": "长度=7"
+    },
+    {
+      "id": "geo-cmm-15909",
+      "reason": "too_short",
+      "detail": "长度=18"
+    },
+    {
+      "id": "geo-cmm-15910",
+      "reason": "too_short",
+      "detail": "长度=17"
+    },
+    {
+      "id": "geo-cmm-15911",
+      "reason": "too_short",
+      "detail": "长度=12"
+    },
+    {
+      "id": "geo-cmm-15912",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在三棱台 $A^{\\prime} B^{\\prime} C^{\\prime}-A B C$ 中, 截去三棱雉 $A^{\\prime}-A B C$,"
+    },
+    {
+      "id": "geo-cmm-15913",
+      "reason": "no_geometry_keyword",
+      "detail": "若棱台上、下底面的对应边之比为 $1: 2$, 则上、下底面的面积之比是 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-15916",
+      "reason": "no_geometry_keyword",
+      "detail": "给出下列说法:\n\n(1)梯形的四个顶点共面;\n\n(2)三条平行直线共面;\n\n(3)有三个公共点的两个平面重合;\n\n(4)三条直线两两相交, 可以确定 3 个平面"
+    },
+    {
+      "id": "geo-cmm-15918",
+      "reason": "too_short",
+      "detail": "长度=14"
+    },
+    {
+      "id": "geo-cmm-15920",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-1-7, 平面 $\\alpha \\cap$ 平面 $\\beta=l, A 、 B \\in \\alpha, C \\in \\beta, C \\notin "
+    },
+    {
+      "id": "geo-cmm-15927",
+      "reason": "too_short",
+      "detail": "长度=20"
+    },
+    {
+      "id": "geo-cmm-15928",
+      "reason": "no_geometry_keyword",
+      "detail": "如果 $A$ 点在直线 $a$ 上, 而直线 $a$ 在平面 $\\alpha$ 内, 点 $B$ 在 $\\alpha$ 内, 可以表示为 ( )"
+    },
+    {
+      "id": "geo-cmm-15930",
+      "reason": "no_geometry_keyword",
+      "detail": "有下列说法:\n\n(1)梯形的四个顶点在同一个平面内;\n\n(2)三条平行直线必共面;\n\n(3)有三个公共点的两个平面必重合.\n\n其中正确的个数是( )"
+    },
+    {
+      "id": "geo-cmm-15932",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 平面 $\\alpha \\cap \\beta=l, A 、 B \\in \\alpha, C \\in \\beta$, 且 $C \\notin l$, 直"
+    },
+    {
+      "id": "geo-cmm-16437",
+      "reason": "no_geometry_keyword",
+      "detail": "下列条件中, 能使直线 $m \\perp$ 平面 $\\alpha$ 的是( )"
+    },
+    {
+      "id": "geo-cmm-16438",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-6, 三棱雉 $P-A B C$ 中, $P A \\perp A B, P A \\perp B C$, 则直线 $P B$ 和平面 $A B C$"
+    },
+    {
+      "id": "geo-cmm-16439",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $m, n$ 是异面直线, 则过直线 $n$ 且与直线 $m$ 垂直的平面( )"
+    },
+    {
+      "id": "geo-cmm-16440",
+      "reason": "no_task_keyword",
+      "detail": "在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $B B_{1}$ 与平面 $A C D_{1}$ 所成角的余弦值为 $(\\"
+    },
+    {
+      "id": "geo-cmm-16321",
+      "reason": "no_geometry_keyword",
+      "detail": "下列说法中正确的个数是( )\n\n(1)若直线 $l$ 与平面 $\\alpha$ 内的一条直线垂直，则 $l \\perp \\alpha$;\n\n(2) 若直线 $l"
+    },
+    {
+      "id": "geo-cmm-16326",
+      "reason": "no_geometry_keyword",
+      "detail": "如果一条直线垂直于一个平面内的下列各种情况, 能保证该直线与平面垂直的是( )\n\n(1)三角形的两边; (2)梯形的两边; (3)圆的两条直径; (4)正六边形"
+    },
+    {
+      "id": "geo-cmm-16327",
+      "reason": "no_geometry_keyword",
+      "detail": "如果一条直线 $l$ 与平面 $\\alpha$ 的一条垂线垂直, 那么直线 $l$ 与平面 $\\alpha$ 的位置关系是 ( )"
+    },
+    {
+      "id": "geo-cmm-16328",
+      "reason": "no_geometry_keyword",
+      "detail": "若三条直线 $O A, O B, O C$ 两两垂直, 则直线 $O A$ 垂直于 ( )"
+    },
+    {
+      "id": "geo-cmm-15936",
+      "reason": "too_short",
+      "detail": "长度=22"
+    },
+    {
+      "id": "geo-cmm-15937",
+      "reason": "no_geometry_keyword",
+      "detail": "以下四个命题:\n\n(1)三个平面最多可以把空间分成八部分;\n\n(2)若直线 $a \\subset$ 平面 $\\alpha$, 直线 $b \\subset$ 平面"
+    },
+    {
+      "id": "geo-cmm-15942",
+      "reason": "no_geometry_keyword",
+      "detail": "若直线 $a$ 不平行于平面 $\\alpha$, 则下列结论成立的是( )"
+    },
+    {
+      "id": "geo-cmm-15943",
+      "reason": "too_short",
+      "detail": "长度=29"
+    },
+    {
+      "id": "geo-cmm-15950",
+      "reason": "too_short",
+      "detail": "长度=14"
+    },
+    {
+      "id": "geo-cmm-15952",
+      "reason": "too_short",
+      "detail": "长度=23"
+    },
+    {
+      "id": "geo-cmm-16446",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\triangle A B C$ 所在的平面为 $\\alpha$, 直线 $l \\perp A B, l \\perp A C$, 直线 $m \\perp B "
+    },
+    {
+      "id": "geo-cmm-16448",
+      "reason": "no_geometry_keyword",
+      "detail": "已知平面 $\\alpha 、 \\beta$ 和直线 $m 、 l$, 则下列命题中正确的是 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-16449",
+      "reason": "no_task_keyword",
+      "detail": "在四棱柱 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, 已知平面 $A A_{1} C_{1} C \\perp$ 平面 $A B C"
+    },
+    {
+      "id": "geo-cmm-16450",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-41 所示, 三棱雉 $P-A B C$ 的底面在平面 $\\alpha$ 内, 且 $A C \\perp P C$, 平面 $P A C \\per"
+    },
+    {
+      "id": "geo-cmm-16347",
+      "reason": "too_short",
+      "detail": "长度=11"
+    },
+    {
+      "id": "geo-cmm-16352",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $m, n$ 为两条不同直线, $\\alpha, \\beta$ 为两个不同平面, 给出下列命题: ( )\n(1) $\\left\\{\\begin{array"
+    },
+    {
+      "id": "geo-cmm-16353",
+      "reason": "no_task_keyword",
+      "detail": "在下列四个正方体中, 能得出 $A B \\perp C D$ 的是( )"
+    },
+    {
+      "id": "geo-cmm-16355",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $l \\perp$ 平面 $\\alpha$, 直线 $m \\subset$ 平面 $\\beta$. 有下面四个命题:\n(1) $\\alpha / / \\b"
+    },
+    {
+      "id": "geo-cmm-16356",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 平面 $\\alpha \\perp$ 平面 $\\beta, A \\in \\alpha, B \\in \\beta, A B$ 与两平面 $\\alpha "
+    },
+    {
+      "id": "geo-cmm-16357",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在三棱雉 $P-A B C$ 中, 平面 $P A B \\perp$ 平面 $A B C, P A=P B, A D=D B$, 则( )"
+    },
+    {
+      "id": "geo-cmm-15955",
+      "reason": "too_short",
+      "detail": "长度=19"
+    },
+    {
+      "id": "geo-cmm-15956",
+      "reason": "no_geometry_keyword",
+      "detail": "以针角三角形的较小边所在的直线为轴, 其他两边旋转一周所得到的几何体是 ( )"
+    },
+    {
+      "id": "geo-cmm-15957",
+      "reason": "no_geometry_keyword",
+      "detail": "用一个平面去截一个几何体, 得到的截面是圆面, 这个几何体不可能是\n\n( )"
+    },
+    {
+      "id": "geo-cmm-15958",
+      "reason": "no_geometry_keyword",
+      "detail": "在日常生活中, 常用到的螺母可以看成一个组合体, 其结构特征是"
+    },
+    {
+      "id": "geo-cmm-15964",
+      "reason": "too_short",
+      "detail": "长度=15"
+    },
+    {
+      "id": "geo-cmm-15970",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-15973",
+      "reason": "no_geometry_keyword",
+      "detail": "一个圆雉的母线长为 $20 \\mathrm{~cm}$, 母线与轴的夹角为 $30^{\\circ}$, 则圆雉的高为 ( )"
+    },
+    {
+      "id": "geo-cmm-15974",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示的平面中阴影部分绕中间轴旋转一周, 形成的几何体形状为( )"
+    },
+    {
+      "id": "geo-cmm-15977",
+      "reason": "no_geometry_keyword",
+      "detail": "$a 、 b$ 为异面直线是指\n(1) $a \\cap b=\\varnothing$, 且 $a$ 不平行于 $b$; (2) $a \\subset$ 平面 $"
+    },
+    {
+      "id": "geo-cmm-15983",
+      "reason": "no_geometry_keyword",
+      "detail": "若 $a$ 和 $b$ 是异面直线, $b$ 和 $c$ 是异面直线，则 $a$ 和 $c$ 的位置关系是 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-15988",
+      "reason": "no_geometry_keyword",
+      "detail": "两个三角形不在同一平面内, 它们的边两两对应平行, 那么这两个三角形( )"
+    },
+    {
+      "id": "geo-cmm-15989",
+      "reason": "no_geometry_keyword",
+      "detail": "已知异面直线 $a, b$ 分别在平面 $\\alpha, \\beta$ 内, 且 $\\alpha \\cap \\beta=c$, 那么直线 $c$ 一定 ( )"
+    },
+    {
+      "id": "geo-cmm-15990",
+      "reason": "no_geometry_keyword",
+      "detail": "空间四边形的两条对角线相互垂直, 顺次连接四边中点的四边形一定是( )"
+    },
+    {
+      "id": "geo-cmm-15991",
+      "reason": "no_task_keyword",
+      "detail": "如图是无盖正方体纸盒的平面展开图, 则直线 $A B, C D$ 在原正方体中的位置关系是( )"
+    },
+    {
+      "id": "geo-cmm-15994",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在三棱雉 $D-A B C$ 中, $A C=B D$, 且 $A C \\perp B D, E, F$ 分别是棱 $D C, A B$ 的中点, 则 "
+    },
+    {
+      "id": "geo-cmm-15995",
+      "reason": "no_geometry_keyword",
+      "detail": "若直线 $l$ 不平行于平面 $\\alpha$, 且 $l \\Varangle \\alpha$, 则 ( )"
+    },
+    {
+      "id": "geo-cmm-15998",
+      "reason": "no_geometry_keyword",
+      "detail": "如果 $A B 、 B C 、 C D$ 是不在同一平面内的三条线段, 则经过它们中点的平面和直线 $A C$ 的位置关系是( )"
+    },
+    {
+      "id": "geo-cmm-15999",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-2-8, $P$ 为平行四边形 $A B C D$ 所在平面外一点, $Q$ 为 $P A$ 的中点, $O$ 为 $A C$ 与 $B D$ 的交点"
+    },
+    {
+      "id": "geo-cmm-16004",
+      "reason": "no_geometry_keyword",
+      "detail": "直线 $l / /$ 平面 $\\alpha$, 直线 $m / /$ 平面 $\\alpha$, 直线 $l$ 与 $m$ 相交于点 $P$, 且 $l$ 与 $"
+    },
+    {
+      "id": "geo-cmm-16006",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $m, n$ 是两条直线, $\\alpha, \\beta$ 是两个平面, 有以下命题:\n\n(1) $m, n$ 相交且都在平面 $\\alpha, \\bet"
+    },
+    {
+      "id": "geo-cmm-16010",
+      "reason": "no_geometry_keyword",
+      "detail": "如图是四棱雉的平面展开图, 其中四边形 $A B C D$ 为正方形, $E, F, G, H$ 分别为 $P A, P D, P C, P B$ 的中点，在此"
+    },
+    {
+      "id": "geo-cmm-16011",
+      "reason": "no_geometry_keyword",
+      "detail": "圆台 $O O^{\\prime}$ 的母线长为 6 , 两底面半径分别为 2,7 , 则圆台 $O O^{\\prime}$ 的侧面积是 ( )"
+    },
+    {
+      "id": "geo-cmm-16018",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16019",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 圆雉的底面半径为 1 , 高为 $\\sqrt{3}$, 则圆雉的表面积为 $($ )"
+    },
+    {
+      "id": "geo-cmm-16024",
+      "reason": "no_geometry_keyword",
+      "detail": "一个圆台的母线长等于上、下底面半径和的一半, 且侧面积是 $32 \\pi$, 则母线长为 ( )"
+    },
+    {
+      "id": "geo-cmm-16026",
+      "reason": "no_geometry_keyword",
+      "detail": "某几何体的俯视图是如图所示的矩形, 正视图是一个底边长为 8 、高为 4 的等腰三角形, 侧视图是一个底边长为 6 、高为 4 的等腰三角形, 则该几何体的表面"
+    },
+    {
+      "id": "geo-cmm-16027",
+      "reason": "no_geometry_keyword",
+      "detail": "一个直角三角形的直角边分别为 3 与 4, 以其直角边为旋转轴, 旋转而成的圆雉的侧面积为 ( )"
+    },
+    {
+      "id": "geo-cmm-16028",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16029",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16455",
+      "reason": "no_geometry_keyword",
+      "detail": "下列说法:\n\n(1)两个相交平面所组成的图形叫做二面角;\n\n(2)二面角的平面角是从棱上一点出发, 分别在两个面内作射线所成的角;\n\n(3)二面角的大小与其平面"
+    },
+    {
+      "id": "geo-cmm-16456",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-24, $P A$ 垂直于矩形 $A B C D$ 所在的平面, 则图中与平面 $P C D$ 垂直的平面是 ( )\n\n图 2-3-24"
+    },
+    {
+      "id": "geo-cmm-16457",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-25, $A B$ 是圆的直径, $P A$ 垂直于圆所在的平面, $C$ 是圆上一点(不同于 $A 、 B$ )且 $P A=A C$, 则二面"
+    },
+    {
+      "id": "geo-cmm-16458",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-26, 在三棱雉 $P-A B C$ 中, 已知 $P C \\perp B C, P C \\perp A C$, 点 $E, F, G$ 分别是所"
+    },
+    {
+      "id": "geo-cmm-16405",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在 $\\triangle A B C$ 中, $A D \\perp B C, \\triangle A B D$ 的面积是 $\\triangle A "
+    },
+    {
+      "id": "geo-cmm-16406",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, $A B$ 是圆 $O$ 的直径, $P A$ 垂直于圆 $O$ 所在平面 $A B C$, 点 $C$ 是圆上的任意一点, 图中互相垂直平面的对数为 "
+    },
+    {
+      "id": "geo-cmm-16409",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 已知六棱雉 $P-A B C D E F$ 的底面是正六边形, $P A \\perp$ 平面 $A B C, P A=2 A B$, 则下列结论正确"
+    },
+    {
+      "id": "geo-cmm-16032",
+      "reason": "too_short",
+      "detail": "长度=28"
+    },
+    {
+      "id": "geo-cmm-16047",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16053",
+      "reason": "no_geometry_keyword",
+      "detail": "直线 $a / /$ 平面 $\\alpha, \\alpha$ 内有 $n$ 条直线交于一点, 那么这 $n$ 条直线中与直线 $a$ 平行的 ( )"
+    },
+    {
+      "id": "geo-cmm-16054",
+      "reason": "no_geometry_keyword",
+      "detail": "设 $a, b$ 是两条直线, $\\alpha, \\beta$ 是两个平面, 若 $a / / \\alpha, a \\subset \\beta, \\alpha "
+    },
+    {
+      "id": "geo-cmm-16055",
+      "reason": "too_short",
+      "detail": "长度=13"
+    },
+    {
+      "id": "geo-cmm-16057",
+      "reason": "no_geometry_keyword",
+      "detail": "设平面 $\\alpha / /$ 平面 $\\beta, A \\in \\alpha, B \\in \\beta, C$ 是 $A B$ 的中点, 当点 $A 、 B"
+    },
+    {
+      "id": "geo-cmm-16062",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 已知 $S$ 为四边形 $A B C D$ 外一点, $G, H$ 分别为 $S B, B D$ 上的点, 若 $G H / /$ 平面 $S C D$"
+    },
+    {
+      "id": "geo-cmm-16068",
+      "reason": "no_geometry_keyword",
+      "detail": "过平面 $\\alpha$ 外的直线 $l$ 作一组平面与 $\\alpha$ 相交, 如果所得的交线为 $a, b, c, \\cdots$, 则这些交线的位置关系"
+    },
+    {
+      "id": "geo-cmm-16069",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四棱雉 $P-A B C D$ 中, $M, N$ 分别为 $A C, P C$ 上的点, 且 $M N / /$ 平面 $P A D$, 则 ( )"
+    },
+    {
+      "id": "geo-cmm-16072",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四棱雉 $S-A B C D$ 的所有的棱长都等于 $2, E$ 是 $S A$ 的中点, 过 $C, D, E$ 三点的平面与 $S B$ 交于点 $"
+    },
+    {
+      "id": "geo-cmm-16089",
+      "reason": "no_geometry_keyword",
+      "detail": "若 $l$ 是平面 $\\alpha$ 外的一条直线, 则下列条件中可推出 $l / / \\alpha$ 的是 ( )"
+    },
+    {
+      "id": "geo-cmm-16090",
+      "reason": "no_geometry_keyword",
+      "detail": "一条直线 $l$ 上有相异三个点 $A 、 B 、 C$ 到平面 $\\alpha$ 的距离相等, 那么直线 $l$ 与平面 $\\alpha$ 的位置关系是 $("
+    },
+    {
+      "id": "geo-cmm-16092",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $a / /$ 平面 $\\alpha, P \\in \\alpha$, 那么过点 $P$ 且平行于直线 $a$ 的直线 $(\\quad)$"
+    },
+    {
+      "id": "geo-cmm-16094",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $P$ 为矩形 $A B C D$ 所在平面外一点, 矩形对角线交点为 $O, M$ 为 $P B$ 的中点, 给出五个结论:\n\n(1) $O M "
+    },
+    {
+      "id": "geo-cmm-16112",
+      "reason": "no_geometry_keyword",
+      "detail": "已知一个正方形的直观图是一个平行四边形, 其中有一边长为 4, 则此正方形的面积为 ( )"
+    },
+    {
+      "id": "geo-cmm-16114",
+      "reason": "no_geometry_keyword",
+      "detail": "已知两个底面半径相等的圆雉, 底面重合在一起(底面平行于水平面), 其中一个圆雉顶点到底面的距离为 $2 \\mathrm{~cm}$, 另一个圆雉顶点到底面的距"
+    },
+    {
+      "id": "geo-cmm-18021",
+      "reason": "no_geometry_keyword",
+      "detail": "13. 下列向量中, $\\boldsymbol{a}, \\boldsymbol{b}$ 一定共线的有 (填序号).\n\n(1) $a=2 \\boldsymbol{"
+    },
+    {
+      "id": "geo-cmm-19003",
+      "reason": "no_geometry_keyword",
+      "detail": "17. (2018 江西上饶二模) 锐角 $\\triangle A B C$ 中, 角 $A, B, C$ 的对边分别为 $a, b, c$, 若 $b^{2}"
+    },
+    {
+      "id": "geo-cmm-19027",
+      "reason": "no_geometry_keyword",
+      "detail": "17. (2019-浙江高考模拟) 在 $\\triangle A B C$ 中, 角 $A, B, C$ 所对的边 $a, b, c$, 点 $E$ 为边 $A"
+    },
+    {
+      "id": "geo-cmm-18741",
+      "reason": "no_geometry_keyword",
+      "detail": "16. 针角三角形的三边为 $a, a+1, a+2$, 其最大角不超过 $120^{\\circ}$, 则 $a$ 的取值范围是"
+    },
+    {
+      "id": "geo-cmm-18505",
+      "reason": "no_geometry_keyword",
+      "detail": "8. $\\triangle A B C$ 中, 已知 $A=60^{\\circ}, A B: A C=8: 5$, 面积为 $10 \\sqrt{3}$, 则其周"
+    },
+    {
+      "id": "geo-cmm-18506",
+      "reason": "no_geometry_keyword",
+      "detail": "9. 已知等腰三角形的底边长为 6 , 一腰长为 12 , 则它的内切圆面积为"
+    },
+    {
+      "id": "geo-cmm-18691",
+      "reason": "no_task_keyword",
+      "detail": "9. 建造一个容积为 $8 \\mathrm{~m}^{3}$, 深为 $2 \\mathrm{~m}$ 的长方体无盖水池, 如果池底和池壁的造价每平方米分别为 1"
+    },
+    {
+      "id": "geo-cmm-17617",
+      "reason": "no_geometry_keyword",
+      "detail": "函数 $f(x)=\\cos ^{2} x-2 \\sin x+1, x \\in\\left[-\\frac{\\pi}{2}, \\frac{\\pi}{6}\\right]"
+    },
+    {
+      "id": "geo-cmm-18357",
+      "reason": "no_geometry_keyword",
+      "detail": "设向量 $\\boldsymbol{a}, \\boldsymbol{b}, \\boldsymbol{c}$ 满足 $\\boldsymbol{a}+\\boldsym"
+    },
+    {
+      "id": "geo-cmm-17704",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $O$ 为 $\\triangle A B C$ 所在平面内一点, 且 $\\overrightarrow{O A}+2 \\overrightarrow{O "
+    },
+    {
+      "id": "geo-cmm-21288",
+      "reason": "no_geometry_keyword",
+      "detail": "已知点 $A(0,2,3), B(-2,1,6), C(1,-1,5)$ 为空间三点, 则以 $A B, A C$ 为邻边的平行四边形 $A B D C$ 的顶"
+    },
+    {
+      "id": "geo-cmm-21313",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直线 $l$ 的方向向量为 $\\vec{e}=(-1,1,2)$, 平面 $\\alpha$ 的法向量为 $\\vec{n}=\\left(\\frac{1}{2}"
+    },
+    {
+      "id": "geo-cmm-22715",
+      "reason": "no_geometry_keyword",
+      "detail": "12. 用一个平面去截一个正圆雉, 而且这个平面不通过圆雉的顶点, 则会出现四种情况:\n\n, \\$ \\qquad \\$"
+    },
+    {
+      "id": "geo-cmm-22716",
+      "reason": "no_geometry_keyword",
+      "detail": "13. 已知圆雉母线与轴夹角为 $60^{\\circ}$, 平面 $\\pi$ 与轴夹角为 $45^{\\circ}$, 则平面 $\\pi$ 与圆雉交线的离心率是 "
+    },
+    {
+      "id": "geo-cmm-22717",
+      "reason": "no_geometry_keyword",
+      "detail": "14. 一圆雉面的母线和轴线成 $30^{\\circ}$ 角,当用一个与轴线成 $30^{\\circ}$ 角的不过顶点的平面去截圆雉面时,所截得的截线是 \\$ "
+    },
+    {
+      "id": "geo-cmm-22718",
+      "reason": "no_geometry_keyword",
+      "detail": "15. 设圆雉面是由直线 $l^{\\prime}$ 绕直线 $l$ 旋转而得, $l^{\\prime}$ 与 $l$ 交点为 $\\mathrm{V}, l^{\\"
+    },
+    {
+      "id": "geo-cmm-22719",
+      "reason": "no_task_keyword",
+      "detail": "16. 在圆锥内部嵌入 Dandelin 双球,一个位于平面 $\\pi$ 的上方,一个位于平面 $\\pi$ 的下方, 并且与平面 $\\pi$ 和圆雉面均相切,则"
+    },
+    {
+      "id": "geo-cmm-21014",
+      "reason": "no_task_keyword",
+      "detail": "正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, 面 $A B D_{1}$ 与面 $B_{1} B D_{1}$ 所成角的大小"
+    },
+    {
+      "id": "geo-cmm-22080",
+      "reason": "too_short",
+      "detail": "长度=20"
+    },
+    {
+      "id": "geo-cmm-20924",
+      "reason": "no_geometry_keyword",
+      "detail": "在 $\\triangle A B C$ 中, “角 $A, B, C$ 成等差数列” 是 “ $B=\\frac{\\pi}{3}$ ” 成立的条\n\n件.\n\n(填："
+    },
+    {
+      "id": "geo-cmm-20596",
+      "reason": "no_geometry_keyword",
+      "detail": "16. 画结构图时, 首先要确定组成结构图的基本要素, 然后通过来标明各要素之间的关系."
+    },
+    {
+      "id": "geo-cmm-15587",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15588",
+      "reason": "excluded_keyword",
+      "detail": "射影"
+    },
+    {
+      "id": "geo-cmm-15604",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15606",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15607",
+      "reason": "no_geometry_keyword",
+      "detail": "某几何体的正视图和侧视图如图 1 所示, 俯视图的直观图如图 2 所示, 则该几何体的表面积为 , 体积为\n\n正视图\n\n侧视图\n\n图1\n\n图2"
+    },
+    {
+      "id": "geo-cmm-15608",
+      "reason": "no_geometry_keyword",
+      "detail": ", 圆形纸片的圆心为 $O$, 半径为 $5 \\mathrm{~cm}$, 该纸片上的等边三角形 $A B C$ 的中心为 $O . D, E, F$为圆 $O"
+    },
+    {
+      "id": "geo-cmm-15644",
+      "reason": "too_short",
+      "detail": "长度=23"
+    },
+    {
+      "id": "geo-cmm-15646",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15647",
+      "reason": "no_geometry_keyword",
+      "detail": "一个圆雉的底面积和侧面积分别为 $9 \\pi$ 和 $15 \\pi$, 则该圆雉的体积为"
+    },
+    {
+      "id": "geo-cmm-15663",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15695",
+      "reason": "no_geometry_keyword",
+      "detail": "（1）如果直线 $a / / b ，$ 那么 $a$ 平行于经过 $b$ 的任何平面.\n\n（2）如果直线 $a$ 与平面 $\\alpha$ 满足 $a / / "
+    },
+    {
+      "id": "geo-cmm-15698",
+      "reason": "no_geometry_keyword",
+      "detail": "下列命题:\n\n(1)任意三点确定一个平面;\n\n(2)三条平行直线最多可以确定三个个平面;\n\n(3)不同的两条直线均垂直于同一个平面，则这两条直线平行;\n\n(4)"
+    },
+    {
+      "id": "geo-cmm-15699",
+      "reason": "no_geometry_keyword",
+      "detail": "过平面外两点, 可作 \\$ \\qquad \\$个平面与已知平面平行."
+    },
+    {
+      "id": "geo-cmm-15701",
+      "reason": "no_geometry_keyword",
+      "detail": "线 $l, m$, 平面 $\\alpha, \\beta$, 下列条件能得出 $\\alpha / / \\beta$ 的是 \\$ \\qquad \\$ . (1) $"
+    },
+    {
+      "id": "geo-cmm-15719",
+      "reason": "too_short",
+      "detail": "长度=29"
+    },
+    {
+      "id": "geo-cmm-15721",
+      "reason": "no_geometry_keyword",
+      "detail": "空间四边形 $A B C D$ 的对棱 $A D, B C$ 成 $60^{\\circ}$ 的角, 且 $A D=a, B C=b$, 平行于 $A D$ 与 "
+    },
+    {
+      "id": "geo-cmm-15741",
+      "reason": "no_geometry_keyword",
+      "detail": "说法正确的有:\n\n(1)如果一个平面内的两条直线分别平行于另一个平面, 那么这两个平面平行;\n\n(2)如果一个平面内的任何一条直线都平行于另一个平面, 那么这两"
+    },
+    {
+      "id": "geo-cmm-15758",
+      "reason": "no_geometry_keyword",
+      "detail": "棱雉 $P-A B C$ 的三条侧棱两两垂直, 且 $P A=P B=P C=1$, 则三棱雉 $P-A B C$ 的体积是"
+    },
+    {
+      "id": "geo-cmm-15760",
+      "reason": "no_geometry_keyword",
+      "detail": "60 的二面角的棱上有 $A, B$ 两点, 直线 $A C, B D$ 分别在二面角两个半平面内, 且垂直于 $A B, A C=B D=6, A B=8$,"
+    },
+    {
+      "id": "geo-cmm-15778",
+      "reason": "too_short",
+      "detail": "长度=20"
+    },
+    {
+      "id": "geo-cmm-15781",
+      "reason": "no_geometry_keyword",
+      "detail": "所示, 在四棱雉 $P-A B C D$ 中, $P A \\perp$ 底面 $A B C D$, 且底面各边都相等, $M$是 $P C$ 上的一动点, 当点"
+    },
+    {
+      "id": "geo-cmm-15799",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\alpha \\perp$ 平面 $\\beta, \\alpha \\cap \\beta=l, n \\subset \\beta, n \\perp l$, 直线 $"
+    },
+    {
+      "id": "geo-cmm-15801",
+      "reason": "no_geometry_keyword",
+      "detail": "圆雉的顶点为 $S$, 点 $A, B, C$ 在底面圆周上, 且 $A B$ 为底面直径, 若 $S A=A C=B C$, 则直线 $S A$ 与 $B C"
+    },
+    {
+      "id": "geo-cmm-15802",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在四棱雉 $P-A B C D$ 中, 四边形 $A B C D$ 为菱形, 且 $A B=2, \\angle D A B=60^{\\circ}, \\t"
+    },
+    {
+      "id": "geo-cmm-15819",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\alpha, \\beta$ 为使互不重合的平面, $m, n$ 是互不重合的直线, 给出下列四个命题:\n\n(1) 若 $m / / n, n \\subset"
+    },
+    {
+      "id": "geo-cmm-15821",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 若边长为 4 和 3 与边长为 4 和 2 的两个矩形所在的平面互相垂直, 则\n$\\cos \\alpha: \\cos \\beta=$"
+    },
+    {
+      "id": "geo-cmm-15878",
+      "reason": "no_geometry_keyword",
+      "detail": "不同的直线 $m, n$ 与不同的平面 $\\alpha, \\beta, \\gamma$, 有下列六个命题:\n\n(1)若 $m \\perp \\alpha, m /"
+    },
+    {
+      "id": "geo-cmm-15879",
+      "reason": "no_geometry_keyword",
+      "detail": "$m, n$ 为空间两条不同的直线, $\\alpha, \\beta$ 为空间两个不同的平面, 给出下列命题:\n\n(1)若 $m\\|\\alpha, m\\| \\be"
+    },
+    {
+      "id": "geo-cmm-15880",
+      "reason": "no_geometry_keyword",
+      "detail": "$a, b, c$ 表示空间中三条不同的直线, $\\alpha, \\beta, \\gamma$ 表示平面, 给出下列命题:\n\n(1)若 $\\vec{a} \\pe"
+    },
+    {
+      "id": "geo-cmm-15881",
+      "reason": "no_geometry_keyword",
+      "detail": "命题中正确的是 . (填上所有正确命题的序号)\n\n(1)若 $m / / \\alpha, n \\subset \\alpha$, 则 $m / / n$;\n\n(2"
+    },
+    {
+      "id": "geo-cmm-15901",
+      "reason": "no_task_keyword",
+      "detail": "下列四个平面图形都是正方体的展开图, 还原成正方体后, 数字排列规律完全一样的两个是\n\n(1)\n\n(2)\n\n(3)\n\n(4)\n\n图 1-1-12"
+    },
+    {
+      "id": "geo-cmm-15915",
+      "reason": "no_geometry_keyword",
+      "detail": "以三棱台的顶点为三棱雉的顶点, 这样可以把一个三棱台分成 \\$ \\qquad \\$个三棱雉."
+    },
+    {
+      "id": "geo-cmm-15924",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $A \\in \\alpha, B \\notin \\alpha$, 若 $A \\in l, B \\in l$, 那么直线 $l$ 与平面 $\\alpha$ "
+    },
+    {
+      "id": "geo-cmm-15925",
+      "reason": "no_geometry_keyword",
+      "detail": "$\\alpha 、 \\beta$ 为平面, $A 、 B 、 M 、 N$ 为点, $a$ 为直线, 下列推理错误的是 - (填序号)\n\n(1) $A \\in "
+    },
+    {
+      "id": "geo-cmm-15933",
+      "reason": "too_short",
+      "detail": "长度=16"
+    },
+    {
+      "id": "geo-cmm-16441",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-7, 平面 $\\alpha \\cap \\beta=C D, E A \\perp \\alpha$, 垂足为 $A, E B \\perp \\beta$"
+    },
+    {
+      "id": "geo-cmm-16322",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $A B$ 是 $\\odot O$ 的直径, $P A \\perp \\odot O$ 所在的平面, $C$ 是圆上一点, 且 $\\angle A B"
+    },
+    {
+      "id": "geo-cmm-16323",
+      "reason": "no_task_keyword",
+      "detail": "如图所示, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, $M 、 N$ 分别是棱 $A A_{1}$ 和 $A B$ 上"
+    },
+    {
+      "id": "geo-cmm-15938",
+      "reason": "no_geometry_keyword",
+      "detail": "若 $a 、 b$ 是两条异面直线, 且 $a / /$ 平面 $\\alpha$, 则 $b$ 与 $\\alpha$ 的位置关系是"
+    },
+    {
+      "id": "geo-cmm-15946",
+      "reason": "no_geometry_keyword",
+      "detail": "若不共线的三点到平面 $\\alpha$ 的距离相等, 则该三点确定的平面 $\\beta$ 与 $\\alpha$ 之间的关系是"
+    },
+    {
+      "id": "geo-cmm-15954",
+      "reason": "no_task_keyword",
+      "detail": "如图, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中判断下列位置关系:\n\n(1) $A D_{1}$ 所在直线与平面 $B "
+    },
+    {
+      "id": "geo-cmm-16451",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-3-42, 在三棱雉 $P-A B C$ 中, $P A \\perp$ 底面 $A B C, \\angle B A C=90^{\\circ}, F$ "
+    },
+    {
+      "id": "geo-cmm-16452",
+      "reason": "no_geometry_keyword",
+      "detail": "在三棱雉 $P-A B C$ 中, 平面 $P A C \\perp$ 平面 $A B C, \\angle P C A=90^{\\circ}, \\triangle"
+    },
+    {
+      "id": "geo-cmm-16358",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在三棱雉 $P-A B C$ 中, 侧面 $P A C \\perp$ 底面 $A B C$, 且 $\\angle P A C=90^{\\circ}, P"
+    },
+    {
+      "id": "geo-cmm-15960",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 1-1-21 是一个几何体的表面展开图形, 则这个几何体是\n\n图 1-1-21\n\n【"
+    },
+    {
+      "id": "geo-cmm-15961",
+      "reason": "no_geometry_keyword",
+      "detail": "一圆雉的母线长为 6 , 底面半径为 3 , 用该圆雉截一圆台, 截得圆台的母线长为 4 , 则圆台的另一底面半径为 \\$ \\qquad \\$\n\n## 【"
+    },
+    {
+      "id": "geo-cmm-15965",
+      "reason": "no_geometry_keyword",
+      "detail": "若母线长是 4 的圆雉的轴截面的面积是 8 , 则该圆雉的高是"
+    },
+    {
+      "id": "geo-cmm-15975",
+      "reason": "too_short",
+      "detail": "长度=26"
+    },
+    {
+      "id": "geo-cmm-15980",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-1-21, 在三棱雉 $A-B C D$ 中, $E, F, G$ 分别是 $A B, B C, A D$ 的中点, $\\angle G E F=12"
+    },
+    {
+      "id": "geo-cmm-15984",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在三棱雉 $P-A B C$ 的六条棱所在的直线中, 异面直线共有对."
+    },
+    {
+      "id": "geo-cmm-15986",
+      "reason": "no_task_keyword",
+      "detail": "如图所示, 在正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中,\n\n(1) $A C$ 与 $D D_{1}$ 所成的角为 \\$ "
+    },
+    {
+      "id": "geo-cmm-16000",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-2-9, 在五面体 $F E-A B C D$ 中, 四边形 $C D E F$ 为矩形, $M, N$ 分别是 $B F, B C$ 的中点, 则 "
+    },
+    {
+      "id": "geo-cmm-16015",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16030",
+      "reason": "no_geometry_keyword",
+      "detail": "个圆雉的侧面展开图是半圆, 则这个圆雉的底面面积与侧面积的比是 \\$ \\qquad \\$ ."
+    },
+    {
+      "id": "geo-cmm-16031",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16459",
+      "reason": "no_geometry_keyword",
+      "detail": "若 $P$ 是 $\\triangle A B C$ 所在平面外一点, 且 $\\triangle P B C$ 和 $\\triangle A B C$ 都是边长为"
+    },
+    {
+      "id": "geo-cmm-16398",
+      "reason": "no_geometry_keyword",
+      "detail": "结论中, 所有正确结论的序号是\n\n(1)两个相交平面形成的图形叫做二面角;\n\n(2)异面直线 $a, b$ 分别和一个二面角的两个面垂直, 则 $a, b$ 所"
+    },
+    {
+      "id": "geo-cmm-16410",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $\\alpha, \\beta$ 是两个不同的平面, $l$ 是平面 $\\alpha$ 与 $\\beta$ 之外的直线, 给出下列三个论断: (1) $l "
+    },
+    {
+      "id": "geo-cmm-16036",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16042",
+      "reason": "no_geometry_keyword",
+      "detail": "圆雉的侧面展开图为扇形, 若其弧长为 $2 \\pi \\mathrm{cm}$, 半径为 $\\sqrt{2} \\mathrm{~cm}$, 则该圆雉的体积为— $"
+    },
+    {
+      "id": "geo-cmm-16043",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-16059",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 2-2-26 所示, 直线 $a / /$ 平面 $\\alpha, A \\notin \\alpha$, 并且 $a$ 和 $A$ 位于平面 $\\alpha"
+    },
+    {
+      "id": "geo-cmm-16074",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在空间四边形 $A B C D$ 中, $E 、 F 、 G 、 H$ 分别是四边上的点, 它们共面, 并且 $A C / /$ 平面 $E F G"
+    },
+    {
+      "id": "geo-cmm-16085",
+      "reason": "no_geometry_keyword",
+      "detail": "考查下列两个命题, 在 “ \\$ \\qquad \\$ ”处都缺少同一个条件，补上这个条件使其构成真命题(其中 $a 、 b$为不同的直线， $\\alpha 、 "
+    },
+    {
+      "id": "geo-cmm-16096",
+      "reason": "no_geometry_keyword",
+      "detail": "过平面外一点, 与该平面平行的直线有条，如果直线 $m$ 平行于平面，那么在平面内有\n\n条直线与直线 $m$ 平行."
+    },
+    {
+      "id": "geo-cmm-16100",
+      "reason": "no_geometry_keyword",
+      "detail": "有一个长为 5 , 宽为 4 的矩形, 则其直观图的面积为\n\n【答案】 $5 \\sqrt{2}$ [由于该矩形的面积为 $S=5 \\times 4=20$, 所"
+    },
+    {
+      "id": "geo-cmm-15739",
+      "reason": "no_geometry_keyword",
+      "detail": "结论中, 正确结论的序号为\n\n(1)过平面 $\\alpha$ 外一点 $\\boldsymbol{P}$, 有且仅有一条直线与 $\\alpha$ 平行;\n\n(2)"
+    },
+    {
+      "id": "geo-cmm-16105",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 四边形 $O A B C$ 是上底为 2 , 下底为 6 , 底角为 $45^{\\circ}$ 的等腰梯形, 用斜二测画法画出这个梯形的直观图 $O"
+    },
+    {
+      "id": "geo-cmm-16115",
+      "reason": "no_geometry_keyword",
+      "detail": "在斜二测画法中, 位于平面直角坐标系中的点 $M(4,4)$ 在直观图中的对应点是 $M^{\\prime}$, 则点 $M^{\\prime}$ 的坐标为"
+    },
+    {
+      "id": "geo-cmm-19004",
+      "reason": "no_geometry_keyword",
+      "detail": "18.【广东省韶关市 2019 届高考模拟测试 (4 月) 数学试题】在 $\\triangle A B C$ 中, $a 、 b 、 c$ 分别是内角 $A$ "
+    },
+    {
+      "id": "geo-cmm-19055",
+      "reason": "no_geometry_keyword",
+      "detail": "20. (12 分)\n\n设 $a, b, c$ 分别是 $\\triangle A B C$ 的内角 $A, B, C$ 的对边. 已知 $\\tan A=\\sqr"
+    },
+    {
+      "id": "geo-cmm-20580",
+      "reason": "no_geometry_keyword",
+      "detail": "22. 某保险公司业务流程如下:\n\n(1)保户投保: 填单交费、公司承保、出具保单;\n\n(2)保户提赔: 公司勘查; 同意, 则赔偿, 不同意, 则拒赔.\n\n试"
+    },
+    {
+      "id": "geo-cmm-20602",
+      "reason": "too_short",
+      "detail": "长度=21"
+    },
+    {
+      "id": "geo-cmm-20603",
+      "reason": "no_geometry_keyword",
+      "detail": "22. 某地行政服务中心办公分布结构如下.\n\n(1)服务中心管理委员会全面管理该中心工作，下设办公室、综合业务处、督察投诉中心这三部门在一楼, 其余局、委办理窗"
+    },
+    {
+      "id": "geo-cmm-20743",
+      "reason": "no_geometry_keyword",
+      "detail": "（12 分）下面是联通公司关于账单的表述：\n\n总体上，账单由客户基本信息、费用、积分、缴费记录四部分组成.\n\n客户基本信息包括客户姓名、手机号码、话费账单, 以"
+    },
+    {
+      "id": "geo-cmm-15595",
+      "reason": "no_task_keyword",
+      "detail": "用数个小正方体组成一个几何体, 使它的正视图和俯视图如图所示, 俯视图中小正方形中的字母表示在该位置的小立方体的个数.\n\n正视图\n\n管祝图\n\n（1）你能确定哪些"
+    },
+    {
+      "id": "geo-cmm-15611",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15652",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在四棱雉 $B-A C D E$ 中, 正方形 $A C D E$ 所在平面与正 $\\triangle A B C$ 所在平面垂直, $M, N$ 分别"
+    },
+    {
+      "id": "geo-cmm-15683",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, $P$ 为平行四边形 $A B C D$ 所在平面外一点, $M, N$ 分别为 $A B, P C$ 的中点.求证: $M N / /$ 平面 $"
+    },
+    {
+      "id": "geo-cmm-15685",
+      "reason": "no_geometry_keyword",
+      "detail": "已知直角梯形 $A B C D$ 的下底与等腰直角三角形 $A B E$ 的斜边重合, $A B \\perp B C$ 且 $A B=2 C D=2 B C$ "
+    },
+    {
+      "id": "geo-cmm-15703",
+      "reason": "no_geometry_keyword",
+      "detail": ", 在四棱雉 $P-A B C D$ 中, $A D \\perp C D, A B / / C D, E, F$ 分别为棱 $P C, C D$的中点, $A "
+    },
+    {
+      "id": "geo-cmm-15708",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 矩形 $A B C D$ 所在平面垂直于直角梯形 $A B P E$ 所在平面, $E P=\\sqrt{3}, B P=2, A D=A E=1, A "
+    },
+    {
+      "id": "geo-cmm-15724",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, $\\alpha \\cap \\beta=a, b \\subset \\alpha, c \\subset \\beta, b / / c$, 求证 $a / /"
+    },
+    {
+      "id": "geo-cmm-15726",
+      "reason": "no_geometry_keyword",
+      "detail": ", 在四棱雉 $P-A B C D$ 中, 底面 $A B C D$ 是平行四边形, $P D \\perp$ 平面 $A B C D$, $E$ 是棱 $P C"
+    },
+    {
+      "id": "geo-cmm-15746",
+      "reason": "no_geometry_keyword",
+      "detail": "将三棱雉 $E-A F C$ 与 $B-A F C$ 拼接得到如图所示的多面体, 其中 $H, D, G$, $I$ 分别为 $F B, A C, E C, F"
+    },
+    {
+      "id": "geo-cmm-15783",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 在四棱雉 $P-A B C D$ 中, $A D / / B C, A D \\perp A B$, 面 $A B C D \\perp$ 面 $P A"
+    },
+    {
+      "id": "geo-cmm-15784",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示: 在三棱雉 $V-A B C$ 中, 平面 $V A B \\perp$ 平面 $A B C, \\triangle V A B$ 为等边三角形, $A "
+    },
+    {
+      "id": "geo-cmm-15788",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 四棱雉 $P-A B C D$ 中, $A B=A D=2 B C=2, B C / / A D, A B \\perp A D, \\triangle P"
+    },
+    {
+      "id": "geo-cmm-15803",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 (1), 在 $\\triangle A B C$ 中, $A B=A C, A D$ 是边 $B C$ 边上的中线, 将 $\\triangle A B D"
+    },
+    {
+      "id": "geo-cmm-15805",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在四棱雉 $P-A B C D$ 中, 底面 $A B C D$ 为平行四边形, 平面 $P A D \\perp$ 平面 $A B C D$, $P A"
+    },
+    {
+      "id": "geo-cmm-15806",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在几何体 $A C D-A_{1} B_{1} C_{1} D_{1}$ 中, 四边形 $A D D_{1} A_{1}, C D D_{1} C_{1"
+    },
+    {
+      "id": "geo-cmm-15823",
+      "reason": "no_geometry_keyword",
+      "detail": "棱雉 $P-A B C$ 中, $P B \\perp$ 平面 $A B C, A B \\perp B C, P B=A B, D, E$ 分别是 $P A, P"
+    },
+    {
+      "id": "geo-cmm-15825",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在四棱雉 $P-A B C D$ 中, $\\triangle P A D$ 为等边三角形, 边长为 $2, \\triangle A B C$ 为等腰直角"
+    },
+    {
+      "id": "geo-cmm-15826",
+      "reason": "no_geometry_keyword",
+      "detail": "如图空间几何体 $A B C D E$ 中, $\\triangle A B C$ 与 $\\triangle A C D, \\triangle E B C$ 均为"
+    },
+    {
+      "id": "geo-cmm-15828",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 在多面体 $A B C D E$ 中, 平面 $A B D \\perp$ 平面 $A B C, A B \\perp A C, A E \\perp B D"
+    },
+    {
+      "id": "geo-cmm-15846",
+      "reason": "no_geometry_keyword",
+      "detail": "已知 $P A \\perp$ 平面 $A B C, A B \\perp B C, D, E$ 分别为 $P B, P C$ 上的点, 且 $A D \\perp "
+    },
+    {
+      "id": "geo-cmm-15848",
+      "reason": "no_geometry_keyword",
+      "detail": "如图, 已知点 $E$ 是圆心为 $O_{1}$ 半径为 2 的半圆弧上从点 $B$ 数起的第一个三等分点,点 $F$ 是圆心为 $O_{2}$ 半径为 1 的"
+    },
+    {
+      "id": "geo-cmm-15883",
+      "reason": "no_geometry_keyword",
+      "detail": "判断下列命题的真假.\n\n(1) $a / / \\alpha, a \\perp b \\Rightarrow b \\perp \\alpha$; (2) $a \\pe"
+    },
+    {
+      "id": "geo-cmm-15885",
+      "reason": "no_geometry_keyword",
+      "detail": "判断下列命题的真假.\n\n(1) $\\alpha / / \\beta, a \\subset \\alpha, b \\subset \\beta \\Rightarrow"
+    },
+    {
+      "id": "geo-cmm-15886",
+      "reason": "no_geometry_keyword",
+      "detail": "判断下列命题的真假.\n\n(1) 若 $m \\perp \\alpha, n / / \\alpha$, 则 $m \\perp n$;\n\n(2) 若 $\\alpha "
+    },
+    {
+      "id": "geo-cmm-15902",
+      "reason": "no_geometry_keyword",
+      "detail": "如图 1-1-13, 已知四边形 $A B C D$ 是一个正方形, $E, F$ 分别是边 $A B$ 和 $B C$ 的中点, 沿折痕 $D E, E F,"
+    },
+    {
+      "id": "geo-cmm-15903",
+      "reason": "no_geometry_keyword",
+      "detail": "根据下面对几何体结构特征的描述, 说出几何体的名称.\n\n(1)由八个面围成, 其中两个面是互相平行且全等的六边形, 其他各面都是平行四边形;\n\n(2)由五个面围"
+    },
+    {
+      "id": "geo-cmm-15907",
+      "reason": "no_task_keyword",
+      "detail": "试从正方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 的八个顶点中任取若干, 连接后构成以下空间几何体, 并且用适当的符号表示出来.\n"
+    },
+    {
+      "id": "geo-cmm-15947",
+      "reason": "no_task_keyword",
+      "detail": "如图所示, 在长方体 $A B C D-A_{1} B_{1} C_{1} D_{1}$ 中, 直线 $B_{1} D_{1}$ 与长方体的六个面之间的位置关系"
+    },
+    {
+      "id": "geo-cmm-15967",
+      "reason": "no_geometry_keyword",
+      "detail": "一个有 $30^{\\circ}$ 角的直角三角尺绕其各条边所在直线旋转一周所得的几何体都是圆雉吗? 如果以斜边上的高所在的直线为轴旋转 $180^{\\circ}"
+    },
+    {
+      "id": "geo-cmm-16038",
+      "reason": "no_task_keyword",
+      "detail": "如图 1-3-20, 一个圆柱形的玻璃瓶的内半径为 $3 \\mathrm{~cm}$, 瓶里所装的水深为 $8 \\mathrm{~cm}$, 将一个钢球完全浸入"
+    },
+    {
+      "id": "geo-cmm-15609",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-cmm-15631",
+      "reason": "no_geometry_keyword",
+      "detail": "如图所示, 梯形 $A_{1} B_{1} C_{1} D_{1}$ 是平面图形 $A B C D$ 的直观图.其中 $A_{1} D_{1} / / O^{\\"
+    },
+    {
+      "id": "geo-cmm-15632",
+      "reason": "no_geometry_keyword",
+      "detail": "在水平放置的平面 $\\alpha$ 内有一个边长为 1 的正方形 $A^{\\prime} B^{\\prime} C^{\\prime} D^{\\prime}$, "
+    },
+    {
+      "id": "geo-cmm-16841",
+      "reason": "no_geometry_keyword",
+      "detail": "（12 分）把下列程序用程序框图表示出来.\n\n$$\n\\begin{aligned}\n& A=20 \\\\\n& B=15 \\\\\n& A=A+B \\\\\n& B=A-B"
+    },
+    {
+      "id": "geo-cmm-15963",
+      "reason": "no_geometry_keyword",
+      "detail": "指出如图 1-1-22(1)(2)所示的图形是由哪些简单几何体构成的.\n\n(1)\n\n(2)\n\n图 1-1-22"
+    },
+    {
+      "id": "geo-gk-003",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-005",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-009",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-011",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-014",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-015",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-017",
+      "reason": "no_geometry_keyword",
+      "detail": "6. (5 分) 《九章算术》是我国古代内容极为丰富的数学名著, 书中有如下问题：\"今有委米依垣内角, 下周八尺, 高五尺. 问：积及为米几何？ “其意思为: "
+    },
+    {
+      "id": "geo-gk-020",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-022",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-025",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-029",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-033",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-035",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-036",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-041",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-045",
+      "reason": "no_task_keyword",
+      "detail": "3. (5 分) 中国古建筑借助榫卯将木构件连接起来. 构件的凸出部分叫榫头, 凹进部分叫卯眼, 图中木构件右边的小长方体是榫头. 若如图摆放的木构件与某一带卯"
+    },
+    {
+      "id": "geo-gk-055",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-056",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-058",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-066",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    },
+    {
+      "id": "geo-gk-075",
+      "reason": "excluded_keyword",
+      "detail": "三视图"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "MOL-042",
+  "name_cn": "氢氧根",
+  "name_en": "Hydroxide",
+  "formula": "OH⁻",
+  "category": "ion",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -0.6,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 1,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0.6,
+      "y": 0,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

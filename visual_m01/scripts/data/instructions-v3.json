@@ -1,0 +1,9384 @@
+[
+  {
+    "id": "cube-line-plane-parallel-midpoint",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "planeEFG",
+        "points": [
+          "E",
+          "F",
+          "G"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeBCD1",
+        "points": [
+          "B",
+          "C₁",
+          "D₁"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "cylinder-oblique-section-ellipse",
+    "geometry": {
+      "type": "cylinder",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          1.732,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          -1.732,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "face",
+        "label": "oblique_plane",
+        "points": [
+          "O₁",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "free_point",
+        "label": "P",
+        "position": [
+          0.866,
+          0.5,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F₁",
+        "position": [
+          1.732,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F₂",
+        "position": [
+          -1.732,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F₂",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O₁",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-skew-distance",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "C",
+          "D"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "N",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "plane_PMN",
+        "points": [
+          "P",
+          "M",
+          "N",
+          "Q"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cube-line-length-range",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "C",
+          "C₁"
+        ],
+        "t": 0.667
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "A",
+          "A₁"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "D",
+          "D₁"
+        ],
+        "t": 0.667
+      },
+      {
+        "type": "face",
+        "label": "planeDEF",
+        "points": [
+          "D",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeB1QM",
+        "points": [
+          "B₁",
+          "Q",
+          "M"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "Q",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "N",
+        "to": "M",
+        "color": "#3498db"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A"
+    }
+  },
+  {
+    "id": "cube-vector-dot-product",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "C",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "H",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeD₁AE",
+        "points": [
+          "D₁",
+          "A",
+          "E"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "H",
+        "to": "G",
+        "color": "#3498db"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ",
+      "xDirection": [
+        "A",
+        "B"
+      ]
+    }
+  },
+  {
+    "id": "pyramid4-dihedral-angle",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "D",
+          "P"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "C",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": "面DAP",
+        "face2": "底面",
+        "edge": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "kind": "dihedral_angle",
+        "face1": "面DAP",
+        "face2": "面CDP",
+        "edge": [
+          "D",
+          "P"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "B",
+      "mode": "upZ",
+      "xDirection": [
+        "B",
+        "A"
+      ]
+    }
+  },
+  {
+    "id": "pyramid4-dynamic-point",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "P",
+          "C"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "M",
+          "N"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "planeEMN",
+        "points": [
+          "E",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeSBD",
+        "points": [
+          "P",
+          "B",
+          "D"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeSAC",
+        "points": [
+          "P",
+          "A",
+          "C"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "Q"
+        ],
+        "line2": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "Q"
+        ],
+        "line2": [
+          "B",
+          "D"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cuboid-trajectory-angle",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "G",
+        "edge": [
+          "C₁",
+          "D₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "C",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "BEF",
+        "points": [
+          "B",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "D₁GM",
+        "points": [
+          "D₁",
+          "G",
+          "M"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "edge_point",
+        "label": "H",
+        "edge": [
+          "D₁",
+          "G"
+        ],
+        "t": 0.6
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "H",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "C",
+          "H"
+        ],
+        "line2": [
+          "B",
+          "B₁"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-projection-area",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "B",
+          "D₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "triangle_PAC",
+        "points": [
+          "P",
+          "A",
+          "C"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "plane_DC1",
+        "points": [
+          "D",
+          "C",
+          "C₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "plane_BC1",
+        "points": [
+          "B",
+          "C",
+          "C₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "plane_AC",
+        "points": [
+          "A",
+          "C",
+          "D₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "free_point",
+        "label": "Q",
+        "position": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "N",
+        "position": [
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "O",
+        "position": [
+          1,
+          1,
+          0.5
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "R",
+        "position": [
+          1,
+          0.5,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "M",
+        "position": [
+          1,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "Q",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "N",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "O",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "R",
+        "to": "M",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cube-section-area",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "C",
+          "B₁"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "A₁",
+          "D₁"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "Q",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面",
+        "points": [
+          "A",
+          "P",
+          "C₁",
+          "Q"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "cube-section-perimeter",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "D",
+          "D₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面BEFC₁",
+        "points": [
+          "B",
+          "E",
+          "F",
+          "C₁"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "cube-moving-point-diagonal-comprehensive",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "D",
+          "C"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "D",
+          "C"
+        ],
+        "t": 0.8
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "triangle_B1EF",
+        "points": [
+          "B₁",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "A₁",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "O",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "O",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "D₁",
+          "B₁"
+        ],
+        "line2": [
+          "E",
+          "F"
+        ]
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "D₁",
+          "B₁"
+        ],
+        "face": "triangle_B1EF"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cuboid-skew-lines-angle",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "D",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "C",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "F",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A₁",
+          "E"
+        ],
+        "line2": [
+          "G",
+          "F"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "upZ",
+      "xDirection": [
+        "D",
+        "A"
+      ]
+    }
+  },
+  {
+    "id": "pyramid4-skew-lines-angle",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "P",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "P",
+          "B"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "triPCD",
+        "points": [
+          "P",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "B",
+          "C"
+        ],
+        "line2": [
+          "A",
+          "E"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-surface-area",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "O",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "triPOE",
+        "points": [
+          "P",
+          "O",
+          "E"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "E"
+        ],
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-volume",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "Q",
+        "of": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "R",
+        "of": [
+          "D",
+          "A"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "O",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "M",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "triangle_APB",
+        "points": [
+          "A",
+          "P",
+          "B"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "底面"
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "M"
+        ],
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-skew-lines-angle",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "C",
+          "E"
+        ],
+        "line2": [
+          "A",
+          "C₁"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "C",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-skew-angle-general",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "C₁"
+        ],
+        "line2": [
+          "A₁",
+          "B₁"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "B",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "prism3-circumsphere-surface",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          2,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D₁",
+        "position": [
+          2,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "rectABDA₁",
+        "points": [
+          "A",
+          "B",
+          "D₁",
+          "A₁"
+        ],
+        "style": "auxiliary"
+      },
+      {
+        "type": "face",
+        "label": "rectBCDB₁",
+        "points": [
+          "B",
+          "C",
+          "D₁",
+          "B₁"
+        ],
+        "style": "auxiliary"
+      },
+      {
+        "type": "face",
+        "label": "rectACD₁",
+        "points": [
+          "A",
+          "C",
+          "D₁"
+        ],
+        "style": "auxiliary"
+      },
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "A₁",
+          "B₁",
+          "C₁",
+          "D",
+          "D₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "C",
+        "color": "#e74c3c"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "tetrahedron-circumsphere-special",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeOCM",
+        "points": [
+          "O",
+          "C",
+          "M"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "O",
+          "A",
+          "B"
+        ],
+        "face2": [
+          "C",
+          "A",
+          "B"
+        ],
+        "edge": [
+          "A",
+          "B"
+        ]
+      }
+    ],
+    "circumSphere": true
+  },
+  {
+    "id": "cuboid-line-plane-distance",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeEFG",
+        "points": [
+          "E",
+          "F",
+          "G"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeACD1",
+        "points": [
+          "A",
+          "C",
+          "D₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "A",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "P",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "D₁",
+        "face": "planeEFG"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "upZ",
+      "xDirection": [
+        "D",
+        "A"
+      ]
+    }
+  },
+  {
+    "id": "prism3-dihedral-angle",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "H",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "H",
+        "color": "#3498db"
+      },
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "B",
+          "B₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "C",
+          "C₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "E",
+          "F"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "F",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "plane_alpha",
+        "points": [
+          "A",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": "底面",
+        "face2": "plane_alpha",
+        "edge": [
+          "A",
+          "H"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cylinder-random-point-probability",
+    "geometry": {
+      "type": "cylinder",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P",
+        "position": [
+          0.5,
+          0.3,
+          1.2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O₁",
+        "to": "P",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "P",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "tetrahedron-equilateral-base-circumsphere-area",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "Q",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          0.667,
+          0.667,
+          4
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "D",
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "tetrahedron-vertex-perpendicular-point-plane-distance",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "O",
+          "A"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "O",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "面ACD",
+        "points": [
+          "A",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "E",
+        "face": "面ACD"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "regular-tetrahedron-section-area",
+    "geometry": {
+      "type": "regularTetrahedron",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "M",
+        "of": [
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "M",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "edge_point",
+        "label": "O",
+        "edge": [
+          "A",
+          "M"
+        ],
+        "t": 0.667
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "A",
+          "M"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "face",
+        "label": "planeEFG",
+        "points": [
+          "E",
+          "F",
+          "G"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "N",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "O",
+        "face": "planeEFG"
+      }
+    ],
+    "circumSphere": true
+  },
+  {
+    "id": "regular-tetrahedron-incircle-section",
+    "geometry": {
+      "type": "regularTetrahedron",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面AEF",
+        "points": [
+          "A",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "centroid",
+        "label": "N",
+        "of": [
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "N",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "free_point",
+        "label": "O",
+        "position": [
+          0,
+          0,
+          0.408
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "D",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "A",
+        "face": "底面"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "O",
+        "face": "截面AEF"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "N",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid3-folding-circumsphere-volume",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "free_point",
+        "label": "O",
+        "position": [
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "P",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "底面"
+      }
+    ],
+    "circumSphere": true,
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cone-volume-inscribed-cube",
+    "geometry": {
+      "type": "cone",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          0.707,
+          -0.707,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          -0.707,
+          0.707,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "C₁",
+        "position": [
+          0.707,
+          -0.707,
+          0.707
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D₁",
+        "position": [
+          -0.707,
+          0.707,
+          0.707
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "E",
+        "position": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F",
+        "position": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "axialSection",
+        "points": [
+          "P",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "cubeSection",
+        "points": [
+          "C",
+          "D",
+          "D₁",
+          "C₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid3-line-face-angle",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "A",
+          "E"
+        ],
+        "t": 0.667
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planePAB",
+        "points": [
+          "P",
+          "A",
+          "B"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "C"
+        ],
+        "face": "planePAB"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "F",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "pyramid3-surface-area",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "E",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "edge_point",
+        "label": "O",
+        "edge": [
+          "P",
+          "E"
+        ],
+        "t": 0.25
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "底面"
+      }
+    ],
+    "circumSphere": true
+  },
+  {
+    "id": "pyramid3-lateral-base-dihedral",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "M",
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "M",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "A",
+          "B",
+          "P"
+        ],
+        "face2": "底面",
+        "edge": [
+          "A",
+          "B"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "M",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "prism4-point-distance-ratio",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeA1BCD1",
+        "points": [
+          "A₁",
+          "B",
+          "C",
+          "D₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "B₁",
+        "face": "planeA1BCD1"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism-quad-trajectory-midpoint",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "edge_point",
+        "label": "M",
+        "edge": [
+          "A",
+          "C₁"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "D₁",
+          "C"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "M",
+          "N"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "edge_point",
+        "label": "H",
+        "edge": [
+          "A",
+          "C"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "edge_point",
+        "label": "G",
+        "edge": [
+          "C",
+          "D"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "H",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "N",
+        "to": "G",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "parallelPlane",
+        "points": [
+          "M",
+          "H",
+          "G",
+          "N"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "edge_point",
+        "label": "M2",
+        "edge": [
+          "A",
+          "C₁"
+        ],
+        "t": 0.7
+      },
+      {
+        "type": "edge_point",
+        "label": "N2",
+        "edge": [
+          "D₁",
+          "C"
+        ],
+        "t": 0.7
+      },
+      {
+        "type": "midpoint",
+        "label": "E2",
+        "of": [
+          "M2",
+          "N2"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "E2",
+        "color": "#9b59b6"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-dihedral-other",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "P",
+        "of": [
+          "A₁",
+          "B₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "Q",
+        "position": [
+          0.667,
+          0.667,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "free_point",
+        "label": "E",
+        "position": [
+          0,
+          0.667,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F",
+        "position": [
+          2,
+          0.667,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "G",
+        "position": [
+          1.333,
+          1.333,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "F",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "G",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeACC1A1",
+        "points": [
+          "A",
+          "C",
+          "C₁",
+          "A₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "P",
+          "A",
+          "D"
+        ],
+        "face2": [
+          "B",
+          "A",
+          "D"
+        ],
+        "edge": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "P",
+          "A",
+          "C"
+        ],
+        "face2": [
+          "B",
+          "A",
+          "C"
+        ],
+        "edge": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "P",
+          "B",
+          "C"
+        ],
+        "face2": [
+          "A",
+          "B",
+          "C"
+        ],
+        "edge": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "planeACC1A1"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-skew-angle-midpoint-general",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "C",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "D₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "M",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "F",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "O",
+          "E"
+        ],
+        "line2": [
+          "F",
+          "D₁"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-plane-plane-parallel",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "P",
+        "of": [
+          "B₁",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "N",
+        "to": "P",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeMNP",
+        "points": [
+          "M",
+          "N",
+          "P"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [],
+    "circumSphere": false
+  },
+  {
+    "id": "cube-line-plane-angle",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "M",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "D₁",
+          "M"
+        ],
+        "face": "底面"
+      }
+    ]
+  },
+  {
+    "id": "cuboid-parallel-plane-section",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "plane_AEF",
+        "points": [
+          "A",
+          "E",
+          "F"
+        ],
+        "style": "crossSection",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "plane_MNAC",
+        "points": [
+          "M",
+          "N",
+          "A",
+          "C"
+        ],
+        "style": "crossSection",
+        "color": "#3498db"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-line-plane-angle",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "O",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A",
+          "P"
+        ],
+        "face": "底面"
+      }
+    ]
+  },
+  {
+    "id": "tetrahedron-perpendicular-midpoint",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "O",
+          "A"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "H",
+        "of": [
+          "C",
+          "O"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "H",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "EFGH",
+        "points": [
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "sphere-section-volume",
+    "geometry": {
+      "type": "sphere",
+      "params": {
+        "radius": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "O₁",
+        "position": [
+          0,
+          0,
+          -1.6
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "A",
+        "position": [
+          1.2,
+          0,
+          -1.6
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "B",
+        "position": [
+          0,
+          1.2,
+          -1.6
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          -1.2,
+          0,
+          -1.6
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "O₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O₁",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "截面",
+        "points": [
+          "A",
+          "B",
+          "C"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "O",
+        "face": "截面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-dihedral-diagonal-face",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "O",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面A₁BD",
+        "points": [
+          "A₁",
+          "B",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": "截面A₁BD",
+        "face2": "底面",
+        "edge": [
+          "B",
+          "D"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cube-line-line-perpendicular",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "B",
+          "D₁"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cube-point-plane-distance",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeACE",
+        "points": [
+          "A",
+          "C",
+          "E"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "B",
+        "face": "planeACE"
+      }
+    ]
+  },
+  {
+    "id": "cuboid-line-plane-angle",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A",
+          "E"
+        ],
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cuboid-dihedral-angle",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "B",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "F",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "C₁",
+          "E",
+          "F"
+        ],
+        "face2": [
+          "C",
+          "E",
+          "F"
+        ],
+        "edge": [
+          "E",
+          "F"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A"
+    }
+  },
+  {
+    "id": "cuboid-diagonal-section-perpendicular",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "MNAC",
+        "points": [
+          "M",
+          "N",
+          "A",
+          "C"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "DEF",
+        "points": [
+          "D",
+          "E",
+          "F"
+        ],
+        "style": "plane"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "D₁",
+          "B"
+        ],
+        "face": "DEF"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-parallel-proof",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "P",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "O",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeAEC",
+        "points": [
+          "A",
+          "E",
+          "C"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "A",
+        "face": [
+          "P",
+          "B",
+          "C"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-probability",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "prism3-line-face-angle",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "P",
+        "of": [
+          "A₁",
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "centroid",
+        "label": "D",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "A"
+        ],
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-point-face-distance",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "B",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "plane_A₁BC₁",
+        "points": [
+          "A₁",
+          "B",
+          "C₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "A",
+        "face": "plane_A₁BC₁"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "prism3-face-face-perpendicular",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "BMN",
+        "points": [
+          "B",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "midpoint",
+        "label": "P",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "P",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "P",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": "BMN",
+        "face2": [
+          "A",
+          "C",
+          "C₁",
+          "A₁"
+        ],
+        "edge": [
+          "A",
+          "C"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tetrahedron-section-parallel",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "A",
+          "C"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "B",
+          "C"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "G",
+        "edge": [
+          "B",
+          "O"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "H",
+        "edge": [
+          "A",
+          "O"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "H",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "EFGH",
+        "points": [
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "O",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ]
+  },
+  {
+    "id": "tetrahedron-edge-midpoint-skew-angle",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "O",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "G",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "O",
+          "C"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "tetrahedron-angle-midpoint",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "C",
+          "A"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "A"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "O",
+          "E"
+        ],
+        "line2": [
+          "A",
+          "E"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "sphere-perpendicular-chords",
+    "geometry": {
+      "type": "sphere",
+      "params": {
+        "radius": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P",
+        "position": [
+          1.4142,
+          1.4142,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "A",
+        "position": [
+          2,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "B",
+        "position": [
+          0,
+          2,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          0,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "B",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "free_point",
+        "label": "E",
+        "position": [
+          2,
+          2,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F",
+        "position": [
+          0,
+          2,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "G",
+        "position": [
+          1.4142,
+          1.4142,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "H",
+        "position": [
+          2,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "F",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "G",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "auto"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "prism3-parallel-section",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "P",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "edge_point",
+        "label": "O",
+        "edge": [
+          "B",
+          "C₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "plane_B1CD",
+        "points": [
+          "B₁",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "B₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "plane_APC1",
+        "points": [
+          "A",
+          "P",
+          "C₁"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "pyramid4-dihedral-lateral-lateral",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "A",
+          "B"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "C",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "P",
+          "E",
+          "C"
+        ],
+        "face2": [
+          "D",
+          "E",
+          "C"
+        ],
+        "edge": [
+          "E",
+          "C"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "upZ",
+      "xDirection": [
+        "D",
+        "A"
+      ]
+    }
+  },
+  {
+    "id": "pyramid4-line-face-angle-rhombus-equilateral",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "E",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "B"
+        ],
+        "face": "底面"
+      }
+    ]
+  },
+  {
+    "id": "pyramid3-unfold-shortest-path",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "Q",
+        "of": [
+          "P",
+          "A"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": false
+      }
+    ]
+  },
+  {
+    "id": "prism4-circumsphere-surface",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O₁",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "O₂",
+        "of": [
+          "A₁",
+          "B₁",
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "O₁",
+          "O₂"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "A₁",
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O₁",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "prism-quad-diagonal-perpendicular",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D₁",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A₁",
+          "C"
+        ],
+        "line2": [
+          "B₁",
+          "D₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "C"
+        ],
+        "line2": [
+          "B",
+          "D"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cube-surface-curve",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P₁",
+        "position": [
+          0,
+          1.1547,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P₂",
+        "position": [
+          0,
+          2,
+          0.5774
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P₃",
+        "position": [
+          0.5774,
+          2,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P₄",
+        "position": [
+          1.1547,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P₅",
+        "position": [
+          2,
+          0.5774,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P₆",
+        "position": [
+          2,
+          2,
+          1.1547
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "P₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "P₂",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "P₃",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cuboid-section-optimization",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "M",
+        "edge": [
+          "A",
+          "B"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "free_point",
+        "label": "E",
+        "position": [
+          2,
+          2,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "E",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面",
+        "points": [
+          "A₁",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A",
+          "A₁"
+        ],
+        "face": "截面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cuboid-section-comprehensive",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "C",
+          "C₁"
+        ],
+        "t": 0.6
+      },
+      {
+        "type": "free_point",
+        "label": "F",
+        "position": [
+          0,
+          0,
+          3
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "B",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "截面BED₁F",
+        "points": [
+          "B",
+          "E",
+          "D₁",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "edge_point",
+        "label": "G",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "G",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "B₁",
+          "D"
+        ],
+        "face": "截面BED₁F"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "B₁",
+        "face": "截面BED₁F"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cylinder-dandelin-sphere-ellipse",
+    "geometry": {
+      "type": "cylinder",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P1",
+        "position": [
+          0,
+          0,
+          0.3
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P2",
+        "position": [
+          0.8,
+          0,
+          0.3
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P3",
+        "position": [
+          0.6,
+          0.6,
+          0.3
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P4",
+        "position": [
+          -0.6,
+          0.6,
+          0.3
+        ]
+      },
+      {
+        "type": "face",
+        "label": "plane_pi",
+        "points": [
+          "P1",
+          "P2",
+          "P3",
+          "P4"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "free_point",
+        "label": "S1",
+        "position": [
+          0,
+          0,
+          0.8
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "S2",
+        "position": [
+          0,
+          0,
+          -0.2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F1",
+        "position": [
+          0.7,
+          0,
+          0.3
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "F2",
+        "position": [
+          -0.7,
+          0,
+          0.3
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "F1",
+        "to": "F2",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "S1",
+        "to": "F1",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "S2",
+        "to": "F2",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "F1",
+        "face": "plane_pi"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "F2",
+        "face": "plane_pi"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "tetrahedron-equal-edges-circumsphere",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M_AB",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M_BC",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "M_CA",
+        "of": [
+          "C",
+          "A"
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          2,
+          2,
+          2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "centroid",
+        "label": "O_center",
+        "of": [
+          "O",
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O_center",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O_center",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O_center",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O_center",
+        "to": "D",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "O_center",
+          "A"
+        ],
+        "line2": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "O_center",
+          "A"
+        ],
+        "line2": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "O_center",
+          "A"
+        ],
+        "line2": [
+          "A",
+          "D"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "prism3-line-plane-perpendicular",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "F",
+        "edge": [
+          "A",
+          "A₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "planeB1DF",
+        "points": [
+          "B₁",
+          "D",
+          "F"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "C",
+          "F"
+        ],
+        "face": "planeB1DF"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "B",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid3-right-circumsphere-constraint",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "O",
+        "position": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "P",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "A"
+        ],
+        "face": "底面"
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "B"
+        ],
+        "line2": [
+          "B",
+          "C"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "pyramid4-point-face-distance-vertical-lateral",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "centroid",
+        "label": "M",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "P",
+          "A"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeBDE",
+        "points": [
+          "B",
+          "D",
+          "E"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planePCD",
+        "points": [
+          "P",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "E",
+        "face": "planePCD"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "M",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cube-tetrahedron-comprehensive",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "tetraB1ABD",
+        "points": [
+          "B₁",
+          "A",
+          "B",
+          "D"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "triAD1C",
+        "points": [
+          "A",
+          "D₁",
+          "C"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeAAF",
+        "points": [
+          "A",
+          "A₁",
+          "F"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "B₁",
+          "C₁"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "Q",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "D",
+          "E"
+        ],
+        "line2": [
+          "A",
+          "F"
+        ]
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "Q",
+        "face": "triAD1C"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "cuboid-parallel-midpoint-section",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "B₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "G",
+        "edge": [
+          "B",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "edge_point",
+        "label": "H",
+        "edge": [
+          "A",
+          "D"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "H",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "EFGH",
+        "points": [
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "pyramid4-perpendicular-proof",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "A",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planePAB",
+        "points": [
+          "P",
+          "A",
+          "B"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A",
+          "D"
+        ],
+        "face": "planePAB"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "prism3-line-face-parallel",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "A₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeACC1A1",
+        "points": [
+          "A",
+          "C",
+          "C₁",
+          "A₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "E",
+          "F"
+        ],
+        "face": "planeACC1A1"
+      }
+    ]
+  },
+  {
+    "id": "prism3-projection-area-optimization",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          1.732,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "E",
+        "position": [
+          0.866,
+          1.5,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "projection_plane",
+        "points": [
+          "A",
+          "D",
+          "A₁"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A",
+          "B"
+        ],
+        "face": "projection_plane"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-volume-sphere-region",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P",
+        "position": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "P",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    },
+    "circumSphere": false
+  },
+  {
+    "id": "cube-center-midpoint-relation",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "C",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "H",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "H",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "G",
+          "H"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cuboid-projection-area",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "triangle_CD1E",
+        "points": [
+          "C",
+          "D₁",
+          "E"
+        ],
+        "style": "highlight"
+      },
+      {
+        "type": "face",
+        "label": "plane_BDD1B1",
+        "points": [
+          "B",
+          "D",
+          "D₁",
+          "B₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "midpoint",
+        "label": "C'",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "E'",
+        "edge": [
+          "B₁",
+          "D₁"
+        ],
+        "t": 0.25
+      },
+      {
+        "type": "segment",
+        "from": "C'",
+        "to": "D₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C'",
+        "to": "E'",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "E'",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "projection_triangle",
+        "points": [
+          "C'",
+          "D₁",
+          "E'"
+        ],
+        "style": "highlight"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid4-point-plane-distance",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "PMN",
+        "points": [
+          "P",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": "PMN",
+        "face2": [
+          "P",
+          "A",
+          "D"
+        ],
+        "edge": [
+          "P",
+          "M"
+        ]
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "M"
+        ],
+        "face": [
+          "P",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "C",
+        "face": "PMN"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-path-optimization",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "A",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "triDEF",
+        "points": [
+          "D",
+          "E",
+          "F"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-circumsphere",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "A₁",
+          "B₁",
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "A₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "tetrahedron-square-section-properties",
+    "geometry": {
+      "type": "cornerTetrahedron",
+      "params": {
+        "edgeA": 2,
+        "edgeB": 2,
+        "edgeC": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "O",
+          "A"
+        ],
+        "t": 0.6
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "O",
+          "B"
+        ],
+        "t": 0.6
+      },
+      {
+        "type": "edge_point",
+        "label": "M",
+        "edge": [
+          "O",
+          "C"
+        ],
+        "t": 0.6
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "A",
+          "B"
+        ],
+        "t": 0.4
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "Q",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "N",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "square_section",
+        "points": [
+          "P",
+          "Q",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "M",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "N",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "C"
+        ],
+        "line2": [
+          "O",
+          "B"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "P",
+          "M"
+        ],
+        "line2": [
+          "O",
+          "B"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "P",
+          "M"
+        ],
+        "line2": [
+          "Q",
+          "M"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-diagonal-perpendicular-condition",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "plane_AB1C",
+        "points": [
+          "A",
+          "B₁",
+          "C"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "B₁"
+        ],
+        "line2": [
+          "B",
+          "C₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "B",
+          "C₁"
+        ],
+        "line2": [
+          "B₁",
+          "C"
+        ]
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "B",
+          "C₁"
+        ],
+        "face": "plane_AB1C"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "C",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid3-perpendicular-face-circumsphere",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "P",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "dihedral_angle",
+        "face1": [
+          "P",
+          "A",
+          "B"
+        ],
+        "face2": "底面",
+        "edge": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "P",
+        "face": "底面"
+      }
+    ],
+    "circumSphere": true
+  },
+  {
+    "id": "pyramid4-point-face-distance-vertical-base",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "P",
+          "A"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "Q",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "M",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "N",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeDMN",
+        "points": [
+          "D",
+          "M",
+          "N"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "B",
+        "face": "planeDMN"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ",
+      "xDirection": [
+        "A",
+        "B"
+      ]
+    }
+  },
+  {
+    "id": "cube-midpoint-triangle-properties",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "G",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "G",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "triEFG",
+        "points": [
+          "E",
+          "F",
+          "G"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "midpoint",
+        "label": "N",
+        "of": [
+          "C",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "N",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "midpoint",
+        "label": "H",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "H",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "H",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "G",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "F",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A₁",
+          "G"
+        ],
+        "line2": [
+          "C₁",
+          "F"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "auto"
+    }
+  },
+  {
+    "id": "prism3-volume-circumsphere",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "M",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "A₁",
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "C₁",
+        "face": "底面"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "C",
+      "mode": "upZ",
+      "xDirection": [
+        "C",
+        "A"
+      ]
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "cube-volume-tetrahedron",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "E",
+        "edge": [
+          "B",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "tetrahedron_base",
+        "points": [
+          "B₁",
+          "C₁",
+          "E"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "D₁",
+        "face": "tetrahedron_base"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-skew-angle-midpoint-diagonal",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "C₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "A₁",
+          "C₁"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cube-inscribed-sphere-section",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "A₁",
+          "B₁",
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E₁",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E₂",
+        "of": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E₃",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E₄",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "face",
+        "label": "section1",
+        "points": [
+          "E₁",
+          "E₂",
+          "E₃",
+          "E₄"
+        ],
+        "style": "crossSection",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "midpoint",
+        "label": "F₁",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F₂",
+        "of": [
+          "B",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F₃",
+        "of": [
+          "A₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F₄",
+        "of": [
+          "B₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "face",
+        "label": "section2",
+        "points": [
+          "F₁",
+          "F₂",
+          "F₃",
+          "F₄"
+        ],
+        "style": "crossSection",
+        "color": "#3498db"
+      },
+      {
+        "type": "midpoint",
+        "label": "G₁",
+        "of": [
+          "A",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G₂",
+        "of": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G₃",
+        "of": [
+          "A₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "G₄",
+        "of": [
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "face",
+        "label": "section3",
+        "points": [
+          "G₁",
+          "G₂",
+          "G₃",
+          "G₄"
+        ],
+        "style": "crossSection",
+        "color": "#9b59b6"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "auto"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "cuboid-coordinate-vector",
+    "geometry": {
+      "type": "cuboid",
+      "params": {
+        "length": 4,
+        "width": 3,
+        "height": 2
+      }
+    },
+    "coordinateSystem": {
+      "origin": "D",
+      "mode": "auto"
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#3498db"
+      }
+    ]
+  },
+  {
+    "id": "pyramid4-right-triangle",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "B",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "D",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "P",
+          "A"
+        ],
+        "face": "底面"
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "P",
+          "A"
+        ],
+        "line2": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "B"
+        ],
+        "line2": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "B",
+          "C"
+        ],
+        "line2": [
+          "P",
+          "B"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "C",
+          "D"
+        ],
+        "line2": [
+          "P",
+          "D"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-line-perpendicular",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "B₁"
+        ],
+        "line2": [
+          "B",
+          "C₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "B₁",
+          "C"
+        ],
+        "line2": [
+          "B",
+          "C₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "C"
+        ],
+        "line2": [
+          "B",
+          "C"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "multi-cylinder-eccentricity-compare",
+    "geometry": {
+      "type": "cylinder",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "P1",
+        "position": [
+          0.8,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "P2",
+        "position": [
+          -0.8,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "Q1",
+        "position": [
+          0.6,
+          0.8,
+          1.5
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "Q2",
+        "position": [
+          -0.6,
+          -0.8,
+          1.5
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "P1",
+        "to": "P2",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q1",
+        "to": "Q2",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "free_point",
+        "label": "M1",
+        "position": [
+          1,
+          0,
+          0.5
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "M2",
+        "position": [
+          1,
+          0,
+          1.5
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "M1",
+        "to": "M2",
+        "color": "#2ecc71"
+      },
+      {
+        "type": "segment",
+        "from": "P1",
+        "to": "M1",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "Q1",
+        "to": "M2",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "P1",
+          "P2"
+        ],
+        "line2": [
+          "M1",
+          "M2"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "Q1",
+          "Q2"
+        ],
+        "line2": [
+          "M1",
+          "M2"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cylinder-circumscribed-sphere",
+    "geometry": {
+      "type": "cylinder",
+      "params": {
+        "radius": 1,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "A",
+        "edge": [
+          "O",
+          "O₁"
+        ],
+        "t": 0
+      },
+      {
+        "type": "edge_point",
+        "label": "B",
+        "edge": [
+          "O",
+          "O₁"
+        ],
+        "t": 1
+      },
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          1,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": false
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    },
+    "circumSphere": true
+  },
+  {
+    "id": "sphere-section-circle-area",
+    "geometry": {
+      "type": "sphere",
+      "params": {
+        "radius": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "D",
+        "position": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "C",
+        "position": [
+          0,
+          0,
+          2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "A",
+        "position": [
+          3,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "B",
+        "position": [
+          -3,
+          0,
+          1
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "截面圆",
+        "points": [
+          "A",
+          "B",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "pyramid3-inscribed-sphere-formula",
+    "geometry": {
+      "type": "pyramid",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "I",
+        "position": [
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "I",
+        "to": "A",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "I",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "I",
+        "to": "C",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "I",
+        "to": "P",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "I",
+        "face": "底面"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "I",
+        "face": "面ABP"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "I",
+        "face": "面BCP"
+      },
+      {
+        "kind": "point_face_distance",
+        "point": "I",
+        "face": "面CAP"
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism4-edge-midpoint-relation",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 4,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "B",
+          "C₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "C₁",
+        "color": "#e74c3c",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "A₁",
+          "C₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "E",
+          "F"
+        ],
+        "line2": [
+          "B",
+          "B₁"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cube-fold-line-path",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "edge_point",
+        "label": "M",
+        "edge": [
+          "A",
+          "B₁"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "N",
+        "edge": [
+          "A₁",
+          "C₁"
+        ],
+        "t": 0.333
+      },
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "B",
+          "B₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "edge_point",
+        "label": "Q",
+        "edge": [
+          "B₁",
+          "C₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "P",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "P",
+        "to": "Q",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "Q",
+        "to": "N",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "M",
+        "to": "N",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-line-plane-position-comprehensive",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "C₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "D₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeBD1",
+        "points": [
+          "B",
+          "D₁",
+          "B₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "planeACB1",
+        "points": [
+          "A",
+          "C",
+          "B₁"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "B₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "D",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "A₁",
+          "C₁"
+        ],
+        "face": "planeBD1"
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "B",
+          "D₁"
+        ],
+        "face": "planeACB1"
+      },
+      {
+        "kind": "line_face_angle",
+        "line": [
+          "B",
+          "D₁"
+        ],
+        "face": "右面"
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "D"
+        ],
+        "line2": [
+          "C",
+          "B₁"
+        ]
+      },
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A₁",
+          "D"
+        ],
+        "line2": [
+          "C",
+          "B₁"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-moving-point-plane-sweep",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O",
+        "of": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A₁",
+          "B₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "C₁",
+          "D₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E₁",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F₁",
+        "of": [
+          "D",
+          "C"
+        ]
+      },
+      {
+        "type": "edge_point",
+        "label": "M",
+        "edge": [
+          "A₁",
+          "D₁"
+        ],
+        "t": 0.3
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "M",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "face",
+        "label": "sweepPlane",
+        "points": [
+          "A₁",
+          "E₁",
+          "F₁",
+          "D₁"
+        ],
+        "style": "crossSection",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "parallelPlane",
+        "points": [
+          "B",
+          "C",
+          "F",
+          "E"
+        ],
+        "style": "crossSection",
+        "color": "#2ecc71"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "E₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E₁",
+        "to": "F₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "F₁",
+        "to": "D₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "E",
+        "color": "#2ecc71",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "F",
+        "color": "#2ecc71",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "E",
+        "to": "F",
+        "color": "#2ecc71",
+        "dashed": true
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "A",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "cube-perpendicular-trajectory",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B₁",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "planeAB1C",
+        "points": [
+          "A",
+          "B₁",
+          "C"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "edge_point",
+        "label": "P",
+        "edge": [
+          "B₁",
+          "C"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "P",
+        "color": "#e74c3c"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "A",
+          "P"
+        ],
+        "line2": [
+          "B",
+          "D₁"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cube-diagonal-parallel-properties",
+    "geometry": {
+      "type": "cube",
+      "params": {
+        "sideLength": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "segment",
+        "from": "D₁",
+        "to": "A",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "C₁",
+        "to": "B",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "平面C₁BD",
+        "points": [
+          "C₁",
+          "B",
+          "D"
+        ],
+        "style": "crossSection"
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "D₁",
+          "A"
+        ],
+        "line2": [
+          "B",
+          "D"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "prism3-circumsphere-volume",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "centroid",
+        "label": "O₁",
+        "of": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "type": "centroid",
+        "label": "O₂",
+        "of": [
+          "A₁",
+          "B₁",
+          "C₁"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "O",
+        "of": [
+          "O₁",
+          "O₂"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "A₁",
+        "color": "#e74c3c",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O₁",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O₁",
+        "to": "B",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "segment",
+        "from": "O₁",
+        "to": "C",
+        "color": "#3498db",
+        "dashed": true
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "point_face_distance",
+        "point": "O",
+        "face": "底面"
+      }
+    ],
+    "circumSphere": true,
+    "coordinateSystem": {
+      "origin": "O₁",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-pyramid-volume-ratio",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "E",
+        "of": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "type": "midpoint",
+        "label": "F",
+        "of": [
+          "A",
+          "A₁"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "E",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "F",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "D",
+        "to": "E",
+        "color": "#3498db"
+      },
+      {
+        "type": "face",
+        "label": "triangleADE",
+        "points": [
+          "A",
+          "D",
+          "E"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "face",
+        "label": "triangleFDE",
+        "points": [
+          "F",
+          "D",
+          "E"
+        ],
+        "style": "crossSection"
+      }
+    ]
+  },
+  {
+    "id": "sphere-projection-ellipse",
+    "geometry": {
+      "type": "sphere",
+      "params": {
+        "radius": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "free_point",
+        "label": "L",
+        "position": [
+          0,
+          0,
+          5
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "A",
+        "position": [
+          2,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "B",
+        "position": [
+          2,
+          0,
+          -2
+        ]
+      },
+      {
+        "type": "free_point",
+        "label": "O_proj",
+        "position": [
+          0,
+          0,
+          -2
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "L",
+        "to": "A",
+        "color": "#3498db",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "O_proj",
+        "to": "A",
+        "color": "#e74c3c",
+        "dashed": false
+      },
+      {
+        "type": "segment",
+        "from": "O_proj",
+        "to": "B",
+        "color": "#e74c3c",
+        "dashed": false
+      }
+    ],
+    "measurements": [
+      {
+        "kind": "line_line_angle",
+        "line1": [
+          "L",
+          "A"
+        ],
+        "line2": [
+          "O_proj",
+          "A"
+        ]
+      }
+    ],
+    "coordinateSystem": {
+      "origin": "O_proj",
+      "mode": "upZ"
+    }
+  },
+  {
+    "id": "prism3-volume-tetrahedron",
+    "geometry": {
+      "type": "prism",
+      "params": {
+        "sides": 3,
+        "sideLength": 2,
+        "height": 2
+      }
+    },
+    "constructions": [
+      {
+        "type": "midpoint",
+        "label": "D",
+        "of": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "type": "segment",
+        "from": "B",
+        "to": "C₁",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "B₁",
+        "to": "C",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "edge_point",
+        "label": "O",
+        "edge": [
+          "B",
+          "C₁"
+        ],
+        "t": 0.5
+      },
+      {
+        "type": "segment",
+        "from": "O",
+        "to": "D",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A",
+        "to": "C₁",
+        "color": "#3498db",
+        "dashed": true
+      },
+      {
+        "type": "face",
+        "label": "plane_B1CD",
+        "points": [
+          "B₁",
+          "C",
+          "D"
+        ],
+        "style": "crossSection"
+      },
+      {
+        "type": "segment",
+        "from": "C",
+        "to": "D",
+        "color": "#e74c3c"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "O",
+        "color": "#3498db"
+      },
+      {
+        "type": "segment",
+        "from": "A₁",
+        "to": "D",
+        "color": "#3498db"
+      }
+    ]
+  }
+]

@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "id": "FM-041",
+    "name": "圆盘摩擦模型",
+    "module": "P-01",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过圆盘摩擦模型的侧视图，观察圆盘上滑块随盘转动时的受力关系，重点理解静摩擦力提供向心力，并比较不同角速度下未打滑、临界与将打滑三种状态。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加转轴 axle-main，并在其上方放置圆盘侧视图 disk-main。",
+      "3. 添加盘上滑块 slider-main，作为随圆盘转动的研究对象。",
+      "4. 在右侧教学参数中调节角速度 ω，观察滑块的 G、N 和指向圆心的静摩擦力 f静。",
+      "5. 结合未打滑、临界、将打滑三种状态，比较所需向心力与最大静摩擦力。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-041.json",
+  "commandProgram": {
+    "templateId": "FM-041",
+    "sceneName": "FM-041 圆盘摩擦模型",
+    "version": "1.0",
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "axle-main",
+        "bodyType": "wall",
+        "label": "转轴",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 0.7
+          },
+          "wallWidth": 0.18,
+          "wallHeight": 1.4
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "disk-main",
+        "bodyType": "block",
+        "label": "圆盘",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 1.625
+          },
+          "width": 7.2,
+          "height": 0.45,
+          "isStatic": true,
+          "mass": 6,
+          "friction": 0.6,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 2,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slider-main",
+        "bodyType": "block",
+        "label": "滑块",
+        "patch": {
+          "position": {
+            "x": 2.4,
+            "y": 2.225
+          },
+          "width": 0.75,
+          "height": 0.75,
+          "mass": 0.6,
+          "friction": 0.6,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slider-main",
+        "targetBodyRefs": [
+          "disk-main"
+        ],
+        "threshold": 1.2
+      }
+    ]
+  }
+}

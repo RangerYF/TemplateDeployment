@@ -1,0 +1,263 @@
+{
+  "id": "CRY-017",
+  "name_cn": "钠",
+  "formula": "Na",
+  "level": "高中必修",
+  "crystal_system": "立方",
+  "space_group": "Im3̄m (No. 229)",
+  "lattice_params": {
+    "a": 422.5,
+    "b": 422.5,
+    "c": 422.5,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Na1",
+      "element": "Na",
+      "label": "Na1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Na2",
+      "element": "Na",
+      "label": "Na2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "金属键",
+  "coord_number": "8",
+  "z": 2,
+  "teaching_points": [
+    "体心立方(BCC)结构，配位数8，空间利用率68.02%",
+    "每个晶胞含2个Na原子",
+    "8个最近邻距离为a√3/2=372pm",
+    "Na是典型的活泼金属，金属键较弱（密度低0.97g/cm³，熔点98°C）",
+    "与α-Fe相同的BCC结构，但Na原子半径更大(186pm)",
+    "Na可与Cl形成NaCl(CRY-001)，完全不同的结构类型"
+  ],
+  "key_parameters": [
+    {
+      "id": "structure_type",
+      "label": "结构类型",
+      "value": "体心立方(BCC)"
+    },
+    {
+      "id": "bond_length_na_na",
+      "label": "键长",
+      "value": "Na-Na: 372 pm"
+    },
+    {
+      "id": "packing_type",
+      "label": "堆积方式",
+      "value": "BCC"
+    },
+    {
+      "id": "packing_efficiency",
+      "label": "空间利用率",
+      "value": "68.02%"
+    }
+  ],
+  "render": {
+    "category": "metallic",
+    "name": "钠",
+    "formula_html": "Na",
+    "grade_level": "高中必修",
+    "structure_type": "体心立方(BCC)",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Im3̄m",
+    "space_group_number": 229,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "metallic",
+    "neighbor_cutoff_angstrom": 3.72,
+    "bond_types": [
+      "metallic"
+    ],
+    "bonds": [],
+    "polyhedra": [],
+    "coordination_geometry": "立方体",
+    "bond_lengths_pm": {
+      "Na-Na": 372
+    },
+    "hybridization": null,
+    "packing_type": "BCC",
+    "packing_efficiency": 0.6801999999999999,
+    "data_source": "COD #9008544 — Wyckoff, Crystal Structures (1963), T=5K",
+    "mp_material_id": "mp-127",
+    "representation_note": null,
+    "source_summary": "COD #9008544 — Wyckoff, Crystal Structures (1963), T=5K + Materials Project mp-127"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-017_na/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-017_na/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008544 — Wyckoff, Crystal Structures (1963), T=5K",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008544.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-127",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-127"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "origin"
+      ],
+      "name_cn": [
+        "origin",
+        "prd"
+      ],
+      "formula": [
+        "origin",
+        "prd"
+      ],
+      "level": [
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "space_group": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "lattice_params": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "atoms": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "bond_type": [
+        "chem",
+        "origin"
+      ],
+      "coord_number": [
+        "origin",
+        "cod"
+      ],
+      "z": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "teaching_points": [
+        "origin",
+        "prd"
+      ],
+      "key_parameters": [
+        "origin",
+        "prd",
+        "cod",
+        "mp"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin"
+      ],
+      "render.hybridization": [
+        "origin"
+      ],
+      "render.packing_type": [
+        "origin"
+      ],
+      "render.packing_efficiency": [
+        "origin"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

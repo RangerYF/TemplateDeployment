@@ -1,0 +1,451 @@
+{
+  "id": "CRY-015",
+  "slug": "cry-015-zns",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-015",
+    "name_cn": "硫化锌 (闪锌矿)",
+    "formula": "ZnS",
+    "level": "高中选修",
+    "crystal_system": "cubic",
+    "space_group": "F̄43m",
+    "lattice_params": {
+      "a": 541.5,
+      "b": 541.5,
+      "c": 541.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "+2"
+      },
+      {
+        "element": "S",
+        "label": "S1",
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25,
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S2",
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.25,
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S3",
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.75,
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S4",
+        "x": 0.25,
+        "y": 0.75,
+        "z": 0.75,
+        "charge": "-2"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "4:4",
+    "z": 4,
+    "teaching_points": [
+      "闪锌矿与金刚石结构相同，但Zn和S交替占据位置",
+      "Zn2+和S2-均为四面体配位（配位数4:4）",
+      "Zn-S键长234pm，键有部分共价性",
+      "闪锌矿是ZnS的低温相，高温转变为纤锌矿(CRY-016)",
+      "半导体材料，带隙3.68eV，用于光电器件",
+      "结构可看作两套FCC子晶格（Zn和S各一套）相互嵌套"
+    ],
+    "bond_lengths": {
+      "Zn-S": 234
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-015",
+    "name": "硫化锌 (闪锌矿)",
+    "formula": "ZnS",
+    "formulaHtml": "ZnS (闪锌矿)",
+    "category": "ionic",
+    "gradeLevel": "高中选修",
+    "structureType": "闪锌矿型",
+    "crystalSystem": "cubic",
+    "spaceGroup": "F̄43m",
+    "spaceGroupNumber": 216,
+    "lattice": {
+      "a": 541.5,
+      "b": 541.5,
+      "c": 541.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "S",
+        "label": "S1",
+        "fracCoords": [
+          0.25,
+          0.25,
+          0.25
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S2",
+        "fracCoords": [
+          0.75,
+          0.75,
+          0.25
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S3",
+        "fracCoords": [
+          0.75,
+          0.25,
+          0.75
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S4",
+        "fracCoords": [
+          0.25,
+          0.75,
+          0.75
+        ],
+        "charge": "-2"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          0,
+          5
+        ],
+        "cellOffset": [
+          -1,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          0,
+          7
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          1,
+          6
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          1,
+          7
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          2,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          2,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          2,
+          5
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          2,
+          7
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          3,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          3,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          3,
+          5
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      },
+      {
+        "siteIndices": [
+          3,
+          6
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 234
+      }
+    ],
+    "coordinationNumber": "4:4",
+    "coordinationGeometry": "正四面体",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "ZnS4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 2.5
+      }
+    ],
+    "teachingPoints": [
+      "闪锌矿与金刚石结构相同，但Zn和S交替占据位置",
+      "Zn2+和S2-均为四面体配位（配位数4:4）",
+      "Zn-S键长234pm，键有部分共价性",
+      "闪锌矿是ZnS的低温相，高温转变为纤锌矿(CRY-016)",
+      "半导体材料，带隙3.68eV，用于光电器件",
+      "结构可看作两套FCC子晶格（Zn和S各一套）相互嵌套"
+    ],
+    "bondLengths": {
+      "Zn-S": 234
+    },
+    "codId": 1100043,
+    "dataSource": "COD #1100043 — ZnS Sphalerite (F-43m)"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "MOL-018",
+  "name_cn": "臭氧",
+  "name_en": "Ozone",
+  "formula": "O₃",
+  "category": "triatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.0231681972249107,
+      "y": -0.6269982776591385,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -1.0231681972249105,
+      "y": -0.6269982776591386,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 2,
+      "length": 100
+    }
+  ]
+}

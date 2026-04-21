@@ -1,0 +1,76 @@
+{
+  "id": "P02-EM001-two-charges-coulomb",
+  "version": "1.0",
+  "name": "两点电荷·库仑力",
+  "description": "两个点电荷之间的库仑力分析，调节电荷量观察力的变化",
+  "category": "P-02",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 400, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "charge-A",
+      "type": "point-charge",
+      "properties": { "charge": 2, "radius": 0.15 },
+      "transform": { "position": { "x": -1, "y": 0 }, "rotation": 0 },
+      "label": "A"
+    },
+    {
+      "ref": "charge-B",
+      "type": "point-charge",
+      "properties": { "charge": 3, "radius": 0.15 },
+      "transform": { "position": { "x": 1, "y": 0 }, "rotation": 0 },
+      "label": "B"
+    }
+  ],
+  "relations": [
+    {
+      "type": "coulomb",
+      "sourceRef": "charge-A",
+      "targetRef": "charge-B",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "charge-params",
+      "label": "电荷属性",
+      "params": [
+        {
+          "key": "chargeA",
+          "label": "电荷A",
+          "type": "slider",
+          "min": -10,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "μC",
+          "targetEntityId": "charge-A",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "chargeB",
+          "label": "电荷B",
+          "type": "slider",
+          "min": -10,
+          "max": 10,
+          "step": 0.1,
+          "default": 3,
+          "unit": "μC",
+          "targetEntityId": "charge-B",
+          "targetProperty": "charge"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "chargeA": 2,
+    "chargeB": 3
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "interaction": "electrostatic" }
+}

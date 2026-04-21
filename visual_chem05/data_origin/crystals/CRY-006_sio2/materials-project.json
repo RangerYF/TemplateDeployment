@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-006",
+  "folder": "CRY-006_sio2",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "SiO2",
+    "spaceGroupNumber": 152,
+    "structureType": "α-石英型"
+  },
+  "materialId": "mp-7000",
+  "downloadedAt": "2026-04-02T07:25:14.842885+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 200,
+  "checkedAt": "2026-04-02T07:25:14.170142+00:00",
+  "formulaPretty": "SiO2",
+  "spaceGroupNumber": 152,
+  "spaceGroupSymbol": "P3_121",
+  "energyAboveHull": 0.0,
+  "isStable": true,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-7000"
+}

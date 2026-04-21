@@ -1,0 +1,242 @@
+{
+  "id": "P04-CIR-EXP002-voltammetry-external",
+  "version": "1.0",
+  "name": "伏安法·外接法",
+  "description": "电流表外接法测电阻：电流表串联后，被测电阻与电压表并联。R测 = RxRv/(Rx+Rv)（偏小）",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 120,
+    "origin": { "x": 300, "y": 350 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 6,
+        "internalResistance": 1,
+        "width": 0.8,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -3, "y": 0 }, "rotation": 0 },
+      "label": "电源"
+    },
+    {
+      "ref": "switch-1",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": -1.5, "y": 0.1 }, "rotation": 0 },
+      "label": "开关"
+    },
+    {
+      "ref": "ammeter-1",
+      "type": "ammeter",
+      "properties": {
+        "range": 0.6,
+        "internalResistance": 0.2,
+        "radius": 0.3,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": -0.2, "y": 0.25 }, "rotation": 0 },
+      "label": "电流表"
+    },
+    {
+      "ref": "resistor-x",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 10,
+        "width": 0.8,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": 1, "y": 0.05 }, "rotation": 0 },
+      "label": "被测电阻 Rx"
+    },
+    {
+      "ref": "voltmeter-1",
+      "type": "voltmeter",
+      "properties": {
+        "range": 15,
+        "internalResistance": 15000,
+        "radius": 0.35,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": 1.4, "y": -1 }, "rotation": 0 },
+      "label": "电压表"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "source-1",
+      "targetRef": "switch-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-1",
+      "targetRef": "ammeter-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "ammeter-1",
+      "targetRef": "resistor-x",
+      "properties": { "topology": "external" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "resistor-x",
+      "targetRef": "voltmeter-1",
+      "properties": { "topology": "parallel" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "source-params",
+      "label": "电源",
+      "params": [
+        {
+          "key": "emf",
+          "label": "电动势",
+          "type": "slider",
+          "min": 1,
+          "max": 24,
+          "step": 0.1,
+          "default": 6,
+          "unit": "V",
+          "targetEntityId": "source-1",
+          "targetProperty": "emf"
+        },
+        {
+          "key": "r",
+          "label": "内阻",
+          "type": "slider",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "Ω",
+          "targetEntityId": "source-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "resistor-params",
+      "label": "被测电阻",
+      "params": [
+        {
+          "key": "Rx",
+          "label": "电阻值",
+          "type": "slider",
+          "min": 1,
+          "max": 1000,
+          "step": 1,
+          "default": 10,
+          "unit": "Ω",
+          "targetEntityId": "resistor-x",
+          "targetProperty": "resistance"
+        }
+      ]
+    },
+    {
+      "key": "ammeter-params",
+      "label": "电流表",
+      "params": [
+        {
+          "key": "ammeterRange",
+          "label": "量程",
+          "type": "slider",
+          "min": 0.6,
+          "max": 3,
+          "step": 2.4,
+          "default": 0.6,
+          "unit": "A",
+          "targetEntityId": "ammeter-1",
+          "targetProperty": "range"
+        },
+        {
+          "key": "rA",
+          "label": "内阻",
+          "type": "slider",
+          "min": 0.01,
+          "max": 1,
+          "step": 0.01,
+          "default": 0.2,
+          "unit": "Ω",
+          "targetEntityId": "ammeter-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "voltmeter-params",
+      "label": "电压表",
+      "params": [
+        {
+          "key": "voltmeterRange",
+          "label": "量程",
+          "type": "slider",
+          "min": 3,
+          "max": 15,
+          "step": 12,
+          "default": 15,
+          "unit": "V",
+          "targetEntityId": "voltmeter-1",
+          "targetProperty": "range"
+        },
+        {
+          "key": "rV",
+          "label": "内阻",
+          "type": "slider",
+          "min": 1000,
+          "max": 30000,
+          "step": 100,
+          "default": 15000,
+          "unit": "Ω",
+          "targetEntityId": "voltmeter-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "switch-params",
+      "label": "开关",
+      "params": [
+        {
+          "key": "switchClosed",
+          "label": "开关状态",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "闭合",
+          "labelOff": "断开",
+          "targetEntityId": "switch-1",
+          "targetProperty": "closed"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "emf": 6,
+    "r": 1,
+    "Rx": 10,
+    "ammeterRange": 0.6,
+    "rA": 0.2,
+    "voltmeterRange": 15,
+    "rV": 15000,
+    "switchClosed": true
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "voltammetry-external" }
+}

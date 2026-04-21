@@ -1,0 +1,272 @@
+{
+  "id": "CRY-019",
+  "slug": "cry-019-gan",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-019",
+    "name_cn": "氮化镓",
+    "formula": "GaN",
+    "level": "拓展",
+    "crystal_system": "hexagonal",
+    "space_group": "P6₃mc",
+    "lattice_params": {
+      "a": 318,
+      "b": 318,
+      "c": 516.6,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "Ga",
+        "label": "Ga1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Ga",
+        "label": "Ga2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "N",
+        "label": "N1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0.385,
+        "charge": null
+      },
+      {
+        "element": "N",
+        "label": "N2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.885,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "4",
+    "z": 2,
+    "teaching_points": [
+      "GaN采用纤锌矿结构，与ZnS纤锌矿(CRY-016)同型",
+      "Ga和N均为四面体配位（sp3杂化）",
+      "Ga-N键长约195pm，键有部分离子性和部分共价性",
+      "GaN是重要的第三代半导体（宽禁带3.4eV）",
+      "蓝光LED和激光的核心材料（2014年诺贝尔物理学奖）",
+      "应用于5G通信、电力电子、紫外探测等领域"
+    ],
+    "bond_lengths": {
+      "Ga-N": 195
+    },
+    "hybridization": "sp3",
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-019",
+    "name": "氮化镓",
+    "formula": "GaN",
+    "formulaHtml": "GaN",
+    "category": "atomic",
+    "gradeLevel": "拓展",
+    "structureType": "纤锌矿型",
+    "crystalSystem": "hexagonal",
+    "spaceGroup": "P6₃mc",
+    "spaceGroupNumber": 186,
+    "lattice": {
+      "a": 318,
+      "b": 318,
+      "c": 516.6,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 2,
+    "atomSites": [
+      {
+        "element": "Ga",
+        "label": "Ga1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0
+        ]
+      },
+      {
+        "element": "Ga",
+        "label": "Ga2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.5
+        ]
+      },
+      {
+        "element": "N",
+        "label": "N1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0.385
+        ]
+      },
+      {
+        "element": "N",
+        "label": "N2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.885
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          -1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          -1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          1,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 195
+      }
+    ],
+    "coordinationNumber": "4",
+    "coordinationGeometry": "正四面体",
+    "hybridization": "sp3",
+    "teachingPoints": [
+      "GaN采用纤锌矿结构，与ZnS纤锌矿(CRY-016)同型",
+      "Ga和N均为四面体配位（sp3杂化）",
+      "Ga-N键长约195pm，键有部分离子性和部分共价性",
+      "GaN是重要的第三代半导体（宽禁带3.4eV）",
+      "蓝光LED和激光的核心材料（2014年诺贝尔物理学奖）",
+      "应用于5G通信、电力电子、紫外探测等领域"
+    ],
+    "bondLengths": {
+      "Ga-N": 195
+    },
+    "codId": 9008868,
+    "dataSource": "COD #9008868 — Wyckoff, Crystal Structures 1, 85-237 (1963)"
+  }
+}

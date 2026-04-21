@@ -1,0 +1,288 @@
+{
+  "id": "CRY-008",
+  "name_cn": "铜",
+  "formula": "Cu",
+  "level": "高中必修",
+  "crystal_system": "立方",
+  "space_group": "Fm3̄m (No. 225)",
+  "lattice_params": {
+    "a": 361.5,
+    "b": 361.5,
+    "c": 361.5,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Cu1",
+      "element": "Cu",
+      "label": "Cu1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu2",
+      "element": "Cu",
+      "label": "Cu2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "0",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu3",
+      "element": "Cu",
+      "label": "Cu3",
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "1/2",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu4",
+      "element": "Cu",
+      "label": "Cu4",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "金属键",
+  "coord_number": "12",
+  "z": 4,
+  "teaching_points": [
+    "面心立方(FCC)堆积，配位数12，空间利用率74.05%",
+    "堆积方式为ABCABC...（立方最密堆积CCP）",
+    "每个晶胞含4个Cu原子（顶点1/8×8=1，面心1/2×6=3）",
+    "12个最近邻原子距离均为a/√2=255pm",
+    "延展性极好（金属键无方向性），优良导体",
+    "Cu还可形成多种合金：黄铜(Cu-Zn)、青铜(Cu-Sn)等"
+  ],
+  "key_parameters": [
+    {
+      "id": "packing_sequence",
+      "label": "堆积方式",
+      "value": "ABCABC（面心立方密堆积）"
+    },
+    {
+      "id": "packing_efficiency",
+      "label": "空间利用率",
+      "value": "74.05%"
+    }
+  ],
+  "render": {
+    "category": "metallic",
+    "name": "铜",
+    "formula_html": "Cu",
+    "grade_level": "高中必修",
+    "structure_type": "面心立方(FCC)",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Fm3̄m",
+    "space_group_number": 225,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "metallic",
+    "neighbor_cutoff_angstrom": 2.56,
+    "bond_types": [
+      "metallic"
+    ],
+    "bonds": [],
+    "polyhedra": [],
+    "coordination_geometry": "立方八面体",
+    "bond_lengths_pm": {
+      "Cu-Cu": 255
+    },
+    "hybridization": null,
+    "packing_type": "FCC",
+    "packing_efficiency": 0.7404999999999999,
+    "data_source": "COD #9008468 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+    "mp_material_id": "mp-30",
+    "representation_note": null,
+    "source_summary": "C-05 数据文档 + COD #9008468 — Wyckoff, Crystal Structures 1, 7-83 (1963) + Materials Project mp-30"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "c05",
+        "label": "C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+        "type": "document",
+        "path": "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md"
+      },
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-008_cu/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-008_cu/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008468 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008468.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-30",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-30"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "c05",
+        "origin"
+      ],
+      "name_cn": [
+        "c05",
+        "origin"
+      ],
+      "formula": [
+        "c05",
+        "origin"
+      ],
+      "level": [
+        "c05",
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "c05",
+        "origin"
+      ],
+      "space_group": [
+        "c05",
+        "origin"
+      ],
+      "lattice_params": [
+        "c05",
+        "origin"
+      ],
+      "atoms": [
+        "c05",
+        "origin"
+      ],
+      "bond_type": [
+        "chem",
+        "c05",
+        "origin"
+      ],
+      "coord_number": [
+        "c05",
+        "origin"
+      ],
+      "z": [
+        "c05",
+        "origin"
+      ],
+      "teaching_points": [
+        "c05",
+        "origin"
+      ],
+      "key_parameters": [
+        "c05",
+        "origin"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin",
+        "c05"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin",
+        "c05"
+      ],
+      "render.hybridization": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_type": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_efficiency": [
+        "origin",
+        "c05"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "id": "CRY-002",
+  "slug": "cry-002-cscl",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-002",
+    "name_cn": "氯化铯",
+    "formula": "CsCl",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Pm3̄m",
+    "lattice_params": {
+      "a": 412.3,
+      "b": 412.3,
+      "c": 412.3,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Cs",
+        "label": "Cs1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "-1"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "8:8",
+    "z": 1,
+    "teaching_points": [
+      "CsCl结构不是体心立方(BCC)！顶点和体心是不同离子",
+      "每个Cs+周围有8个Cl-，形成立方体配位（配位数8:8）",
+      "每个晶胞含1个CsCl（Cs在顶点共享8个晶胞，贡献1/8×8=1；Cl在体心贡献1）",
+      "Cs+半径较大(167pm)，能容纳8个Cl-围绕",
+      "简单立方堆积，立方体空隙被填充"
+    ],
+    "bond_lengths": {
+      "Cs-Cl": 357
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-002",
+    "name": "氯化铯",
+    "formula": "CsCl",
+    "formulaHtml": "CsCl",
+    "category": "ionic",
+    "gradeLevel": "高中必修",
+    "structureType": "氯化铯型",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Pm3̄m",
+    "spaceGroupNumber": 221,
+    "lattice": {
+      "a": 412.3,
+      "b": 412.3,
+      "c": 412.3,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 1,
+    "atomSites": [
+      {
+        "element": "Cs",
+        "label": "Cs1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "charge": "-1"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 357
+      }
+    ],
+    "coordinationNumber": "8:8",
+    "coordinationGeometry": "立方体",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "CsCl8",
+        "polyhedronType": "cube",
+        "neighborCutoff": 3.8
+      }
+    ],
+    "teachingPoints": [
+      "CsCl结构不是体心立方(BCC)！顶点和体心是不同离子",
+      "每个Cs+周围有8个Cl-，形成立方体配位（配位数8:8）",
+      "每个晶胞含1个CsCl（Cs在顶点共享8个晶胞，贡献1/8×8=1；Cl在体心贡献1）",
+      "Cs+半径较大(167pm)，能容纳8个Cl-围绕",
+      "简单立方堆积，立方体空隙被填充"
+    ],
+    "bondLengths": {
+      "Cs-Cl": 357
+    },
+    "codId": 9008789,
+    "dataSource": "COD #9008789 — Wyckoff, Crystal Structures 1, 85-237 (1963)"
+  }
+}

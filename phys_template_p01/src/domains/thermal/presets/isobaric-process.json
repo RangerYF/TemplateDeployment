@@ -1,0 +1,82 @@
+{
+  "id": "P07-THM-012-isobaric-process",
+  "version": "1.0",
+  "name": "等压过程",
+  "description": "理想气体等压变化：V/T = 常量。调节温度观察体积变化，V-T图显示过原点的直线。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 450 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "cylinder",
+        "width": 0.5,
+        "height": 2.5,
+        "openEnd": "top",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气缸"
+    },
+    {
+      "ref": "gas-1",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 101325,
+        "volume": 2e-4,
+        "temperature": 300,
+        "length": 1.0,
+        "crossSection": 2e-4,
+        "chartType": "V-T",
+        "chartData": [],
+        "initialPressure": 101325,
+        "initialVolume": 2e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-1",
+        "positionOffset": -0.5
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气柱"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 600,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-1",
+          "targetProperty": "temperature"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "isobaric" }
+}

@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "id": "FM-052",
+    "name": "杆模型",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“杆模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 block-main（block）。",
+      "4. 添加约束 rod-main（rod），连接 anchor-top 与 block-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-052.json",
+  "commandProgram": {
+    "templateId": "FM-052",
+    "sceneName": "FM-052 杆模型",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 2.2,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": 3.6,
+            "y": 4.6
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1,
+          "friction": 0.15,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rod-main",
+        "jointType": "rod",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "block-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0.3
+        }
+      }
+    ]
+  }
+}

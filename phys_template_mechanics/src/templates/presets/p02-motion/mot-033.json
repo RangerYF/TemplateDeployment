@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "id": "MOT-033",
+    "name": "竖直圆周运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“竖直圆周运动”模板，让学生观察临界速度条件下绳约束运动的动力学特征。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 ball-main（ball），并设置切向初速度。",
+      "4. 添加约束 rope-main（rope），连接 anchor-top 与 ball-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-033.json",
+  "commandProgram": {
+    "templateId": "MOT-033",
+    "sceneName": "MOT-033 竖直圆周运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 7.4
+          },
+          "radius": 0.3,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "initialVelocity": {
+            "x": 10.435516278556,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-main",
+        "jointType": "rope",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "ball-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

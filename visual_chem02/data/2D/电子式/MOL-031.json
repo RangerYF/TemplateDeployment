@@ -1,0 +1,119 @@
+{
+  "id": "MOL-031",
+  "name_cn": "五氯化磷",
+  "name_en": "Phosphorus pentachloride",
+  "formula": "PCl₅",
+  "category": "polyatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "P",
+      "label": "P",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.141267819554184,
+      "y": 0.3708203932499369,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 0.7053423027509678,
+      "y": -0.9708203932499369,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": -0.7053423027509677,
+      "y": -0.9708203932499369,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -1.1412678195541843,
+      "y": 0.3708203932499367,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

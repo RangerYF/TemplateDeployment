@@ -1,0 +1,134 @@
+{
+  "id": "P02-EM004-emf-induction",
+  "version": "1.0",
+  "name": "矩形线框·穿过匀强磁场",
+  "description": "矩形线框匀速穿过匀强磁场区域，观察感应电动势和感应电流的变化过程",
+  "category": "P-02",
+  "supportedViewports": ["circuit", "field", "force", "motion"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 80,
+    "origin": { "x": 200, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 2.0,
+        "direction": "into",
+        "width": 4,
+        "height": 4
+      },
+      "transform": { "position": { "x": 2, "y": -2 }, "rotation": 0 },
+      "label": "匀强磁场"
+    },
+    {
+      "ref": "frame-1",
+      "type": "wire-frame",
+      "properties": {
+        "width": 1,
+        "height": 1,
+        "resistance": 2,
+        "initialVelocity": { "x": 2, "y": 0 },
+        "emf": 0,
+        "current": 0,
+        "flux": 0
+      },
+      "transform": { "position": { "x": -1, "y": -0.5 }, "rotation": 0 },
+      "label": "线框"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "frame-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "frame-params",
+      "label": "线框属性",
+      "params": [
+        {
+          "key": "velocity",
+          "label": "速度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m/s",
+          "targetEntityId": "frame-1",
+          "targetProperty": "initialVelocity.x"
+        },
+        {
+          "key": "resistance",
+          "label": "电阻",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "\u03a9",
+          "targetEntityId": "frame-1",
+          "targetProperty": "resistance"
+        },
+        {
+          "key": "frameWidth",
+          "label": "线框宽度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 3,
+          "step": 0.1,
+          "default": 1,
+          "unit": "m",
+          "targetEntityId": "frame-1",
+          "targetProperty": "width"
+        }
+      ]
+    },
+    {
+      "key": "bfield-params",
+      "label": "磁场属性",
+      "params": [
+        {
+          "key": "B",
+          "label": "磁感应强度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "direction",
+          "label": "磁场方向",
+          "type": "select",
+          "options": [
+            { "value": "into", "label": "垂直纸面向内 \u00d7" },
+            { "value": "out", "label": "垂直纸面向外 \u00b7" }
+          ],
+          "default": "into",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "direction"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "velocity": 2,
+    "resistance": 2,
+    "frameWidth": 1,
+    "B": 2,
+    "direction": "into"
+  },
+  "solveMode": "numerical",
+  "duration": 8,
+  "solverQualifier": { "interaction": "induction" }
+}

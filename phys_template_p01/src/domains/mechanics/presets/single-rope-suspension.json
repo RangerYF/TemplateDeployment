@@ -1,0 +1,73 @@
+{
+  "id": "P01-FM021-single-rope",
+  "version": "1.0",
+  "name": "单绳",
+  "description": "物块由一根轻绳竖直悬挂，分析重力和张力的二力平衡",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 500, "y": 200 }
+  },
+  "entities": [
+    {
+      "ref": "pivot-1",
+      "type": "pivot",
+      "properties": { "radius": 0.05 },
+      "transform": { "position": { "x": 0, "y": 2 }, "rotation": 0 },
+      "label": "固定点"
+    },
+    {
+      "ref": "rope-1",
+      "type": "rope",
+      "properties": { "length": 1.5, "pivotEntityId": "pivot-1", "blockEntityId": "block-A" },
+      "transform": { "position": { "x": 0, "y": 2 }, "rotation": 0 },
+      "label": "轻绳"
+    },
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 1, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 0.5 }, "rotation": 0 },
+      "label": "物块"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "block-A",
+      "targetRef": "pivot-1",
+      "properties": { "connector": "rope-1" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "block-params",
+      "label": "物体属性",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "default": 1,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "mass": 1
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "suspension": "single-rope" },
+  "group": "suspension",
+  "groupLabel": "悬挂模型",
+  "groupOrder": 1
+}

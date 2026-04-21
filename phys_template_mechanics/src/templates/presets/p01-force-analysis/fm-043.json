@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "id": "FM-043",
+    "name": "竖直圆周(绳连)",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“竖直圆周(绳连)”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 ball-main（ball）。",
+      "4. 添加约束 rope-main（rope），连接 anchor-top 与 ball-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-043.json",
+  "commandProgram": {
+    "templateId": "FM-043",
+    "sceneName": "FM-043 竖直圆周(绳连)",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 7.6
+          },
+          "radius": 0.3,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "initialVelocity": {
+            "x": 9.838699100999,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-main",
+        "jointType": "rope",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "ball-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

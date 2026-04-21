@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "id": "FM-053",
+    "name": "半球模型",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“半球模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 hemisphere-main（hemisphere）。",
+      "3. 将物体 hemisphere-main 吸附到 ground。",
+      "4. 添加物体 ball-main（ball）。",
+      "5. 将物体 ball-main 吸附到 hemisphere-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-053.json",
+  "commandProgram": {
+    "templateId": "FM-053",
+    "sceneName": "FM-053 半球模型",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "hemisphere-main",
+        "bodyType": "hemisphere",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 1.6
+          },
+          "hemisphereRadius": 2.6,
+          "hemisphereAngle": 3.141592653589793,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.35
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "hemisphere-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 12
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -1.5,
+            "y": 4.8
+          },
+          "radius": 0.3,
+          "mass": 0.6,
+          "friction": 0.08,
+          "restitution": 0.1,
+          "initialVelocity": {
+            "x": 0.8,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "ball-main",
+        "targetBodyRefs": [
+          "hemisphere-main"
+        ],
+        "threshold": 3,
+        "allowNoSnap": true
+      }
+    ]
+  },
+  "sceneSource": "manual",
+  "updatedAt": "2026-04-01T16:15:00.956Z"
+}

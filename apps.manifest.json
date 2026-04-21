@@ -1,0 +1,79 @@
+[
+  {
+    "id": "chem02",
+    "subject": "chemistry",
+    "title": "分子结构查看器",
+    "path": "visual_chem02",
+    "port": 5173
+  },
+  {
+    "id": "chem05",
+    "subject": "chemistry",
+    "title": "晶体结构查看器",
+    "path": "visual_chem05",
+    "port": 5174
+  },
+  {
+    "id": "chem06",
+    "subject": "chemistry",
+    "title": "电化学演示台",
+    "path": "visual_chem06",
+    "port": 5175
+  },
+  {
+    "id": "chem08",
+    "subject": "chemistry",
+    "title": "酸碱滴定与 pH 模拟器",
+    "path": "visual_chem08",
+    "port": 5176
+  },
+  {
+    "id": "m01",
+    "subject": "math",
+    "title": "立体几何展示台",
+    "path": "visual_m01",
+    "port": 5177
+  },
+  {
+    "id": "m05",
+    "subject": "math",
+    "title": "概率统计模拟器",
+    "path": "visual_m05",
+    "port": 5178
+  },
+  {
+    "id": "m06",
+    "subject": "math",
+    "title": "向量运算演示台",
+    "path": "visual_m06",
+    "port": 5179
+  },
+  {
+    "id": "p01",
+    "subject": "physics",
+    "title": "受力分析器",
+    "path": "phys_template_p01",
+    "port": 5180
+  },
+  {
+    "id": "p-mechanics",
+    "subject": "physics",
+    "title": "力学模板集",
+    "path": "phys_template_mechanics",
+    "port": 5181
+  },
+  {
+    "id": "p03",
+    "subject": "physics",
+    "title": "光学实验台",
+    "path": "phys_template_p03",
+    "port": 5182
+  },
+  {
+    "id": "m02",
+    "subject": "math",
+    "title": "函数图像实验室",
+    "path": "M02-math",
+    "port": 5183
+  }
+]

@@ -1,0 +1,127 @@
+{
+  "id": "P07-THM-026-double-sealed-tube",
+  "version": "1.0",
+  "name": "双密封管",
+  "description": "两端封闭的管中，水银柱隔开两段气体。改变温度后联立两段气体状态方程求解液柱位移。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 500 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "double-sealed",
+        "width": 0.4,
+        "height": 2.0,
+        "openEnd": "none",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "双密封管"
+    },
+    {
+      "ref": "gas-left",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 101325,
+        "volume": 8e-5,
+        "temperature": 300,
+        "length": 0.4,
+        "crossSection": 2e-4,
+        "chartType": "p-V",
+        "chartData": [],
+        "initialPressure": 101325,
+        "initialVolume": 8e-5,
+        "initialTemperature": 300,
+        "columnId": "left",
+        "positionOffset": -0.5
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "左气柱"
+    },
+    {
+      "ref": "gas-right",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 101325,
+        "volume": 8e-5,
+        "temperature": 300,
+        "length": 0.4,
+        "crossSection": 2e-4,
+        "chartType": "p-V",
+        "chartData": [],
+        "initialPressure": 101325,
+        "initialVolume": 8e-5,
+        "initialTemperature": 300,
+        "columnId": "right",
+        "positionOffset": 0.5
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "右气柱"
+    },
+    {
+      "ref": "liquid-1",
+      "type": "liquid-column",
+      "properties": {
+        "length": 0.1,
+        "density": 13600,
+        "crossSection": 2e-4,
+        "positionOffset": 0,
+        "columnId": "liquid-1"
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "水银柱"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-left",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-right",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "liquid-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 500,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-left",
+          "targetProperty": "temperature"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "double-sealed-tube" }
+}

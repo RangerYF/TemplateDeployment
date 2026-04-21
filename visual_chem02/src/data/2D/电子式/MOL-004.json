@@ -1,0 +1,43 @@
+{
+  "id": "MOL-004",
+  "name_cn": "氯气",
+  "name_en": "Chlorine",
+  "formula": "Cl₂",
+  "category": "diatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -0.6,
+      "y": 0,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0.6,
+      "y": 0,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

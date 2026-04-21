@@ -1,0 +1,434 @@
+{
+  "id": "CRY-006",
+  "slug": "cry-006-sio2",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-006",
+    "name_cn": "二氧化硅 (α-石英)",
+    "formula": "SiO2",
+    "level": "高中必修",
+    "crystal_system": "trigonal",
+    "space_group": "P3₁21",
+    "lattice_params": {
+      "a": 491.3,
+      "b": 491.3,
+      "c": 540.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "Si",
+        "label": "Si1",
+        "x": 0.4697,
+        "y": 0,
+        "z": 0.333,
+        "charge": null
+      },
+      {
+        "element": "Si",
+        "label": "Si2",
+        "x": 0,
+        "y": 0.4697,
+        "z": 0.667,
+        "charge": null
+      },
+      {
+        "element": "Si",
+        "label": "Si3",
+        "x": 0.5303,
+        "y": 0.5303,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O1",
+        "x": 0.4135,
+        "y": 0.2669,
+        "z": 0.2144,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O2",
+        "x": 0.7331,
+        "y": 0.1466,
+        "z": 0.5477,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O3",
+        "x": 0.8534,
+        "y": 0.5865,
+        "z": 0.8811,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O4",
+        "x": 0.2669,
+        "y": 0.4135,
+        "z": 0.7856,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O5",
+        "x": 0.1466,
+        "y": 0.7331,
+        "z": 0.4523,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O6",
+        "x": 0.5865,
+        "y": 0.8534,
+        "z": 0.1189,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "Si:4, O:2",
+    "z": 3,
+    "teaching_points": [
+      "每个Si与4个O形成共价键（sp3杂化，正四面体），每个O桥接2个Si",
+      "Si-O键长161pm，Si-O-Si键角约144°",
+      "所有SiO4四面体共顶点连接，形成三维网络",
+      "石英具有压电效应，广泛用于电子振荡器",
+      "整个晶体是一个共价键网络，无独立SiO2分子",
+      "三方晶系，具有手性（左旋/右旋石英）"
+    ],
+    "bond_lengths": {
+      "Si-O": 161
+    },
+    "hybridization": "sp3",
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-006",
+    "name": "二氧化硅 (α-石英)",
+    "formula": "SiO2",
+    "formulaHtml": "SiO<sub>2</sub> (α-石英)",
+    "category": "atomic",
+    "gradeLevel": "高中必修",
+    "structureType": "α-石英型",
+    "crystalSystem": "trigonal",
+    "spaceGroup": "P3₁21",
+    "spaceGroupNumber": 152,
+    "lattice": {
+      "a": 491.3,
+      "b": 491.3,
+      "c": 540.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 3,
+    "atomSites": [
+      {
+        "element": "Si",
+        "label": "Si1",
+        "fracCoords": [
+          0.4697,
+          0,
+          0.333
+        ]
+      },
+      {
+        "element": "Si",
+        "label": "Si2",
+        "fracCoords": [
+          0,
+          0.4697,
+          0.667
+        ]
+      },
+      {
+        "element": "Si",
+        "label": "Si3",
+        "fracCoords": [
+          0.5303,
+          0.5303,
+          0
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O1",
+        "fracCoords": [
+          0.4135,
+          0.2669,
+          0.2144
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O2",
+        "fracCoords": [
+          0.7331,
+          0.1466,
+          0.5477
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O3",
+        "fracCoords": [
+          0.8534,
+          0.5865,
+          0.8811
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O4",
+        "fracCoords": [
+          0.2669,
+          0.4135,
+          0.7856
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O5",
+        "fracCoords": [
+          0.1466,
+          0.7331,
+          0.4523
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O6",
+        "fracCoords": [
+          0.5865,
+          0.8534,
+          0.1189
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          0,
+          8
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          1,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          1,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          1,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          2,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          2,
+          8
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          2,
+          4
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      },
+      {
+        "siteIndices": [
+          2,
+          7
+        ],
+        "cellOffset": [
+          0,
+          1,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 161
+      }
+    ],
+    "coordinationNumber": "Si:4, O:2",
+    "coordinationGeometry": "Si:正四面体, O:角顶连接",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "SiO4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 1.8
+      },
+      {
+        "centerSiteIndex": 1,
+        "label": "SiO4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 1.8
+      },
+      {
+        "centerSiteIndex": 2,
+        "label": "SiO4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 1.8
+      }
+    ],
+    "hybridization": "sp3",
+    "teachingPoints": [
+      "每个Si与4个O形成共价键（sp3杂化，正四面体），每个O桥接2个Si",
+      "Si-O键长161pm，Si-O-Si键角约144°",
+      "所有SiO4四面体共顶点连接，形成三维网络",
+      "石英具有压电效应，广泛用于电子振荡器",
+      "整个晶体是一个共价键网络，无独立SiO2分子",
+      "三方晶系，具有手性（左旋/右旋石英）"
+    ],
+    "bondLengths": {
+      "Si-O": 161
+    },
+    "codId": 9013321,
+    "dataSource": "COD #9013321 — Antao et al., Can. Mineral. (2008)"
+  }
+}

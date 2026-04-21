@@ -1,0 +1,263 @@
+{
+  "id": "CRY-020",
+  "name_cn": "β-黄铜",
+  "formula": "CuZn",
+  "level": "拓展",
+  "crystal_system": "立方",
+  "space_group": "Pm3̄m (No. 221)",
+  "lattice_params": {
+    "a": 294.5,
+    "b": 294.5,
+    "c": 294.5,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Cu1",
+      "element": "Cu",
+      "label": "Cu1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Zn1",
+      "element": "Zn",
+      "label": "Zn1",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "金属键",
+  "coord_number": "8",
+  "z": 1,
+  "teaching_points": [
+    "β-黄铜采用CsCl型有序结构：Cu在顶点，Zn在体心",
+    "与CsCl(CRY-002)结构类型相同，但为金属间化合物（金属键）",
+    "每个Cu周围8个Zn最近邻，每个Zn周围8个Cu最近邻",
+    "Cu-Zn距离为a√3/2=255pm",
+    "高温下(>470°C)发生有序-无序转变，成为无序BCC合金",
+    "合金是不同金属的混合，结构可与纯金属不同"
+  ],
+  "key_parameters": [
+    {
+      "id": "structure_type",
+      "label": "结构类型",
+      "value": "有序BCC(CsCl型)"
+    },
+    {
+      "id": "bond_length_cu_zn",
+      "label": "键长",
+      "value": "Cu-Zn: 255 pm"
+    },
+    {
+      "id": "packing_type",
+      "label": "堆积方式",
+      "value": "BCC"
+    },
+    {
+      "id": "packing_efficiency",
+      "label": "空间利用率",
+      "value": "68.02%"
+    }
+  ],
+  "render": {
+    "category": "metallic",
+    "name": "β-黄铜",
+    "formula_html": "CuZn (β-黄铜)",
+    "grade_level": "拓展",
+    "structure_type": "有序BCC(CsCl型)",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Pm3̄m",
+    "space_group_number": 221,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "metallic",
+    "neighbor_cutoff_angstrom": 2.56,
+    "bond_types": [
+      "metallic"
+    ],
+    "bonds": [],
+    "polyhedra": [],
+    "coordination_geometry": "立方体",
+    "bond_lengths_pm": {
+      "Cu-Zn": 255
+    },
+    "hybridization": null,
+    "packing_type": "BCC",
+    "packing_efficiency": 0.6801999999999999,
+    "data_source": "COD #9008814 — Wyckoff, Crystal Structures 1, 85-237 (1963)",
+    "mp_material_id": "mp-987",
+    "representation_note": null,
+    "source_summary": "COD #9008814 — Wyckoff, Crystal Structures 1, 85-237 (1963) + Materials Project mp-987"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-020_cuzn/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-020_cuzn/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008814 — Wyckoff, Crystal Structures 1, 85-237 (1963)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008814.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-987",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-987"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "origin"
+      ],
+      "name_cn": [
+        "origin",
+        "prd"
+      ],
+      "formula": [
+        "origin",
+        "prd"
+      ],
+      "level": [
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "space_group": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "lattice_params": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "atoms": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "bond_type": [
+        "chem",
+        "origin"
+      ],
+      "coord_number": [
+        "origin",
+        "cod"
+      ],
+      "z": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "teaching_points": [
+        "origin",
+        "prd"
+      ],
+      "key_parameters": [
+        "origin",
+        "prd",
+        "cod",
+        "mp"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin"
+      ],
+      "render.hybridization": [
+        "origin"
+      ],
+      "render.packing_type": [
+        "origin"
+      ],
+      "render.packing_efficiency": [
+        "origin"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

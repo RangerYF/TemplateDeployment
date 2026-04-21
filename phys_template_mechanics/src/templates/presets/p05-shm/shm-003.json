@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "id": "SHM-003",
+    "name": "单摆",
+    "module": "P-05",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过更长摆长、无明显耗散的单摆模板，观察摆动幅度、速度与周期之间的关系。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 bob-ball（ball）。",
+      "4. 添加更长的 rope-main（rope），用更明显的初始偏角和更慢节奏观察摆动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/SHM-003.json",
+  "commandProgram": {
+    "templateId": "SHM-003",
+    "sceneName": "SHM-003 单摆",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "bob-ball",
+        "bodyType": "ball",
+        "label": "摆球",
+        "patch": {
+          "position": {
+            "x": 3.2,
+            "y": 3.9
+          },
+          "radius": 0.3,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-main",
+        "jointType": "rope",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "bob-ball",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

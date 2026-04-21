@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-004",
+  "folder": "CRY-004_tio2",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "TiO2",
+    "spaceGroupNumber": 136,
+    "structureType": "金红石型"
+  },
+  "materialId": "mp-2657",
+  "downloadedAt": "2026-04-02T07:25:12.454370+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 46,
+  "checkedAt": "2026-04-02T07:25:11.732847+00:00",
+  "formulaPretty": "TiO2",
+  "spaceGroupNumber": 136,
+  "spaceGroupSymbol": "P4_2/mnm",
+  "energyAboveHull": 0.043638704166665,
+  "isStable": false,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-2657"
+}

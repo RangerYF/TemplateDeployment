@@ -1,0 +1,245 @@
+{
+  "id": "CRY-014",
+  "slug": "cry-014-cdcl2",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-014",
+    "name_cn": "氯化镉",
+    "formula": "CdCl2",
+    "level": "拓展",
+    "crystal_system": "trigonal",
+    "space_group": "R3̄m",
+    "lattice_params": {
+      "a": 386,
+      "b": 386,
+      "c": 1742,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "Cd",
+        "label": "Cd1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0.075,
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": -0.075,
+        "charge": "-1"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "Cd:6, Cl:3",
+    "z": 3,
+    "teaching_points": [
+      "CdCl2为典型层状结构：Cl-Cd-Cl三明治层通过范德华力堆叠",
+      "Cd2+位于两层Cl-之间的八面体空隙中，配位数6",
+      "Cl-层为立方最密堆积(CCP)，Cd2+填充交替的八面体层",
+      "层间以范德华力结合，可沿层方向解理",
+      "层内Cd-Cl键有较强离子性，层间为分子间力",
+      "类似结构：MgCl2、FeCl2、NiCl2等"
+    ],
+    "bond_lengths": {
+      "Cd-Cl": 264
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-014",
+    "name": "氯化镉",
+    "formula": "CdCl2",
+    "formulaHtml": "CdCl<sub>2</sub>",
+    "category": "layered",
+    "gradeLevel": "拓展",
+    "structureType": "层状结构(CdCl2型)",
+    "crystalSystem": "trigonal",
+    "spaceGroup": "R3̄m",
+    "spaceGroupNumber": 166,
+    "lattice": {
+      "a": 386,
+      "b": 386,
+      "c": 1742,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 3,
+    "atomSites": [
+      {
+        "element": "Cd",
+        "label": "Cd1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0.075
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          -0.075
+        ],
+        "charge": "-1"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 264
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 369
+      }
+    ],
+    "coordinationNumber": "Cd:6, Cl:3",
+    "coordinationGeometry": "Cd:八面体, Cl:三角锥",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "CdCl6",
+        "polyhedronType": "octahedron",
+        "neighborCutoff": 2.8
+      }
+    ],
+    "teachingPoints": [
+      "CdCl2为典型层状结构：Cl-Cd-Cl三明治层通过范德华力堆叠",
+      "Cd2+位于两层Cl-之间的八面体空隙中，配位数6",
+      "Cl-层为立方最密堆积(CCP)，Cd2+填充交替的八面体层",
+      "层间以范德华力结合，可沿层方向解理",
+      "层内Cd-Cl键有较强离子性，层间为分子间力",
+      "类似结构：MgCl2、FeCl2、NiCl2等"
+    ],
+    "bondLengths": {
+      "Cd-Cl": 264
+    },
+    "codId": 1011332,
+    "dataSource": "COD #1011332 — CdCl₂ (R-3m)"
+  }
+}

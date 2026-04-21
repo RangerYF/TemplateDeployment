@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "id": "MOM-013",
+    "name": "滑块模型",
+    "module": "P-12",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过滑块碰撞后滑行模板，分段观察碰撞阶段动量关系与碰后摩擦耗散。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加有限平台 platform-main，并在平台上放置两个滑块。",
+      "3. 设置 block-a 初速度使其追碰 block-b。",
+      "4. 观察碰撞阶段与碰后平台摩擦滑行阶段的分段变化。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOM-013.json",
+  "commandProgram": {
+    "templateId": "MOM-013",
+    "sceneName": "MOM-013 滑块模型",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "platform-main",
+        "bodyType": "block",
+        "label": "平台",
+        "patch": {
+          "position": {
+            "x": -0.3,
+            "y": 0.95
+          },
+          "width": 9.5,
+          "height": 0.24,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.12,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-a",
+        "bodyType": "block",
+        "label": "滑块A",
+        "patch": {
+          "position": {
+            "x": -3.8,
+            "y": 1.25
+          },
+          "width": 0.9,
+          "height": 0.6,
+          "mass": 1.2,
+          "friction": 0.12,
+          "restitution": 0.45,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 6.5,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-a",
+        "targetBodyRefs": [
+          "platform-main"
+        ],
+        "threshold": 1.2
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-b",
+        "bodyType": "block",
+        "label": "滑块B",
+        "patch": {
+          "position": {
+            "x": 0.4,
+            "y": 1.25
+          },
+          "width": 0.9,
+          "height": 0.6,
+          "mass": 1.8,
+          "friction": 0.12,
+          "restitution": 0.45,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-b",
+        "targetBodyRefs": [
+          "platform-main"
+        ],
+        "threshold": 1.2
+      }
+    ]
+  }
+}

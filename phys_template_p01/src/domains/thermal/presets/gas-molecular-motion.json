@@ -1,0 +1,92 @@
+{
+  "id": "P07-THM-001-gas-molecular-motion",
+  "version": "1.0",
+  "name": "气体分子运动模拟",
+  "description": "模拟理想气体分子的热运动。分子与容器壁弹性碰撞，右侧显示麦克斯韦速率分布直方图。调节温度观察分子运动速度和分布变化。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 250, "y": 400 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "open-box",
+        "width": 4,
+        "height": 3,
+        "openEnd": "none",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 2, "y": 1.5 }, "rotation": 0 },
+      "label": "容器"
+    },
+    {
+      "ref": "molecules-1",
+      "type": "gas-molecules",
+      "properties": {
+        "count": 200,
+        "temperature": 300,
+        "molecularMass": 4.65e-26,
+        "positions": [],
+        "velocities": [],
+        "speedHistogram": [],
+        "histogramBins": [],
+        "containerWidth": 4,
+        "containerHeight": 3
+      },
+      "transform": { "position": { "x": 2, "y": 1.5 }, "rotation": 0 },
+      "label": "气体分子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "molecules-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "molecule-params",
+      "label": "分子参数",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 100,
+          "max": 1000,
+          "step": 10,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "molecules-1",
+          "targetProperty": "temperature"
+        },
+        {
+          "key": "count",
+          "label": "分子数",
+          "type": "slider",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 200,
+          "unit": "个",
+          "targetEntityId": "molecules-1",
+          "targetProperty": "count"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300,
+    "count": 200
+  },
+  "solveMode": "numerical",
+  "duration": 60,
+  "solverQualifier": { "thermal": "gas-molecular-motion" }
+}

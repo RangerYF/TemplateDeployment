@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "id": "MOM-001",
+    "name": "完全弹性碰撞",
+    "module": "P-12",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过完全弹性碰撞模板，观察一维碰撞中总动量与总动能同时守恒的特征。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加球体 ball-left 与 ball-right，并吸附到低摩擦 ground。",
+      "3. 设置 ball-left 以更易观察的速度向右运动，ball-right 初速度为 0。",
+      "4. 将两球恢复系数设为 1，构造更清晰的一维完全弹性碰撞。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOM-001.json",
+  "commandProgram": {
+    "templateId": "MOM-001",
+    "sceneName": "MOM-001 完全弹性碰撞",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-left",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -4.2,
+            "y": 0.3
+          },
+          "mass": 2,
+          "friction": 0,
+          "restitution": 1,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 5,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "ball-left",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 1.2
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-right",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 1.0,
+            "y": 0.3
+          },
+          "mass": 3,
+          "friction": 0,
+          "restitution": 1
+          ,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "ball-right",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 1.2
+      }
+    ]
+  }
+}

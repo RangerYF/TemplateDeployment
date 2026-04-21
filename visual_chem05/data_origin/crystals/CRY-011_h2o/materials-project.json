@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-011",
+  "folder": "CRY-011_h2o",
+  "status": "partial_match",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "H2O",
+    "spaceGroupNumber": 194,
+    "structureType": "六方冰(Ih)"
+  },
+  "materialId": "mp-697111",
+  "downloadedAt": "2026-04-02T07:25:19.206001+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "No exact target space group in Materials Project; saved the closest available candidate."
+  ],
+  "candidateCount": 18,
+  "checkedAt": "2026-04-02T07:25:18.628578+00:00",
+  "formulaPretty": "H2O",
+  "spaceGroupNumber": 36,
+  "spaceGroupSymbol": "Cmc2_1",
+  "energyAboveHull": 0.0,
+  "isStable": true,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-697111"
+}

@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "id": "FM-011",
+    "name": "斜面受力",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过单一斜面受力模板，先观察默认 37° 斜面的临界静止状态，再通过右侧属性与初始运动设置验证不同角度和运动状态下的受力变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 使用 37° 斜面作为默认教学角度，可在右侧属性面板继续修改。",
+      "3. 先观察临界静止状态下 G∥、G⊥、支持力与静摩擦力。",
+      "4. 在右侧初始运动中设置沿斜面向上或向下的初速度。",
+      "5. 对比不同角度、静止、下滑、上滑三种状态下的受力与合力。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-011.json",
+  "commandProgram": {
+    "templateId": "FM-011",
+    "sceneName": "FM-011 斜面受力",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "label": "斜面",
+        "patch": {
+          "position": {
+            "x": -0.2,
+            "y": 0.2
+          },
+          "baseLength": 8,
+          "slopeHeight": 6,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.9
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 10
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "label": "静止物块",
+        "patch": {
+          "position": {
+            "x": -2.4,
+            "y": 4.6
+          },
+          "width": 0.9,
+          "height": 0.65,
+          "mass": 1,
+          "friction": 0.75,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "slope-main"
+        ],
+        "threshold": 3
+      }
+    ]
+  }
+}

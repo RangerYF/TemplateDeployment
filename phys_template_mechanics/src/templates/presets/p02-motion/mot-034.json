@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "id": "MOT-034",
+    "name": "木板-物块相对运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过木板与物块的相对运动模板，观察地面摩擦和板-块摩擦共同作用下两物体速度的耦合变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加更长的木板 board-main（block）并吸附到 ground。",
+      "3. 添加物块 block-top（block）并吸附到 board-main 左侧，形成更明显的相对滑动过程。",
+      "4. 设置更慢的木板初速度，观察木板与物块的双速度曲线和位移变化。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-034.json",
+  "commandProgram": {
+    "templateId": "MOT-034",
+    "sceneName": "MOT-034 木板-物块相对运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0.08,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "board-main",
+        "bodyType": "block",
+        "label": "木板",
+        "patch": {
+          "position": {
+            "x": -0.2,
+            "y": 0.5
+          },
+          "width": 6.4,
+          "height": 0.35,
+          "mass": 5.5,
+          "friction": 0.1,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 2.6,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "board-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 2
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-top",
+        "bodyType": "block",
+        "label": "板上物块",
+        "patch": {
+          "position": {
+            "x": -2.5,
+            "y": 1.1
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1,
+          "friction": 0.38,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-top",
+        "targetBodyRefs": [
+          "board-main"
+        ],
+        "threshold": 1.5
+      }
+    ]
+  }
+}

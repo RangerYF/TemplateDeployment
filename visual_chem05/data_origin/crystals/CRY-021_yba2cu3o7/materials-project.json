@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-021",
+  "folder": "CRY-021_yba2cu3o7",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "YBa2Cu3O7",
+    "spaceGroupNumber": 47,
+    "structureType": "钙钛矿衍生型"
+  },
+  "materialId": "mp-20674",
+  "downloadedAt": "2026-04-02T07:25:28.170950+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 1,
+  "checkedAt": "2026-04-02T07:25:27.638823+00:00",
+  "formulaPretty": "Ba2YCu3O7",
+  "spaceGroupNumber": 47,
+  "spaceGroupSymbol": "Pmmm",
+  "energyAboveHull": 0.031375912660262004,
+  "isStable": false,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-20674"
+}

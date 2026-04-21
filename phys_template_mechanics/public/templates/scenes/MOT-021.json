@@ -1,0 +1,61 @@
+{
+  "id": "template-scene-mot-021",
+  "name": "MOT-021 平抛运动",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-ball-main",
+      "type": "ball",
+      "label": "平抛小球",
+      "position": {
+        "x": -4.8,
+        "y": 4.2
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 7.2,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.2
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

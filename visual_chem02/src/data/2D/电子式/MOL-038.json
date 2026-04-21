@@ -1,0 +1,81 @@
+{
+  "id": "MOL-038",
+  "name_cn": "硝酸根",
+  "name_en": "Nitrate",
+  "formula": "NO₃⁻",
+  "category": "ion",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -1.0392304845413265,
+      "y": -0.5999999999999996,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 1.0392304845413265,
+      "y": -0.5999999999999998,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

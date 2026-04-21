@@ -1,0 +1,157 @@
+{
+  "id": "MOL-063",
+  "name_cn": "乙酸",
+  "name_en": "Acetic acid",
+  "formula": "CH₃COOH",
+  "category": "alcohol_aldehyde_acid_ester",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 1.8,
+      "y": 1.0392304845413263,
+      "element": "O",
+      "label": "O",
+      "hCount": 1,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.8,
+      "y": -1.0392304845413263,
+      "element": "C",
+      "label": "C",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 1.2,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 1.8,
+      "y": -1.9992304845413262,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": 2.76,
+      "y": -1.0392304845413263,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 0.8400000000000001,
+      "y": -1.0392304845413265,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 1.8,
+      "y": 1.9992304845413262,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

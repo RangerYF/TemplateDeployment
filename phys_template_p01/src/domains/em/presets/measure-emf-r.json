@@ -1,0 +1,230 @@
+{
+  "id": "P04-CIR-EXP004-measure-emf-r",
+  "version": "1.0",
+  "name": "测电源EMF和内阻",
+  "description": "通过调节滑动变阻器改变外电路电阻，测量多组 U-I 数据，利用 U = ε - Ir 线性关系确定电源电动势和内阻",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 120,
+    "origin": { "x": 300, "y": 350 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 4.5,
+        "internalResistance": 0.5,
+        "width": 0.8,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -3, "y": 0 }, "rotation": 0 },
+      "label": "电源"
+    },
+    {
+      "ref": "switch-1",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": -1.5, "y": 0.1 }, "rotation": 0 },
+      "label": "开关"
+    },
+    {
+      "ref": "ammeter-1",
+      "type": "ammeter",
+      "properties": {
+        "range": 0.6,
+        "internalResistance": 0.1,
+        "radius": 0.3,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": -0.2, "y": 0.25 }, "rotation": 0 },
+      "label": "电流表"
+    },
+    {
+      "ref": "rheostat-1",
+      "type": "slide-rheostat",
+      "properties": {
+        "maxResistance": 50,
+        "sliderRatio": 0.5,
+        "width": 1.0,
+        "height": 0.5,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": 1, "y": 0 }, "rotation": 0 },
+      "label": "滑动变阻器"
+    },
+    {
+      "ref": "voltmeter-1",
+      "type": "voltmeter",
+      "properties": {
+        "range": 15,
+        "internalResistance": 15000,
+        "radius": 0.35,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": -1, "y": -1.2 }, "rotation": 0 },
+      "label": "电压表"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "source-1",
+      "targetRef": "switch-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-1",
+      "targetRef": "ammeter-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "ammeter-1",
+      "targetRef": "rheostat-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "source-1",
+      "targetRef": "voltmeter-1",
+      "properties": { "topology": "parallel-terminal" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "source-params",
+      "label": "电源（待测）",
+      "params": [
+        {
+          "key": "emf",
+          "label": "电动势",
+          "type": "slider",
+          "min": 1,
+          "max": 12,
+          "step": 0.1,
+          "default": 4.5,
+          "unit": "V",
+          "targetEntityId": "source-1",
+          "targetProperty": "emf"
+        },
+        {
+          "key": "r",
+          "label": "内阻",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 0.5,
+          "unit": "Ω",
+          "targetEntityId": "source-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "rheostat-params",
+      "label": "滑动变阻器",
+      "params": [
+        {
+          "key": "maxR",
+          "label": "最大阻值",
+          "type": "slider",
+          "min": 5,
+          "max": 200,
+          "step": 1,
+          "default": 50,
+          "unit": "Ω",
+          "targetEntityId": "rheostat-1",
+          "targetProperty": "maxResistance"
+        },
+        {
+          "key": "sliderRatio",
+          "label": "滑片位置",
+          "type": "slider",
+          "min": 0.01,
+          "max": 1,
+          "step": 0.01,
+          "default": 0.5,
+          "unit": "",
+          "targetEntityId": "rheostat-1",
+          "targetProperty": "sliderRatio"
+        }
+      ]
+    },
+    {
+      "key": "ammeter-params",
+      "label": "电流表",
+      "params": [
+        {
+          "key": "ammeterRange",
+          "label": "量程",
+          "type": "slider",
+          "min": 0.6,
+          "max": 3,
+          "step": 2.4,
+          "default": 0.6,
+          "unit": "A",
+          "targetEntityId": "ammeter-1",
+          "targetProperty": "range"
+        }
+      ]
+    },
+    {
+      "key": "voltmeter-params",
+      "label": "电压表",
+      "params": [
+        {
+          "key": "voltmeterRange",
+          "label": "量程",
+          "type": "slider",
+          "min": 3,
+          "max": 15,
+          "step": 12,
+          "default": 15,
+          "unit": "V",
+          "targetEntityId": "voltmeter-1",
+          "targetProperty": "range"
+        }
+      ]
+    },
+    {
+      "key": "switch-params",
+      "label": "开关",
+      "params": [
+        {
+          "key": "switchClosed",
+          "label": "开关状态",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "闭合",
+          "labelOff": "断开",
+          "targetEntityId": "switch-1",
+          "targetProperty": "closed"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "emf": 4.5,
+    "r": 0.5,
+    "maxR": 50,
+    "sliderRatio": 0.5,
+    "ammeterRange": 0.6,
+    "voltmeterRange": 15,
+    "switchClosed": true
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "measure-emf-r" }
+}

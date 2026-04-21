@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "id": "FM-042",
+    "name": "圆锥摆受力",
+    "module": "P-01",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过“侧视图 + 顶视图”双视图圆锥摆模板，同时观察斜绳、水平圆轨迹和顶视圆周运动，理解张力的竖直分量平衡重力、水平分量提供向心力。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加固定点 anchor-top 与摆球 bob-ball，并保持斜绳初态。",
+      "3. 在主画面观察圆锥截面、竖直轴与水平圆轨迹的侧视投影。",
+      "4. 在右上角顶视图中观察摆球做水平圆周运动。",
+      "5. 结合 G 与 T 的分解理解圆锥摆的受力语义。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-042.json",
+  "commandProgram": {
+    "templateId": "FM-042",
+    "sceneName": "FM-042 圆锥摆受力",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "label": "固定点",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "bob-ball",
+        "bodyType": "ball",
+        "label": "摆球",
+        "patch": {
+          "position": {
+            "x": 2.6,
+            "y": 4.8
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-main",
+        "jointType": "rope",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "bob-ball",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

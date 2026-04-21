@@ -1,0 +1,100 @@
+{
+  "id": "MOL-062",
+  "name_cn": "甲酸",
+  "name_en": "Formic acid",
+  "formula": "HCOOH",
+  "category": "alcohol_aldehyde_acid_ester",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 1.2,
+      "y": 0.96,
+      "element": "O",
+      "label": "O",
+      "hCount": 1,
+      "lonePairs": 2,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": true
+    },
+    {
+      "index": 1,
+      "x": 1.2,
+      "y": -0.96,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "HCOOH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": -1.2,
+      "y": 0,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 2.16,
+      "y": 0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "id": "CRY-001",
+  "slug": "cry-001-nacl",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-001",
+    "name_cn": "氯化钠 (岩盐型)",
+    "formula": "NaCl",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Fm3̄m",
+    "lattice_params": {
+      "a": 564.1,
+      "b": 564.1,
+      "c": 564.1,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Na",
+        "label": "Na1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "+1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "x": 0.5,
+        "y": 0,
+        "z": 0,
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl2",
+        "x": 0,
+        "y": 0.5,
+        "z": 0,
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl3",
+        "x": 0,
+        "y": 0,
+        "z": 0.5,
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl4",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "-1"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "6:6",
+    "z": 4,
+    "teaching_points": [
+      "每个Na+周围有6个Cl-，形成正八面体配位（配位数6:6）",
+      "晶胞中含有4个NaCl（Na:4个在棱中点和体心位置，Cl:4个在顶点和面心位置）",
+      "NaCl晶体中不存在\"NaCl分子\"，只有离子",
+      "晶格能较高(786 kJ/mol)，熔点801°C",
+      "等径球最密堆积的八面体空隙全部被填充"
+    ],
+    "bond_lengths": {
+      "Na-Cl": 282
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-001",
+    "name": "氯化钠 (岩盐型)",
+    "formula": "NaCl",
+    "formulaHtml": "NaCl",
+    "category": "ionic",
+    "gradeLevel": "高中必修",
+    "structureType": "岩盐型",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Fm3̄m",
+    "spaceGroupNumber": 225,
+    "lattice": {
+      "a": 564.1,
+      "b": 564.1,
+      "c": 564.1,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "Na",
+        "label": "Na1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ],
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ],
+        "charge": "+1"
+      },
+      {
+        "element": "Na",
+        "label": "Na4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ],
+        "charge": "+1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl1",
+        "fracCoords": [
+          0.5,
+          0,
+          0
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl2",
+        "fracCoords": [
+          0,
+          0.5,
+          0
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl3",
+        "fracCoords": [
+          0,
+          0,
+          0.5
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "Cl",
+        "label": "Cl4",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "charge": "-1"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          0,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          0,
+          5
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          1,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          6
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          2,
+          7
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          6
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      },
+      {
+        "siteIndices": [
+          3,
+          7
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 282
+      }
+    ],
+    "coordinationNumber": "6:6",
+    "coordinationGeometry": "正八面体",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "NaO6",
+        "polyhedronType": "octahedron",
+        "neighborCutoff": 3
+      }
+    ],
+    "teachingPoints": [
+      "每个Na+周围有6个Cl-，形成正八面体配位（配位数6:6）",
+      "晶胞中含有4个NaCl（Na:4个在棱中点和体心位置，Cl:4个在顶点和面心位置）",
+      "NaCl晶体中不存在\"NaCl分子\"，只有离子",
+      "晶格能较高(786 kJ/mol)，熔点801°C",
+      "等径球最密堆积的八面体空隙全部被填充"
+    ],
+    "bondLengths": {
+      "Na-Cl": 282
+    },
+    "codId": 9008678,
+    "dataSource": "COD #9008678 — Wyckoff, Crystal Structures 1, 85-237 (1963)"
+  }
+}

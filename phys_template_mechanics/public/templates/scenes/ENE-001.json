@@ -1,0 +1,61 @@
+{
+  "id": "template-scene-ene-001",
+  "name": "ENE-001 自由落体",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-ball-main",
+      "type": "ball",
+      "label": "球体 #1",
+      "position": {
+        "x": 0,
+        "y": 6.5
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 1,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "id": "CRY-017",
+  "slug": "cry-017-na",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-017",
+    "name_cn": "钠",
+    "formula": "Na",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Im3̄m",
+    "lattice_params": {
+      "a": 422.5,
+      "b": 422.5,
+      "c": 422.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Na",
+        "label": "Na1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Na",
+        "label": "Na2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      }
+    ],
+    "bond_type": "metallic",
+    "coord_number": "8",
+    "z": 2,
+    "teaching_points": [
+      "体心立方(BCC)结构，配位数8，空间利用率68.02%",
+      "每个晶胞含2个Na原子",
+      "8个最近邻距离为a√3/2=372pm",
+      "Na是典型的活泼金属，金属键较弱（密度低0.97g/cm³，熔点98°C）",
+      "与α-Fe相同的BCC结构，但Na原子半径更大(186pm)",
+      "Na可与Cl形成NaCl(CRY-001)，完全不同的结构类型"
+    ],
+    "bond_lengths": {
+      "Na-Na": 372
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-017",
+    "name": "钠",
+    "formula": "Na",
+    "formulaHtml": "Na",
+    "category": "metallic",
+    "gradeLevel": "高中必修",
+    "structureType": "体心立方(BCC)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Im3̄m",
+    "spaceGroupNumber": 229,
+    "lattice": {
+      "a": 422.5,
+      "b": 422.5,
+      "c": 422.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 2,
+    "atomSites": [
+      {
+        "element": "Na",
+        "label": "Na1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "Na",
+        "label": "Na2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    ],
+    "bonds": [],
+    "neighborCutoff": 3.72,
+    "packingType": "BCC",
+    "packingEfficiency": 68.02,
+    "coordinationNumber": "8",
+    "coordinationGeometry": "立方体",
+    "teachingPoints": [
+      "体心立方(BCC)结构，配位数8，空间利用率68.02%",
+      "每个晶胞含2个Na原子",
+      "8个最近邻距离为a√3/2=372pm",
+      "Na是典型的活泼金属，金属键较弱（密度低0.97g/cm³，熔点98°C）",
+      "与α-Fe相同的BCC结构，但Na原子半径更大(186pm)",
+      "Na可与Cl形成NaCl(CRY-001)，完全不同的结构类型"
+    ],
+    "bondLengths": {
+      "Na-Na": 372
+    },
+    "codId": 9008544,
+    "dataSource": "COD #9008544 — Wyckoff, Crystal Structures (1963), T=5K"
+  }
+}

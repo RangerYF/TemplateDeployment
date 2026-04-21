@@ -1,0 +1,35 @@
+{
+  "crystalId": "CRY-010",
+  "recommendedView": {
+    "expansionRange": {
+      "x": [
+        0,
+        1
+      ],
+      "y": [
+        0,
+        1
+      ],
+      "z": [
+        0,
+        1
+      ]
+    },
+    "renderMode": "ballAndStick",
+    "showUnitCell": true,
+    "showBonds": true,
+    "showLabels": false
+  },
+  "animationClips": [
+    {
+      "id": "CRY-010-rotate",
+      "label": "基础旋转展示",
+      "kind": "orbit",
+      "durationMs": 6000
+    }
+  ],
+  "packingReference": {
+    "type": "HCP",
+    "packingEfficiency": 74.05
+  }
+}

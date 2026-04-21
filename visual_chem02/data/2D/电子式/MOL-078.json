@@ -1,0 +1,119 @@
+{
+  "id": "MOL-078",
+  "name_cn": "碳酸",
+  "name_en": "Carbonic acid",
+  "formula": "H₂CO₃",
+  "category": "inorganic_acid",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "O",
+      "label": "O",
+      "hCount": 1,
+      "lonePairs": 2,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": -1.0392304845413265,
+      "y": -0.5999999999999996,
+      "element": "O",
+      "label": "O",
+      "hCount": 1,
+      "lonePairs": 2,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.0392304845413265,
+      "y": -0.5999999999999998,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 1.3226185430791415e-16,
+      "y": 2.16,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -1.9992304845413265,
+      "y": -0.5999999999999998,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "order": 2,
+      "length": 100
+    }
+  ]
+}

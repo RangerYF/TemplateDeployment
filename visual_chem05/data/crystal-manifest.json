@@ -1,0 +1,170 @@
+[
+  {
+    "id": "CRY-001",
+    "file_name": "CRY-001_nacl.json",
+    "name_cn": "氯化钠 (岩盐型)",
+    "formula": "NaCl",
+    "level": "高中必修",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-002",
+    "file_name": "CRY-002_cscl.json",
+    "name_cn": "氯化铯",
+    "formula": "CsCl",
+    "level": "高中必修",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-003",
+    "file_name": "CRY-003_caf2.json",
+    "name_cn": "氟化钙 (萤石)",
+    "formula": "CaF2",
+    "level": "高中选修",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-004",
+    "file_name": "CRY-004_tio2.json",
+    "name_cn": "二氧化钛 (金红石)",
+    "formula": "TiO2",
+    "level": "高中选修",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-005",
+    "file_name": "CRY-005_c.json",
+    "name_cn": "金刚石",
+    "formula": "C",
+    "level": "高中必修",
+    "category": "atomic"
+  },
+  {
+    "id": "CRY-006",
+    "file_name": "CRY-006_sio2.json",
+    "name_cn": "二氧化硅 (α-石英)",
+    "formula": "SiO2",
+    "level": "高中必修",
+    "category": "atomic"
+  },
+  {
+    "id": "CRY-007",
+    "file_name": "CRY-007_sic.json",
+    "name_cn": "碳化硅",
+    "formula": "SiC",
+    "level": "拓展",
+    "category": "atomic"
+  },
+  {
+    "id": "CRY-008",
+    "file_name": "CRY-008_cu.json",
+    "name_cn": "铜",
+    "formula": "Cu",
+    "level": "高中必修",
+    "category": "metallic"
+  },
+  {
+    "id": "CRY-009",
+    "file_name": "CRY-009_fe.json",
+    "name_cn": "α-铁",
+    "formula": "Fe",
+    "level": "高中必修",
+    "category": "metallic"
+  },
+  {
+    "id": "CRY-010",
+    "file_name": "CRY-010_mg.json",
+    "name_cn": "镁",
+    "formula": "Mg",
+    "level": "高中选修",
+    "category": "metallic"
+  },
+  {
+    "id": "CRY-011",
+    "file_name": "CRY-011_h2o.json",
+    "name_cn": "冰 (Ih)",
+    "formula": "H2O",
+    "level": "高中必修",
+    "category": "molecular"
+  },
+  {
+    "id": "CRY-012",
+    "file_name": "CRY-012_co2.json",
+    "name_cn": "干冰",
+    "formula": "CO2",
+    "level": "高中必修",
+    "category": "molecular"
+  },
+  {
+    "id": "CRY-013",
+    "file_name": "CRY-013_c.json",
+    "name_cn": "石墨",
+    "formula": "C",
+    "level": "高中必修",
+    "category": "layered"
+  },
+  {
+    "id": "CRY-014",
+    "file_name": "CRY-014_cdcl2.json",
+    "name_cn": "氯化镉",
+    "formula": "CdCl2",
+    "level": "拓展",
+    "category": "layered"
+  },
+  {
+    "id": "CRY-015",
+    "file_name": "CRY-015_zns.json",
+    "name_cn": "硫化锌 (闪锌矿)",
+    "formula": "ZnS",
+    "level": "高中选修",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-016",
+    "file_name": "CRY-016_zns.json",
+    "name_cn": "硫化锌 (纤锌矿)",
+    "formula": "ZnS",
+    "level": "拓展",
+    "category": "ionic"
+  },
+  {
+    "id": "CRY-017",
+    "file_name": "CRY-017_na.json",
+    "name_cn": "钠",
+    "formula": "Na",
+    "level": "高中必修",
+    "category": "metallic"
+  },
+  {
+    "id": "CRY-018",
+    "file_name": "CRY-018_i2.json",
+    "name_cn": "碘",
+    "formula": "I2",
+    "level": "高中选修",
+    "category": "molecular"
+  },
+  {
+    "id": "CRY-019",
+    "file_name": "CRY-019_gan.json",
+    "name_cn": "氮化镓",
+    "formula": "GaN",
+    "level": "拓展",
+    "category": "atomic"
+  },
+  {
+    "id": "CRY-020",
+    "file_name": "CRY-020_cuzn.json",
+    "name_cn": "β-黄铜",
+    "formula": "CuZn",
+    "level": "拓展",
+    "category": "metallic"
+  },
+  {
+    "id": "CRY-021",
+    "file_name": "CRY-021_yba2cu3o7.json",
+    "name_cn": "钇钡铜氧 (YBCO)",
+    "formula": "YBa2Cu3O7",
+    "level": "拓展",
+    "category": "ionic"
+  }
+]

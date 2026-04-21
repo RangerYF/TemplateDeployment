@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-016",
+  "folder": "CRY-016_zns",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "ZnS",
+    "spaceGroupNumber": 186,
+    "structureType": "纤锌矿型"
+  },
+  "materialId": "mp-561286",
+  "downloadedAt": "2026-04-02T07:25:23.803789+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 145,
+  "checkedAt": "2026-04-02T07:25:23.462162+00:00",
+  "formulaPretty": "ZnS",
+  "spaceGroupNumber": 186,
+  "spaceGroupSymbol": "P6_3mc",
+  "energyAboveHull": 0.00011004546428500001,
+  "isStable": false,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-561286"
+}

@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "SHM-002",
+    "name": "水平弹簧振子",
+    "module": "P-05",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过无阻尼水平弹簧振子模板，观察回复力与位移方向相反时更清晰的往复振动过程。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, 0)。",
+      "2. 添加物体 wall-left（wall）。",
+      "3. 将物体 wall-left 吸附到 ground。",
+      "4. 添加物体 mass-block（block）。",
+      "5. 添加更软的无阻尼弹簧 spring-main，观察更大振幅、更慢的水平振动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/SHM-002.json",
+  "commandProgram": {
+    "templateId": "SHM-002",
+    "sceneName": "SHM-002 水平弹簧振子",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "wall-left",
+        "bodyType": "wall",
+        "patch": {
+          "position": {
+            "x": -3.2,
+            "y": 2.2
+          },
+          "wallWidth": 0.15,
+          "wallHeight": 4.4,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.3,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "wall-left",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "mass-block",
+        "bodyType": "block",
+        "label": "振子物块",
+        "patch": {
+          "position": {
+            "x": 0.7,
+            "y": 2.2
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1.1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "wall-left",
+        "bodyRefB": "mass-block",
+        "anchorA": {
+          "x": 0.075,
+          "y": 0
+        },
+        "anchorB": {
+          "x": -0.4,
+          "y": 0
+        },
+        "patch": {
+          "springLength": 2.2,
+          "stiffness": 0.65,
+          "damping": 0
+        }
+      }
+    ]
+  }
+}

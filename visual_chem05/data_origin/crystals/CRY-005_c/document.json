@@ -1,0 +1,453 @@
+{
+  "id": "CRY-005",
+  "slug": "cry-005-c",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-005",
+    "name_cn": "金刚石",
+    "formula": "C",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Fd3̄m",
+    "lattice_params": {
+      "a": 356.7,
+      "b": 356.7,
+      "c": 356.7,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "C",
+        "label": "C1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C5",
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C6",
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C7",
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.75,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C8",
+        "x": 0.25,
+        "y": 0.75,
+        "z": 0.75,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "4",
+    "z": 8,
+    "teaching_points": [
+      "每个C原子与4个C原子形成共价键，sp3杂化，正四面体构型（键角109.5°）",
+      "C-C键长154pm，键能很强(347 kJ/mol)",
+      "晶胞含8个C原子（FCC位置4个 + 四面体空隙4个）",
+      "金刚石是已知最硬的天然物质（莫氏硬度10）",
+      "整个晶体是一个巨大的共价键网络，不存在单个分子",
+      "金刚石结构=两套FCC子晶格沿体对角线平移1/4"
+    ],
+    "bond_lengths": {
+      "C-C": 154
+    },
+    "hybridization": "sp3",
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-005",
+    "name": "金刚石",
+    "formula": "C",
+    "formulaHtml": "C (金刚石)",
+    "category": "atomic",
+    "gradeLevel": "高中必修",
+    "structureType": "金刚石型",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Fd3̄m",
+    "spaceGroupNumber": 227,
+    "lattice": {
+      "a": 356.7,
+      "b": 356.7,
+      "c": 356.7,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 8,
+    "atomSites": [
+      {
+        "element": "C",
+        "label": "C1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C5",
+        "fracCoords": [
+          0.25,
+          0.25,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C6",
+        "fracCoords": [
+          0.75,
+          0.75,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C7",
+        "fracCoords": [
+          0.75,
+          0.25,
+          0.75
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C8",
+        "fracCoords": [
+          0.25,
+          0.75,
+          0.75
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          2,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          3,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          5,
+          0
+        ],
+        "cellOffset": [
+          1,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          5,
+          2
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          4,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          4,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          6,
+          0
+        ],
+        "cellOffset": [
+          1,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          6,
+          3
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          6,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          7,
+          0
+        ],
+        "cellOffset": [
+          0,
+          1,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          7,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          7,
+          3
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      },
+      {
+        "siteIndices": [
+          5,
+          3
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 154
+      }
+    ],
+    "coordinationNumber": "4",
+    "coordinationGeometry": "正四面体",
+    "hybridization": "sp3",
+    "teachingPoints": [
+      "每个C原子与4个C原子形成共价键，sp3杂化，正四面体构型（键角109.5°）",
+      "C-C键长154pm，键能很强(347 kJ/mol)",
+      "晶胞含8个C原子（FCC位置4个 + 四面体空隙4个）",
+      "金刚石是已知最硬的天然物质（莫氏硬度10）",
+      "整个晶体是一个巨大的共价键网络，不存在单个分子",
+      "金刚石结构=两套FCC子晶格沿体对角线平移1/4"
+    ],
+    "bondLengths": {
+      "C-C": 154
+    },
+    "codId": 9008564,
+    "dataSource": "COD #9008564 — Wyckoff, Crystal Structures 1, 7-83 (1963)"
+  }
+}

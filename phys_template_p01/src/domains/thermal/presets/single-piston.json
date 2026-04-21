@@ -1,0 +1,135 @@
+{
+  "id": "P07-THM-031-single-piston",
+  "version": "1.0",
+  "name": "单活塞气缸",
+  "description": "竖直气缸中活塞封住气体。p = p₀ + Mg/S。调节温度观察活塞移动和气柱体积变化。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 500 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "cylinder",
+        "width": 0.5,
+        "height": 2.5,
+        "openEnd": "top",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气缸"
+    },
+    {
+      "ref": "gas-1",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 150325,
+        "volume": 1e-4,
+        "temperature": 300,
+        "length": 0.5,
+        "crossSection": 2e-4,
+        "chartType": "V-T",
+        "chartData": [],
+        "initialPressure": 150325,
+        "initialVolume": 1e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-1",
+        "positionOffset": -0.6
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气柱"
+    },
+    {
+      "ref": "piston-1",
+      "type": "piston",
+      "properties": {
+        "mass": 1.0,
+        "crossSection": 2e-4,
+        "orientation": "vertical",
+        "positionOffset": 0.5,
+        "width": 0.5,
+        "thickness": 0.08,
+        "pistonId": "piston-1"
+      },
+      "transform": { "position": { "x": 0, "y": -0.35 }, "rotation": 0 },
+      "label": "活塞"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-1",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "piston-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 600,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-1",
+          "targetProperty": "temperature"
+        }
+      ]
+    },
+    {
+      "key": "piston-params",
+      "label": "活塞",
+      "params": [
+        {
+          "key": "pistonMass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 10,
+          "step": 0.1,
+          "default": 1.0,
+          "unit": "kg",
+          "targetEntityId": "piston-1",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "crossSection",
+          "label": "截面积",
+          "type": "slider",
+          "min": 1e-4,
+          "max": 1e-3,
+          "step": 1e-5,
+          "default": 2e-4,
+          "unit": "m²",
+          "targetEntityId": "piston-1",
+          "targetProperty": "crossSection"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300,
+    "pistonMass": 1.0,
+    "crossSection": 2e-4
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "single-piston" }
+}

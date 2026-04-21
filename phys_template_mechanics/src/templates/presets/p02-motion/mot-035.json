@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "id": "MOT-035",
+    "name": "斜面上平抛",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过斜面上平抛模板，观察物体从斜面高处做水平抛出后重新落回斜面的过程，并对比 vx、vy 随时间的变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加长斜面 slope-main 并吸附到 ground。",
+      "3. 在斜面高端附近放置质点化小球 ball-main。",
+      "4. 给小球设置水平方向初速度，观察其落回斜面。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-035.json",
+  "commandProgram": {
+    "templateId": "MOT-035",
+    "sceneName": "MOT-035 斜面上平抛",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "label": "长斜面",
+        "patch": {
+          "position": {
+            "x": 0.4,
+            "y": 0.2
+          },
+          "baseLength": 18,
+          "slopeHeight": 7.2,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 12
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "label": "平抛小球",
+        "patch": {
+          "position": {
+            "x": -8.2,
+            "y": 7.55
+          },
+          "radius": 0.2,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 7.2,
+            "y": 0
+          }
+        }
+      }
+    ]
+  }
+}

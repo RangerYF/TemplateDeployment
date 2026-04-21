@@ -1,0 +1,19 @@
+HETATM    1 Zn           1      -0.689  -0.162   0.097
+HETATM    2  O           2      -0.732   1.861   0.097
+HETATM    3  O           3       1.191  -0.989   0.097
+HETATM    4  O           4      -1.686  -0.935   1.735
+HETATM    5  H           5      -1.674   1.974   0.097
+HETATM    6  H           6      -1.554  -1.856   1.551
+HETATM    7  H           7       0.939  -1.903   0.097
+HETATM    8  O           8      -1.686  -0.935  -1.542
+HETATM    9  H           9      -1.554  -1.856  -1.358
+CONECT    1    2    3    4    8
+CONECT    2    1    5
+CONECT    3    1    7
+CONECT    4    1    6
+CONECT    5    2
+CONECT    6    4
+CONECT    7    3
+CONECT    8    1    9
+CONECT    9    8
+END

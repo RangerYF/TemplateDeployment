@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-018",
+  "folder": "CRY-018_i2",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "I2",
+    "spaceGroupNumber": 64,
+    "structureType": "分子晶体(正交)"
+  },
+  "materialId": "mp-1525634",
+  "downloadedAt": "2026-04-02T07:25:25.474091+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 6,
+  "checkedAt": "2026-04-02T07:25:25.137617+00:00",
+  "formulaPretty": "I",
+  "spaceGroupNumber": 64,
+  "spaceGroupSymbol": "Cmce",
+  "energyAboveHull": 0.0,
+  "isStable": true,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-1525634"
+}

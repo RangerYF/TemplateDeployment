@@ -1,0 +1,271 @@
+{
+  "id": "MOL-046",
+  "name_cn": "正丁烷",
+  "name_en": "Butane",
+  "formula": "C₄H₁₀",
+  "category": "alkane",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 2.4,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.2,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 3.5999999999999996,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 2.4,
+      "y": 0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": 2.4,
+      "y": -0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 1.2,
+      "y": 0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 1.2,
+      "y": -0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": 4.56,
+      "y": 0,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": 3.5999999999999996,
+      "y": 0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 10,
+      "x": 3.5999999999999996,
+      "y": -0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 11,
+      "x": -0.96,
+      "y": -1.175660927181459e-16,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 12,
+      "x": 5.878304635907295e-17,
+      "y": 0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 13,
+      "x": 5.878304635907295e-17,
+      "y": -0.96,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 10,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 11,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 12,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 13,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

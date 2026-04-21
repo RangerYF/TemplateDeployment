@@ -1,0 +1,149 @@
+[
+  {
+    "id": "CRY-001",
+    "folder": "CRY-001_nacl",
+    "formula": "NaCl",
+    "name": "氯化钠 (岩盐型)",
+    "spaceGroupNumber": 225
+  },
+  {
+    "id": "CRY-002",
+    "folder": "CRY-002_cscl",
+    "formula": "CsCl",
+    "name": "氯化铯",
+    "spaceGroupNumber": 221
+  },
+  {
+    "id": "CRY-003",
+    "folder": "CRY-003_caf2",
+    "formula": "CaF2",
+    "name": "氟化钙 (萤石)",
+    "spaceGroupNumber": 225
+  },
+  {
+    "id": "CRY-004",
+    "folder": "CRY-004_tio2",
+    "formula": "TiO2",
+    "name": "二氧化钛 (金红石)",
+    "spaceGroupNumber": 136
+  },
+  {
+    "id": "CRY-005",
+    "folder": "CRY-005_c",
+    "formula": "C",
+    "name": "金刚石",
+    "spaceGroupNumber": 227
+  },
+  {
+    "id": "CRY-006",
+    "folder": "CRY-006_sio2",
+    "formula": "SiO2",
+    "name": "二氧化硅 (α-石英)",
+    "spaceGroupNumber": 152
+  },
+  {
+    "id": "CRY-007",
+    "folder": "CRY-007_sic",
+    "formula": "SiC",
+    "name": "碳化硅",
+    "spaceGroupNumber": 216
+  },
+  {
+    "id": "CRY-008",
+    "folder": "CRY-008_cu",
+    "formula": "Cu",
+    "name": "铜",
+    "spaceGroupNumber": 225
+  },
+  {
+    "id": "CRY-009",
+    "folder": "CRY-009_fe",
+    "formula": "Fe",
+    "name": "α-铁",
+    "spaceGroupNumber": 229
+  },
+  {
+    "id": "CRY-010",
+    "folder": "CRY-010_mg",
+    "formula": "Mg",
+    "name": "镁",
+    "spaceGroupNumber": 194
+  },
+  {
+    "id": "CRY-011",
+    "folder": "CRY-011_h2o",
+    "formula": "H2O",
+    "name": "冰 (Ih)",
+    "spaceGroupNumber": 194
+  },
+  {
+    "id": "CRY-012",
+    "folder": "CRY-012_co2",
+    "formula": "CO2",
+    "name": "干冰",
+    "spaceGroupNumber": 205
+  },
+  {
+    "id": "CRY-013",
+    "folder": "CRY-013_c",
+    "formula": "C",
+    "name": "石墨",
+    "spaceGroupNumber": 194
+  },
+  {
+    "id": "CRY-014",
+    "folder": "CRY-014_cdcl2",
+    "formula": "CdCl2",
+    "name": "氯化镉",
+    "spaceGroupNumber": 166
+  },
+  {
+    "id": "CRY-015",
+    "folder": "CRY-015_zns",
+    "formula": "ZnS",
+    "name": "硫化锌 (闪锌矿)",
+    "spaceGroupNumber": 216
+  },
+  {
+    "id": "CRY-016",
+    "folder": "CRY-016_zns",
+    "formula": "ZnS",
+    "name": "硫化锌 (纤锌矿)",
+    "spaceGroupNumber": 186
+  },
+  {
+    "id": "CRY-017",
+    "folder": "CRY-017_na",
+    "formula": "Na",
+    "name": "钠",
+    "spaceGroupNumber": 229
+  },
+  {
+    "id": "CRY-018",
+    "folder": "CRY-018_i2",
+    "formula": "I2",
+    "name": "碘",
+    "spaceGroupNumber": 64
+  },
+  {
+    "id": "CRY-019",
+    "folder": "CRY-019_gan",
+    "formula": "GaN",
+    "name": "氮化镓",
+    "spaceGroupNumber": 186
+  },
+  {
+    "id": "CRY-020",
+    "folder": "CRY-020_cuzn",
+    "formula": "CuZn",
+    "name": "β-黄铜",
+    "spaceGroupNumber": 221
+  },
+  {
+    "id": "CRY-021",
+    "folder": "CRY-021_yba2cu3o7",
+    "formula": "YBa2Cu3O7",
+    "name": "钇钡铜氧 (YBCO)",
+    "spaceGroupNumber": 47
+  }
+]

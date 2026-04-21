@@ -1,0 +1,61 @@
+{
+  "id": "MOL-015",
+  "name_cn": "二氧化氮",
+  "name_en": "Nitrogen dioxide",
+  "formula": "NO₂",
+  "category": "triatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.1046058241429284,
+      "y": -0.4688773541871284,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -1.1046058241429284,
+      "y": -0.4688773541871285,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "type": "single",
+      "length": 120
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "type": "single",
+      "length": 120
+    }
+  ]
+}

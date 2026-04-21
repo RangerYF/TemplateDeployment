@@ -1,0 +1,95 @@
+{
+  "id": "P07-THM-011-isothermal-process",
+  "version": "1.0",
+  "name": "等温过程",
+  "description": "理想气体等温变化：pV = 常量。调节体积观察压强变化，p-V图显示等温线（双曲线）。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 450 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "cylinder",
+        "width": 0.5,
+        "height": 2.5,
+        "openEnd": "top",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气缸"
+    },
+    {
+      "ref": "gas-1",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 101325,
+        "volume": 2e-4,
+        "temperature": 300,
+        "length": 1.0,
+        "crossSection": 2e-4,
+        "chartType": "p-V",
+        "chartData": [],
+        "initialPressure": 101325,
+        "initialVolume": 2e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-1",
+        "positionOffset": -0.5
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气柱"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "volume",
+          "label": "体积",
+          "type": "slider",
+          "min": 0.5e-4,
+          "max": 5e-4,
+          "step": 0.1e-4,
+          "default": 2e-4,
+          "unit": "m³",
+          "targetEntityId": "gas-1",
+          "targetProperty": "volume"
+        },
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 600,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-1",
+          "targetProperty": "temperature"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "volume": 2e-4,
+    "temperature": 300
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "isothermal" }
+}

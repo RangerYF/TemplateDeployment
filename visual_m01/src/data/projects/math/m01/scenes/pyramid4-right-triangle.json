@@ -1,0 +1,436 @@
+{
+  "entities": {
+    "1": {
+      "id": "1",
+      "type": "geometry",
+      "properties": {
+        "geometryType": "pyramid",
+        "params": {
+          "sides": 4,
+          "sideLength": 2,
+          "height": 2
+        }
+      },
+      "visible": true
+    },
+    "2": {
+      "id": "2",
+      "type": "point",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "constraint": {
+          "type": "vertex",
+          "vertexIndex": 0
+        },
+        "label": "A"
+      },
+      "visible": true
+    },
+    "3": {
+      "id": "3",
+      "type": "point",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "constraint": {
+          "type": "vertex",
+          "vertexIndex": 1
+        },
+        "label": "B"
+      },
+      "visible": true
+    },
+    "4": {
+      "id": "4",
+      "type": "point",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "constraint": {
+          "type": "vertex",
+          "vertexIndex": 2
+        },
+        "label": "C"
+      },
+      "visible": true
+    },
+    "5": {
+      "id": "5",
+      "type": "point",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "constraint": {
+          "type": "vertex",
+          "vertexIndex": 3
+        },
+        "label": "D"
+      },
+      "visible": true
+    },
+    "6": {
+      "id": "6",
+      "type": "point",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "constraint": {
+          "type": "vertex",
+          "vertexIndex": 4
+        },
+        "label": "P"
+      },
+      "visible": true
+    },
+    "7": {
+      "id": "7",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "2",
+        "endPointId": "3",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "8": {
+      "id": "8",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "3",
+        "endPointId": "4",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "9": {
+      "id": "9",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "4",
+        "endPointId": "5",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "10": {
+      "id": "10",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "5",
+        "endPointId": "2",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "11": {
+      "id": "11",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "2",
+        "endPointId": "6",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "12": {
+      "id": "12",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "3",
+        "endPointId": "6",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "13": {
+      "id": "13",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "4",
+        "endPointId": "6",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "14": {
+      "id": "14",
+      "type": "segment",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "startPointId": "5",
+        "endPointId": "6",
+        "style": {
+          "color": "#000000",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "15": {
+      "id": "15",
+      "type": "face",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "pointIds": [
+          "5",
+          "4",
+          "3",
+          "2"
+        ],
+        "source": {
+          "type": "geometry",
+          "faceIndex": 0
+        }
+      },
+      "visible": true
+    },
+    "16": {
+      "id": "16",
+      "type": "face",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "pointIds": [
+          "2",
+          "3",
+          "6"
+        ],
+        "source": {
+          "type": "geometry",
+          "faceIndex": 1
+        }
+      },
+      "visible": true
+    },
+    "17": {
+      "id": "17",
+      "type": "face",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "pointIds": [
+          "3",
+          "4",
+          "6"
+        ],
+        "source": {
+          "type": "geometry",
+          "faceIndex": 2
+        }
+      },
+      "visible": true
+    },
+    "18": {
+      "id": "18",
+      "type": "face",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "pointIds": [
+          "4",
+          "5",
+          "6"
+        ],
+        "source": {
+          "type": "geometry",
+          "faceIndex": 3
+        }
+      },
+      "visible": true
+    },
+    "19": {
+      "id": "19",
+      "type": "face",
+      "properties": {
+        "builtIn": true,
+        "geometryId": "1",
+        "pointIds": [
+          "5",
+          "2",
+          "6"
+        ],
+        "source": {
+          "type": "geometry",
+          "faceIndex": 4
+        }
+      },
+      "visible": true
+    },
+    "20": {
+      "id": "20",
+      "type": "segment",
+      "properties": {
+        "builtIn": false,
+        "geometryId": "1",
+        "startPointId": "6",
+        "endPointId": "3",
+        "style": {
+          "color": "#e74c3c",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "21": {
+      "id": "21",
+      "type": "segment",
+      "properties": {
+        "builtIn": false,
+        "geometryId": "1",
+        "startPointId": "6",
+        "endPointId": "5",
+        "style": {
+          "color": "#e74c3c",
+          "dashed": false
+        }
+      },
+      "visible": true
+    },
+    "22": {
+      "id": "22",
+      "type": "angleMeasurement",
+      "properties": {
+        "geometryId": "1",
+        "kind": "lineFace",
+        "entityIds": [
+          "11",
+          "15"
+        ],
+        "angleRadians": 0.9553166181245094,
+        "angleLatex": "\\arctan\\sqrt{2}",
+        "angleDegrees": 54.73561031724535
+      },
+      "visible": true
+    },
+    "23": {
+      "id": "23",
+      "type": "angleMeasurement",
+      "properties": {
+        "geometryId": "1",
+        "kind": "lineLine",
+        "entityIds": [
+          "11",
+          "8"
+        ],
+        "angleRadians": 1.1502619915109316,
+        "angleLatex": "65.91°",
+        "angleDegrees": 65.90515744788931
+      },
+      "visible": true
+    },
+    "24": {
+      "id": "24",
+      "type": "angleMeasurement",
+      "properties": {
+        "geometryId": "1",
+        "kind": "lineLine",
+        "entityIds": [
+          "7",
+          "8"
+        ],
+        "angleRadians": 1.5707963267948966,
+        "angleLatex": "90°",
+        "angleDegrees": 90
+      },
+      "visible": true
+    },
+    "25": {
+      "id": "25",
+      "type": "angleMeasurement",
+      "properties": {
+        "geometryId": "1",
+        "kind": "lineLine",
+        "entityIds": [
+          "8",
+          "12"
+        ],
+        "angleRadians": 1.1502619915109316,
+        "angleLatex": "65.91°",
+        "angleDegrees": 65.90515744788931
+      },
+      "visible": true
+    },
+    "26": {
+      "id": "26",
+      "type": "angleMeasurement",
+      "properties": {
+        "geometryId": "1",
+        "kind": "lineLine",
+        "entityIds": [
+          "9",
+          "14"
+        ],
+        "angleRadians": 1.1502619915109316,
+        "angleLatex": "65.91°",
+        "angleDegrees": 65.90515744788931
+      },
+      "visible": true
+    },
+    "27": {
+      "id": "27",
+      "type": "coordinateSystem",
+      "properties": {
+        "originPointId": "2",
+        "geometryId": "1",
+        "axes": [
+          [
+            0.7071067811865476,
+            0,
+            0.7071067811865476
+          ],
+          [
+            -0.7071067811865476,
+            0,
+            0.7071067811865475
+          ],
+          [
+            0,
+            -1,
+            0
+          ]
+        ]
+      },
+      "visible": true
+    }
+  },
+  "nextId": 28,
+  "activeGeometryId": "1"
+}

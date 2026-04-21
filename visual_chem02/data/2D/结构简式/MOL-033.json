@@ -1,0 +1,549 @@
+{
+  "id": "MOL-033",
+  "name_cn": "五氟化碘",
+  "name_en": "Iodine pentafluoride",
+  "formula": "IF₅",
+  "category": "polyatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 8.467568766034415e-17,
+      "y": 1.3828589225774919,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.081162641482903,
+      "y": 0.8621984356364221,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 0.6000000000000001,
+      "y": -1.245912837943402,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 1.3481877622304803,
+      "y": -0.30771505898176615,
+      "element": "C",
+      "label": "CH₂",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": -1.081162641482903,
+      "y": 0.862198435636422,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -0.5999999999999999,
+      "y": -1.245912837943402,
+      "element": "C",
+      "label": "CH₂",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": -1.3481877622304803,
+      "y": -0.3077150589817663,
+      "element": "C",
+      "label": "CH₂",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 1.5815449560918536e-16,
+      "y": 2.5828589225774916,
+      "element": "C",
+      "label": "CH₃",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": 1.5815449560918536e-16,
+      "y": 2.5828589225774916,
+      "element": "C",
+      "label": "CH₃",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": -2.0193604204445386,
+      "y": 1.6103861978669023,
+      "element": "C",
+      "label": "CH₃",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 10,
+      "x": 1.912547029115964,
+      "y": 1.342198435636422,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 11,
+      "x": 1.08,
+      "y": -2.077297225576463,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 12,
+      "x": 2.3081877622304803,
+      "y": -0.30771505898176615,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 13,
+      "x": 0.38818776223048035,
+      "y": -0.30771505898176604,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 14,
+      "x": -0.6011626414829029,
+      "y": 1.693582823269483,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 15,
+      "x": -1.0800000000000003,
+      "y": -2.077297225576463,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 16,
+      "x": -0.11999999999999977,
+      "y": -0.4145284503103409,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 17,
+      "x": -2.3081877622304803,
+      "y": -0.3077150589817662,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 18,
+      "x": -1.8281877622304807,
+      "y": -1.1390994466148272,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 19,
+      "x": -0.8313843876330608,
+      "y": 3.062858922577492,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 20,
+      "x": 0.8313843876330613,
+      "y": 3.062858922577491,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 21,
+      "x": 3.774721240228255e-18,
+      "y": 1.6228589225774916,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 22,
+      "x": -0.8313843876330608,
+      "y": 3.062858922577492,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 23,
+      "x": 0.8313843876330613,
+      "y": 3.062858922577491,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 24,
+      "x": 3.774721240228255e-18,
+      "y": 1.6228589225774916,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 25,
+      "x": -2.9129992191429745,
+      "y": 1.2596588144751633,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 26,
+      "x": -1.8762798449154108,
+      "y": 2.5596637910430258,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 27,
+      "x": -1.2688021972752301,
+      "y": 1.011835988082518,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 10,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 11,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 12,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 13,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 14,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 15,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 16,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 6,
+      "to": 17,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 6,
+      "to": 18,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 7,
+      "to": 19,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 7,
+      "to": 20,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 7,
+      "to": 21,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 8,
+      "to": 22,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 8,
+      "to": 23,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 8,
+      "to": 24,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 9,
+      "to": 25,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 9,
+      "to": 26,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 9,
+      "to": 27,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "id": "FM-051",
+    "name": "弹簧模型",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“弹簧模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 block-main（block）。",
+      "4. 添加约束 spring-main（spring），连接 anchor-top 与 block-main。",
+      "5. 给物体 block-main 添加外力 disturb-force。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-051.json",
+  "commandProgram": {
+    "templateId": "FM-051",
+    "sceneName": "FM-051 弹簧模型",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": -1.2,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -1.2,
+            "y": 7.9
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 0.9,
+          "friction": 0.1,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "block-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0.3
+        },
+        "patch": {
+          "springLength": 1,
+          "stiffness": 2.4,
+          "damping": 0.1
+        }
+      },
+      {
+        "kind": "addForce",
+        "ref": "disturb-force",
+        "targetBodyRef": "block-main",
+        "patch": {
+          "magnitude": 4,
+          "direction": 0
+        }
+      }
+    ]
+  },
+  "sceneSource": "manual",
+  "updatedAt": "2026-04-02T06:38:32.470Z"
+}

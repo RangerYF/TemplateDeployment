@@ -1,0 +1,61 @@
+{
+  "id": "MOL-014",
+  "name_cn": "二氧化硫",
+  "name_en": "Sulfur dioxide",
+  "formula": "SO₂",
+  "category": "triatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "S",
+      "label": "S",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.033954992529831,
+      "y": -0.6090460355528449,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -1.033954992529831,
+      "y": -0.6090460355528449,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "type": "single",
+      "length": 143
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "type": "single",
+      "length": 143
+    }
+  ]
+}

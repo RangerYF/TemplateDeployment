@@ -1,0 +1,659 @@
+{
+  "id": "CRY-001",
+  "name_cn": "氯化钠 (岩盐型)",
+  "formula": "NaCl",
+  "level": "高中必修",
+  "crystal_system": "立方",
+  "space_group": "Fm3̄m (No. 225)",
+  "lattice_params": {
+    "a": 564.1,
+    "b": 564.1,
+    "c": 564.1,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Na1",
+      "element": "Na",
+      "label": "Na1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": "+1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Na2",
+      "element": "Na",
+      "label": "Na2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "0",
+      "charge": "+1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Na3",
+      "element": "Na",
+      "label": "Na3",
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "1/2",
+      "charge": "+1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Na4",
+      "element": "Na",
+      "label": "Na4",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": "+1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cl1",
+      "element": "Cl",
+      "label": "Cl1",
+      "x": 0.5,
+      "y": 0,
+      "z": 0,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cl2",
+      "element": "Cl",
+      "label": "Cl2",
+      "x": 0,
+      "y": 0.5,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cl3",
+      "element": "Cl",
+      "label": "Cl3",
+      "x": 0,
+      "y": 0,
+      "z": 0.5,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "1/2",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cl4",
+      "element": "Cl",
+      "label": "Cl4",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "离子键",
+  "coord_number": "6:6",
+  "z": 4,
+  "teaching_points": [
+    "每个Na+周围有6个Cl-，形成正八面体配位（配位数6:6）",
+    "晶胞中含有4个NaCl（Na:4个在棱中点和体心位置，Cl:4个在顶点和面心位置）",
+    "NaCl晶体中不存在\"NaCl分子\"，只有离子",
+    "晶格能较高(786 kJ/mol)，熔点801°C",
+    "等径球最密堆积的八面体空隙全部被填充"
+  ],
+  "key_parameters": [
+    {
+      "id": "structure_type",
+      "label": "结构类型",
+      "value": "岩盐型"
+    }
+  ],
+  "render": {
+    "category": "ionic",
+    "name": "氯化钠 (岩盐型)",
+    "formula_html": "NaCl",
+    "grade_level": "高中必修",
+    "structure_type": "岩盐型",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Fm3̄m",
+    "space_group_number": 225,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "ionic",
+    "neighbor_cutoff_angstrom": null,
+    "bond_types": [
+      "ionic"
+    ],
+    "bonds": [
+      {
+        "id": "BOND-001",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-002",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-003",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-004",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-005",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-006",
+        "from_atom_id": "Na1",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-007",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-008",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-009",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-010",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-011",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-012",
+        "from_atom_id": "Na2",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-013",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-014",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-015",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-016",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl1",
+        "cell_offset": [
+          0,
+          0,
+          1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-017",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-018",
+        "from_atom_id": "Na3",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-019",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-020",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-021",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-022",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl2",
+        "cell_offset": [
+          0,
+          0,
+          1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-023",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl3",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      },
+      {
+        "id": "BOND-024",
+        "from_atom_id": "Na4",
+        "to_atom_id": "Cl4",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 282
+      }
+    ],
+    "polyhedra": [
+      {
+        "id": "POLY-001",
+        "center_atom_id": "Na1",
+        "label": "NaO6",
+        "polyhedron_type": "octahedron",
+        "neighbor_cutoff_angstrom": 3
+      }
+    ],
+    "coordination_geometry": "正八面体",
+    "bond_lengths_pm": {
+      "Na-Cl": 282
+    },
+    "hybridization": null,
+    "packing_type": null,
+    "packing_efficiency": null,
+    "data_source": "COD #9008678 — Wyckoff, Crystal Structures 1, 85-237 (1963)",
+    "mp_material_id": "mp-22862",
+    "representation_note": null,
+    "source_summary": "C-05 数据文档 + COD #9008678 — Wyckoff, Crystal Structures 1, 85-237 (1963) + Materials Project mp-22862"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "c05",
+        "label": "C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+        "type": "document",
+        "path": "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md"
+      },
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-001_nacl/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-001_nacl/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008678 — Wyckoff, Crystal Structures 1, 85-237 (1963)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008678.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-22862",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-22862"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "c05",
+        "origin"
+      ],
+      "name_cn": [
+        "c05",
+        "origin"
+      ],
+      "formula": [
+        "c05",
+        "origin"
+      ],
+      "level": [
+        "c05",
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "c05",
+        "origin"
+      ],
+      "space_group": [
+        "c05",
+        "origin"
+      ],
+      "lattice_params": [
+        "c05",
+        "origin"
+      ],
+      "atoms": [
+        "c05",
+        "origin"
+      ],
+      "bond_type": [
+        "chem",
+        "c05",
+        "origin"
+      ],
+      "coord_number": [
+        "c05",
+        "origin"
+      ],
+      "z": [
+        "c05",
+        "origin"
+      ],
+      "teaching_points": [
+        "c05",
+        "origin"
+      ],
+      "key_parameters": [
+        "c05",
+        "origin"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin",
+        "c05"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin",
+        "c05"
+      ],
+      "render.hybridization": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_type": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_efficiency": [
+        "origin",
+        "c05"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

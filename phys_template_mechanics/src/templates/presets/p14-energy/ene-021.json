@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "id": "ENE-021",
+    "name": "光滑斜面",
+    "module": "P-14",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过光滑斜面模板，观察重力势能向动能转化时机械能近似守恒。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加斜面 slope-main 并吸附到 ground。",
+      "3. 添加滑块 block-main 并吸附到 slope-main。",
+      "4. 设置斜面与滑块摩擦近似为 0，运行仿真观察能量转化。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-021.json",
+  "commandProgram": {
+    "templateId": "ENE-021",
+    "sceneName": "ENE-021 光滑斜面",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "patch": {
+          "position": {
+            "x": 0.8,
+            "y": 0.2
+          },
+          "baseLength": 5,
+          "slopeHeight": 2.6,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -0.2,
+            "y": 2.4
+          },
+          "mass": 2,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "slope-main"
+        ],
+        "threshold": 1.8
+      }
+    ]
+  }
+}

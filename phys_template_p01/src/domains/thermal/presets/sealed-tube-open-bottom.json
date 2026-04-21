@@ -1,0 +1,120 @@
+{
+  "id": "P07-THM-022-sealed-tube-open-bottom",
+  "version": "1.0",
+  "name": "密封管（开口朝下）",
+  "description": "竖直管顶端封闭、下端开口，水银柱封住气体。p = p₀ − ρgL。调节温度观察气柱长度变化。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 500 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "sealed-tube",
+        "width": 0.4,
+        "height": 2.0,
+        "openEnd": "bottom",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "玻璃管"
+    },
+    {
+      "ref": "gas-1",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 87925,
+        "volume": 1e-4,
+        "temperature": 300,
+        "length": 0.5,
+        "crossSection": 2e-4,
+        "chartType": "p-V",
+        "chartData": [],
+        "initialPressure": 87925,
+        "initialVolume": 1e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-1",
+        "positionOffset": 0.55
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气柱"
+    },
+    {
+      "ref": "liquid-1",
+      "type": "liquid-column",
+      "properties": {
+        "length": 0.1,
+        "density": 13600,
+        "crossSection": 2e-4,
+        "positionOffset": 0.05,
+        "columnId": "liquid-1"
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "水银柱"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-1",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "liquid-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 500,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-1",
+          "targetProperty": "temperature"
+        }
+      ]
+    },
+    {
+      "key": "liquid-params",
+      "label": "液柱",
+      "params": [
+        {
+          "key": "liquidLength",
+          "label": "水银柱长度",
+          "type": "slider",
+          "min": 0.02,
+          "max": 0.3,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "m",
+          "targetEntityId": "liquid-1",
+          "targetProperty": "length"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300,
+    "liquidLength": 0.1
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "sealed-tube-open-bottom" }
+}

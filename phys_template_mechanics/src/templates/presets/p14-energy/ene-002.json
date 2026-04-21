@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "id": "ENE-002",
+    "name": "竖直上抛",
+    "module": "P-14",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过竖直上抛模板，观察上升与回落过程中动能和重力势能的双向转化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加小球 ball-main，并设置竖直向上初速度。",
+      "3. 运行仿真观察最高点速度趋近于 0 后回落。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-002.json",
+  "commandProgram": {
+    "templateId": "ENE-002",
+    "sceneName": "ENE-002 竖直上抛",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 2
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "initialVelocity": {
+            "x": 0,
+            "y": 11
+          }
+        }
+      }
+    ]
+  }
+}

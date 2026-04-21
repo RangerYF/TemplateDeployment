@@ -1,0 +1,825 @@
+{
+  "id": "CRY-003",
+  "name_cn": "氟化钙 (萤石)",
+  "formula": "CaF2",
+  "level": "高中选修",
+  "crystal_system": "立方",
+  "space_group": "Fm3̄m (No. 225)",
+  "lattice_params": {
+    "a": 546.2,
+    "b": 546.2,
+    "c": 546.2,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Ca1",
+      "element": "Ca",
+      "label": "Ca1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Ca2",
+      "element": "Ca",
+      "label": "Ca2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "0",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Ca3",
+      "element": "Ca",
+      "label": "Ca3",
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "1/2",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Ca4",
+      "element": "Ca",
+      "label": "Ca4",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F1",
+      "element": "F",
+      "label": "F1",
+      "x": 0.25,
+      "y": 0.25,
+      "z": 0.25,
+      "x_expr": "1/4",
+      "y_expr": "1/4",
+      "z_expr": "1/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F2",
+      "element": "F",
+      "label": "F2",
+      "x": 0.75,
+      "y": 0.75,
+      "z": 0.25,
+      "x_expr": "3/4",
+      "y_expr": "3/4",
+      "z_expr": "1/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F3",
+      "element": "F",
+      "label": "F3",
+      "x": 0.75,
+      "y": 0.25,
+      "z": 0.75,
+      "x_expr": "3/4",
+      "y_expr": "1/4",
+      "z_expr": "3/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F4",
+      "element": "F",
+      "label": "F4",
+      "x": 0.25,
+      "y": 0.75,
+      "z": 0.75,
+      "x_expr": "1/4",
+      "y_expr": "3/4",
+      "z_expr": "3/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F5",
+      "element": "F",
+      "label": "F5",
+      "x": 0.25,
+      "y": 0.75,
+      "z": 0.25,
+      "x_expr": "1/4",
+      "y_expr": "3/4",
+      "z_expr": "1/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F6",
+      "element": "F",
+      "label": "F6",
+      "x": 0.75,
+      "y": 0.25,
+      "z": 0.25,
+      "x_expr": "3/4",
+      "y_expr": "1/4",
+      "z_expr": "1/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F7",
+      "element": "F",
+      "label": "F7",
+      "x": 0.25,
+      "y": 0.25,
+      "z": 0.75,
+      "x_expr": "1/4",
+      "y_expr": "1/4",
+      "z_expr": "3/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "F8",
+      "element": "F",
+      "label": "F8",
+      "x": 0.75,
+      "y": 0.75,
+      "z": 0.75,
+      "x_expr": "3/4",
+      "y_expr": "3/4",
+      "z_expr": "3/4",
+      "charge": "-1",
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "离子键",
+  "coord_number": "Ca:8, F:4",
+  "z": 4,
+  "teaching_points": [
+    "Ca2+配位数为8（立方体配位），F-配位数为4（正四面体配位）",
+    "晶胞含4个CaF2（Ca在FCC位置4个，F填充全部8个四面体空隙）",
+    "反萤石结构：阳离子和阴离子位置互换（如Na2O）",
+    "F-形成简单立方子晶格，Ca2+占据交替的立方体空隙",
+    "萤石是重要的光学材料和冶金助熔剂"
+  ],
+  "key_parameters": [
+    {
+      "id": "structure_type",
+      "label": "结构类型",
+      "value": "萤石型"
+    }
+  ],
+  "render": {
+    "category": "ionic",
+    "name": "氟化钙 (萤石)",
+    "formula_html": "CaF<sub>2</sub>",
+    "grade_level": "高中选修",
+    "structure_type": "萤石型",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Fm3̄m",
+    "space_group_number": 225,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "ionic",
+    "neighbor_cutoff_angstrom": null,
+    "bond_types": [
+      "ionic"
+    ],
+    "bonds": [
+      {
+        "id": "BOND-001",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-002",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F2",
+        "cell_offset": [
+          -1,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-003",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F3",
+        "cell_offset": [
+          -1,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-004",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F4",
+        "cell_offset": [
+          0,
+          -1,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-005",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F5",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-006",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F6",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-007",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F7",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-008",
+        "from_atom_id": "Ca1",
+        "to_atom_id": "F8",
+        "cell_offset": [
+          -1,
+          -1,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-009",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-010",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F4",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-011",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F5",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-012",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F7",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-013",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-014",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F3",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-015",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F6",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-016",
+        "from_atom_id": "Ca2",
+        "to_atom_id": "F8",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-017",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-018",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F4",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-019",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F6",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-020",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F7",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-021",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F2",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-022",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-023",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F5",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-024",
+        "from_atom_id": "Ca3",
+        "to_atom_id": "F8",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-025",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-026",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F5",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-027",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F7",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-028",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F2",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-029",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F3",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-030",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-031",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F6",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      },
+      {
+        "id": "BOND-032",
+        "from_atom_id": "Ca4",
+        "to_atom_id": "F8",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 237
+      }
+    ],
+    "polyhedra": [
+      {
+        "id": "POLY-001",
+        "center_atom_id": "Ca1",
+        "label": "CaF8",
+        "polyhedron_type": "cube",
+        "neighbor_cutoff_angstrom": 2.5
+      }
+    ],
+    "coordination_geometry": "Ca:立方体, F:正四面体",
+    "bond_lengths_pm": {
+      "Ca-F": 236
+    },
+    "hybridization": null,
+    "packing_type": null,
+    "packing_efficiency": null,
+    "data_source": "COD #1000043 — Cheetham et al., J. Phys. C 4, 3107-3121 (1971)",
+    "mp_material_id": "mp-2741",
+    "representation_note": null,
+    "source_summary": "C-05 数据文档 + COD #1000043 — Cheetham et al., J. Phys. C 4, 3107-3121 (1971) + Materials Project mp-2741"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "c05",
+        "label": "C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+        "type": "document",
+        "path": "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md"
+      },
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-003_caf2/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-003_caf2/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #1000043 — Cheetham et al., J. Phys. C 4, 3107-3121 (1971)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/1000043.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-2741",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-2741"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      },
+      {
+        "id": "coordination_auto",
+        "label": "按最近异种原子第一配位层与目标配位数自动生成键连关系",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "c05",
+        "origin"
+      ],
+      "name_cn": [
+        "c05",
+        "origin"
+      ],
+      "formula": [
+        "c05",
+        "origin"
+      ],
+      "level": [
+        "c05",
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "c05",
+        "origin"
+      ],
+      "space_group": [
+        "c05",
+        "origin"
+      ],
+      "lattice_params": [
+        "c05",
+        "origin"
+      ],
+      "atoms": [
+        "c05",
+        "origin"
+      ],
+      "bond_type": [
+        "chem",
+        "c05",
+        "origin"
+      ],
+      "coord_number": [
+        "c05",
+        "origin"
+      ],
+      "z": [
+        "c05",
+        "origin"
+      ],
+      "teaching_points": [
+        "c05",
+        "origin"
+      ],
+      "key_parameters": [
+        "c05",
+        "origin"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin",
+        "c05"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "coordination_auto",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin",
+        "c05"
+      ],
+      "render.hybridization": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_type": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_efficiency": [
+        "origin",
+        "c05"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

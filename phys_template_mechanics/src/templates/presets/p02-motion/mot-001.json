@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "id": "MOT-001",
+    "name": "匀速直线运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“匀速直线运动”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 cart（block）。",
+      "3. 将物体 cart 吸附到 ground。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-001.json",
+  "commandProgram": {
+    "templateId": "MOT-001",
+    "sceneName": "MOT-001 匀速直线运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "cart",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -1.5,
+            "y": 0.32
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 2,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "cart",
+        "targetBodyRefs": [
+          "ground"
+        ]
+      }
+    ]
+  }
+}

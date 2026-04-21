@@ -1,0 +1,119 @@
+{
+  "id": "MOL-069",
+  "name_cn": "氯乙烯",
+  "name_en": "Vinyl chloride",
+  "formula": "CH₂=CHCl",
+  "category": "polymer_monomer",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -1.0392304845413265,
+      "y": -0.5999999999999996,
+      "element": "C",
+      "label": "C",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 1.0392304845413265,
+      "y": -0.5999999999999998,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": -1.8706148721743874,
+      "y": -0.11999999999999933,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -1.0392304845413265,
+      "y": -1.5599999999999996,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

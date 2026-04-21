@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-002",
+  "folder": "CRY-002_cscl",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "CsCl",
+    "spaceGroupNumber": 221,
+    "structureType": "氯化铯型"
+  },
+  "materialId": "mp-22865",
+  "downloadedAt": "2026-04-02T07:25:10.353479+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 2,
+  "checkedAt": "2026-04-02T07:25:10.010664+00:00",
+  "formulaPretty": "CsCl",
+  "spaceGroupNumber": 221,
+  "spaceGroupSymbol": "Pm-3m",
+  "energyAboveHull": 0.0,
+  "isStable": true,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-22865"
+}

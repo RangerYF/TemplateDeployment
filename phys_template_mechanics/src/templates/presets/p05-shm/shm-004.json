@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "id": "SHM-004",
+    "name": "耦合振动（近似）",
+    "module": "P-05",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过“耦合振动（近似）”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "待接入 commandProgram 后自动生成构造步骤。"
+    ]
+  }
+}

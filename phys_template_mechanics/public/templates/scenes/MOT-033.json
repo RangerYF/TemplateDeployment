@@ -1,0 +1,103 @@
+{
+  "id": "template-scene-mot-033",
+  "name": "MOT-033 竖直圆周运动",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-anchor-top",
+      "type": "anchor",
+      "label": "固定锚点 #1",
+      "position": {
+        "x": 0,
+        "y": 9.2
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.3,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorRadius": 0.15,
+      "mountSide": "top"
+    },
+    {
+      "id": "body-ball-main",
+      "type": "ball",
+      "label": "球体 #1",
+      "position": {
+        "x": 0,
+        "y": 7.4
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 1,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 10.435516278556,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    }
+  ],
+  "joints": [
+    {
+      "id": "joint-rope-main",
+      "type": "rope",
+      "label": "绳",
+      "bodyIdA": "body-anchor-top",
+      "bodyIdB": "body-ball-main",
+      "anchorA": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorB": {
+        "x": 0,
+        "y": 0
+      },
+      "maxLength": 1.799999999999999
+    }
+  ],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

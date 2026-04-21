@@ -1,0 +1,64 @@
+{
+  "id": "MOL-034",
+  "name_cn": "二氟化氙",
+  "name_en": "Xenon difluoride",
+  "formula": "XeF₂",
+  "category": "polyatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "Xe",
+      "label": "Xe",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": -1.4,
+      "y": 0,
+      "element": "F",
+      "label": "F",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.4,
+      "y": 0,
+      "element": "F",
+      "label": "F",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "type": "single",
+      "length": 200
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "type": "single",
+      "length": 200
+    }
+  ]
+}

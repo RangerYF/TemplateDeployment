@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 互动课件生成系统 — 产品原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#00C06B; --green-d:#00A85A; --green-l:#E8F8F0; --green-bg:#F0FAF5;
+  --ink:#1A1A2E; --ink2:#6B7280; --ink3:#9CA3AF;
+  --border:#E5E7EB; --divider:#F3F4F6;
+  --white:#fff; --gray:#F9FAFB;
+  --blue:#1890FF; --orange:#FF8C00; --red:#FF4D4F; --purple:#722ED1;
+  --game-dark:#0D1B2A; --gold:#FFD700;
+  --sh-sm:0 2px 12px rgba(0,0,0,.06);
+  --sh-md:0 4px 20px rgba(0,0,0,.10);
+  --sh-lg:0 8px 32px rgba(0,0,0,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--gray);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* ─── TOPBAR ─── */
+.topbar{height:64px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;gap:0;position:sticky;top:0;z-index:200;box-shadow:var(--sh-sm)}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);display:flex;align-items:center;gap:6px;margin-right:40px}
+.logo-dot{width:8px;height:8px;background:var(--green);border-radius:50%}
+.nav-tabs{display:flex;gap:2px;flex:1}
+.nav-tab{padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink2);border:none;background:none;transition:all .18s;font-family:inherit}
+.nav-tab:hover{color:var(--ink);background:var(--gray)}
+.nav-tab.active{color:var(--green);background:var(--green-l)}
+.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00E08A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0}
+
+/* ─── PAGE SYSTEM ─── */
+.page{display:none;animation:fadeSlide .28s ease}
+.page.active{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ─── BTN ─── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .18s;font-family:inherit;white-space:nowrap}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(0,192,107,.3)}
+.btn-primary:hover{background:var(--green-d);transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,192,107,.4)}
+.btn-secondary{background:var(--white);color:var(--ink);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--ink2);background:var(--gray)}
+.btn-ghost{background:transparent;color:var(--green)}
+.btn-ghost:hover{background:var(--green-l)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{background:#2d2d45}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-lg{padding:13px 32px;font-size:16px;border-radius:10px}
+
+/* ── INPUT HISTORY ROW ── */
+.input-history-row{display:flex;gap:6px;padding:8px 16px 12px;flex-wrap:wrap}
+.hist-dropdown-wrap{position:relative}
+.hist-dropdown-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .16s;white-space:nowrap}
+.hist-dropdown-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hist-dropdown-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-l)}
+.hist-arrow{font-size:9px;transition:transform .18s;margin-left:1px}
+.hist-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:300;min-width:180px;padding:6px;animation:fadeSlide .15s ease}
+.hist-dropdown-menu.open{display:block}
+.hist-dropdown-item{padding:8px 12px;font-size:13px;color:var(--ink);cursor:pointer;transition:background .13s;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.hist-dropdown-item:hover{background:var(--green-l);color:var(--green-d)}
+
+/* ── FILE UPLOAD TAG ── */
+.file-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--green-l);border:1px solid rgba(0,192,107,.3);border-radius:20px;font-size:12px;color:var(--green-d);font-weight:600;margin:0 16px 10px;animation:fadeSlide .2s ease}
+.file-tag-remove{cursor:pointer;width:14px;height:14px;border-radius:50%;background:var(--green-d);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:.7}
+.file-tag-remove:hover{opacity:1}
+
+/* ══════════════════════════════
+   PAGE: TEMPLATE BROWSE
+══════════════════════════════ */
+.tpl-browse-header{background:var(--white);border-bottom:1px solid var(--border);padding:28px 48px 24px}
+.tpl-browse-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.tpl-browse-sub{font-size:14px;color:var(--ink2)}
+
+/* subject grid */
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;padding:36px 48px}
+.subj-card{background:var(--white);border-radius:16px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;border:1.5px solid var(--border);transition:all .22s;box-shadow:var(--sh-sm)}
+.subj-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.subj-card.active{border-color:var(--green);background:var(--green-bg)}
+.subj-card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.subj-card-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.subj-card-name{font-size:14px;font-weight:700;color:var(--ink)}
+.subj-card-cnt{font-size:12px;color:var(--ink3)}
+
+/* template grid (after subject select) */
+.tpl-browse-content{padding:0 48px 40px}
+.tpl-browse-section{margin-bottom:36px}
+.tpl-browse-sec-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.tpl-browse-sec-title{font-size:16px;font-weight:700;color:var(--ink)}
+.tpl-back-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:all .16s;margin-bottom:24px}
+.tpl-back-btn:hover{border-color:var(--green);color:var(--green)}
+.tpl-back-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.tpl-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.tpl-card{background:var(--white);border-radius:14px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;box-shadow:var(--sh-sm)}
+.tpl-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.tpl-card:hover .tpl-card-overlay{opacity:1}
+.tpl-card-thumb{height:130px;position:relative;overflow:hidden;background:#0d1b2a}
+.tpl-card-overlay{position:absolute;inset:0;background:rgba(0,192,107,.15);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.tpl-card-overlay span{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:7px 16px;border-radius:20px}
+.tpl-card-body{padding:12px 14px 14px}
+.tpl-card-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.tpl-card-desc{font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:10px}
+.tpl-card-tags{display:flex;gap:5px;flex-wrap:wrap}
+.tpl-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+.tag-math{background:#EBF5FF;color:var(--blue)}
+.tag-phys{background:#FFF3E0;color:var(--orange)}
+.tag-chem{background:var(--green-l);color:var(--green-d)}
+.tag-bio{background:#F5F0FF;color:var(--purple)}
+.tag-battle{background:#EBF5FF;color:var(--blue)}
+.tag-adv{background:#FFF3E0;color:var(--orange)}
+.tag-puzz{background:var(--green-l);color:var(--green-d)}
+.tag-speed{background:#FFF0F0;color:var(--red)}
+
+/* ══════════════════════════════
+   PAGE 1: HOME / INPUT
+══════════════════════════════ */
+.hero{background:linear-gradient(160deg,#f0faf5 0%,#fafffe 40%,#fff 100%);padding:56px 0 44px;position:relative;overflow:hidden;width:100%}
+.hero::before{content:'';position:absolute;right:-120px;top:-120px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,192,107,.07),transparent 65%);border-radius:50%;pointer-events:none}
+.hero::after{content:'';position:absolute;left:-60px;bottom:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(0,192,107,.05),transparent 70%);border-radius:50%;pointer-events:none}
+.hero-inner{max-width:760px;margin:0 auto;padding:0 40px}
+.hero-eyebrow{font-size:12px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:20px;height:2px;background:var(--green);border-radius:1px}
+.hero-title{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;line-height:1.15;margin-bottom:12px;color:var(--ink)}
+.hero-title span{color:var(--green)}
+.hero-sub{font-size:15px;color:var(--ink2);margin-bottom:36px;line-height:1.7}
+
+/* INPUT BOX */
+.input-wrap{background:var(--white);border-radius:18px;border:1.5px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.08);transition:border-color .2s,box-shadow .2s}
+.input-wrap:focus-within{border-color:var(--green);box-shadow:0 4px 24px rgba(0,192,107,.12),0 0 0 4px rgba(0,192,107,.08)}
+.input-inner{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 10px}
+.input-icon{flex-shrink:0;margin-top:2px;color:var(--green);opacity:.8}
+#mainInput{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;color:var(--ink);resize:none;line-height:1.7;min-height:56px;max-height:160px;background:transparent}
+#mainInput::placeholder{color:var(--ink3)}
+.input-foot{display:flex;align-items:center;padding:8px 16px 14px;gap:6px;border-top:1px solid var(--divider);margin-top:4px}
+.input-aux-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink3);transition:all .18s}
+.input-aux-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-l)}
+.input-aux-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.char-count{font-size:11px;color:var(--ink3);margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* CTA ROW */
+.cta-row{display:flex;align-items:center;gap:14px;margin-top:22px}
+
+/* GENERATE BUTTON - animated */
+.btn-generate{position:relative;overflow:hidden;background:var(--green);color:#fff;border:none;border-radius:11px;padding:14px 30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:all .2s;box-shadow:0 4px 16px rgba(0,192,107,.35)}
+.btn-generate:hover{background:var(--green-d);transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,192,107,.45)}
+.btn-generate::before{content:'';position:absolute;top:-50%;left:-75%;width:50%;height:200%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:btnShimmer 2.4s infinite}
+@keyframes btnShimmer{0%{left:-75%}100%{left:130%}}
+.btn-generate .spark{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;opacity:0;animation:spark 2.4s infinite}
+.btn-generate .spark:nth-child(1){top:30%;left:15%;animation-delay:.2s}
+.btn-generate .spark:nth-child(2){top:55%;left:70%;animation-delay:.8s}
+.btn-generate .spark:nth-child(3){top:25%;left:85%;animation-delay:1.4s}
+@keyframes spark{0%,90%{opacity:0;transform:scale(0)}95%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0) translateY(-8px)}}
+
+.divider-or{display:flex;align-items:center;gap:14px;margin-top:36px;color:var(--ink3);font-size:13px}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.templates-strip{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.tpl-chip{display:flex;align-items:center;gap:7px;padding:7px 13px;background:var(--white);border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink2);transition:all .18s}
+.tpl-chip:hover{border-color:var(--green);color:var(--green);background:var(--green-l);transform:translateY(-1px)}
+.tpl-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+
+/* history section */
+.section{padding:36px 40px;max-width:1200px;margin:0 auto}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.sec-title{font-size:16px;font-weight:700}
+.hist-tabs{display:flex;gap:4px}
+.hist-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink2);border:none;background:none;transition:all .16s;font-family:inherit}
+.hist-tab.active{color:var(--green);background:var(--green-l)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.cw-card{background:var(--white);border-radius:12px;overflow:hidden;box-shadow:var(--sh-sm);cursor:pointer;transition:all .22s;border:1.5px solid transparent}
+.cw-card:hover{transform:translateY(-3px);box-shadow:var(--sh-md);border-color:var(--green)}
+.cw-thumb{height:130px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cw-thumb-math{background:linear-gradient(135deg,#0f1f3d,#1a3a6e)}
+.cw-thumb-geo{background:linear-gradient(135deg,#0d1f12,#1a3d25)}
+.cw-thumb-phy{background:linear-gradient(135deg,#1f0d00,#3d2000)}
+.cw-thumb-label{position:absolute;top:8px;right:8px}
+.cw-body{padding:12px 14px 14px}
+.cw-name{font-size:14px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-meta{font-size:12px;color:var(--ink2)}
+.cw-actions{display:flex;gap:6px;margin-top:10px}
+.cw-action{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--gray);color:var(--ink2);transition:all .16s;font-family:inherit}
+.cw-action:hover{border-color:var(--green);color:var(--green);background:var(--green-l)}
+
+/* ══════════════════════════════
+   PAGE 2: GENERATING
+══════════════════════════════ */
+.gen-layout{display:grid;grid-template-columns:1fr 320px;gap:0;height:calc(100vh - 64px)}
+.gen-preview{background:var(--ink);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+.gen-preview-inner{width:100%;max-width:640px;aspect-ratio:16/10;background:rgba(255,255,255,.04);border-radius:16px;border:1px solid rgba(255,255,255,.08);overflow:hidden;position:relative}
+.shimmer-wrap{position:absolute;inset:0;display:flex;flex-direction:column;gap:16px;padding:24px}
+.shimmer-line{border-radius:6px;background:linear-gradient(90deg,#1e2d3d 25%,#2a3f56 50%,#1e2d3d 75%);background-size:400% 100%;animation:shimmer 1.5s infinite linear}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.sh-l1{height:36px;width:55%}
+.sh-l2{height:20px;width:80%}
+.sh-l3{height:20px;width:65%}
+.sh-l4{height:160px;width:100%;border-radius:12px;margin-top:8px}
+.sh-l5{height:20px;width:45%}
+.sh-l6{height:20px;width:70%}
+
+.gen-live{position:absolute;inset:0;display:none;flex-direction:column;padding:24px}
+.gen-live.show{display:flex}
+.gen-live-axes{flex:1;position:relative}
+
+.gen-preview-tools{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;opacity:0;transition:opacity .2s}
+.gen-preview:hover .gen-preview-tools{opacity:1}
+
+.gen-panel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.gen-panel-head{padding:24px 24px 16px;border-bottom:1px solid var(--divider)}
+.gen-panel-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.gen-panel-sub{font-size:13px;color:var(--ink2)}
+.gen-panel-body{padding:20px 24px;flex:1;display:flex;flex-direction:column;gap:20px}
+
+/* steps */
+.steps{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:36px;width:2px;height:calc(100% - 12px);background:var(--divider)}
+.step-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;border:2px solid var(--border);background:var(--gray);color:var(--ink3);transition:all .3s;margin-top:1px}
+.step-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.step-dot.active{background:#fff;border-color:var(--green);animation:pulse-ring 1.2s infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(0,192,107,.4)}50%{box-shadow:0 0 0 6px rgba(0,192,107,0)}}
+.step-dot.done::before{content:'✓'}
+.step-info{flex:1;padding-top:2px}
+.step-label{font-size:14px;font-weight:600;color:var(--ink)}
+.step-label.muted{color:var(--ink3)}
+.step-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* validation */
+.val-block{background:var(--green-l);border-radius:10px;padding:14px;display:none}
+.val-block.show{display:block;animation:fadeSlide .3s ease}
+.val-title{font-size:13px;font-weight:700;color:var(--green-d);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.val-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);padding:3px 0;animation:slideInLeft .25s ease both}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.val-check{color:var(--green);font-size:14px;font-weight:700}
+
+/* append input */
+.append-area{background:var(--gray);border-radius:10px;overflow:hidden;border:1.5px solid var(--border);transition:border-color .2s}
+.append-area:focus-within{border-color:var(--green)}
+.append-area textarea{width:100%;border:none;outline:none;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--ink);background:transparent;resize:none;min-height:60px}
+.append-area textarea::placeholder{color:var(--ink3)}
+.append-foot{display:flex;justify-content:flex-end;padding:6px 8px;gap:6px}
+
+.export-btns{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+
+/* ══════════════════════════════
+   PAGE 2B: TEMPLATE
+══════════════════════════════ */
+.tpl-layout{display:grid;grid-template-columns:1fr 340px;gap:0;height:calc(100vh - 64px)}
+.tpl-preview{background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;position:relative}
+.tpl-preview-inner{width:100%;max-width:640px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;position:relative}
+.canvas-area{padding:24px;min-height:360px;position:relative}
+
+/* axes svg */
+.axes-label{font-size:11px;fill:rgba(255,255,255,.5);font-family:'Noto Sans SC',sans-serif}
+.axes-line{stroke:rgba(255,255,255,.2);stroke-width:1}
+.fn-path{fill:none;stroke:var(--green);stroke-width:2.5;stroke-linecap:round;transition:all .4s ease}
+.fn-path2{fill:none;stroke:rgba(255,255,255,.25);stroke-width:1.5;stroke-dasharray:5,4}
+.param-badge{position:absolute;top:14px;right:14px;background:rgba(0,192,107,.15);border:1px solid rgba(0,192,107,.3);border-radius:8px;padding:6px 12px;font-size:12px;color:rgba(0,192,107,.9);font-weight:600}
+
+.tpl-panel{background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.tpl-panel-head{padding:24px 24px 16px;border-bottom:1px solid var(--divider)}
+.tpl-panel-head h2{font-size:18px;font-weight:700}
+.tpl-panel-head p{font-size:13px;color:var(--ink2);margin-top:4px}
+.tpl-panel-body{padding:20px 24px;display:flex;flex-direction:column;gap:20px;flex:1}
+
+.param-block{display:flex;flex-direction:column;gap:8px}
+.param-label{font-size:13px;font-weight:700;color:var(--ink2);display:flex;justify-content:space-between;align-items:center}
+.param-val{font-size:14px;font-weight:700;color:var(--green)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 2px 8px rgba(0,192,107,.4);transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+.seg-btns{display:flex;gap:4px}
+.seg-btn{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;background:var(--gray);color:var(--ink2);transition:all .16s;font-family:inherit}
+.seg-btn.active{background:var(--green-l);border-color:var(--green);color:var(--green)}
+.seg-btn:hover:not(.active){border-color:var(--ink2);color:var(--ink)}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-label{font-size:13px;font-weight:600;color:var(--ink)}
+.toggle{width:40px;height:22px;background:var(--border);border-radius:11px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--green)}
+.toggle-knob{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle.on .toggle-knob{left:20px}
+
+.ai-hint-btn{background:var(--green-l);border:1.5px dashed var(--green);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--green);cursor:pointer;text-align:center;transition:all .18s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+.ai-hint-btn:hover{background:var(--green);color:#fff;border-style:solid}
+
+/* ══════════════════════════════
+   PAGE 3: GAME PLAZA
+══════════════════════════════ */
+.plaza-hero{background:linear-gradient(135deg,#0d1f2d 0%,#0a2a1a 100%);padding:40px;position:relative;overflow:hidden}
+.plaza-hero::before{content:'🎮';position:absolute;right:60px;top:50%;transform:translateY(-50%);font-size:100px;opacity:.08}
+.plaza-title{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#fff;margin-bottom:6px}
+.plaza-title span{color:var(--green)}
+.plaza-sub{font-size:14px;color:rgba(255,255,255,.5)}
+.plaza-stats{display:flex;gap:32px;margin-top:20px}
+.pstat{display:flex;flex-direction:column}
+.pstat-n{font-size:22px;font-weight:900;color:var(--green)}
+.pstat-l{font-size:12px;color:rgba(255,255,255,.4);margin-top:1px}
+
+.plaza-tabs{padding:0 40px;background:var(--white);border-bottom:1px solid var(--border);display:flex;gap:4px;overflow-x:auto}
+.plaza-tab{padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink2);border:none;background:none;border-bottom:2px solid transparent;transition:all .18s;font-family:inherit;white-space:nowrap}
+.plaza-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.plaza-tab:hover:not(.active){color:var(--ink)}
+
+.plaza-body{padding:32px 40px}
+.plaza-sec{margin-bottom:40px}
+.plaza-sec-title{font-size:16px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.hot-badge{background:linear-gradient(135deg,#ff6b00,#ff8c00);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+
+.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.game-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--sh-sm);cursor:pointer;transition:all .22s;border:2px solid transparent}
+.game-card:hover{transform:translateY(-5px);box-shadow:var(--sh-lg);border-color:var(--green)}
+.game-thumb{height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.gt-tug{background:linear-gradient(135deg,#0d1b2a,#162236)}
+.gt-quest{background:linear-gradient(135deg,#0d1f0d,#1a3318)}
+.gt-match{background:linear-gradient(135deg,#120823,#1e0f3a)}
+.gt-whack{background:linear-gradient(135deg,#1f1000,#3a2000)}
+.gt-space{background:linear-gradient(135deg,#000818,#001530)}
+.gt-relay{background:linear-gradient(135deg,#0f001a,#1e003a)}
+.game-body{padding:14px 16px 16px}
+.game-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.game-desc{font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:10px;min-height:38px}
+.game-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.game-ppl{font-size:12px;color:var(--ink3);font-weight:600;margin-left:auto}
+
+/* ══════════════════════════════
+   GAME SETUP MODAL
+══════════════════════════════ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:300;align-items:center;justify-content:center}
+.overlay.show{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--white);border-radius:20px;width:940px;max-width:95vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.modal-header{padding:22px 28px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.modal-header h2{font-size:18px;font-weight:700}
+.modal-close{margin-left:auto;width:32px;height:32px;border-radius:50%;background:var(--gray);border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .16s}
+.modal-close:hover{background:var(--border)}
+.modal-body{display:grid;grid-template-columns:1fr 300px;flex:1;overflow:hidden}
+.modal-left{padding:22px 28px;overflow-y:auto;border-right:1px solid var(--border)}
+.modal-right{padding:20px;background:var(--gray);overflow-y:auto}
+
+.qlabel{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.q-card{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:var(--white);position:relative;transition:border-color .2s}
+.q-card:hover{border-color:var(--green-d)}
+.q-num{font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:8px}
+.q-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;resize:none;outline:none;transition:border-color .2s;color:var(--ink)}
+.q-input:focus{border-color:var(--green)}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.opt-box{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--gray);cursor:pointer;transition:all .16s}
+.opt-box.correct{border-color:var(--green);background:var(--green-l)}
+.opt-letter{font-size:11px;font-weight:800;color:var(--ink3);min-width:16px}
+.opt-box.correct .opt-letter{color:var(--green)}
+.opt-txt{font-size:13px;font-weight:600;color:var(--ink)}
+.q-meta{display:flex;gap:7px;margin-top:10px}
+.q-sel{font-size:12px;font-weight:600;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);color:var(--ink2);cursor:pointer;font-family:inherit;outline:none}
+.q-del{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--gray);border:none;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .16s}
+.q-del:hover{background:#fecaca;color:var(--red)}
+.add-row{display:flex;gap:8px;margin-top:4px}
+.btn-dashed{flex:1;padding:10px;border:2px dashed var(--border);border-radius:10px;background:none;font-size:13px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .18s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-dashed:hover{border-color:var(--green);color:var(--green);background:var(--green-l)}
+
+.setting-blk{margin-bottom:18px}
+.setting-lbl{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px}
+.mode-row{display:flex;gap:6px}
+.mode-btn{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:var(--white);color:var(--ink2);transition:all .16s;font-family:inherit;text-align:center}
+.mode-btn.active{background:var(--green-l);border-color:var(--green);color:var(--green)}
+
+.preview-sum{background:var(--white);border-radius:10px;padding:14px;border:1px solid var(--border);margin-bottom:14px}
+.preview-sum .pname{font-size:14px;font-weight:700;margin-bottom:8px}
+.prow{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-bottom:3px}
+.prow span:last-child{font-weight:700;color:var(--ink)}
+.btn-start-game{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#00e08a);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(0,192,107,.35);transition:all .18s}
+.btn-start-game:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,192,107,.45)}
+
+/* ══════════════════════════════
+   GAME SCREEN
+══════════════════════════════ */
+.game-screen{display:none;position:fixed;inset:0;background:var(--game-dark);z-index:400;flex-direction:column}
+.game-screen.show{display:flex;animation:fadeIn .3s ease}
+.gs-header{padding:14px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+.gs-title{font-size:17px;font-weight:800;color:rgba(255,255,255,.9);display:flex;align-items:center;gap:10px}
+.gs-prog{font-size:13px;color:rgba(255,255,255,.4);font-weight:600}
+.btn-exit{padding:6px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.5);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .18s}
+.btn-exit:hover{background:rgba(255,255,255,.14)}
+.gs-scores{padding:10px 40px;display:flex;gap:12px;justify-content:center}
+.team-card{flex:1;max-width:260px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 18px;display:flex;align-items:center;gap:10px}
+.team-score{font-size:30px;font-weight:900;color:#fff;line-height:1}
+.team-name-txt{font-size:12px;color:rgba(255,255,255,.4);font-weight:700}
+.tug-bar{padding:0 40px 12px;display:flex;align-items:center;gap:14px}
+.tug-track{flex:1;height:20px;background:rgba(255,255,255,.06);border-radius:10px;position:relative;overflow:hidden}
+.tug-r{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ff3b3b,#ff6b6b);border-radius:10px;transition:width .6s cubic-bezier(.68,-.55,.27,1.55)}
+.tug-b{position:absolute;right:0;top:0;bottom:0;background:linear-gradient(270deg,#0066ff,#4d9fff);border-radius:10px;transition:width .6s cubic-bezier(.68,-.55,.27,1.55)}
+.tug-mid{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.3);transform:translateX(-50%)}
+.knot{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;background:var(--gold);border-radius:50%;box-shadow:0 0 10px rgba(255,215,0,.6);z-index:2;transition:left .6s cubic-bezier(.68,-.55,.27,1.55)}
+.gs-q-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 80px}
+.gs-question{font-size:42px;font-weight:900;color:#fff;text-align:center;margin-bottom:28px;line-height:1.3;text-shadow:0 2px 20px rgba(0,0,0,.5);animation:qIn .35s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes qIn{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.gs-opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:700px}
+.gs-opt{padding:18px 22px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.1);border-radius:14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .18s;animation:optIn .3s ease both}
+@keyframes optIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.gs-opt:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25);transform:scale(1.02)}
+.gs-opt.correct{background:rgba(0,192,107,.2);border-color:var(--green);animation:correctFlash .5s ease}
+.gs-opt.wrong{background:rgba(255,59,59,.15);border-color:#ff3b3b;animation:wrongShake .4s ease}
+@keyframes correctFlash{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.gs-ol{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:rgba(255,255,255,.7);flex-shrink:0}
+.gs-opt.correct .gs-ol{background:var(--green);color:#fff}
+.gs-ot{font-size:24px;font-weight:800;color:#fff}
+.gs-timer{padding:8px 40px 0;display:flex;justify-content:center;align-items:center;gap:14px}
+.timer-bar{width:300px;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.timer-fill{height:100%;border-radius:4px;transition:width 1s linear,background .3s}
+.timer-n{font-size:19px;font-weight:900;color:#fff;min-width:28px;text-align:center}
+.gs-bottom{padding:10px 40px 18px;display:flex;justify-content:center;gap:12px}
+.ctrl{padding:9px 22px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;display:flex;align-items:center;gap:6px}
+.ctrl:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3)}
+.ctrl.primary{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 14px rgba(0,192,107,.4)}
+.ctrl.primary:hover{background:var(--green-d)}
+
+/* score pop */
+.spop{position:fixed;font-size:26px;font-weight:900;pointer-events:none;z-index:450;animation:floatUp .75s ease forwards;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-70px) scale(1.3);opacity:0}}
+
+/* result screen */
+.result-scr{display:none;position:fixed;inset:0;background:var(--game-dark);z-index:500;flex-direction:column;align-items:center;justify-content:center}
+.result-scr.show{display:flex;animation:fadeIn .4s ease}
+.res-title{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--gold);text-shadow:0 0 40px rgba(255,215,0,.4);margin-bottom:6px;animation:modalIn .6s cubic-bezier(.34,1.56,.64,1) both}
+.res-winner{font-size:20px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:36px}
+.res-scores{display:flex;gap:40px;margin-bottom:36px}
+.res-card{text-align:center;background:rgba(255,255,255,.06);border-radius:18px;padding:24px 36px;border:2px solid rgba(255,255,255,.08)}
+.res-card.win{border-color:var(--gold);background:rgba(255,215,0,.07)}
+.res-crown{font-size:32px;margin-bottom:4px;opacity:.3}
+.res-card.win .res-crown{opacity:1}
+.res-team{font-size:13px;color:rgba(255,255,255,.4);font-weight:700;margin-bottom:6px}
+.res-score{font-size:56px;font-weight:900;color:#fff;line-height:1}
+.res-tip{background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.2);border-radius:10px;padding:12px 22px;font-size:13px;color:rgba(255,140,0,.85);font-weight:600;margin-bottom:28px;display:flex;align-items:center;gap:8px;max-width:480px;text-align:center}
+.res-btns{display:flex;gap:12px}
+.res-btn{padding:11px 28px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .18s;border:2px solid transparent}
+.res-btn.primary{background:var(--green);color:#fff;box-shadow:0 4px 16px rgba(0,192,107,.4)}
+.res-btn.primary:hover{background:var(--green-d);transform:translateY(-1px)}
+.res-btn.sec{background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.15)}
+.res-btn.sec:hover{background:rgba(255,255,255,.14)}
+
+/* canvas */
+#confCanvas{position:fixed;inset:0;pointer-events:none;z-index:510;display:none}
+#confCanvas.show{display:block}
+
+/* export modal */
+.exp-modal{background:var(--white);border-radius:20px;width:520px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)}
+.exp-head{padding:22px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.exp-head h2{font-size:17px;font-weight:700}
+.exp-body{padding:20px 24px}
+.exp-thumb{background:var(--ink);border-radius:12px;height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;position:relative;overflow:hidden}
+.exp-thumb-inner{width:80%;height:80%;display:flex;align-items:center;justify-content:center}
+.exp-formats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.fmt-card{padding:14px 10px;border:2px solid var(--border);border-radius:12px;text-align:center;cursor:pointer;transition:all .18s;position:relative}
+.fmt-card:hover{border-color:var(--green);background:var(--green-bg)}
+.fmt-card.selected{border-color:var(--green);background:var(--green-l)}
+.fmt-icon{font-size:22px;margin-bottom:6px}
+.fmt-name{font-size:13px;font-weight:700;color:var(--ink)}
+.fmt-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+.fmt-star{position:absolute;top:6px;right:6px;background:var(--orange);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+
+/* thumb svgs */
+.th-math-curve{fill:none;stroke:var(--green);stroke-width:2}
+.th-axes{stroke:rgba(255,255,255,.3);stroke-width:1}
+
+/* page indicators (breadcrumb) */
+.page-indicator{display:flex;align-items:center;gap:6px;padding:10px 40px;background:var(--green-bg);border-bottom:1px solid var(--green-l);font-size:12px;color:var(--green-d);font-weight:600}
+.pi-sep{color:var(--ink3)}
+
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="logo"><div class="logo-dot"></div>EduMind</div>
+  <div class="nav-tabs">
+    <button class="nav-tab" onclick="nav('备课中心')">备课中心</button>
+    <button class="nav-tab" onclick="nav('讲义生成')">讲义生成</button>
+    <button class="nav-tab active" id="navCW" onclick="showPage('home')">互动课件</button>
+    <button class="nav-tab" onclick="nav('资源社区')">资源社区</button>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-secondary btn-sm" onclick="showPage('game-plaza')">🎮 课堂游戏</button>
+    <div class="avatar">张</div>
+  </div>
+</nav>
+
+<!-- ════════════ PAGE: HOME ════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-inner">
+    <div class="hero-eyebrow">AI 互动课件生成系统</div>
+    <div class="hero-title">让知识<span>动起来</span></div>
+    <div class="hero-sub">描述你想展示的内容，30 秒生成可交互的动态课件，直接插入 PPT 使用</div>
+
+    <div class="input-wrap">
+      <div class="input-inner">
+        <div class="input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <textarea id="mainInput" rows="2" placeholder="比如：画一个正弦函数，可以调整振幅和周期..." oninput="updateCount()" onkeydown="handleKey(event)"></textarea>
+      </div>
+      <div class="input-foot">
+        <div class="input-aux-btn" title="拍照识别">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <div class="input-aux-btn" title="语音输入">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+        <div class="input-aux-btn" title="上传文件" onclick="document.getElementById('fileUpload').click()">
+          <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </div>
+        <input type="file" id="fileUpload" style="display:none" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" onchange="handleFileUpload(this)">
+        <div class="char-count" id="charCount">0 / 500</div>
+      </div>
+      <!-- History dropdowns row -->
+      <div class="input-history-row">
+        <div class="hist-dropdown-wrap">
+          <button class="hist-dropdown-btn" onclick="toggleHistDropdown('histLecture')">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            历史讲义 <span class="hist-arrow">▾</span>
+          </button>
+          <div class="hist-dropdown-menu" id="histLecture">
+            <div class="hist-dropdown-item" onclick="selectHist('正弦函数变换演示讲义','histLecture')">正弦函数变换演示讲义</div>
+            <div class="hist-dropdown-item" onclick="selectHist('三角形面积公式讲义','histLecture')">三角形面积公式讲义</div>
+            <div class="hist-dropdown-item" onclick="selectHist('匀速圆周运动讲义','histLecture')">匀速圆周运动讲义</div>
+            <div class="hist-dropdown-item" onclick="selectHist('牛顿第二定律讲义','histLecture')">牛顿第二定律讲义</div>
+            <div class="hist-dropdown-item" onclick="selectHist('细胞结构与功能讲义','histLecture')">细胞结构与功能讲义</div>
+          </div>
+        </div>
+        <div class="hist-dropdown-wrap">
+          <button class="hist-dropdown-btn" onclick="toggleHistDropdown('histHw')">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            历史作业 <span class="hist-arrow">▾</span>
+          </button>
+          <div class="hist-dropdown-menu" id="histHw">
+            <div class="hist-dropdown-item" onclick="selectHist('函数图像练习题','histHw')">函数图像练习题</div>
+            <div class="hist-dropdown-item" onclick="selectHist('力学综合习题','histHw')">力学综合习题</div>
+            <div class="hist-dropdown-item" onclick="selectHist('化学方程式配平练习','histHw')">化学方程式配平练习</div>
+            <div class="hist-dropdown-item" onclick="selectHist('英语完形填空作业','histHw')">英语完形填空作业</div>
+            <div class="hist-dropdown-item" onclick="selectHist('数学解题步骤练习','histHw')">数学解题步骤练习</div>
+          </div>
+        </div>
+        <div class="hist-dropdown-wrap">
+          <button class="hist-dropdown-btn" onclick="toggleHistDropdown('histExam')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            历史组卷 <span class="hist-arrow">▾</span>
+          </button>
+          <div class="hist-dropdown-menu" id="histExam">
+            <div class="hist-dropdown-item" onclick="selectHist('高中数学月考卷','histExam')">高中数学月考卷</div>
+            <div class="hist-dropdown-item" onclick="selectHist('初中物理期末卷','histExam')">初中物理期末卷</div>
+            <div class="hist-dropdown-item" onclick="selectHist('高考模拟理综卷','histExam')">高考模拟理综卷</div>
+            <div class="hist-dropdown-item" onclick="selectHist('小学数学单元测验','histExam')">小学数学单元测验</div>
+            <div class="hist-dropdown-item" onclick="selectHist('初中语文阅读理解专项','histExam')">初中语文阅读理解专项</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <button class="btn-generate" onclick="showPage('generating')">
+        <span class="spark"></span><span class="spark"></span><span class="spark"></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        生成动态课件
+      </button>
+      <button class="btn btn-secondary btn-lg" onclick="showPage('tpl-browse')">从模板开始</button>
+    </div>
+
+    <div class="divider-or">快速模板</div>
+    <div class="templates-strip">
+      <div class="tpl-chip" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>数学函数
+      </div>
+      <div class="tpl-chip" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>立体几何
+      </div>
+      <div class="tpl-chip" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>虚拟实验
+      </div>
+      <div class="tpl-chip" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>力学沙盒
+      </div>
+      <div class="tpl-chip" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>板块运动
+      </div>
+      <div class="tpl-chip" style="color:var(--ink3)" onclick="showPage('tpl-browse')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>更多
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-title">我的课件</div>
+      <div class="hist-tabs">
+        <button class="hist-tab active">最近生成</button>
+        <button class="hist-tab" onclick="this.closest('.hist-tabs').querySelectorAll('.hist-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">收藏</button>
+        <button class="hist-tab" onclick="this.closest('.hist-tabs').querySelectorAll('.hist-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">社区热门</button>
+      </div>
+    </div>
+    <div class="cards-grid">
+      <div class="cw-card" onclick="showPage('generating')">
+        <div class="cw-thumb cw-thumb-math">
+          <svg width="150" height="90" viewBox="0 0 150 90"><line x1="10" y1="45" x2="140" y2="45" class="th-axes"/><line x1="75" y1="10" x2="75" y2="80" class="th-axes"/><path d="M10,45 Q25,15 40,45 Q55,75 70,45 Q85,15 100,45 Q115,75 130,45" class="th-math-curve"/></svg>
+          <div class="cw-thumb-label"><span class="tag tag-math">数学</span></div>
+        </div>
+        <div class="cw-body">
+          <div class="cw-name">正弦函数变换演示</div>
+          <div class="cw-meta">今天 14:32 · AI生成</div>
+          <div class="cw-actions"><button class="cw-action">✏️ 编辑</button><button class="cw-action">↓ 导出</button><button class="cw-action">···</button></div>
+        </div>
+      </div>
+      <div class="cw-card">
+        <div class="cw-thumb cw-thumb-geo">
+          <svg width="150" height="90" viewBox="0 0 150 90"><polygon points="75,15 130,75 20,75" stroke="rgba(0,192,107,.7)" fill="none" stroke-width="1.5"/><line x1="75" y1="15" x2="75" y2="75" stroke="rgba(255,255,255,.3)" stroke-width="1" stroke-dasharray="3,3"/><polygon points="75,15 130,75 75,75" fill="rgba(0,192,107,.1)"/></svg>
+          <div class="cw-thumb-label"><span class="tag tag-math">数学</span></div>
+        </div>
+        <div class="cw-body">
+          <div class="cw-name">三角形面积可视化</div>
+          <div class="cw-meta">昨天 · AI生成</div>
+          <div class="cw-actions"><button class="cw-action">✏️ 编辑</button><button class="cw-action">↓ 导出</button><button class="cw-action">···</button></div>
+        </div>
+      </div>
+      <div class="cw-card">
+        <div class="cw-thumb cw-thumb-phy">
+          <svg width="150" height="90" viewBox="0 0 150 90"><circle cx="75" cy="45" r="20" stroke="rgba(255,140,0,.7)" fill="none" stroke-width="1.5"/><line x1="75" y1="25" x2="75" y2="10" stroke="rgba(255,140,0,.5)" stroke-width="1.5" marker-end="url(#arrow)"/><line x1="75" y1="65" x2="75" y2="80" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><text x="85" y="44" fill="rgba(255,255,255,.7)" font-size="10" font-family="Noto Sans SC,sans-serif">F</text></svg>
+          <div class="cw-thumb-label"><span class="tag tag-phys">物理</span></div>
+        </div>
+        <div class="cw-body">
+          <div class="cw-name">匀速圆周运动受力分析</div>
+          <div class="cw-meta">3月1日 · 模板生成</div>
+          <div class="cw-actions"><button class="cw-action">✏️ 编辑</button><button class="cw-action">↓ 导出</button><button class="cw-action">···</button></div>
+        </div>
+      </div>
+      <div class="cw-card" style="border:2px dashed var(--border);background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;min-height:200px;cursor:pointer" onclick="showPage('home')" onmouseover="this.style.borderColor='var(--green)';this.style.background='var(--green-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+        <div style="text-align:center;color:var(--ink3)"><div style="font-size:28px;margin-bottom:8px">＋</div><div style="font-size:13px;font-weight:600">新建课件</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: GENERATING ════════════ -->
+<div class="page" id="page-generating">
+  <div class="page-indicator">
+    <span style="cursor:pointer;color:var(--green-d)" onclick="showPage('home')">互动课件</span>
+    <span class="pi-sep">›</span>
+    <span>正弦函数变换演示</span>
+  </div>
+  <div class="gen-layout">
+    <!-- LEFT: preview -->
+    <div class="gen-preview">
+      <div class="gen-preview-inner" id="genPreviewBox">
+        <!-- shimmer -->
+        <div class="shimmer-wrap" id="shimmerWrap">
+          <div class="shimmer-line sh-l1"></div>
+          <div class="shimmer-line sh-l2"></div>
+          <div class="shimmer-line sh-l3"></div>
+          <div class="shimmer-line sh-l4"></div>
+          <div class="shimmer-line sh-l5"></div>
+          <div class="shimmer-line sh-l6"></div>
+        </div>
+        <!-- live chart (shown after gen) -->
+        <div class="gen-live" id="genLive">
+          <div style="padding:20px 24px 16px;color:#fff;font-size:13px;opacity:.6;font-weight:600">正弦函数变换演示</div>
+          <div style="flex:1;padding:0 24px 20px;position:relative">
+            <svg id="genSvg" width="100%" height="100%" viewBox="0 0 500 280" style="overflow:visible">
+              <line x1="30" y1="140" x2="480" y2="140" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+              <line x1="255" y1="20" x2="255" y2="260" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+              <!-- grid -->
+              <line x1="30" y1="80" x2="480" y2="80" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+              <line x1="30" y1="200" x2="480" y2="200" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+              <!-- reference -->
+              <path id="refPath" d="" stroke="rgba(255,255,255,.2)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+              <!-- main fn -->
+              <path id="fnPath" d="" stroke="#00C06B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <text x="465" y="135" fill="rgba(255,255,255,.4)" font-size="11" font-family="Noto Sans SC,sans-serif">x</text>
+              <text x="260" y="18" fill="rgba(255,255,255,.4)" font-size="11" font-family="Noto Sans SC,sans-serif">y</text>
+            </svg>
+          </div>
+          <div style="padding:0 24px 16px;display:flex;gap:8px;align-items:center">
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:14px;height:2px;background:var(--green);border-radius:1px"></div><span style="font-size:11px;color:rgba(255,255,255,.5)">y = A·sin(ωx+φ)</span></div>
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:14px;height:1px;background:rgba(255,255,255,.3);border-top:2px dashed rgba(255,255,255,.3)"></div><span style="font-size:11px;color:rgba(255,255,255,.35)">y = sin(x)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="gen-preview-tools">
+        <button class="btn btn-dark btn-sm" onclick="showExport()">↓ 导出课件</button>
+        <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">⛶ 全屏</button>
+        <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)">📱 手机看</button>
+      </div>
+    </div>
+    <!-- RIGHT: panel -->
+    <div class="gen-panel">
+      <div class="gen-panel-head">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('home')" style="padding:4px 8px;font-size:13px">← 返回</button>
+        </div>
+        <div class="gen-panel-title" id="genPanelTitle">正在生成课件…</div>
+        <div class="gen-panel-sub">正弦函数变换演示</div>
+      </div>
+      <div class="gen-panel-body">
+        <!-- steps -->
+        <div class="steps" id="stepsBlock">
+          <div class="step-item"><div class="step-dot done" id="s1"></div><div class="step-info"><div class="step-label">理解需求</div><div class="step-sub">识别学科 · 知识点 · 交互方式</div></div></div>
+          <div class="step-item"><div class="step-dot active" id="s2"></div><div class="step-info"><div class="step-label">生成代码</div><div class="step-sub" id="s2sub">D3.js 渲染中…</div></div></div>
+          <div class="step-item"><div class="step-dot" id="s3"></div><div class="step-info"><div class="step-label muted" id="s3lbl">学科校验</div><div class="step-sub" id="s3sub">等待中</div></div></div>
+          <div class="step-item"><div class="step-dot" id="s4"></div><div class="step-info"><div class="step-label muted" id="s4lbl">渲染完成</div><div class="step-sub" id="s4sub">等待中</div></div></div>
+        </div>
+
+        <!-- validation block (hidden until done) -->
+        <div class="val-block" id="valBlock">
+          <div class="val-title"><span>✓</span> 学科校验通过</div>
+          <div class="val-item" style="animation-delay:.0s"><span class="val-check">✓</span> 函数图像关键点精确</div>
+          <div class="val-item" style="animation-delay:.1s"><span class="val-check">✓</span> 坐标轴刻度正确</div>
+          <div class="val-item" style="animation-delay:.2s"><span class="val-check">✓</span> 参数变换逻辑正确</div>
+          <div class="val-item" style="animation-delay:.3s"><span class="val-check">✓</span> 无错别字</div>
+        </div>
+
+        <!-- append input (shown after gen) -->
+        <div id="appendBlock" style="display:none">
+          <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:8px">追加描述</div>
+          <div class="append-area">
+            <textarea placeholder="例如：加一条灰色虚线显示标准正弦函数 y=sin(x) 作为对照..." rows="3"></textarea>
+            <div class="append-foot">
+              <button class="btn btn-secondary btn-sm">重置</button>
+              <button class="btn btn-primary btn-sm">更新课件</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- quick actions (after gen) -->
+        <div id="quickBlock" style="display:none">
+          <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:8px">快捷操作</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-secondary btn-sm" style="justify-content:flex-start;gap:8px">🔄 换一种风格</button>
+            <button class="btn btn-secondary btn-sm" style="justify-content:flex-start;gap:8px">✨ 简化（适合小学）</button>
+            <button class="btn btn-secondary btn-sm" style="justify-content:flex-start;gap:8px">📊 加深（适合高中）</button>
+            <button class="btn btn-secondary btn-sm" style="justify-content:flex-start;gap:8px">✏️ 添加说明文字</button>
+          </div>
+        </div>
+
+        <div class="export-btns" id="exportBtnsBlock" style="display:none">
+          <button class="btn btn-primary" onclick="showExport()">↓ 导出课件</button>
+          <button class="btn btn-secondary" onclick="showPage('home')">↩ 重新生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: TEMPLATE ════════════ -->
+<div class="page" id="page-template">
+  <div class="page-indicator">
+    <span style="cursor:pointer;color:var(--green-d)" onclick="showPage('home')">互动课件</span>
+    <span class="pi-sep">›</span>
+    <span>函数实验室</span>
+  </div>
+  <div class="tpl-layout">
+    <div class="tpl-preview">
+      <div class="tpl-preview-inner">
+        <div class="param-badge" id="paramBadge">A=1.0 · ω=1.0 · φ=0</div>
+        <div class="canvas-area">
+          <svg id="tplSvg" width="100%" height="100%" viewBox="0 0 520 300" style="overflow:visible">
+            <line x1="20" y1="150" x2="500" y2="150" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+            <line x1="260" y1="20" x2="260" y2="280" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+            <line x1="20" y1="90" x2="500" y2="90" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <line x1="20" y1="210" x2="500" y2="210" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <path id="refPathT" d="" stroke="rgba(255,255,255,.18)" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+            <path id="tplPath" d="" stroke="#00C06B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <text x="488" y="145" fill="rgba(255,255,255,.35)" font-size="11" font-family="Noto Sans SC,sans-serif">x</text>
+            <text x="265" y="16" fill="rgba(255,255,255,.35)" font-size="11" font-family="Noto Sans SC,sans-serif">y</text>
+          </svg>
+        </div>
+        <div style="padding:12px 20px 16px;display:flex;gap:10px;border-top:1px solid rgba(255,255,255,.07)">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:2px;background:var(--green);border-radius:1px"></div><span style="font-size:11px;color:rgba(255,255,255,.45)">y = A·sin(ωx+φ)</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:1px;border-top:2px dashed rgba(255,255,255,.25)"></div><span style="font-size:11px;color:rgba(255,255,255,.3)">y = sin(x)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tpl-panel">
+      <div class="tpl-panel-head">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('home')" style="padding:4px 8px;font-size:13px">← 返回</button>
+          <span class="tag tag-math" style="margin-left:4px">数学</span>
+        </div>
+        <h2>函数实验室</h2>
+        <p>拖动滑块调整参数，实时观察图像变化</p>
+      </div>
+      <div class="tpl-panel-body">
+        <div>
+          <div class="setting-lbl">函数类型</div>
+          <div class="seg-btns">
+            <button class="seg-btn active" onclick="switchFn(this,'sin')">正弦</button>
+            <button class="seg-btn" onclick="switchFn(this,'cos')">余弦</button>
+            <button class="seg-btn" onclick="switchFn(this,'tan')">正切</button>
+          </div>
+        </div>
+        <div class="param-block">
+          <div class="param-label">振幅 A <span class="param-val" id="valA">1.0</span></div>
+          <input type="range" min="1" max="50" value="10" oninput="updateTpl('A',this.value/10)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)"><span>0.1</span><span>5.0</span></div>
+        </div>
+        <div class="param-block">
+          <div class="param-label">角频率 ω <span class="param-val" id="valW">1.0</span></div>
+          <input type="range" min="2" max="40" value="10" oninput="updateTpl('W',this.value/10)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)"><span>0.2</span><span>4.0</span></div>
+        </div>
+        <div class="param-block">
+          <div class="param-label">初相 φ <span class="param-val" id="valP">0</span></div>
+          <input type="range" min="-31" max="31" value="0" oninput="updateTpl('P',this.value/10)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)"><span>-π</span><span>+π</span></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">显示参考曲线 y=sin(x)</div>
+          <div class="toggle on" id="refToggle" onclick="toggleRef(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">显示关键点标注</div>
+          <div class="toggle" onclick="this.classList.toggle('on');this.querySelector('.toggle-knob').style.left=this.classList.contains('on')?'20px':'2px'"><div class="toggle-knob"></div></div>
+        </div>
+        <button class="ai-hint-btn">✨ AI 帮我润色一下</button>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-lg" onclick="showPage('generating');setTimeout(skipGen,200)">生成课件 →</button>
+          <button class="btn btn-secondary" onclick="showPage('home')">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: TEMPLATE BROWSE ════════════ -->
+<div class="page" id="page-tpl-browse">
+  <div class="tpl-browse-header">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <button class="tpl-back-btn" onclick="showPage('home')">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回
+      </button>
+      <div style="font-size:12px;color:var(--ink3)">互动课件 › 模板库</div>
+    </div>
+    <div class="tpl-browse-title">选择模板</div>
+    <div class="tpl-browse-sub">选择一个学科，浏览专属互动课件模板</div>
+  </div>
+  <div id="tplBrowseSubjects">
+    <!-- Subject grid -->
+    <div class="subj-grid" id="subjGrid"></div>
+  </div>
+  <div id="tplBrowseTemplates" style="display:none">
+    <div class="tpl-browse-content">
+      <button class="tpl-back-btn" onclick="showSubjects()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>返回学科列表
+      </button>
+      <div id="tplBrowseGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: GAME PLAZA ════════════ -->
+<div class="page" id="page-game-plaza">
+  <div class="plaza-hero">
+    <div class="plaza-title">课堂游戏<span>广场</span></div>
+    <div class="plaza-sub">选个游戏模板，填入你的题目，30 秒开始课堂互动</div>
+    <div class="plaza-stats">
+      <div class="pstat"><span class="pstat-n">8</span><span class="pstat-l">游戏模板</span></div>
+      <div class="pstat"><span class="pstat-n">1.2万</span><span class="pstat-l">老师在用</span></div>
+      <div class="pstat"><span class="pstat-n">≤30s</span><span class="pstat-l">开始游戏</span></div>
+    </div>
+  </div>
+  <div class="plaza-tabs">
+    <button class="plaza-tab active" onclick="filterPlaza('all',this)">全部</button>
+    <button class="plaza-tab" onclick="filterPlaza('battle',this)">答题对战</button>
+    <button class="plaza-tab" onclick="filterPlaza('adv',this)">闯关冒险</button>
+    <button class="plaza-tab" onclick="filterPlaza('puzz',this)">益智消除</button>
+    <button class="plaza-tab" onclick="filterPlaza('speed',this)">抢答竞速</button>
+  </div>
+  <div class="plaza-body">
+    <div class="plaza-sec">
+      <div class="plaza-sec-title">⭐ 最受老师喜欢 <span class="hot-badge">本周热门</span></div>
+      <div class="game-grid">
+        <div class="game-card" data-cat="battle" onclick="openSetup()">
+          <div class="game-thumb gt-tug">
+            <svg width="200" height="110" viewBox="0 0 200 110"><rect x="15" y="48" width="70" height="14" rx="7" fill="#ff3b3b" opacity=".75"/><rect x="115" y="48" width="70" height="14" rx="7" fill="#0066ff" opacity=".75"/><circle cx="100" cy="55" r="10" fill="#ffd700"/><line x1="100" y1="33" x2="100" y2="47" stroke="rgba(255,255,255,.2)" stroke-width="1"/><text x="50" y="32" font-size="11" font-weight="700" fill="rgba(255,255,255,.75)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">🔴 红队</text><text x="150" y="32" font-size="11" font-weight="700" fill="rgba(255,255,255,.75)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">蓝队 🔵</text><text x="100" y="90" font-size="10" fill="rgba(255,255,255,.3)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">答对往你这边拉！</text></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">答题拔河</div>
+            <div class="game-desc">两队抢答，绳结随比分移动。投屏最有课堂氛围！</div>
+            <div class="game-meta"><span class="tag tag-battle">答题对战</span><span class="game-ppl">👥 2–40人</span></div>
+            <button class="btn btn-primary" style="width:100%">立即选用</button>
+          </div>
+        </div>
+        <div class="game-card" data-cat="adv" onclick="openSetup()">
+          <div class="game-thumb gt-quest">
+            <svg width="200" height="110" viewBox="0 0 200 110"><rect x="10" y="80" width="180" height="5" rx="2.5" fill="rgba(255,255,255,.12)"/><rect x="55" y="65" width="20" height="16" rx="4" fill="rgba(255,255,255,.15)"/><rect x="110" y="60" width="20" height="21" rx="4" fill="rgba(255,255,255,.15)"/><circle cx="30" cy="74" r="9" fill="var(--green)"/><text x="30" y="79" font-size="12" text-anchor="middle" fill="white">🏃</text><text x="100" y="30" font-size="12" font-weight="700" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">答对跳过障碍</text><text x="100" y="48" font-size="10" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">答错角色掉坑里！</text></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">知识大闯关</div>
+            <div class="game-desc">类超级马里奥，答对跳过障碍，答错掉坑。刺激！</div>
+            <div class="game-meta"><span class="tag tag-adv">闯关冒险</span><span class="game-ppl">👥 1–30人</span></div>
+            <button class="btn btn-primary" style="width:100%">立即选用</button>
+          </div>
+        </div>
+        <div class="game-card" data-cat="puzz" onclick="openSetup()">
+          <div class="game-thumb gt-match">
+            <svg width="200" height="110" viewBox="0 0 200 110"><rect x="10" y="22" width="48" height="24" rx="7" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><rect x="68" y="22" width="48" height="24" rx="7" fill="rgba(114,46,209,.5)"/><rect x="126" y="22" width="48" height="24" rx="7" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><rect x="10" y="60" width="48" height="24" rx="7" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><rect x="68" y="60" width="48" height="24" rx="7" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><rect x="126" y="60" width="48" height="24" rx="7" fill="rgba(114,46,209,.5)"/><text x="34" y="38" font-size="10" font-weight="700" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">apple</text><text x="92" y="38" font-size="10" font-weight="700" fill="white" text-anchor="middle" font-family="Noto Sans SC,sans-serif">苹果</text><text x="150" y="38" font-size="10" font-weight="700" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">book</text><line x1="92" y1="46" x2="34" y2="46" stroke="#ffd700" stroke-width="1.5" opacity=".5"/></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">单词消消乐</div>
+            <div class="game-desc">连接相同意思的词语，消除得分。英语/语文生字。</div>
+            <div class="game-meta"><span class="tag tag-puzz">益智消除</span><span class="game-ppl">👥 1–40人</span></div>
+            <button class="btn btn-primary" style="width:100%">立即选用</button>
+          </div>
+        </div>
+        <div class="game-card" data-cat="speed">
+          <div class="game-thumb gt-whack">
+            <svg width="200" height="110" viewBox="0 0 200 110"><ellipse cx="50" cy="78" rx="22" ry="12" fill="rgba(139,69,19,.5)"/><circle cx="50" cy="66" r="14" fill="#cd853f"/><text x="50" y="72" font-size="18" text-anchor="middle">🐭</text><ellipse cx="150" cy="78" rx="22" ry="12" fill="rgba(139,69,19,.5)"/><circle cx="150" cy="66" r="14" fill="#cd853f"/><text x="150" y="72" font-size="18" text-anchor="middle">🐭</text><ellipse cx="100" cy="90" rx="22" ry="8" fill="rgba(139,69,19,.3)"/><text x="100" y="28" font-size="11" font-weight="700" fill="rgba(255,255,255,.75)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">打出答案对应的地鼠！</text></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">打地鼠抢答</div>
+            <div class="game-desc">地鼠弹出时显示选项，抢先打正确答案！手脑并用。</div>
+            <div class="game-meta"><span class="tag tag-speed">抢答竞速</span><span class="game-ppl">👥 2–30人</span></div>
+            <button class="btn btn-primary" style="width:100%" onclick="openSetup()">立即选用</button>
+          </div>
+        </div>
+        <div class="game-card" data-cat="adv">
+          <div class="game-thumb gt-space">
+            <svg width="200" height="110" viewBox="0 0 200 110"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,.3)"/><circle cx="160" cy="10" r="1.5" fill="rgba(255,255,255,.2)"/><circle cx="100" cy="35" r="2" fill="rgba(255,255,255,.15)"/><text x="100" y="55" font-size="20" text-anchor="middle">🚀</text><rect x="22" y="68" width="36" height="18" rx="5" fill="rgba(255,59,59,.45)" stroke="rgba(255,59,59,.6)" stroke-width="1"/><rect x="82" y="58" width="36" height="18" rx="5" fill="rgba(255,59,59,.35)"/><rect x="142" y="70" width="36" height="18" rx="5" fill="rgba(255,59,59,.45)" stroke="rgba(255,59,59,.6)" stroke-width="1"/><text x="40" y="81" font-size="9" fill="white" text-anchor="middle" font-family="Noto Sans SC,sans-serif">24</text><text x="100" y="71" font-size="9" fill="white" text-anchor="middle" font-family="Noto Sans SC,sans-serif">21</text><text x="160" y="83" font-size="9" fill="white" text-anchor="middle" font-family="Noto Sans SC,sans-serif">18</text><line x1="100" y1="63" x2="100" y2="76" stroke="rgba(0,192,107,.7)" stroke-width="1.5"/></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">太空射击答题</div>
+            <div class="game-desc">飞船射击正确答案飞碟。理科计算场景最佳。</div>
+            <div class="game-meta"><span class="tag tag-adv">闯关冒险</span><span class="game-ppl">👥 1–20人</span></div>
+            <button class="btn btn-primary" style="width:100%" onclick="openSetup()">立即选用</button>
+          </div>
+        </div>
+        <div class="game-card" data-cat="battle">
+          <div class="game-thumb gt-relay">
+            <svg width="200" height="110" viewBox="0 0 200 110"><rect x="15" y="42" width="170" height="10" rx="5" fill="rgba(255,255,255,.06)"/><rect x="15" y="42" width="60" height="10" rx="5" fill="rgba(255,59,59,.55)"/><rect x="15" y="65" width="170" height="10" rx="5" fill="rgba(255,255,255,.06)"/><rect x="15" y="65" width="44" height="10" rx="5" fill="rgba(0,102,255,.55)"/><text x="45" y="36" font-size="10" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">红队 5/8</text><text x="36" y="59" font-size="10" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">蓝队 3/8</text><text x="100" y="22" font-size="11" font-weight="700" fill="rgba(255,255,255,.75)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">⚡ 答完传给下一位！</text><text x="177" y="80" font-size="13" fill="rgba(255,255,255,.2)" text-anchor="middle">🏁</text></svg>
+          </div>
+          <div class="game-body">
+            <div class="game-name">问答接力跑</div>
+            <div class="game-desc">答完传给下一位同学，队伍最先完成获胜。培养合作。</div>
+            <div class="game-meta"><span class="tag tag-battle">答题对战</span><span class="game-ppl">👥 4–40人</span></div>
+            <button class="btn btn-primary" style="width:100%" onclick="openSetup()">立即选用</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ OVERLAY: GAME SETUP ════════════ -->
+<div class="overlay" id="setupOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:20px">🪢</span>
+      <h2>答题拔河 — 出题配置</h2>
+      <button class="modal-close" onclick="closeSetup()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-left">
+        <div class="qlabel">题目列表</div>
+        <div id="qList">
+          <div class="q-card">
+            <div class="q-num">题目 1</div>
+            <textarea class="q-input" rows="2">3 × 7 = ?</textarea>
+            <div class="opts-grid">
+              <div class="opt-box correct" onclick="setCorr(this)"><span class="opt-letter">A</span><span class="opt-txt">21</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">B</span><span class="opt-txt">24</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">C</span><span class="opt-txt">27</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">D</span><span class="opt-txt">18</span></div>
+            </div>
+            <div class="q-meta"><select class="q-sel"><option>15秒</option><option>10秒</option><option>20秒</option><option>30秒</option></select><select class="q-sel"><option>10分</option><option>5分</option><option>20分</option></select></div>
+            <button class="q-del">✕</button>
+          </div>
+          <div class="q-card">
+            <div class="q-num">题目 2</div>
+            <textarea class="q-input" rows="2">100 ÷ 4 = ?</textarea>
+            <div class="opts-grid">
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">A</span><span class="opt-txt">20</span></div>
+              <div class="opt-box correct" onclick="setCorr(this)"><span class="opt-letter">B</span><span class="opt-txt">25</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">C</span><span class="opt-txt">40</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">D</span><span class="opt-txt">50</span></div>
+            </div>
+            <div class="q-meta"><select class="q-sel"><option>15秒</option><option>10秒</option><option>20秒</option></select><select class="q-sel"><option>10分</option><option>5分</option><option>20分</option></select></div>
+            <button class="q-del">✕</button>
+          </div>
+          <div class="q-card">
+            <div class="q-num">题目 3</div>
+            <textarea class="q-input" rows="2">56 ÷ 8 = ?</textarea>
+            <div class="opts-grid">
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">A</span><span class="opt-txt">6</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">B</span><span class="opt-txt">8</span></div>
+              <div class="opt-box correct" onclick="setCorr(this)"><span class="opt-letter">C</span><span class="opt-txt">7</span></div>
+              <div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">D</span><span class="opt-txt">9</span></div>
+            </div>
+            <div class="q-meta"><select class="q-sel"><option>15秒</option><option>10秒</option><option>20秒</option></select><select class="q-sel"><option>10分</option><option>5分</option><option>20分</option></select></div>
+            <button class="q-del">✕</button>
+          </div>
+        </div>
+        <div class="add-row">
+          <button class="btn-dashed" onclick="addQ()">＋ 添加题目</button>
+          <button class="btn-dashed" style="color:var(--green);border-color:var(--green);background:var(--green-l)">✨ AI 帮我出题</button>
+        </div>
+      </div>
+      <div class="modal-right">
+        <div class="setting-blk"><div class="setting-lbl">参赛模式</div><div class="mode-row"><button class="mode-btn active" onclick="modeToggle(this)">全班抢答</button><button class="mode-btn" onclick="modeToggle(this)">小组对战</button></div></div>
+        <div class="setting-blk"><div class="setting-lbl">游戏氛围</div><div class="mode-row"><button class="mode-btn" onclick="modeToggle(this)">轻松友好</button><button class="mode-btn active" onclick="modeToggle(this)">热血竞技</button></div></div>
+        <div class="setting-blk"><div class="setting-lbl">背景音乐</div><div class="mode-row"><button class="mode-btn active" onclick="modeToggle(this)">开</button><button class="mode-btn" onclick="modeToggle(this)">关</button></div></div>
+        <div class="preview-sum">
+          <div class="pname">🪢 答题拔河</div>
+          <div class="prow"><span>题目数</span><span id="qcnt">3 题</span></div>
+          <div class="prow"><span>预计时长</span><span>约 2 分钟</span></div>
+          <div class="prow"><span>适合人数</span><span>2–40 人</span></div>
+        </div>
+        <button class="btn-start-game" onclick="startGame()">🎮 开始游戏</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ GAME SCREEN ════════════ -->
+<div class="game-screen" id="gameScreen">
+  <div class="gs-header">
+    <div class="gs-title">🪢 答题拔河</div>
+    <div class="gs-prog" id="gsProg">第 1 题 / 共 3 题</div>
+    <button class="btn-exit" onclick="exitGame()">✕ 退出</button>
+  </div>
+  <div class="gs-scores">
+    <div class="team-card" style="justify-content:flex-end">
+      <div style="text-align:right"><div class="team-name-txt">🔴 红队</div><div class="team-score" id="redScore">0</div></div>
+      <span style="font-size:22px">🔴</span>
+    </div>
+    <div class="team-card">
+      <span style="font-size:22px">🔵</span>
+      <div><div class="team-name-txt">蓝队 🔵</div><div class="team-score" id="blueScore">0</div></div>
+    </div>
+  </div>
+  <div class="tug-bar">
+    <span style="font-size:18px">🔴</span>
+    <div class="tug-track">
+      <div class="tug-r" id="tugR" style="width:50%"></div>
+      <div class="tug-b" id="tugB" style="width:50%"></div>
+      <div class="tug-mid"></div>
+      <div class="knot" id="knotEl" style="left:50%"></div>
+    </div>
+    <span style="font-size:18px">🔵</span>
+  </div>
+  <div class="gs-q-area">
+    <div class="gs-question" id="gsQ">3 × 7 = ?</div>
+    <div class="gs-opts" id="gsOpts">
+      <div class="gs-opt" style="animation-delay:.05s" onclick="answerQ(this,true)"><div class="gs-ol">A</div><div class="gs-ot">21</div></div>
+      <div class="gs-opt" style="animation-delay:.1s" onclick="answerQ(this,false)"><div class="gs-ol">B</div><div class="gs-ot">24</div></div>
+      <div class="gs-opt" style="animation-delay:.15s" onclick="answerQ(this,false)"><div class="gs-ol">C</div><div class="gs-ot">27</div></div>
+      <div class="gs-opt" style="animation-delay:.2s" onclick="answerQ(this,false)"><div class="gs-ol">D</div><div class="gs-ot">18</div></div>
+    </div>
+  </div>
+  <div class="gs-timer">
+    <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%;background:var(--green)"></div></div>
+    <div class="timer-n" id="timerN">15</div>
+  </div>
+  <div class="gs-bottom">
+    <button class="ctrl" onclick="pauseGame()">⏸ 暂停</button>
+    <button class="ctrl primary" onclick="nextQ()">公布答案 ▶</button>
+    <button class="ctrl" onclick="nextQ()">⏭ 下一题</button>
+  </div>
+</div>
+
+<!-- ════════════ RESULT SCREEN ════════════ -->
+<div class="result-scr" id="resultScr">
+  <canvas id="confCanvas"></canvas>
+  <div class="res-title">🎉 游戏结束！</div>
+  <div class="res-winner" id="resWinner">🔴 红队获胜！</div>
+  <div class="res-scores">
+    <div class="res-card win" id="resRedCard"><div class="res-crown">👑</div><div class="res-team">🔴 红队</div><div class="res-score" id="redscore">0</div></div>
+    <div class="res-card" id="resBlueCard"><div class="res-crown">👑</div><div class="res-team">🔵 蓝队</div><div class="res-score" id="bluescore">0</div></div>
+  </div>
+  <div class="res-tip">⚠️ 第2题错误率最高（67%答错）— 100÷4 竖式计算需要加强练习</div>
+  <div class="res-btns">
+    <button class="res-btn primary" onclick="closeResult()">✓ 保存战报</button>
+    <button class="res-btn sec" onclick="closeResult()">再来一局</button>
+    <button class="res-btn sec" onclick="closeResult()">生成专项讲义 →</button>
+  </div>
+</div>
+
+<!-- ════════════ OVERLAY: EXPORT ════════════ -->
+<div class="overlay" id="exportOverlay">
+  <div class="exp-modal">
+    <div class="exp-head">
+      <h2>导出课件</h2>
+      <button class="modal-close" onclick="document.getElementById('exportOverlay').classList.remove('show')">✕</button>
+    </div>
+    <div class="exp-body">
+      <div class="exp-thumb">
+        <svg width="280" height="90" viewBox="0 0 280 90"><line x1="20" y1="45" x2="260" y2="45" stroke="rgba(255,255,255,.2)" stroke-width="1"/><line x1="140" y1="10" x2="140" y2="80" stroke="rgba(255,255,255,.2)" stroke-width="1"/><path d="M20,45 Q40,20 60,45 Q80,70 100,45 Q120,20 140,45 Q160,70 180,45 Q200,20 220,45 Q240,70 260,45" stroke="var(--green)" stroke-width="2.5" fill="none"/><path d="M20,45 Q50,15 80,45 Q110,75 140,45 Q170,15 200,45 Q230,75 260,45" stroke="rgba(255,255,255,.2)" stroke-width="1.5" stroke-dasharray="5,4" fill="none"/></svg>
+        <div style="position:absolute;bottom:10px;right:12px;font-size:11px;color:rgba(255,255,255,.4);font-weight:600">正弦函数变换演示</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:12px">选择导出格式</div>
+      <div class="exp-formats">
+        <div class="fmt-card" onclick="selectFmt(this)"><div class="fmt-icon">🌐</div><div class="fmt-name">HTML</div><div class="fmt-sub">可交互</div></div>
+        <div class="fmt-card selected" onclick="selectFmt(this)"><div class="fmt-star">推荐</div><div class="fmt-icon">📊</div><div class="fmt-name">PPT 嵌入</div><div class="fmt-sub">插件/GIF</div></div>
+        <div class="fmt-card" onclick="selectFmt(this)"><div class="fmt-icon">🖼️</div><div class="fmt-name">GIF 动图</div><div class="fmt-sub">微信分享</div></div>
+        <div class="fmt-card" onclick="selectFmt(this)"><div class="fmt-icon">🎬</div><div class="fmt-name">MP4 视频</div><div class="fmt-sub">录屏备课</div></div>
+        <div class="fmt-card" onclick="selectFmt(this)"><div class="fmt-icon">🔗</div><div class="fmt-name">分享链接</div><div class="fmt-sub">扫码即看</div></div>
+      </div>
+      <div id="pptHint" style="background:var(--green-bg);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--ink2);margin-bottom:16px">
+        <div style="font-weight:700;color:var(--ink);margin-bottom:6px">PPT 嵌入方案</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:flex-start;gap:8px"><span style="color:var(--green);font-weight:700;flex-shrink:0">⭐</span><div><div style="font-weight:600;font-size:13px">使用平台 PPT 插件（推荐）</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">安装后在 PPT「插入」菜单直接调用，保留全部交互</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:8px"><span style="color:var(--ink3);flex-shrink:0">→</span><div><div style="font-weight:600;font-size:13px">导出 GIF 手动插入</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">下载后拖入 PPT 即可，GIF 无法交互，仅供演示</div></div></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px">↓ 下载</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PAGE NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'generating') startGenAnimation();
+  if (id === 'template') { drawTplCurve(); drawRefCurve(); }
+}
+function nav(name) { alert('「' + name + '」页面正在建设中，敬请期待～'); }
+
+// ── INPUT ──
+function updateCount() {
+  const v = document.getElementById('mainInput').value.length;
+  document.getElementById('charCount').textContent = v + ' / 500';
+}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); showPage('generating'); }
+}
+
+// ── HIST TABS ──
+document.querySelectorAll('.hist-tab').forEach(t => t.onclick = function(){
+  this.closest('.hist-tabs').querySelectorAll('.hist-tab').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+});
+
+// ── GEN ANIMATION ──
+let genDone = false;
+function startGenAnimation() {
+  if (genDone) return;
+  genDone = true;
+  const s = (n,cls) => { document.getElementById('s'+n).className='step-dot '+cls; };
+  setTimeout(() => { s(2,'done'); s(3,'active'); document.getElementById('s3lbl').classList.remove('muted'); document.getElementById('s3sub').textContent='验算中…'; }, 1200);
+  setTimeout(() => { s(3,'done'); s(4,'active'); document.getElementById('s4lbl').classList.remove('muted'); document.getElementById('s4sub').textContent='渲染中…'; }, 2200);
+  setTimeout(() => {
+    s(4,'done');
+    document.getElementById('shimmerWrap').style.display = 'none';
+    document.getElementById('genLive').classList.add('show');
+    drawGenCurve(1,1,0);
+    document.getElementById('valBlock').classList.add('show');
+    document.getElementById('appendBlock').style.display = 'block';
+    document.getElementById('quickBlock').style.display = 'block';
+    document.getElementById('exportBtnsBlock').style.display = 'flex';
+    document.getElementById('genPanelTitle').textContent = '课件已生成';
+  }, 3200);
+}
+function skipGen() {
+  genDone = true;
+  ['s1','s2','s3','s4'].forEach(id => document.getElementById(id).className='step-dot done');
+  document.getElementById('shimmerWrap').style.display = 'none';
+  document.getElementById('genLive').classList.add('show');
+  drawGenCurve(1,1,0);
+  document.getElementById('valBlock').classList.add('show');
+  document.getElementById('appendBlock').style.display = 'block';
+  document.getElementById('quickBlock').style.display = 'block';
+  document.getElementById('exportBtnsBlock').style.display = 'flex';
+  document.getElementById('genPanelTitle').textContent = '课件已生成';
+}
+
+// ── SVG CURVE DRAWING ──
+function sinPath(A, w, phi, W, H, cx, cy, scale) {
+  let d = '';
+  for (let i = 0; i <= W; i += 2) {
+    const x = (i - cx) / scale;
+    const y = A * Math.sin(w * x + phi);
+    const px = i, py = cy - y * scale;
+    d += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
+  }
+  return d;
+}
+function drawGenCurve(A, w, phi) {
+  const el = document.getElementById('fnPath');
+  if (!el) return;
+  el.setAttribute('d', sinPath(A, w, phi, 500, 280, 255, 140, 55));
+  const r = document.getElementById('refPath');
+  if (r) r.setAttribute('d', sinPath(1, 1, 0, 500, 280, 255, 140, 55));
+}
+
+// ── TEMPLATE ──
+let tplA=1, tplW=1, tplP=0, tplFn='sin', showRef=true;
+function updateTpl(param, val) {
+  if (param==='A') { tplA=val; document.getElementById('valA').textContent=val.toFixed(1); }
+  if (param==='W') { tplW=val; document.getElementById('valW').textContent=val.toFixed(1); }
+  if (param==='P') { tplP=val; document.getElementById('valP').textContent=val.toFixed(1); }
+  drawTplCurve();
+  document.getElementById('paramBadge').textContent = `A=${tplA.toFixed(1)} · ω=${tplW.toFixed(1)} · φ=${tplP.toFixed(1)}`;
+}
+function switchFn(btn, fn) {
+  btn.closest('.seg-btns').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  tplFn = fn;
+  drawTplCurve();
+}
+function toggleRef(el) {
+  el.classList.toggle('on');
+  el.querySelector('.toggle-knob').style.left = el.classList.contains('on') ? '20px' : '2px';
+  showRef = el.classList.contains('on');
+  drawRefCurve();
+}
+function drawTplCurve() {
+  const el = document.getElementById('tplPath');
+  if (!el) return;
+  let d = '';
+  for (let i = 0; i <= 520; i += 2) {
+    const x = (i - 260) / 60;
+    const fn = tplFn === 'cos' ? Math.cos : tplFn === 'tan' ? (v => Math.max(-3, Math.min(3, Math.tan(v)))) : Math.sin;
+    const y = tplA * fn(tplW * x + tplP);
+    const px = i, py = 150 - y * 60;
+    d += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + Math.max(5, Math.min(295, py)).toFixed(1) + ' ';
+  }
+  el.setAttribute('d', d);
+}
+function drawRefCurve() {
+  const el = document.getElementById('refPathT');
+  if (!el) return;
+  el.style.display = showRef ? '' : 'none';
+  let d = '';
+  for (let i = 0; i <= 520; i += 3) {
+    const x = (i - 260) / 60;
+    const y = Math.sin(x);
+    const px = i, py = 150 - y * 60;
+    d += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
+  }
+  el.setAttribute('d', d);
+}
+drawTplCurve(); drawRefCurve();
+
+// ── EXPORT MODAL ──
+function showExport() { document.getElementById('exportOverlay').classList.add('show'); }
+function selectFmt(card) {
+  card.closest('.exp-formats').querySelectorAll('.fmt-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('pptHint').style.display = card.querySelector('.fmt-name').textContent.includes('PPT') ? 'block' : 'none';
+}
+document.getElementById('exportOverlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('show'); });
+
+// ── PLAZA FILTER ──
+function filterPlaza(cat, btn) {
+  document.querySelectorAll('.plaza-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.game-card').forEach(c => {
+    c.style.display = (cat==='all' || c.dataset.cat===cat) ? '' : 'none';
+  });
+}
+
+// ── SETUP MODAL ──
+function openSetup() { document.getElementById('setupOverlay').classList.add('show'); }
+function closeSetup() { document.getElementById('setupOverlay').classList.remove('show'); }
+document.getElementById('setupOverlay').addEventListener('click', function(e){ if(e.target===this) closeSetup(); });
+function setCorr(el) {
+  el.closest('.opts-grid').querySelectorAll('.opt-box').forEach(o => o.classList.remove('correct'));
+  el.classList.add('correct');
+}
+function modeToggle(btn) {
+  btn.closest('.mode-row').querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+let qIdx = 3;
+function addQ() {
+  qIdx++;
+  const div = document.createElement('div'); div.className='q-card';
+  div.innerHTML = `<div class="q-num">题目 ${qIdx}</div><textarea class="q-input" rows="2" placeholder="输入题目内容..."></textarea><div class="opts-grid"><div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">A</span><span class="opt-txt">选项A</span></div><div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">B</span><span class="opt-txt">选项B</span></div><div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">C</span><span class="opt-txt">选项C</span></div><div class="opt-box" onclick="setCorr(this)"><span class="opt-letter">D</span><span class="opt-txt">选项D</span></div></div><div class="q-meta"><select class="q-sel"><option>15秒</option><option>10秒</option><option>20秒</option></select><select class="q-sel"><option>10分</option><option>5分</option></select></div><button class="q-del" onclick="this.closest('.q-card').remove();updateQCnt()">✕</button>`;
+  document.getElementById('qList').appendChild(div);
+  div.style.animation='fadeSlide .25s ease';
+  div.scrollIntoView({behavior:'smooth',block:'start'});
+  updateQCnt();
+}
+function updateQCnt() {
+  document.getElementById('qcnt').textContent = document.querySelectorAll('.q-card').length + ' 题';
+}
+document.querySelectorAll('.q-del').forEach(b => b.onclick = function(){ this.closest('.q-card').remove(); updateQCnt(); });
+
+// ── GAME STATE ──
+const questions = [
+  {q:'3 × 7 = ?', opts:['21','24','27','18'], correct:0},
+  {q:'100 ÷ 4 = ?', opts:['20','25','40','50'], correct:1},
+  {q:'56 ÷ 8 = ?', opts:['6','8','7','9'], correct:2}
+];
+let gs = { cur:0, red:0, blue:0, tv:15, ti:null, answered:false };
+
+function startGame() {
+  closeSetup();
+  gs = { cur:0, red:0, blue:0, tv:15, ti:null, answered:false };
+  updateGameUI();
+  document.getElementById('gameScreen').classList.add('show');
+  startTimer();
+}
+function updateGameUI() {
+  const q = questions[gs.cur];
+  document.getElementById('gsQ').textContent = q.q;
+  document.getElementById('gsProg').textContent = `第 ${gs.cur+1} 题 / 共 ${questions.length} 题`;
+  document.getElementById('redScore').textContent = gs.red;
+  document.getElementById('blueScore').textContent = gs.blue;
+  const opts = document.querySelectorAll('.gs-opt');
+  opts.forEach((o,i) => {
+    o.querySelector('.gs-ot').textContent = q.opts[i];
+    o.className = 'gs-opt';
+    o.style.animationDelay = (i*.05+.05)+'s';
+    o.onclick = () => answerQ(o, i===q.correct);
+  });
+  updateTug(); gs.answered = false; resetTimer();
+}
+function updateTug() {
+  const tot = gs.red + gs.blue || 1;
+  const rp = Math.min(Math.max(gs.red/(tot+10)*100,5),88);
+  const bp = Math.min(Math.max(gs.blue/(tot+10)*100,5),88);
+  const kp = 50 - ((gs.red-gs.blue)/(tot+20))*38;
+  document.getElementById('tugR').style.width=rp+'%';
+  document.getElementById('tugB').style.width=bp+'%';
+  document.getElementById('knotEl').style.left=kp+'%';
+}
+function answerQ(el, correct) {
+  if (gs.answered) return; gs.answered = true;
+  clearInterval(gs.ti);
+  if (correct) {
+    el.classList.add('correct'); gs.red += 10;
+    showPop('+10', 'var(--green)');
+  } else {
+    el.classList.add('wrong'); gs.blue += 10;
+    const q = questions[gs.cur];
+    document.querySelectorAll('.gs-opt')[q.correct].classList.add('correct');
+    showPop('+10 (蓝队)', '#0066ff');
+  }
+  document.getElementById('redScore').textContent=gs.red;
+  document.getElementById('blueScore').textContent=gs.blue;
+  updateTug();
+}
+function showPop(txt, color) {
+  const el=document.createElement('div'); el.className='spop';
+  el.style.color=color; el.style.left=(40+Math.random()*40)+'vw'; el.style.top='45vh';
+  el.textContent=txt; document.body.appendChild(el);
+  setTimeout(()=>el.remove(),750);
+}
+function nextQ() {
+  clearInterval(gs.ti); gs.cur++;
+  if (gs.cur>=questions.length) showResult();
+  else { updateGameUI(); startTimer(); }
+}
+function startTimer() {
+  gs.tv=15;
+  document.getElementById('timerN').textContent=15;
+  gs.ti = setInterval(()=>{
+    gs.tv--;
+    document.getElementById('timerN').textContent=gs.tv;
+    const pct=(gs.tv/15)*100;
+    const fill=document.getElementById('timerFill');
+    fill.style.width=pct+'%';
+    fill.style.background=gs.tv>7?'var(--green)':gs.tv>4?'var(--orange)':'var(--red)';
+    if(gs.tv<=0){clearInterval(gs.ti);if(!gs.answered){gs.blue+=10;document.getElementById('blueScore').textContent=gs.blue;document.querySelectorAll('.gs-opt')[questions[gs.cur].correct].classList.add('correct');updateTug();}}
+  },1000);
+}
+function resetTimer(){document.getElementById('timerN').textContent=15;document.getElementById('timerFill').style.width='100%';document.getElementById('timerFill').style.background='var(--green)';}
+function pauseGame(){if(gs.ti){clearInterval(gs.ti);gs.ti=null;}else startTimer();}
+function exitGame(){clearInterval(gs.ti);document.getElementById('gameScreen').classList.remove('show');}
+function showResult(){
+  document.getElementById('gameScreen').classList.remove('show');
+  const rs=document.getElementById('resultScr'); rs.classList.add('show');
+  document.getElementById('redscore').textContent=gs.red;
+  document.getElementById('bluescore').textContent=gs.blue;
+  const rWins=gs.red>=gs.blue;
+  document.getElementById('resWinner').textContent=rWins?'🔴 红队获胜！':'🔵 蓝队获胜！';
+  document.getElementById('resRedCard').classList.toggle('win',rWins);
+  document.getElementById('resBlueCard').classList.toggle('win',!rWins);
+  launchConfetti();
+}
+function closeResult(){
+  document.getElementById('resultScr').classList.remove('show');
+  document.getElementById('confCanvas').classList.remove('show');
+  showPage('game-plaza');
+}
+function launchConfetti(){
+  const c=document.getElementById('confCanvas'); c.classList.add('show');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+  const ctx=c.getContext('2d');
+  const cols=['#ff3b3b','#0066ff','#00c06b','#ffd700','#ff8c00','#722ed1','#ff69b4'];
+  const pieces=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20,w:7+Math.random()*7,h:10+Math.random()*8,color:cols[Math.floor(Math.random()*cols.length)],rot:Math.random()*360,rs:(Math.random()-.5)*8,vy:3+Math.random()*4,vx:(Math.random()-.5)*3,delay:Math.random()*50}));
+  let f=0;
+  function animate(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pieces.forEach(p=>{
+      if(f<p.delay)return; p.y+=p.vy; p.x+=p.vx; p.rot+=p.rs;
+      if(p.y>c.height)return;
+      ctx.save(); ctx.translate(p.x+p.w/2,p.y+p.h/2); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    f++; if(f<200)requestAnimationFrame(animate);
+  }
+  animate();
+}
+// ── SUBJECT & TEMPLATE DATA ──
+const subjects = [
+  {key:'math', name:'数学', cnt:6, color:'#1890FF', bg:'linear-gradient(135deg,#1890FF,#096dd9)',
+   icon:'<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'},
+  {key:'physics', name:'物理', cnt:6, color:'#FA8C16', bg:'linear-gradient(135deg,#FA8C16,#d46b08)',
+   icon:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><polyline points="12 12 16 14"/>'},
+  {key:'chemistry', name:'化学', cnt:6, color:'#52C41A', bg:'linear-gradient(135deg,#52C41A,#389e0d)',
+   icon:'<path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>'},
+  {key:'biology', name:'生物', cnt:5, color:'#13C2C2', bg:'linear-gradient(135deg,#13C2C2,#08979c)',
+   icon:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {key:'chinese', name:'语文', cnt:4, color:'#722ED1', bg:'linear-gradient(135deg,#722ED1,#531dab)',
+   icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+  {key:'english', name:'英语', cnt:4, color:'#EB2F96', bg:'linear-gradient(135deg,#EB2F96,#c41d7f)',
+   icon:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+  {key:'history', name:'历史', cnt:4, color:'#D4380D', bg:'linear-gradient(135deg,#D4380D,#ad2102)',
+   icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
+  {key:'geo', name:'地理', cnt:4, color:'#0958D9', bg:'linear-gradient(135deg,#0958D9,#003eb3)',
+   icon:'<polygon points="3 11 22 2 13 21 11 13 3 11"/>'},
+];
+
+const templateData = {
+  math:[
+    {name:'函数实验室',desc:'调整参数实时观察三角函数图像变化',tags:['高中','互动'],thumb:'math-fn'},
+    {name:'立体几何展示台',desc:'3D旋转展示空间几何体结构',tags:['高中','3D'],thumb:'math-3d'},
+    {name:'数列与极限',desc:'数列求和与极限概念可视化',tags:['高中','动画'],thumb:'math-seq'},
+    {name:'圆与方程',desc:'圆的标准方程参数交互演示',tags:['初中'],thumb:'math-circ'},
+    {name:'概率统计',desc:'频率分布直方图动态演示',tags:['高中'],thumb:'math-stat'},
+    {name:'勾股定理',desc:'直观证明勾股定理多种方法',tags:['初中','经典'],thumb:'math-py'},
+  ],
+  physics:[
+    {name:'匀速圆周运动',desc:'受力分析与速度向量动态展示',tags:['高中','动画'],thumb:'phy-circle'},
+    {name:'电场力线',desc:'点电荷电场线分布可视化',tags:['高中'],thumb:'phy-field'},
+    {name:'波动与振动',desc:'横波纵波传播过程动态模拟',tags:['高中','互动'],thumb:'phy-wave'},
+    {name:'抛体运动',desc:'平抛运动轨迹实时分解演示',tags:['高中'],thumb:'phy-proj'},
+    {name:'磁场与感应',desc:'楞次定律感应电流方向互动',tags:['高中'],thumb:'phy-mag'},
+    {name:'受力平衡',desc:'力的合成与分解图解演示',tags:['高中','基础'],thumb:'phy-force'},
+  ],
+  chemistry:[
+    {name:'虚拟实验台',desc:'模拟化学实验操作步骤与现象',tags:['高中','互动'],thumb:'chem-lab'},
+    {name:'分子结构展示',desc:'3D展示有机分子空间构型',tags:['高中','3D'],thumb:'chem-mol'},
+    {name:'化学方程式配平',desc:'方程式配平步骤分解演示',tags:['初中'],thumb:'chem-eq'},
+    {name:'酸碱中和滴定',desc:'滴定曲线动态生成',tags:['高中'],thumb:'chem-titrate'},
+    {name:'元素周期律',desc:'周期表规律可视化探索',tags:['高中','经典'],thumb:'chem-table'},
+    {name:'电解质溶液',desc:'离子浓度变化动态演示',tags:['高中'],thumb:'chem-ion'},
+  ],
+  biology:[
+    {name:'细胞结构',desc:'细胞各部分结构功能互动展示',tags:['高中'],thumb:'bio-cell'},
+    {name:'DNA双链结构',desc:'DNA复制过程3D动态演示',tags:['高中','3D'],thumb:'bio-dna'},
+    {name:'光合作用',desc:'光合作用过程分步动画',tags:['初中'],thumb:'bio-photo'},
+    {name:'人体循环系统',desc:'血液循环路径动态展示',tags:['初中','动画'],thumb:'bio-circ'},
+    {name:'遗传与变异',desc:'基因遗传规律可视化推演',tags:['高中'],thumb:'bio-gene'},
+  ],
+  chinese:[
+    {name:'古诗词赏析',desc:'字词解析与意境图文联动',tags:['中学','文学'],thumb:'cn-poem'},
+    {name:'作文结构图解',desc:'议论文结构思维导图展示',tags:['高中'],thumb:'cn-essay'},
+    {name:'文言文字词',desc:'常见文言词汇互动练习',tags:['初中'],thumb:'cn-wenyan'},
+    {name:'修辞手法',desc:'比喻拟人等修辞示例演示',tags:['初中'],thumb:'cn-rhetoric'},
+  ],
+  english:[
+    {name:'语法结构',desc:'句子成分与语法规则可视化',tags:['初中','语法'],thumb:'en-gram'},
+    {name:'词汇联想图',desc:'词根词缀联想记忆网络图',tags:['高中'],thumb:'en-vocab'},
+    {name:'写作框架',desc:'英语作文段落结构互动展示',tags:['高中'],thumb:'en-write'},
+    {name:'情景对话',desc:'场景对话角色扮演模板',tags:['初中','互动'],thumb:'en-dialog'},
+  ],
+  history:[
+    {name:'历史地图',desc:'历史疆域变迁动态演示',tags:['中学','地图'],thumb:'hist-map'},
+    {name:'时间轴',desc:'历史事件时间轴交互展示',tags:['中学'],thumb:'hist-time'},
+    {name:'战役沙盘',desc:'历史战役过程动态推演',tags:['高中'],thumb:'hist-battle'},
+    {name:'文化对比',desc:'中西方文化特征对比展示',tags:['高中'],thumb:'hist-culture'},
+  ],
+  geo:[
+    {name:'板块运动',desc:'地球板块运动与地震火山演示',tags:['高中','动画'],thumb:'geo-plate'},
+    {name:'洋流与气候',desc:'全球洋流分布与气候影响',tags:['高中'],thumb:'geo-ocean'},
+    {name:'地形地貌',desc:'地形类型形成过程演示',tags:['初中'],thumb:'geo-terrain'},
+    {name:'天气系统',desc:'锋面系统与天气变化动画',tags:['高中'],thumb:'geo-weather'},
+  ],
+};
+
+// SVG thumbnails for templates
+function getTplThumb(key, color) {
+  const thumbs = {
+    'math-fn': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="20" y1="60" x2="180" y2="60" stroke="rgba(255,255,255,.15)" stroke-width="1"/><line x1="100" y1="10" x2="100" y2="110" stroke="rgba(255,255,255,.15)" stroke-width="1"/><path d="M20,60 Q40,20 60,60 Q80,100 100,60 Q120,20 140,60 Q160,100 180,60" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M20,60 Q50,10 80,60 Q110,110 140,60 Q170,10 180,50" stroke="rgba(255,255,255,.2)" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/></svg>`,
+    'math-3d': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><polygon points="100,15 160,85 40,85" stroke="${color}" stroke-width="2" fill="rgba(24,144,255,.1)"/><line x1="100" y1="15" x2="100" y2="85" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-dasharray="4,3"/><line x1="40" y1="85" x2="130" y2="55" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-dasharray="4,3"/></svg>`,
+    'math-seq': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,.15)" stroke-width="1"/>${[1,2,3,4,5,6,7].map((i,idx)=>`<rect x="${25+idx*22}" y="${100-i*10}" width="14" height="${i*10}" fill="${color}" opacity="${0.3+idx*0.1}" rx="2"/>`).join('')}</svg>`,
+    'math-circ': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="20" y1="60" x2="180" y2="60" stroke="rgba(255,255,255,.12)" stroke-width="1"/><line x1="100" y1="10" x2="100" y2="110" stroke="rgba(255,255,255,.12)" stroke-width="1"/><circle cx="100" cy="60" r="40" stroke="${color}" stroke-width="2" fill="rgba(24,144,255,.08)"/><line x1="100" y1="60" x2="128" y2="32" stroke="rgba(255,255,255,.4)" stroke-width="1"/></svg>`,
+    'math-stat': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,.15)" stroke-width="1"/>${[35,60,80,55,40,25].map((h,i)=>`<rect x="${25+i*25}" y="${100-h}" width="18" height="${h}" fill="${color}" opacity="${0.4+i*0.06}" rx="2"/>`).join('')}</svg>`,
+    'math-py': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><polygon points="100,20 170,100 30,100" stroke="${color}" stroke-width="2" fill="rgba(24,144,255,.08)"/><rect x="30" y="60" width="40" height="40" stroke="rgba(255,255,255,.2)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/><rect x="100" y="20" width="40" height="40" stroke="rgba(255,255,255,.2)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/></svg>`,
+    'phy-circle': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><circle cx="100" cy="60" r="38" stroke="rgba(255,255,255,.12)" stroke-width="1" fill="none" stroke-dasharray="5,4"/><circle cx="138" cy="60" r="8" fill="${color}" opacity=".9"/><line x1="138" y1="60" x2="138" y2="30" stroke="${color}" stroke-width="2" opacity=".7"/><line x1="100" y1="60" x2="138" y2="60" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/></svg>`,
+    'phy-wave': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M10,60 C30,30 50,90 70,60 C90,30 110,90 130,60 C150,30 170,90 190,60" stroke="${color}" stroke-width="2.5" fill="none"/><path d="M10,80 C30,55 50,105 70,80 C90,55 110,105 130,80 C150,55 170,105 190,80" stroke="rgba(255,255,255,.2)" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/></svg>`,
+    'phy-field': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><circle cx="100" cy="60" r="10" fill="${color}"/>${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;const x1=100+15*Math.cos(r);const y1=60+15*Math.sin(r);const x2=100+50*Math.cos(r);const y2=60+50*Math.sin(r);return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.5" opacity=".5"/>`}).join('')}</svg>`,
+    'phy-proj': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M20,100 Q80,10 180,100" stroke="${color}" stroke-width="2.5" fill="none" stroke-dasharray="6,3"/><circle cx="20" cy="100" r="5" fill="${color}"/><line x1="20" y1="100" x2="50" y2="70" stroke="${color}" stroke-width="1.5" opacity=".6"/><line x1="20" y1="100" x2="50" y2="100" stroke="rgba(255,255,255,.3)" stroke-width="1"/></svg>`,
+    'phy-mag': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="70" y="35" width="60" height="50" rx="4" stroke="${color}" stroke-width="2" fill="rgba(250,140,22,.1)"/><line x1="70" y1="60" x2="30" y2="60" stroke="${color}" stroke-width="2"/><line x1="130" y1="60" x2="170" y2="60" stroke="${color}" stroke-width="2"/><circle cx="30" cy="60" r="6" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none"/><text x="30" y="65" fill="rgba(255,255,255,.6)" font-size="8" text-anchor="middle">S</text><circle cx="170" cy="60" r="6" fill="${color}" opacity=".7"/></svg>`,
+    'phy-force': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="75" y="45" width="50" height="35" rx="4" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><line x1="100" y1="45" x2="100" y2="20" stroke="${color}" stroke-width="2"/><polygon points="100,15 96,23 104,23" fill="${color}"/><line x1="100" y1="80" x2="100" y2="105" stroke="rgba(255,255,255,.35)" stroke-width="2"/><polygon points="100,110 96,102 104,102" fill="rgba(255,255,255,.35)"/><line x1="75" y1="62" x2="40" y2="62" stroke="${color}" stroke-width="2" opacity=".7"/><polygon points="35,62 43,58 43,66" fill="${color}" opacity=".7"/></svg>`,
+    'chem-lab': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M75,30 L75,75 L55,105 L145,105 L125,75 L125,30 Z" stroke="${color}" stroke-width="2" fill="rgba(82,196,26,.08)"/><line x1="75" y1="30" x2="125" y2="30" stroke="${color}" stroke-width="2"/><circle cx="90" cy="88" r="5" fill="${color}" opacity=".6"/><circle cx="110" cy="95" r="4" fill="${color}" opacity=".4"/><circle cx="100" cy="80" r="3" fill="${color}" opacity=".8"/></svg>`,
+    'chem-mol': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><circle cx="100" cy="60" r="14" fill="${color}" opacity=".8"/><circle cx="60" cy="40" r="10" fill="rgba(255,255,255,.4)"/><circle cx="140" cy="40" r="10" fill="rgba(255,255,255,.4)"/><circle cx="60" cy="80" r="10" fill="rgba(255,255,255,.4)"/><circle cx="140" cy="80" r="10" fill="rgba(255,255,255,.4)"/><line x1="86" y1="53" x2="70" y2="45" stroke="rgba(255,255,255,.3)" stroke-width="2"/><line x1="114" y1="53" x2="130" y2="45" stroke="rgba(255,255,255,.3)" stroke-width="2"/><line x1="86" y1="67" x2="70" y2="75" stroke="rgba(255,255,255,.3)" stroke-width="2"/><line x1="114" y1="67" x2="130" y2="75" stroke="rgba(255,255,255,.3)" stroke-width="2"/></svg>`,
+    'chem-eq': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><text x="30" y="55" fill="${color}" font-size="14" font-weight="700" font-family="monospace">H₂ + O</text><text x="30" y="75" fill="rgba(255,255,255,.5)" font-size="12" font-family="monospace">→ H₂O</text><line x1="20" y1="85" x2="180" y2="85" stroke="rgba(255,255,255,.1)" stroke-width="1"/><text x="20" y="105" fill="${color}" font-size="11" font-family="monospace" opacity=".7">2H₂ + O₂ → 2H₂O</text></svg>`,
+    'chem-titrate': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M30,110 L50,70 L80,45 L110,35 L140,40 L160,50 L175,75 L180,110" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round"/><line x1="20" y1="110" x2="190" y2="110" stroke="rgba(255,255,255,.12)" stroke-width="1"/><line x1="20" y1="20" x2="20" y2="110" stroke="rgba(255,255,255,.12)" stroke-width="1"/><circle cx="110" cy="35" r="5" fill="${color}"/></svg>`,
+    'chem-table': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/>${[...Array(18)].map((_,i)=>[...Array(4)].map((_,j)=>`<rect x="${8+i*10}" y="${20+j*22}" width="8" height="17" rx="2" fill="${i<2||i>12?color:'rgba(255,255,255,.12)'}" opacity="${0.3+Math.random()*0.4}"/>`).join('')).join('')}</svg>`,
+    'chem-ion': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/>${[...Array(8)].map((_,i)=>{const x=30+Math.random()*140;const y=20+Math.random()*80;const pos=Math.random()>0.5;return`<circle cx="${x}" cy="${y}" r="7" fill="${pos?color:'rgba(255,255,255,.3)'}" opacity=".8"/><text x="${x}" y="${y+4}" font-size="9" text-anchor="middle" fill="white">${pos?'+':'-'}</text>`}).join('')}</svg>`,
+    'bio-cell': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><ellipse cx="100" cy="60" rx="75" ry="50" stroke="${color}" stroke-width="2" fill="rgba(19,194,194,.07)"/><ellipse cx="100" cy="60" rx="25" ry="20" stroke="${color}" stroke-width="1.5" fill="rgba(19,194,194,.15)" opacity=".7"/><circle cx="65" cy="45" r="6" fill="${color}" opacity=".5"/><circle cx="140" cy="55" r="5" fill="${color}" opacity=".4"/><circle cx="80" cy="80" r="4" fill="${color}" opacity=".5"/></svg>`,
+    'bio-dna': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M80,10 C80,30 120,50 120,60 C120,70 80,90 80,110" stroke="${color}" stroke-width="2.5" fill="none"/><path d="M120,10 C120,30 80,50 80,60 C80,70 120,90 120,110" stroke="rgba(255,255,255,.35)" stroke-width="2.5" fill="none"/>${[20,35,50,60,70,85,100].map(y=>`<line x1="80" y1="${y}" x2="120" y2="${y}" stroke="rgba(255,255,255,.2)" stroke-width="1"/>`).join('')}</svg>`,
+    'bio-photo': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="60" y="35" width="80" height="55" rx="8" stroke="${color}" stroke-width="2" fill="rgba(19,194,194,.08)"/><circle cx="100" cy="15" r="10" fill="#FFD700" opacity=".8"/>${[...Array(5)].map((_,i)=>`<line x1="${90+i*5}" y1="25" x2="${90+i*5}" y2="35" stroke="#FFD700" stroke-width="1.5" opacity=".5"/>`).join('')}<text x="100" y="67" font-size="10" text-anchor="middle" fill="rgba(255,255,255,.5)" font-family="sans-serif">CO₂+H₂O→</text><text x="100" y="82" font-size="10" text-anchor="middle" fill="${color}" font-family="sans-serif">葡萄糖+O₂</text></svg>`,
+    'bio-circ': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><ellipse cx="100" cy="60" rx="55" ry="40" stroke="${color}" stroke-width="2" fill="none" stroke-dasharray="5,3"/><circle cx="100" cy="60" r="15" fill="${color}" opacity=".7"/><polygon points="100,45 97,55 103,55" fill="#fff" opacity=".8"/><text x="100" y="64" font-size="8" text-anchor="middle" fill="white">心脏</text></svg>`,
+    'bio-gene': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="85" y="10" width="30" height="30" rx="4" fill="${color}" opacity=".8"/><text x="100" y="30" font-size="10" text-anchor="middle" fill="white">Aa</text><line x1="80" y1="40" x2="60" y2="65" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><line x1="120" y1="40" x2="140" y2="65" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><rect x="40" y="65" width="28" height="28" rx="4" fill="${color}" opacity=".5"/><rect x="132" y="65" width="28" height="28" rx="4" fill="rgba(255,255,255,.2)"/><text x="54" y="83" font-size="9" text-anchor="middle" fill="white">AA</text><text x="146" y="83" font-size="9" text-anchor="middle" fill="rgba(255,255,255,.7)">aa</text></svg>`,
+    'cn-poem': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="40" y1="15" x2="40" y2="105" stroke="rgba(255,255,255,.15)" stroke-width="1"/>${['床','前','明','月','光','疑','是','地','上','霜'].map((c,i)=>`<text x="40" y="${15+i*9}" font-size="9" text-anchor="middle" fill="${i<5?color:'rgba(255,255,255,.45)'}" font-family="Noto Sans SC,sans-serif">${c}</text>`).join('')}<path d="M70,20 Q130,15 160,40 Q180,60 160,80 Q130,100 90,95 Q60,90 55,70 Q50,50 70,20Z" stroke="${color}" stroke-width="1" fill="rgba(114,46,209,.08)" opacity=".6"/></svg>`,
+    'cn-essay': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="85" y="15" width="30" height="20" rx="4" fill="${color}" opacity=".8"/><text x="100" y="29" font-size="9" text-anchor="middle" fill="white">论点</text><line x1="75" y1="35" x2="55" y2="55" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><line x1="100" y1="35" x2="100" y2="55" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><line x1="125" y1="35" x2="145" y2="55" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>${['论据1','论据2','论据3'].map((t,i)=>`<rect x="${35+i*45}" y="55" width="32" height="18" rx="3" fill="${color}" opacity="${0.4+i*0.1}"/><text x="${51+i*45}" y="68" font-size="8" text-anchor="middle" fill="white">${t}</text>`).join('')}</svg>`,
+    'cn-wenyan': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><text x="30" y="40" font-size="20" fill="${color}" font-family="serif" opacity=".9">之乎者也</text><line x1="25" y1="50" x2="175" y2="50" stroke="rgba(255,255,255,.1)" stroke-width="1"/><text x="30" y="70" font-size="11" fill="rgba(255,255,255,.5)" font-family="Noto Sans SC,sans-serif">之: 结构助词，的</text><text x="30" y="88" font-size="11" fill="rgba(255,255,255,.35)" font-family="Noto Sans SC,sans-serif">乎: 语气助词</text></svg>`,
+    'cn-rhetoric': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M30,80 Q100,20 170,80" stroke="${color}" stroke-width="2" fill="none"/><circle cx="100" cy="42" r="8" fill="${color}" opacity=".7"/><text x="100" y="100" font-size="11" text-anchor="middle" fill="rgba(255,255,255,.5)" font-family="Noto Sans SC,sans-serif">比喻 · 拟人 · 排比</text></svg>`,
+    'en-gram': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/>${[['主语','S',35],['谓语','V',80],['宾语','O',130],['补语','C',165]].map(([n,a,x])=>`<rect x="${x-20}" y="50" width="40" height="28" rx="5" fill="${color}" opacity=".5"/><text x="${x}" y="67" font-size="9" text-anchor="middle" fill="white">${a}</text>`).join('')}<text x="100" y="100" font-size="10" text-anchor="middle" fill="rgba(255,255,255,.4)" font-family="sans-serif">Sentence Structure</text></svg>`,
+    'en-vocab': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><circle cx="100" cy="60" r="18" fill="${color}" opacity=".8"/><text x="100" y="65" font-size="9" text-anchor="middle" fill="white">graph</text>${[['geo-',45,25],['photo-',155,25],['-y',30,80],['-ic',170,80],['-er',100,100]].map(([t,x,y])=>`<circle cx="${x}" cy="${y}" r="13" fill="rgba(255,255,255,.15)"/><text x="${x}" y="${y+4}" font-size="8" text-anchor="middle" fill="rgba(255,255,255,.7)">${t}</text><line x1="${x}" y1="${y}" x2="100" y2="60" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`).join('')}</svg>`,
+    'en-write': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/>${['Introduction','Body Para 1','Body Para 2','Conclusion'].map((t,i)=>`<rect x="30" y="${15+i*25}" width="140" height="19" rx="4" fill="${color}" opacity="${0.2+i*0.08}"/><text x="100" y="${28+i*25}" font-size="9" text-anchor="middle" fill="rgba(255,255,255,.75)">${t}</text>`).join('')}</svg>`,
+    'en-dialog': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="20" y="20" width="90" height="28" rx="8" fill="${color}" opacity=".7"/><polygon points="25,48 35,48 25,58" fill="${color}" opacity=".7"/><rect x="90" y="60" width="90" height="28" rx="8" fill="rgba(255,255,255,.2)"/><polygon points="175,88 165,88 175,98" fill="rgba(255,255,255,.2)"/><text x="65" y="38" font-size="9" text-anchor="middle" fill="white">Hello! How are you?</text><text x="135" y="78" font-size="9" text-anchor="middle" fill="rgba(255,255,255,.8)">I'm fine, thanks!</text></svg>`,
+    'hist-map': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M30,30 Q60,20 90,35 Q120,50 150,35 Q170,25 180,40 L175,90 Q150,100 120,85 Q90,70 60,85 Q40,95 25,80 Z" stroke="${color}" stroke-width="2" fill="rgba(212,56,13,.08)"/><circle cx="100" cy="55" r="5" fill="${color}" opacity=".9"/><circle cx="60" cy="70" r="4" fill="${color}" opacity=".6"/><circle cx="145" cy="50" r="4" fill="${color}" opacity=".6"/></svg>`,
+    'hist-time': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><line x1="20" y1="60" x2="180" y2="60" stroke="rgba(255,255,255,.2)" stroke-width="2"/>${[30,70,110,150].map((x,i)=>`<circle cx="${x}" cy="60" r="6" fill="${color}" opacity="${0.5+i*0.15}"/><line x1="${x}" y1="60" x2="${x}" y2="${i%2===0?40:80}" stroke="${color}" stroke-width="1.5" opacity=".5"/><text x="${x}" y="${i%2===0?35:95}" font-size="8" text-anchor="middle" fill="rgba(255,255,255,.5)" font-family="Noto Sans SC,sans-serif">${[221,206,1912,1949][i]}</text>`).join('')}</svg>`,
+    'hist-battle': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><polygon points="100,30 170,85 30,85" stroke="${color}" stroke-width="1.5" fill="rgba(212,56,13,.08)" stroke-dasharray="5,4"/><circle cx="60" cy="75" r="6" fill="${color}" opacity=".7"/><circle cx="140" cy="75" r="6" fill="rgba(255,255,255,.4)"/><line x1="60" y1="75" x2="90" y2="55" stroke="${color}" stroke-width="1" opacity=".5"/><line x1="140" y1="75" x2="110" y2="55" stroke="rgba(255,255,255,.2)" stroke-width="1"/></svg>`,
+    'hist-culture': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="20" y="25" width="70" height="70" rx="6" stroke="${color}" stroke-width="1.5" fill="rgba(212,56,13,.06)"/><rect x="110" y="25" width="70" height="70" rx="6" stroke="rgba(255,255,255,.25)" stroke-width="1.5" fill="rgba(255,255,255,.04)"/><text x="55" y="65" font-size="14" text-anchor="middle" fill="${color}">中</text><text x="145" y="65" font-size="14" text-anchor="middle" fill="rgba(255,255,255,.5)">West</text><line x1="95" y1="30" x2="105" y2="30" stroke="rgba(255,255,255,.2)" stroke-width="1"/><line x1="95" y1="90" x2="105" y2="90" stroke="rgba(255,255,255,.2)" stroke-width="1"/></svg>`,
+    'geo-plate': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M10,70 L80,65 L100,40 L120,65 L190,70 L190,110 L10,110Z" fill="rgba(9,88,217,.2)" stroke="${color}" stroke-width="1"/><path d="M60,65 Q80,30 100,40 Q120,30 140,65" stroke="${color}" stroke-width="2" fill="none"/><circle cx="100" cy="40" r="5" fill="${color}"/></svg>`,
+    'geo-ocean': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M10,40 Q50,20 100,45 Q150,70 190,50" stroke="${color}" stroke-width="2" fill="none"/><path d="M10,70 Q50,50 100,75 Q150,100 190,80" stroke="${color}" stroke-width="2" fill="none" opacity=".5"/><polygon points="100,45 94,38 106,38" fill="${color}" opacity=".8"/></svg>`,
+    'geo-terrain': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><path d="M10,100 L50,40 L80,70 L110,25 L140,70 L170,50 L190,100Z" stroke="${color}" stroke-width="2" fill="rgba(9,88,217,.08)"/><line x1="10" y1="100" x2="190" y2="100" stroke="rgba(255,255,255,.12)" stroke-width="1"/></svg>`,
+    'geo-weather': `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><circle cx="100" cy="50" r="30" stroke="${color}" stroke-width="2" fill="rgba(9,88,217,.1)"/><path d="M100,20 Q130,35 130,60" stroke="${color}" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity=".6"/><text x="100" y="55" font-size="9" text-anchor="middle" fill="rgba(255,255,255,.5)">低气压</text><polygon points="100,80 96,92 104,92" fill="${color}" opacity=".7"/></svg>`,
+  };
+  return thumbs[key] || `<svg viewBox="0 0 200 120" width="200" height="120"><rect width="200" height="120" fill="#0a1628"/><rect x="70" y="40" width="60" height="40" rx="8" fill="${color}" opacity=".5"/></svg>`;
+}
+
+const tagStyle = {
+  '高中':'background:#EBF5FF;color:#1890FF','初中':'background:#FFF3E0;color:#FF8C00',
+  '小学':'background:#f0faf5;color:#00A85A','中学':'background:#F5F0FF;color:#722ED1',
+  '互动':'background:#f0faf5;color:#00A85A','3D':'background:#EBF5FF;color:#1890FF',
+  '动画':'background:#FFF3E0;color:#FF8C00','经典':'background:#FFF0F0;color:#FF4D4F',
+  '地图':'background:#F5F0FF;color:#722ED1','基础':'background:#f0faf5;color:#00A85A',
+  '文学':'background:#FFF3E0;color:#FF8C00','语法':'background:#EBF5FF;color:#1890FF',
+};
+
+function renderSubjectGrid() {
+  const grid = document.getElementById('subjGrid');
+  grid.innerHTML = subjects.map(s => `
+    <div class="subj-card" onclick="showSubjectTemplates('${s.key}')">
+      <div class="subj-card-icon" style="background:${s.bg}">
+        <svg viewBox="0 0 24 24" width="26" height="26">${s.icon}</svg>
+      </div>
+      <div class="subj-card-name">${s.name}</div>
+      <div class="subj-card-cnt">${s.cnt} 个模板</div>
+    </div>
+  `).join('');
+}
+
+function showSubjectTemplates(key) {
+  const s = subjects.find(x => x.key === key);
+  const tpls = templateData[key] || [];
+  document.getElementById('tplBrowseSubjects').style.display = 'none';
+  document.getElementById('tplBrowseTemplates').style.display = 'block';
+  document.getElementById('tplBrowseGrid').innerHTML = `
+    <div class="tpl-browse-sec-head">
+      <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${s.bg}">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="white" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg>
+      </div>
+      <div class="tpl-browse-sec-title">${s.name} · 全部模板</div>
+      <div style="font-size:12px;color:var(--ink3);margin-left:auto">${tpls.length} 个</div>
+    </div>
+    <div class="tpl-cards-grid">
+      ${tpls.map(t => `
+        <div class="tpl-card" onclick="selectTplBrowse('${t.name}')">
+          <div class="tpl-card-thumb">
+            ${getTplThumb(t.thumb, s.color)}
+            <div class="tpl-card-overlay"><span>使用此模板</span></div>
+          </div>
+          <div class="tpl-card-body">
+            <div class="tpl-card-name">${t.name}</div>
+            <div class="tpl-card-desc">${t.desc}</div>
+            <div class="tpl-card-tags">
+              ${t.tags.map(tag => `<span class="tpl-tag" style="${tagStyle[tag]||'background:#f0faf5;color:#00A85A'}">${tag}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function showSubjects() {
+  document.getElementById('tplBrowseSubjects').style.display = 'block';
+  document.getElementById('tplBrowseTemplates').style.display = 'none';
+}
+
+function selectTplBrowse(name) {
+  showPage('template');
+  document.getElementById('mainInput').value = name + ' 互动课件';
+  updateCount();
+}
+
+// Initialize subject grid
+renderSubjectGrid();
+
+// Legacy modal - removed, now uses page
+function openTemplateModal() { showPage('tpl-browse'); }
+function closeTemplateModal() { showPage('home'); }
+
+</script>
+</body>
+</html>

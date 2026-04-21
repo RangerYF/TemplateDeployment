@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>可视化模板平台架构设计稿</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #dbe3ee;
+      --primary: #0f9d58;
+      --primary-soft: #e8f6ee;
+      --accent: #2563eb;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(15, 157, 88, 0.08), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .page {
+      width: min(1200px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 40px 0 72px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #16355f 55%, #0f9d58 120%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 36px 40px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 38px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 920px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 15px;
+    }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .section {
+      margin-top: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: 26px;
+      letter-spacing: -0.02em;
+    }
+
+    .section h3 {
+      margin: 22px 0 10px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .section h4 {
+      margin: 16px 0 8px;
+      font-size: 16px;
+    }
+
+    .lead {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .callout {
+      margin: 18px 0 0;
+      border-left: 4px solid var(--primary);
+      background: var(--primary-soft);
+      padding: 14px 16px;
+      border-radius: 0 14px 14px 0;
+      color: #14532d;
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    .danger {
+      border-left-color: var(--danger);
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    ul, ol {
+      margin: 10px 0 0 20px;
+      padding: 0;
+    }
+
+    li + li {
+      margin-top: 6px;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: #eff3f8;
+      border: 1px solid #dbe3ee;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.92em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      background: #f8fafc;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .mermaid-wrap {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      overflow-x: auto;
+    }
+
+    .footnote {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 28px 22px;
+      }
+
+      .hero h1 {
+        font-size: 30px;
+      }
+
+      .section {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>可视化模板平台架构设计稿</h1>
+      <p>
+        本设计稿结合当前模板仓库与主项目现状，给出面向“模板持续新增/升级、实例后端化存储、实例 CRUD、继续编辑、版本兼容”的整体平台架构方案。
+        目标不是单纯替换 <code>iframe</code>，而是建立一套长期可扩展的模板平台。
+      </p>
+      <div class="hero-meta">
+        <span class="chip">适用范围：模板中心 / 模板实例 / 工作台 / 模板升级</span>
+        <span class="chip">设计重点：后端注册中心 + 版本化运行时 + 实例快照</span>
+        <span class="chip">迁移原则：先数据后协议，再逐步替换嵌入方式</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>1. 背景与现状</h2>
+      <p class="lead">
+        当前系统由两个部分组成：模板仓库与主项目可视化中心。模板已经有多个独立 Vite/React 应用，主项目通过模板目录页、实例页和工作台页接入这些模板。
+      </p>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>模板仓库现状</strong>
+          <ul>
+            <li>多个模板以独立应用形式存在，主要是 Vite + React + TypeScript。</li>
+            <li>模板大多可独立部署在 Vercel 上，部分物理模板共享同一运行时入口。</li>
+            <li>模板之间技术栈相近，但版本并未完全统一，存在 React 18/19、Vite 6/7/8 并存情况。</li>
+            <li>模板本身更多是“独立 SPA”而不是天然可嵌入组件。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>主项目现状</strong>
+          <ul>
+            <li>模板目录由前端常量 <code>VISUAL_TEMPLATE_MANIFEST</code> 维护。</li>
+            <li>模板实例由前端 <code>localStorage</code> 维护，当前只保存标题、模板编号、更新时间等元信息。</li>
+            <li>工作台进入后通过生成前端 <code>projectId</code> 并用 <code>iframe</code> 打开模板入口地址。</li>
+            <li>目前实例 CRUD 不是模板内容级 CRUD，而是前端卡片记录 CRUD。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        当前最大问题不是“iframe 是否优雅”，而是模板、运行时、实例三层概念混在一起：模板目录前端硬编码、实例没有后端持久化、模板运行时没有版本绑定，导致后续无法稳定支撑升级、回滚、继续编辑和多端同步。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. 设计目标</h2>
+      <div class="grid grid-3">
+        <div class="card">
+          <strong>目标 A：模板可长期扩展</strong>
+          新增模板、下线模板、灰度发布模板、统一管理模板元信息，不再依赖前端改常量。
+        </div>
+        <div class="card">
+          <strong>目标 B：实例完整后端化</strong>
+          模板实例需要真正落库，支持创建、重命名、复制、删除、继续编辑、分享和统计。
+        </div>
+        <div class="card">
+          <strong>目标 C：模板升级可控</strong>
+          模板升级后，老实例默认不被破坏；支持版本绑定、升级预览、复制升级、回滚。
+        </div>
+      </div>
+
+      <div class="grid grid-3" style="margin-top: 16px;">
+        <div class="card">
+          <strong>目标 D：保持迁移可行</strong>
+          短期允许继续使用 <code>iframe</code>，但必须引入统一 bridge，避免未来重做。
+        </div>
+        <div class="card">
+          <strong>目标 E：主项目职责清晰</strong>
+          主项目负责平台壳子、权限、实例管理与宿主交互，不再承担模板内部业务状态存储。
+        </div>
+        <div class="card">
+          <strong>目标 F：支持多种运行时形态</strong>
+          统一协议下允许 <code>iframe</code>、远程模块、Web Component 并存，逐步演进而非一次推翻。
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. 核心设计原则</h2>
+      <ol>
+        <li>模板定义、模板运行时、模板实例必须拆开建模。</li>
+        <li>实例必须绑定运行时版本，不能默认跟随模板最新代码运行。</li>
+        <li>模板内容状态必须以快照 <code>snapshot</code> 的形式后端存储。</li>
+        <li>嵌入技术不是第一优先级，统一 bridge 协议才是第一优先级。</li>
+        <li>优先解决后端注册中心与实例数据模型，再逐步替换前端接入方式。</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>4. 目标总体架构</h2>
+      <p class="lead">
+        目标架构由 5 层组成：模板注册中心、模板运行时、模板实例中心、主项目宿主层、模板桥接层。
+      </p>
+
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TB
+    U[教师/用户]
+
+    subgraph Host["主项目 Host App"]
+      A1[模板库页面]
+      A2[实例列表页面]
+      A3[模板工作台页面]
+      A4[宿主工具栏/保存状态/权限控制]
+    end
+
+    subgraph Backend["模板平台后端"]
+      B1[Template Registry 模板注册中心]
+      B2[Instance Service 实例服务]
+      B3[Version Service 版本/升级服务]
+      B4[Asset & Share 缩略图/分享/统计]
+    end
+
+    subgraph Runtime["Template Runtime 模板运行时"]
+      C1[Physics Runtime]
+      C2[Math Runtime]
+      C3[Chem Runtime]
+      C4[未来新 Runtime]
+    end
+
+    subgraph Bridge["Template Bridge 统一协议"]
+      D1[mount]
+      D2[loadSnapshot]
+      D3[getSnapshot]
+      D4[events]
+      D5[destroy]
+    end
+
+    U --> A1
+    U --> A2
+    U --> A3
+
+    A1 <--> B1
+    A2 <--> B2
+    A3 <--> B2
+    A3 <--> B3
+    A3 <--> B4
+
+    A3 <--> D1
+    A3 <--> D2
+    A3 <--> D3
+    A3 <--> D4
+    A3 <--> D5
+
+    D1 <--> C1
+    D1 <--> C2
+    D1 <--> C3
+    D1 <--> C4
+        </pre>
+      </div>
+
+      <div class="callout">
+        宿主和模板运行时之间一律通过统一 bridge 通信。这样短期可以继续 <code>iframe</code>，长期可以替换为远程模块或 Web Component，而不需要重写业务协议。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. 核心领域模型</h2>
+      <h3>5.1 四个核心对象</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>对象</th>
+            <th>职责</th>
+            <th>示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>VisualTemplateRuntime</code></td>
+            <td>一套真正可执行的前端运行时，负责模板渲染与交互。</td>
+            <td><code>phys-template-mechanics</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateRuntimeVersion</code></td>
+            <td>某个运行时的具体发布版本，带入口地址和桥接协议版本。</td>
+            <td><code>physics-runtime@1.4.2</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateDefinition</code></td>
+            <td>用户在模板库中看到的模板卡片与业务定义。</td>
+            <td><code>P-01 受力分析器</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateInstance</code></td>
+            <td>用户基于某个模板创建的实例，保存标题、快照、版本、缩略图等。</td>
+            <td><code>斜面受力分析课堂演示</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>5.2 为什么必须拆成四层</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>模板定义 ≠ 运行时入口</strong>
+          例如多个物理模板可能共享一个运行时入口，但属于不同模板定义。后端必须支持“多个模板定义指向同一个 Runtime”。
+        </div>
+        <div class="card">
+          <strong>实例 ≠ 模板卡片</strong>
+          实例必须有自己的快照、缩略图、更新时间、版本绑定和权限，而不是模板卡片的简单拷贝。
+        </div>
+      </div>
+
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+erDiagram
+    VISUAL_TEMPLATE_RUNTIME ||--o{ VISUAL_TEMPLATE_RUNTIME_VERSION : has
+    VISUAL_TEMPLATE_RUNTIME ||--o{ VISUAL_TEMPLATE_DEFINITION : serves
+    VISUAL_TEMPLATE_DEFINITION ||--o{ VISUAL_TEMPLATE_INSTANCE : creates
+    VISUAL_TEMPLATE_RUNTIME_VERSION ||--o{ VISUAL_TEMPLATE_INSTANCE : pins
+
+    VISUAL_TEMPLATE_RUNTIME {
+      string id
+      string runtimeKey
+      string name
+      string entryType
+      string status
+      string currentVersionId
+    }
+
+    VISUAL_TEMPLATE_RUNTIME_VERSION {
+      string id
+      string runtimeId
+      string version
+      string entryUrl
+      string manifestUrl
+      string bridgeVersion
+      string snapshotSchemaVersion
+    }
+
+    VISUAL_TEMPLATE_DEFINITION {
+      string id
+      string templateKey
+      string runtimeId
+      string subject
+      string title
+      json defaultConfig
+      json capabilities
+      boolean isPublished
+    }
+
+    VISUAL_TEMPLATE_INSTANCE {
+      string id
+      string userId
+      string templateId
+      string runtimeVersionId
+      string title
+      json snapshot
+      string snapshotSchemaVersion
+      string thumbnailUrl
+      string status
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>6. 后端架构设计</h2>
+      <h3>6.1 后端职责</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>Template Registry</strong>
+          <ul>
+            <li>维护模板目录、模板配置、模板分类、封面、标签、状态。</li>
+            <li>管理模板与运行时的映射关系。</li>
+            <li>决定模板库页面展示哪些模板。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Runtime Version Service</strong>
+          <ul>
+            <li>记录运行时版本、入口地址、资产地址、发布时间。</li>
+            <li>支持灰度、回滚、冻结旧版本、指定推荐版本。</li>
+            <li>向实例服务提供升级检查与迁移能力。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Instance Service</strong>
+          <ul>
+            <li>负责实例创建、读取、重命名、复制、删除、继续编辑。</li>
+            <li>保存实例快照、缩略图、运行时版本绑定。</li>
+            <li>提供实例搜索、筛选、排序、最近访问等能力。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Share / Assets / Analytics</strong>
+          <ul>
+            <li>缩略图上传、分享链接、使用次数、行为埋点。</li>
+            <li>支持模板使用统计与实例编辑统计。</li>
+            <li>为后续模板运营和资源治理提供数据基础。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>6.2 建议的数据表</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>表名</th>
+            <th>作用</th>
+            <th>关键字段</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>VisualTemplateRuntime</code></td>
+            <td>记录运行时的基础信息。</td>
+            <td><code>runtimeKey</code>, <code>entryType</code>, <code>currentVersionId</code>, <code>status</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateRuntimeVersion</code></td>
+            <td>记录每次 runtime 发布版本。</td>
+            <td><code>version</code>, <code>entryUrl</code>, <code>bridgeVersion</code>, <code>snapshotSchemaVersion</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateDefinition</code></td>
+            <td>记录模板目录定义。</td>
+            <td><code>templateKey</code>, <code>runtimeId</code>, <code>title</code>, <code>subject</code>, <code>defaultConfig</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateInstance</code></td>
+            <td>记录用户实例。</td>
+            <td><code>templateId</code>, <code>runtimeVersionId</code>, <code>snapshot</code>, <code>thumbnailUrl</code>, <code>updatedAt</code></td>
+          </tr>
+          <tr>
+            <td><code>VisualTemplateMigration</code></td>
+            <td>记录快照迁移规则。</td>
+            <td><code>fromSchemaVersion</code>, <code>toSchemaVersion</code>, <code>handlerKey</code>, <code>isAutomatic</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        你们现在主项目里“模板实例”只保存元信息，没有保存模板内容快照。新的实例表必须把 <code>snapshot</code> 当作核心字段，否则“继续编辑”无法成立。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>7. 前端主项目架构设计</h2>
+      <h3>7.1 主项目角色</h3>
+      <ul>
+        <li>展示模板库与实例列表。</li>
+        <li>负责模板实例 CRUD、搜索、筛选、排序。</li>
+        <li>负责工作台壳子、顶部工具栏、保存状态、升级提醒。</li>
+        <li>负责向后端读取模板目录、实例详情、版本状态。</li>
+        <li>负责装载模板运行时，但不负责模板内部状态长期存储。</li>
+      </ul>
+
+      <h3>7.2 页面层职责</h3>
+      <div class="grid grid-3">
+        <div class="card">
+          <strong>模板库页</strong>
+          调用 <code>/templates</code> 接口，展示模板目录与筛选条件。用户从这里选择模板进入创建流程。
+        </div>
+        <div class="card">
+          <strong>实例列表页</strong>
+          调用 <code>/instances</code> 接口，展示用户实例。支持重命名、复制、删除、继续编辑。
+        </div>
+        <div class="card">
+          <strong>工作台页</strong>
+          根据 <code>instanceId</code> 装载实例，并通过 bridge 与模板运行时通信，负责保存、升级提示和错误边界。
+        </div>
+      </div>
+
+      <h3>7.3 前端必须移除的临时实现</h3>
+      <ul>
+        <li>不再以前端常量作为正式模板目录。</li>
+        <li>不再以 <code>localStorage</code> 作为正式实例存储。</li>
+        <li>不再把“生成前端 projectId 并写本地存储”当成实例创建流程。</li>
+      </ul>
+
+      <div class="callout danger">
+        <code>localStorage</code> 可以保留为临时缓存或未登录草稿缓存，但不能再作为正式实例的唯一来源。正式实例必须以服务端记录为准。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>8. Template Bridge 协议设计</h2>
+      <p class="lead">
+        bridge 是整套方案的稳定内核。短期即使继续用 <code>iframe</code>，也必须按统一协议通信；长期替换为 remote module 时仍然沿用同一协议。
+      </p>
+
+      <div class="callout warn">
+        在当前团队现状下，不应试图统一所有模板的内部技术实现，也不应要求所有模板共享同一种业务数据结构。真正要统一的是
+        <strong>bridge 接口、snapshot 外层协议、版本迁移机制</strong>，而不是内部 store 细节。
+      </div>
+
+      <h3>8.1 宿主传入模板运行时的上下文</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>字段</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>instanceId</code></td>
+            <td>当前实例 ID。</td>
+          </tr>
+          <tr>
+            <td><code>templateId</code></td>
+            <td>当前模板定义 ID。</td>
+          </tr>
+          <tr>
+            <td><code>runtimeVersion</code></td>
+            <td>当前实例绑定的运行时版本。</td>
+          </tr>
+          <tr>
+            <td><code>initialSnapshot</code></td>
+            <td>实例初始快照。</td>
+          </tr>
+          <tr>
+            <td><code>theme / locale / user</code></td>
+            <td>宿主级上下文。</td>
+          </tr>
+          <tr>
+            <td><code>assetBaseUrl / apiBaseUrl</code></td>
+            <td>模板运行时所需的资源与接口地址。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>8.2 模板运行时对宿主暴露的能力</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>命令类接口</strong>
+          <ul>
+            <li><code>mount(container, context)</code></li>
+            <li><code>load(snapshot, config)</code></li>
+            <li><code>setReadonly(flag)</code></li>
+            <li><code>destroy()</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>读写类接口</strong>
+          <ul>
+            <li><code>getSnapshot()</code></li>
+            <li><code>export(payload)</code></li>
+            <li><code>validateSnapshot()</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>8.2.1 推荐的 Adapter 统一接口</h3>
+      <div class="card">
+        <strong>推荐所有模板最终都适配为统一运行时接口</strong>
+        <pre><code>interface TemplateSnapshotAdapter {
+  loadSnapshot(snapshot: TemplateSnapshotDocument): Promise&lt;void&gt;;
+  getSnapshot(): Promise&lt;TemplateSnapshotDocument&gt;;
+  validateSnapshot(snapshot: unknown): Promise&lt;ValidationResult&gt;;
+  getDirtyState(): Promise&lt;{ dirty: boolean; reason?: string }&gt;;
+}
+
+interface TemplateRuntimeBridge extends TemplateSnapshotAdapter {
+  mount(container: HTMLElement, context: HostContext): Promise&lt;void&gt;;
+  destroy(): Promise&lt;void&gt;;
+}</code></pre>
+      </div>
+
+      <h3>8.3 模板运行时向宿主回传的事件</h3>
+      <ul>
+        <li><code>onDirtyChange</code>：模板内部是否有未保存修改。</li>
+        <li><code>onSaveRequest</code>：模板主动请求宿主保存。</li>
+        <li><code>onNavigate</code>：模板内部页面变化或子路由变化。</li>
+        <li><code>onError</code>：运行时错误、加载失败、导出失败。</li>
+        <li><code>onAnalyticsEvent</code>：模板内部关键行为埋点。</li>
+      </ul>
+
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+sequenceDiagram
+    participant User as 用户
+    participant Host as 主项目工作台
+    participant Bridge as Template Bridge
+    participant Runtime as 模板运行时
+    participant API as 实例服务
+
+    User->>Host: 打开实例
+    Host->>API: GET /instances/:id
+    API-->>Host: instance + snapshot + runtimeVersion
+    Host->>Bridge: mount(context)
+    Bridge->>Runtime: mount(context)
+    Host->>Bridge: load(snapshot)
+    Bridge->>Runtime: load(snapshot)
+    Runtime-->>Bridge: onDirtyChange(true)
+    Bridge-->>Host: onDirtyChange(true)
+    User->>Host: 点击保存
+    Host->>Bridge: getSnapshot()
+    Bridge->>Runtime: getSnapshot()
+    Runtime-->>Bridge: snapshot
+    Bridge-->>Host: snapshot
+    Host->>API: PATCH /instances/:id
+    API-->>Host: 保存成功
+    Host-->>User: 保存成功提示
+        </pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>9. 模板库配置与发布方式</h2>
+      <h3>9.1 模板库配置原则</h3>
+      <ol>
+        <li>模板目录由后端返回，前端只消费，不手写生产配置。</li>
+        <li>模板定义和运行时入口分开配置。</li>
+        <li>多个模板定义可以复用一个运行时。</li>
+        <li>模板卡片只展示模板定义，不直接暴露底层入口细节。</li>
+      </ol>
+
+      <h3>9.2 运行时发布流程</h3>
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart LR
+    A[模板仓库代码变更]
+    B[CI 构建运行时产物]
+    C[发布到 CDN / 静态托管]
+    D[后端登记 RuntimeVersion]
+    E[更新 TemplateDefinition 推荐版本]
+    F[主项目拉取模板目录]
+    G[用户创建或继续编辑实例]
+
+    A --> B --> C --> D --> E --> F --> G
+        </pre>
+      </div>
+
+      <h3>9.3 接入形态建议</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>形态</th>
+            <th>适用阶段</th>
+            <th>适用对象</th>
+            <th>建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>iframe + bridge</code></td>
+            <td>短期主方案</td>
+            <td>现有绝大多数模板</td>
+            <td>先解决实例存储与协议问题，迁移成本最低。</td>
+          </tr>
+          <tr>
+            <td><code>remote ESM / 私有包</code></td>
+            <td>中期增强</td>
+            <td>适合深度集成的单页模板</td>
+            <td>在 bridge 稳定后逐步替换。</td>
+          </tr>
+          <tr>
+            <td><code>独立子应用</code></td>
+            <td>长期共存</td>
+            <td>像完整业务应用的复杂模板</td>
+            <td>保留独立部署能力，但纳入统一注册中心和实例系统。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>10. 用户使用流程设计</h2>
+      <h3>10.1 从模板创建实例</h3>
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TD
+    U1[用户进入模板库]
+    U2[选择模板]
+    U3[前端请求模板详情]
+    U4[后端返回模板定义 + 推荐运行时版本]
+    U5[前端调用 POST /instances]
+    U6[后端创建实例并绑定 runtimeVersion]
+    U7[返回 instanceId]
+    U8[跳转工作台]
+    U9[工作台加载实例并装载模板]
+
+    U1 --> U2 --> U3 --> U4 --> U5 --> U6 --> U7 --> U8 --> U9
+        </pre>
+      </div>
+
+      <h3>10.2 继续编辑实例</h3>
+      <ol>
+        <li>用户进入“我的模板课件”实例列表。</li>
+        <li>主项目调用 <code>GET /instances</code> 获取实例列表。</li>
+        <li>用户点击“继续编辑”。</li>
+        <li>工作台根据 <code>instanceId</code> 拉取实例详情。</li>
+        <li>主项目按实例绑定的 <code>runtimeVersionId</code> 装载运行时。</li>
+        <li>主项目把实例快照传给运行时，恢复现场。</li>
+      </ol>
+
+      <h3>10.3 复制实例</h3>
+      <ol>
+        <li>用户在实例列表中点击“新建副本”。</li>
+        <li>前端调用 <code>POST /instances/:id/duplicate</code>。</li>
+        <li>后端复制实例元信息与快照，并生成新的实例 ID。</li>
+        <li>前端跳转到新实例工作台，用户继续编辑副本。</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>11. 实例数据存储设计</h2>
+      <h3>11.1 实例必须保存什么</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>类别</th>
+            <th>字段示例</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>基础元信息</td>
+            <td><code>title</code>, <code>subject</code>, <code>thumbnailUrl</code></td>
+            <td>用于实例列表展示和搜索。</td>
+          </tr>
+          <tr>
+            <td>绑定信息</td>
+            <td><code>templateId</code>, <code>runtimeVersionId</code>, <code>snapshotSchemaVersion</code></td>
+            <td>保证继续编辑与版本回溯可用。</td>
+          </tr>
+          <tr>
+            <td>业务快照</td>
+            <td><code>snapshot</code></td>
+            <td>模板真实编辑状态，决定能否恢复现场。</td>
+          </tr>
+          <tr>
+            <td>审计/运营字段</td>
+            <td><code>createdAt</code>, <code>updatedAt</code>, <code>lastOpenedAt</code></td>
+            <td>用于排序、统计、历史与埋点。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>11.2 快照设计建议</h3>
+      <ul>
+        <li>优先使用 JSON 结构保存，避免依赖 DOM 或 HTML 字符串。</li>
+        <li>每份快照必须携带 <code>schemaVersion</code>。</li>
+        <li>模板内部应负责定义自己快照的最小可恢复结构。</li>
+        <li>对于大文件或媒体资源，只在快照中保存引用，不直接塞入大体积二进制。</li>
+        <li>对于随机模拟类模板，优先考虑保存 <code>seed + params + engineVersion + resultSummary</code>，而不是无条件保存全量试验结果。</li>
+      </ul>
+
+      <div class="callout">
+        实例快照不是“可选优化项”，而是“继续编辑”能力的基础。只存标题和模板编号并不构成实例系统。
+      </div>
+
+      <div class="callout warn">
+        Snapshot 不应等价于“内存 dump”。能通过参数、算法版本和随机种子重算出来的结果，应优先采用“可重放”设计，而不是把所有原始结果完整写入数据库。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>11A. Snapshot 统一策略</h2>
+      <p class="lead">
+        当前模板由不同同学开发，进度、技术栈版本、功能复杂度差异很大。因此 snapshot 设计不能要求“所有模板共享同一业务数据结构”，而应采用
+        <strong>统一 envelope，放开 payload</strong> 的模式。
+      </p>
+
+      <h3>11A.1 统一什么，不统一什么</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>必须统一</strong>
+          <ul>
+            <li>snapshot 外层 envelope 结构</li>
+            <li>snapshot 生命周期接口</li>
+            <li>snapshot schema version 规则</li>
+            <li>migration 执行机制</li>
+            <li>dirty 状态与保存触发约定</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>可以不统一</strong>
+          <ul>
+            <li>模板内部 store 形态</li>
+            <li>React 版本与局部依赖版本</li>
+            <li>具体 payload 字段命名</li>
+            <li>模板内部 UI 与交互细节</li>
+            <li>模板内部模块组织方式</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>11A.2 推荐的 Snapshot 文档结构</h3>
+      <div class="card">
+        <strong>平台统一 envelope，模板维护 payload</strong>
+        <pre><code>{
+  "envelope": {
+    "instanceId": "ins_xxx",
+    "templateKey": "p01",
+    "runtimeKey": "physics-mechanics",
+    "runtimeVersion": "1.4.2",
+    "bridgeVersion": "1.0",
+    "snapshotSchemaVersion": 3,
+    "createdAt": "2026-04-09T10:00:00Z",
+    "updatedAt": "2026-04-09T10:05:00Z",
+    "persistMode": "full",
+    "checksum": "sha256:xxx"
+  },
+  "payload": {},
+  "uiState": {},
+  "assets": []
+}</code></pre>
+      </div>
+
+      <h3>11A.3 Snapshot 分层建议</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>层级</th>
+            <th>是否持久化</th>
+            <th>示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>domain state</code></td>
+            <td>必须</td>
+            <td>场景数据、参数配置、教学步骤、图元数据、自定义内容</td>
+          </tr>
+          <tr>
+            <td><code>uiState</code></td>
+            <td>按需</td>
+            <td>当前 tab、视角、缩放位置、当前激活面板</td>
+          </tr>
+          <tr>
+            <td><code>ephemeral state</code></td>
+            <td>不应</td>
+            <td>hover、loading、toast、拖拽中状态、临时请求 ID</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>11A.3.1 大体量结果的处理原则</h3>
+      <div class="grid grid-3">
+        <div class="card">
+          <strong>Minimal</strong>
+          只保存最小编辑状态，不保存大结果。适合仅要求继续编辑、不要求完全一模一样的模板。
+        </div>
+        <div class="card">
+          <strong>Deterministic</strong>
+          保存 <code>seed + params + engineVersion</code>，恢复时重新生成结果。适合随机模拟类模板，推荐优先使用。
+        </div>
+        <div class="card">
+          <strong>Full</strong>
+          保存完整结果数组。仅在无法可靠重算、且必须精确逐点恢复时使用，不建议作为默认方案。
+        </div>
+      </div>
+
+      <div class="callout warn">
+        不建议直接把整个前端 store 全量序列化为 snapshot。不同模板代码质量和 store 设计差异较大，最稳妥的做法是由模板显式提取可持久化的 domain state。
+      </div>
+
+      <h3>11A.4 默认快照要求</h3>
+      <ul>
+        <li>每个模板定义都必须提供 <code>defaultSnapshot</code>。</li>
+        <li>实例创建时基于 <code>defaultSnapshot</code> 生成初始快照。</li>
+        <li>默认快照也必须带 <code>snapshotSchemaVersion</code>。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>11B. 异构模板团队协作策略</h2>
+      <p class="lead">
+        鉴于模板由不同同学开发，建议按接入能力分级，而不是要求所有模板一次性达到完全一致。
+      </p>
+
+      <h3>11B.1 模板接入等级</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>等级</th>
+            <th>能力</th>
+            <th>适用说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>L0</code></td>
+            <td>仅展示，不支持 snapshot</td>
+            <td>只能预览，不进入正式实例体系。</td>
+          </tr>
+          <tr>
+            <td><code>L1</code></td>
+            <td>支持 <code>loadSnapshot/getSnapshot</code></td>
+            <td>进入正式实例体系的最低门槛。</td>
+          </tr>
+          <tr>
+            <td><code>L2</code></td>
+            <td>支持 dirty 检测与自动保存</td>
+            <td>可接入完整工作台体验。</td>
+          </tr>
+          <tr>
+            <td><code>L3</code></td>
+            <td>支持 schema version 与 migration</td>
+            <td>可安全参与模板升级与实例迁移。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>11B.2 双模式要求</h3>
+      <div class="grid grid-2">
+        <div class="card">
+          <strong>Standalone Mode</strong>
+          模板可独立运行，便于开发调试、演示部署、产品验收。
+        </div>
+        <div class="card">
+          <strong>Embed Mode</strong>
+          模板接受宿主控制，使用宿主传入的实例、快照、权限和保存机制。
+        </div>
+      </div>
+
+      <div class="callout">
+        对复杂模板，例如已经带登录、工作台、路由和项目管理能力的模板，不应要求整个应用直接接入平台，而应拆出真正的编辑器核心，优先让 <code>embed mode</code> 支持 snapshot。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>12. 模板升级与兼容策略</h2>
+      <h3>12.1 核心原则</h3>
+      <div class="callout danger">
+        老实例默认必须绑定旧运行时版本，不能在模板发布新版本后自动切到新代码。
+      </div>
+
+      <h3>12.2 三种升级策略</h3>
+      <div class="grid grid-3">
+        <div class="card">
+          <strong>Pinned</strong>
+          实例永久绑定创建时的运行时版本。最稳，推荐默认策略。
+        </div>
+        <div class="card">
+          <strong>Copy-on-upgrade</strong>
+          用户主动复制实例到新版本，保留老实例不动。最适合课件场景。
+        </div>
+        <div class="card">
+          <strong>In-place migrate</strong>
+          仅在迁移脚本完全可靠时允许原地升级，需谨慎控制。
+        </div>
+      </div>
+
+      <h3>12.3 推荐默认策略</h3>
+      <ol>
+        <li>所有新实例默认使用创建时推荐的运行时版本。</li>
+        <li>模板新版本发布后，老实例保持旧版本。</li>
+        <li>工作台展示“有新版本可升级”提醒。</li>
+        <li>用户可选择“复制为新版本实例”。</li>
+        <li>只有通过迁移校验的模板，才允许“原地升级”。</li>
+      </ol>
+
+      <h3>12.4 Snapshot Migration 机制</h3>
+      <div class="card">
+        <strong>推荐每个模板维护自己的 migration 链</strong>
+        <pre><code>type SnapshotMigration = {
+  templateKey: string;
+  from: number;
+  to: number;
+  migrate: (oldPayload: unknown) =&gt; unknown;
+};</code></pre>
+      </div>
+
+      <ul>
+        <li>平台不理解模板 payload 的业务细节，只负责调度 migration。</li>
+        <li>模板必须对自己的 <code>snapshotSchemaVersion</code> 负责。</li>
+        <li>升级流程中可先跑 <code>upgrade-preview</code>，通过后再生成升级副本或执行原地升级。</li>
+      </ul>
+
+      <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TD
+    A[打开实例]
+    B[检查实例 runtimeVersion]
+    C[检查模板当前推荐版本]
+    D{是否有新版本}
+    E[继续使用当前版本]
+    F[提示可升级]
+    G{是否支持自动迁移}
+    H[提供复制升级]
+    I[提供原地升级或复制升级]
+
+    A --> B --> C --> D
+    D -- 否 --> E
+    D -- 是 --> F --> G
+    G -- 否 --> H
+    G -- 是 --> I
+        </pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>13. API 设计草案</h2>
+      <h3>13.1 模板目录 API</h3>
+      <ul>
+        <li><code>GET /api/visual-center/templates</code>：获取模板目录。</li>
+        <li><code>GET /api/visual-center/templates/:templateId</code>：获取模板详情。</li>
+        <li><code>GET /api/visual-center/runtimes/:runtimeId</code>：获取运行时详情。</li>
+      </ul>
+
+      <h3>13.2 实例 API</h3>
+      <ul>
+        <li><code>POST /api/visual-center/instances</code>：创建实例。</li>
+        <li><code>GET /api/visual-center/instances</code>：获取实例列表。</li>
+        <li><code>GET /api/visual-center/instances/:instanceId</code>：获取实例详情。</li>
+        <li><code>PATCH /api/visual-center/instances/:instanceId</code>：保存实例元信息或快照。</li>
+        <li><code>DELETE /api/visual-center/instances/:instanceId</code>：删除实例。</li>
+        <li><code>POST /api/visual-center/instances/:instanceId/duplicate</code>：复制实例。</li>
+      </ul>
+
+      <h3>13.3 版本与升级 API</h3>
+      <ul>
+        <li><code>GET /api/visual-center/instances/:instanceId/version-status</code>：查询实例版本状态。</li>
+        <li><code>POST /api/visual-center/instances/:instanceId/upgrade-preview</code>：查看升级预览。</li>
+        <li><code>POST /api/visual-center/instances/:instanceId/upgrade</code>：执行升级。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>14. 迁移路线</h2>
+      <h3>阶段 1：后端化模板目录与实例系统</h3>
+      <ul>
+        <li>新增模板、运行时、实例相关数据表。</li>
+        <li>把前端模板常量改为从 API 获取。</li>
+        <li>把前端实例列表改为从 API 获取。</li>
+        <li>保留 <code>iframe</code>，但引入 bridge 协议。</li>
+      </ul>
+
+      <h3>阶段 2：模板运行时支持快照协议</h3>
+      <ul>
+        <li>给模板运行时补充 <code>loadSnapshot/getSnapshot</code> 能力。</li>
+        <li>工作台支持手动保存、自动保存、离开提醒、继续编辑。</li>
+        <li>实例真正从“卡片记录”升级为“可恢复作品”。</li>
+        <li>定义模板接入等级，以 <code>L1</code> 作为进入正式实例系统的最低要求。</li>
+      </ul>
+
+      <h3>阶段 3：引入版本控制与升级能力</h3>
+      <ul>
+        <li>实例创建时绑定 <code>runtimeVersionId</code>。</li>
+        <li>模板发布新版本时，后端记录版本信息。</li>
+        <li>工作台支持升级提醒和复制升级。</li>
+        <li>对达到 <code>L3</code> 的模板引入 migration 机制。</li>
+      </ul>
+
+      <h3>阶段 4：按模板类型逐步升级嵌入方式</h3>
+      <ul>
+        <li>保留复杂模板的独立子应用能力。</li>
+        <li>把适合深度集成的模板逐步改为 remote ESM / 私有包。</li>
+        <li>桥接协议保持不变，只替换运行时装载方式。</li>
+      </ul>
+
+      <div class="callout warn">
+        推荐迁移顺序是：先做后端实例与版本模型，再做 bridge，再逐步替换 iframe。不要反过来，否则很容易只是在“更换前端壳子”，而没有真正解决实例与升级问题。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>15. 最终结论</h2>
+      <p>
+        对当前系统而言，最合理的宏观架构不是“把所有模板都直接改成组件库”或者“立即全量上模块联邦”，而是先把系统建设成一个
+        <strong>版本化模板平台</strong>：
+      </p>
+      <ul>
+        <li>模板目录在后端注册和管理。</li>
+        <li>实例在后端存储和 CRUD。</li>
+        <li>实例保存真实编辑快照，支持继续编辑。</li>
+        <li>实例绑定运行时版本，模板升级默认不破坏老实例。</li>
+        <li>宿主与模板运行时通过统一 bridge 协议通信。</li>
+        <li>短期继续兼容 iframe，长期逐步演进为更深度的嵌入方式。</li>
+      </ul>
+
+      <div class="callout">
+        这套架构既能兼容你们当前已有模板仓库和主项目现状，也能支撑后续模板越来越多、模板持续升级、实例持续沉淀的长期平台化目标。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>附录：实现建议</h2>
+      <p class="footnote">
+        本文档为架构与设计稿，建议下一步继续输出：
+        1) Prisma 表结构草案；
+        2) API schema；
+        3) bridge TypeScript 接口定义；
+        4) 现有主项目页面的迁移对照表。
+      </p>
+      <p class="footnote">
+        Mermaid 图表依赖页面底部脚本渲染。若离线查看无法加载脚本，可直接阅读源码中的 Mermaid 定义。
+      </p>
+    </section>
+  </div>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "default",
+      securityLevel: "loose",
+      flowchart: { curve: "basis" }
+    });
+  </script>
+</body>
+</html>

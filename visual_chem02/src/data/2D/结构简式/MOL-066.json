@@ -1,0 +1,277 @@
+{
+  "id": "MOL-066",
+  "name_cn": "苯胺",
+  "name_en": "Aniline",
+  "formula": "C₆H₅NH₂",
+  "category": "nitrogen_organic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 1.469576158976824e-16,
+      "y": 2.4000000000000004,
+      "element": "N",
+      "label": "NH₂",
+      "hCount": 2,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 7.34788079488412e-17,
+      "y": 1.2000000000000002,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.0392304845413265,
+      "y": 0.6000000000000001,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": -1.0392304845413265,
+      "y": 0.6000000000000002,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 1.0392304845413265,
+      "y": -0.5999999999999999,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -1.0392304845413263,
+      "y": -0.6000000000000005,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 7.34788079488412e-17,
+      "y": -1.2000000000000002,
+      "element": "C",
+      "label": "CH",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 1.8706148721743876,
+      "y": 1.08,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": -1.8706148721743876,
+      "y": 1.08,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": 1.9992304845413265,
+      "y": -0.5999999999999999,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 10,
+      "x": -1.8706148721743872,
+      "y": -1.0800000000000005,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 11,
+      "x": -1.0287033112837764e-16,
+      "y": -2.16,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 12,
+      "x": -0.8313843876330608,
+      "y": 2.880000000000001,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 13,
+      "x": 0.8313843876330613,
+      "y": 2.88,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": true,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 12,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 13,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 6,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 10,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 6,
+      "to": 11,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

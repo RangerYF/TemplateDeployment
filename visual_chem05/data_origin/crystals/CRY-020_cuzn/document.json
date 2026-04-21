@@ -1,0 +1,127 @@
+{
+  "id": "CRY-020",
+  "slug": "cry-020-cuzn",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-020",
+    "name_cn": "β-黄铜",
+    "formula": "CuZn",
+    "level": "拓展",
+    "crystal_system": "cubic",
+    "space_group": "Pm3̄m",
+    "lattice_params": {
+      "a": 294.5,
+      "b": 294.5,
+      "c": 294.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      }
+    ],
+    "bond_type": "metallic",
+    "coord_number": "8",
+    "z": 1,
+    "teaching_points": [
+      "β-黄铜采用CsCl型有序结构：Cu在顶点，Zn在体心",
+      "与CsCl(CRY-002)结构类型相同，但为金属间化合物（金属键）",
+      "每个Cu周围8个Zn最近邻，每个Zn周围8个Cu最近邻",
+      "Cu-Zn距离为a√3/2=255pm",
+      "高温下(>470°C)发生有序-无序转变，成为无序BCC合金",
+      "合金是不同金属的混合，结构可与纯金属不同"
+    ],
+    "bond_lengths": {
+      "Cu-Zn": 255
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-020",
+    "name": "β-黄铜",
+    "formula": "CuZn",
+    "formulaHtml": "CuZn (β-黄铜)",
+    "category": "metallic",
+    "gradeLevel": "拓展",
+    "structureType": "有序BCC(CsCl型)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Pm3̄m",
+    "spaceGroupNumber": 221,
+    "lattice": {
+      "a": 294.5,
+      "b": 294.5,
+      "c": 294.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 1,
+    "atomSites": [
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    ],
+    "bonds": [],
+    "neighborCutoff": 2.56,
+    "packingType": "BCC",
+    "packingEfficiency": 68.02,
+    "coordinationNumber": "8",
+    "coordinationGeometry": "立方体",
+    "teachingPoints": [
+      "β-黄铜采用CsCl型有序结构：Cu在顶点，Zn在体心",
+      "与CsCl(CRY-002)结构类型相同，但为金属间化合物（金属键）",
+      "每个Cu周围8个Zn最近邻，每个Zn周围8个Cu最近邻",
+      "Cu-Zn距离为a√3/2=255pm",
+      "高温下(>470°C)发生有序-无序转变，成为无序BCC合金",
+      "合金是不同金属的混合，结构可与纯金属不同"
+    ],
+    "bondLengths": {
+      "Cu-Zn": 255
+    },
+    "codId": 9008814,
+    "dataSource": "COD #9008814 — Wyckoff, Crystal Structures 1, 85-237 (1963)"
+  }
+}

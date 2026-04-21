@@ -1,0 +1,103 @@
+{
+  "id": "template-scene-fm-042",
+  "name": "FM-042 圆锥摆受力",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-anchor-top",
+      "type": "anchor",
+      "label": "固定点",
+      "position": {
+        "x": 0,
+        "y": 9.2
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.3,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorRadius": 0.15,
+      "mountSide": "top"
+    },
+    {
+      "id": "body-bob-ball",
+      "type": "ball",
+      "label": "摆球",
+      "position": {
+        "x": 2.6,
+        "y": 4.8
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 1,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    }
+  ],
+  "joints": [
+    {
+      "id": "joint-rope-main",
+      "type": "rope",
+      "label": "绳",
+      "bodyIdA": "body-anchor-top",
+      "bodyIdB": "body-bob-ball",
+      "anchorA": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorB": {
+        "x": 0,
+        "y": 0
+      },
+      "maxLength": 5.110772935672254
+    }
+  ],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

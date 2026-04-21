@@ -1,0 +1,100 @@
+{
+  "id": "MOL-039",
+  "name_cn": "高氯酸根",
+  "name_en": "Perchlorate",
+  "formula": "ClO₄⁻",
+  "category": "ion",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "element": "Cl",
+      "label": "Cl",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.2,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 7.347880794884119e-17,
+      "y": -1.2,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": -1.2,
+      "y": 1.4695761589768238e-16,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

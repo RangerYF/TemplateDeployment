@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "id": "MOT-012",
+    "name": "斜面上滑",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过斜面上滑模板，让学生观察初速度与重力分量共同作用下的减速、回滑与落地后的继续运动。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 slope-main（slope）。",
+      "3. 将物体 slope-main 吸附到 ground。",
+      "4. 添加物体 block-main（block），并设置沿斜面向上的较慢初速度。",
+      "5. 将物体 block-main 吸附到 slope-main，观察回滑后更平滑地沿水平面继续运动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-012.json",
+  "commandProgram": {
+    "templateId": "MOT-012",
+    "sceneName": "MOT-012 斜面上滑",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "patch": {
+          "position": {
+            "x": -0.4,
+            "y": 0.2
+          },
+          "baseLength": 7.2,
+          "slopeHeight": 3,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.06
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -2.4,
+            "y": 2.9
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": -5,
+            "y": 2.08
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "slope-main"
+        ],
+        "threshold": 2.5
+      }
+    ]
+  }
+}

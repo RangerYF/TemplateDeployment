@@ -1,0 +1,87 @@
+{
+  "id": "template-scene-fm-011",
+  "name": "FM-011 斜面受力",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-slope-main",
+      "type": "slope",
+      "label": "斜面",
+      "position": {
+        "x": -0.20000000000000018,
+        "y": 2.008
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 5,
+      "friction": 0.9,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "baseLength": 8,
+      "slopeHeight": 6
+    },
+    {
+      "id": "body-block-main",
+      "type": "block",
+      "label": "静止物块",
+      "position": {
+        "x": -2.0163599999999997,
+        "y": 4.786519999999999
+      },
+      "angle": -0.6435011087932844,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.75,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.9,
+      "height": 0.65
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

@@ -1,0 +1,943 @@
+{
+  "id": "CRY-021",
+  "name_cn": "钇钡铜氧 (YBCO)",
+  "formula": "YBa2Cu3O7",
+  "level": "拓展",
+  "crystal_system": "正交",
+  "space_group": "Pmmm (No. 47)",
+  "lattice_params": {
+    "a": 382,
+    "b": 388.5,
+    "c": 1168.3,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Y1",
+      "element": "Y",
+      "label": "Y1",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": "+3",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Ba1",
+      "element": "Ba",
+      "label": "Ba1",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.184,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "0.184",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Ba2",
+      "element": "Ba",
+      "label": "Ba2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.816,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "0.816",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu1",
+      "element": "Cu",
+      "label": "Cu1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu2",
+      "element": "Cu",
+      "label": "Cu2",
+      "x": 0,
+      "y": 0,
+      "z": 0.356,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0.356",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Cu3",
+      "element": "Cu",
+      "label": "Cu3",
+      "x": 0,
+      "y": 0,
+      "z": 0.644,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0.644",
+      "charge": "+2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O1",
+      "element": "O",
+      "label": "O1",
+      "x": 0,
+      "y": 0.5,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O2",
+      "element": "O",
+      "label": "O2",
+      "x": 0.5,
+      "y": 0,
+      "z": 0.378,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "0.378",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O3",
+      "element": "O",
+      "label": "O3",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.378,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0.378",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O4",
+      "element": "O",
+      "label": "O4",
+      "x": 0.5,
+      "y": 0,
+      "z": 0.622,
+      "x_expr": "1/2",
+      "y_expr": "0",
+      "z_expr": "0.622",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O5",
+      "element": "O",
+      "label": "O5",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.622,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0.622",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O6",
+      "element": "O",
+      "label": "O6",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.159,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0.159",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "O7",
+      "element": "O",
+      "label": "O7",
+      "x": 0,
+      "y": 0.5,
+      "z": 0.841,
+      "x_expr": "0",
+      "y_expr": "1/2",
+      "z_expr": "0.841",
+      "charge": "-2",
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "离子键",
+  "coord_number": "Cu1:4(平面), Cu2/Cu3:5(锥形)",
+  "z": 1,
+  "teaching_points": [
+    "YBCO是第一个液氮温区高温超导体（Tc=92K，超过液氮77K）",
+    "结构由缺氧钙钛矿三层叠加而成：CuO链层-BaO层-CuO2面层-Y层-CuO2面层-BaO层-CuO链层",
+    "CuO2面（Cu2/Cu3位置）是超导电性的关键层",
+    "Cu1位于链位（平面四配位），Cu2/Cu3位于面位（四方锥五配位）",
+    "O含量对超导性至关重要：YBa2Cu3O7为超导体，YBa2Cu3O6为绝缘体",
+    "正交晶系(a≠b≠c)，由氧有序排列导致的对称性降低",
+    "1987年发现，开启高温超导研究热潮"
+  ],
+  "key_parameters": [
+    {
+      "id": "structure_type",
+      "label": "结构类型",
+      "value": "钙钛矿衍生型"
+    },
+    {
+      "id": "bond_length_cu1_o",
+      "label": "键长",
+      "value": "Cu1-O: 194 pm"
+    },
+    {
+      "id": "bond_length_cu2_o_",
+      "label": "键长",
+      "value": "Cu2-O(面内): 196 pm"
+    },
+    {
+      "id": "bond_length_cu2_o_",
+      "label": "键长",
+      "value": "Cu2-O(顶点): 230 pm"
+    }
+  ],
+  "render": {
+    "category": "ionic",
+    "name": "钇钡铜氧 (YBCO)",
+    "formula_html": "YBa<sub>2</sub>Cu<sub>3</sub>O<sub>7</sub>",
+    "grade_level": "拓展",
+    "structure_type": "钙钛矿衍生型",
+    "crystal_system_code": "orthorhombic",
+    "space_group_symbol": "Pmmm",
+    "space_group_number": 47,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "ionic",
+    "neighbor_cutoff_angstrom": null,
+    "bond_types": [
+      "ionic"
+    ],
+    "bonds": [
+      {
+        "id": "BOND-001",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 238
+      },
+      {
+        "id": "BOND-002",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 238
+      },
+      {
+        "id": "BOND-003",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 238
+      },
+      {
+        "id": "BOND-004",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 238
+      },
+      {
+        "id": "BOND-005",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 241
+      },
+      {
+        "id": "BOND-006",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 241
+      },
+      {
+        "id": "BOND-007",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 241
+      },
+      {
+        "id": "BOND-008",
+        "from_atom_id": "Y1",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 241
+      },
+      {
+        "id": "BOND-009",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O6",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-010",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O6",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-011",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 288
+      },
+      {
+        "id": "BOND-012",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 288
+      },
+      {
+        "id": "BOND-013",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 296
+      },
+      {
+        "id": "BOND-014",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 296
+      },
+      {
+        "id": "BOND-015",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 299
+      },
+      {
+        "id": "BOND-016",
+        "from_atom_id": "Ba1",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 299
+      },
+      {
+        "id": "BOND-017",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O7",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-018",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O7",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-019",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          0,
+          0,
+          1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 288
+      },
+      {
+        "id": "BOND-020",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          1,
+          0,
+          1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 288
+      },
+      {
+        "id": "BOND-021",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 296
+      },
+      {
+        "id": "BOND-022",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 296
+      },
+      {
+        "id": "BOND-023",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 299
+      },
+      {
+        "id": "BOND-024",
+        "from_atom_id": "Ba2",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          0,
+          1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 299
+      },
+      {
+        "id": "BOND-025",
+        "from_atom_id": "Cu2",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-026",
+        "from_atom_id": "Cu2",
+        "to_atom_id": "O2",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-027",
+        "from_atom_id": "Cu2",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 196
+      },
+      {
+        "id": "BOND-028",
+        "from_atom_id": "Cu2",
+        "to_atom_id": "O3",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 196
+      },
+      {
+        "id": "BOND-029",
+        "from_atom_id": "Cu2",
+        "to_atom_id": "O6",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 301
+      },
+      {
+        "id": "BOND-030",
+        "from_atom_id": "Cu3",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          -1,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-031",
+        "from_atom_id": "Cu3",
+        "to_atom_id": "O4",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 193
+      },
+      {
+        "id": "BOND-032",
+        "from_atom_id": "Cu3",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 196
+      },
+      {
+        "id": "BOND-033",
+        "from_atom_id": "Cu3",
+        "to_atom_id": "O5",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 196
+      },
+      {
+        "id": "BOND-034",
+        "from_atom_id": "Cu3",
+        "to_atom_id": "O7",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 301
+      },
+      {
+        "id": "BOND-035",
+        "from_atom_id": "Cu1",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 194
+      },
+      {
+        "id": "BOND-036",
+        "from_atom_id": "Cu1",
+        "to_atom_id": "O1",
+        "cell_offset": [
+          0,
+          -1,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 194
+      },
+      {
+        "id": "BOND-037",
+        "from_atom_id": "Cu1",
+        "to_atom_id": "O6",
+        "cell_offset": [
+          0,
+          0,
+          0
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 269
+      },
+      {
+        "id": "BOND-038",
+        "from_atom_id": "Cu1",
+        "to_atom_id": "O7",
+        "cell_offset": [
+          0,
+          0,
+          -1
+        ],
+        "type": "ionic",
+        "order": null,
+        "expected_length_pm": 269
+      }
+    ],
+    "polyhedra": [
+      {
+        "id": "POLY-001",
+        "center_atom_id": "Cu1",
+        "label": "Cu1O4",
+        "polyhedron_type": "other",
+        "neighbor_cutoff_angstrom": 2
+      },
+      {
+        "id": "POLY-002",
+        "center_atom_id": "Cu2",
+        "label": "Cu2O5",
+        "polyhedron_type": "other",
+        "neighbor_cutoff_angstrom": 2.4
+      },
+      {
+        "id": "POLY-003",
+        "center_atom_id": "Cu3",
+        "label": "Cu3O5",
+        "polyhedron_type": "other",
+        "neighbor_cutoff_angstrom": 2.4
+      }
+    ],
+    "coordination_geometry": "Cu1:平面正方形, Cu2/Cu3:四方锥",
+    "bond_lengths_pm": {
+      "Cu1-O": 194,
+      "Cu2-O(面内)": 196,
+      "Cu2-O(顶点)": 230
+    },
+    "hybridization": null,
+    "packing_type": null,
+    "packing_efficiency": null,
+    "data_source": "COD #1000030 — YBa₂Cu₃O₆.₉ (Pmmm)",
+    "mp_material_id": "mp-20674",
+    "representation_note": null,
+    "source_summary": "COD #1000030 — YBa₂Cu₃O₆.₉ (Pmmm) + Materials Project mp-20674"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-021_yba2cu3o7/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-021_yba2cu3o7/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #1000030 — YBa₂Cu₃O₆.₉ (Pmmm)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/1000030.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-20674",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-20674"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      },
+      {
+        "id": "coordination_auto",
+        "label": "按最近异种原子第一配位层与目标配位数自动生成键连关系",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "origin"
+      ],
+      "name_cn": [
+        "origin",
+        "prd"
+      ],
+      "formula": [
+        "origin",
+        "prd"
+      ],
+      "level": [
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "space_group": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "lattice_params": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "atoms": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "bond_type": [
+        "chem",
+        "origin"
+      ],
+      "coord_number": [
+        "origin",
+        "cod"
+      ],
+      "z": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "teaching_points": [
+        "origin",
+        "prd"
+      ],
+      "key_parameters": [
+        "origin",
+        "prd",
+        "cod",
+        "mp"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "coordination_auto",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin"
+      ],
+      "render.hybridization": [
+        "origin"
+      ],
+      "render.packing_type": [
+        "origin"
+      ],
+      "render.packing_efficiency": [
+        "origin"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "FM-033",
+    "name": "弹簧连接",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“弹簧连接”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, 0)。",
+      "2. 添加物体 block-left（block）。",
+      "3. 添加物体 block-right（block）。",
+      "4. 添加约束 spring-main（spring），连接 block-left 与 block-right。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-033.json",
+  "commandProgram": {
+    "templateId": "FM-033",
+    "sceneName": "FM-033 弹簧连接",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-left",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -1.6,
+            "y": 1
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1.2,
+          "friction": 0.2,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 0.5,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-right",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": 1.1,
+            "y": 1
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1.2,
+          "friction": 0.2,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "block-left",
+        "bodyRefB": "block-right",
+        "anchorA": {
+          "x": 0.45,
+          "y": 0
+        },
+        "anchorB": {
+          "x": -0.45,
+          "y": 0
+        },
+        "patch": {
+          "springLength": 1.8,
+          "stiffness": 2.6,
+          "damping": 0.12
+        }
+      }
+    ]
+  },
+  "sceneSource": "manual",
+  "updatedAt": "2026-04-02T06:40:30.051Z"
+}

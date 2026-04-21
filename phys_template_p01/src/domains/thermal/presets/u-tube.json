@@ -1,0 +1,123 @@
+{
+  "id": "P07-THM-025-u-tube",
+  "version": "1.0",
+  "name": "U管",
+  "description": "U管左侧封闭气体，右侧开口。改变温度后两侧液柱高度差变化，联立气态方程与液柱平衡求解。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 120,
+    "origin": { "x": 350, "y": 500 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "u-tube",
+        "width": 0.4,
+        "height": 2.5,
+        "openEnd": "right",
+        "inclineAngle": 0,
+        "leftArmHeight": 2.5,
+        "rightArmHeight": 2.5,
+        "innerDiameter": 0.3
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "U管"
+    },
+    {
+      "ref": "gas-1",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 101325,
+        "volume": 1e-4,
+        "temperature": 300,
+        "length": 0.5,
+        "crossSection": 2e-4,
+        "chartType": "p-V",
+        "chartData": [],
+        "initialPressure": 101325,
+        "initialVolume": 1e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-1",
+        "positionOffset": 0
+      },
+      "transform": { "position": { "x": -0.8, "y": 0.5 }, "rotation": 0 },
+      "label": "气柱"
+    },
+    {
+      "ref": "liquid-left",
+      "type": "liquid-column",
+      "properties": {
+        "length": 0.3,
+        "density": 13600,
+        "crossSection": 2e-4,
+        "positionOffset": 0,
+        "columnId": "left"
+      },
+      "transform": { "position": { "x": -0.8, "y": -0.2 }, "rotation": 0 },
+      "label": "左液柱"
+    },
+    {
+      "ref": "liquid-right",
+      "type": "liquid-column",
+      "properties": {
+        "length": 0.3,
+        "density": 13600,
+        "crossSection": 2e-4,
+        "positionOffset": 0,
+        "columnId": "right"
+      },
+      "transform": { "position": { "x": 0.8, "y": -0.2 }, "rotation": 0 },
+      "label": "右液柱"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-1",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "liquid-left",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "liquid-right",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 500,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-1",
+          "targetProperty": "temperature"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "u-tube" }
+}

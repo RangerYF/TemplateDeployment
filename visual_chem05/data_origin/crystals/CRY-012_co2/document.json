@@ -1,0 +1,447 @@
+{
+  "id": "CRY-012",
+  "slug": "cry-012-co2",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-012",
+    "name_cn": "干冰",
+    "formula": "CO2",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Pa3̄",
+    "lattice_params": {
+      "a": 563,
+      "b": 563,
+      "c": 563,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "C",
+        "label": "C1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O1a",
+        "x": 0.118,
+        "y": 0.118,
+        "z": 0.118,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O1b",
+        "x": -0.118,
+        "y": -0.118,
+        "z": -0.118,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O2a",
+        "x": 0.618,
+        "y": 0.382,
+        "z": 0.118,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O2b",
+        "x": 0.382,
+        "y": 0.618,
+        "z": -0.118,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O3a",
+        "x": 0.618,
+        "y": 0.118,
+        "z": 0.382,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O3b",
+        "x": 0.382,
+        "y": -0.118,
+        "z": 0.618,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O4a",
+        "x": 0.118,
+        "y": 0.382,
+        "z": 0.618,
+        "charge": null
+      },
+      {
+        "element": "O",
+        "label": "O4b",
+        "x": -0.118,
+        "y": 0.618,
+        "z": 0.382,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "12 (分子间)",
+    "z": 4,
+    "teaching_points": [
+      "干冰是CO2的分子晶体，分子间通过范德华力结合",
+      "CO2为直线形分子（O=C=O），C=O键长116pm",
+      "分子在FCC位置排列，每个CO2周围有12个最近邻CO2分子",
+      "升华温度-78.5°C（范德华力弱，易升华）",
+      "分子内共价键强(C=O 805kJ/mol)，分子间范德华力弱(~25kJ/mol)",
+      "注意区分：分子内共价键 vs 分子间范德华力"
+    ],
+    "bond_lengths": {
+      "C=O": 116
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-012",
+    "name": "干冰",
+    "formula": "CO2",
+    "formulaHtml": "CO<sub>2</sub> (干冰)",
+    "category": "molecular",
+    "gradeLevel": "高中必修",
+    "structureType": "分子晶体(FCC)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Pa3̄",
+    "spaceGroupNumber": 205,
+    "lattice": {
+      "a": 563,
+      "b": 563,
+      "c": 563,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "C",
+        "label": "C1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O1a",
+        "fracCoords": [
+          0.118,
+          0.118,
+          0.118
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O1b",
+        "fracCoords": [
+          -0.118,
+          -0.118,
+          -0.118
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O2a",
+        "fracCoords": [
+          0.618,
+          0.382,
+          0.118
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O2b",
+        "fracCoords": [
+          0.382,
+          0.618,
+          -0.118
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O3a",
+        "fracCoords": [
+          0.618,
+          0.118,
+          0.382
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O3b",
+        "fracCoords": [
+          0.382,
+          -0.118,
+          0.618
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O4a",
+        "fracCoords": [
+          0.118,
+          0.382,
+          0.618
+        ]
+      },
+      {
+        "element": "O",
+        "label": "O4b",
+        "fracCoords": [
+          -0.118,
+          0.618,
+          0.382
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          3,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          3,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          6,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          6,
+          8
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          9,
+          10
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          9,
+          11
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 2,
+        "expectedLength": 116
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 397
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 397
+      },
+      {
+        "siteIndices": [
+          0,
+          9
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 397
+      }
+    ],
+    "coordinationNumber": "12 (分子间)",
+    "coordinationGeometry": "线性分子(O=C=O), FCC分子排列",
+    "teachingPoints": [
+      "干冰是CO2的分子晶体，分子间通过范德华力结合",
+      "CO2为直线形分子（O=C=O），C=O键长116pm",
+      "分子在FCC位置排列，每个CO2周围有12个最近邻CO2分子",
+      "升华温度-78.5°C（范德华力弱，易升华）",
+      "分子内共价键强(C=O 805kJ/mol)，分子间范德华力弱(~25kJ/mol)",
+      "注意区分：分子内共价键 vs 分子间范德华力"
+    ],
+    "bondLengths": {
+      "C=O": 116
+    },
+    "codId": 1010060,
+    "dataSource": "COD #1010060 — Solid CO₂ (Pa-3)"
+  }
+}

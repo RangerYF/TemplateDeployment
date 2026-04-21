@@ -1,0 +1,108 @@
+{
+  "id": "template-scene-fm-053",
+  "name": "FM-053 半球模型",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-ball-main",
+      "type": "ball",
+      "label": "球体 #1",
+      "position": {
+        "x": -1.48,
+        "y": 4.058
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 0.6,
+      "friction": 0.08,
+      "restitution": 0.1,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    },
+    {
+      "id": "body-1775059967815-2",
+      "type": "half-sphere",
+      "label": "半球 #1",
+      "position": {
+        "x": -1.4800000000000002,
+        "y": 0.008
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 8,
+      "friction": 0.35,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "halfSphereRadius": 3.75
+    }
+  ],
+  "joints": [],
+  "forces": [
+    {
+      "id": "body-1775060024092-3",
+      "type": "external",
+      "targetBodyId": "body-ball-main",
+      "label": "F1",
+      "magnitude": 0,
+      "direction": 0,
+      "visible": true,
+      "decompose": false,
+      "decomposeAngle": 0
+    },
+    {
+      "id": "body-1775060087725-4",
+      "type": "external",
+      "targetBodyId": "body-ball-main",
+      "label": "F2",
+      "magnitude": 1,
+      "direction": 0,
+      "visible": true,
+      "decompose": false,
+      "decomposeAngle": 0
+    }
+  ],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

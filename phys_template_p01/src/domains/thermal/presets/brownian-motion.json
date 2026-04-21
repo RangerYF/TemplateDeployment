@@ -1,0 +1,93 @@
+{
+  "id": "P07-THM-041-brownian-motion",
+  "version": "1.0",
+  "name": "布朗运动",
+  "description": "模拟布朗运动：大粒子在液体中被液体分子撞击做无规则运动。红色轨迹显示粒子运动路径。温度越高运动越剧烈。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 250, "y": 400 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "open-box",
+        "width": 4,
+        "height": 3,
+        "openEnd": "none",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 2, "y": 1.5 }, "rotation": 0 },
+      "label": "容器"
+    },
+    {
+      "ref": "particle-1",
+      "type": "brownian-particle",
+      "properties": {
+        "radius": 0.15,
+        "temperature": 300,
+        "trajectory": [],
+        "liquidMoleculeCount": 100,
+        "liquidPositions": [],
+        "liquidVelocities": [],
+        "containerWidth": 4,
+        "containerHeight": 3,
+        "currentX": 0,
+        "currentY": 0
+      },
+      "transform": { "position": { "x": 2, "y": 1.5 }, "rotation": 0 },
+      "label": "布朗粒子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "particle-params",
+      "label": "粒子参数",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 100,
+          "max": 1000,
+          "step": 10,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "particle-1",
+          "targetProperty": "temperature"
+        },
+        {
+          "key": "liquidMoleculeCount",
+          "label": "液体分子数",
+          "type": "slider",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 100,
+          "unit": "个",
+          "targetEntityId": "particle-1",
+          "targetProperty": "liquidMoleculeCount"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300,
+    "liquidMoleculeCount": 100
+  },
+  "solveMode": "numerical",
+  "duration": 60,
+  "solverQualifier": { "thermal": "brownian-motion" }
+}

@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "id": "ENE-051",
+    "name": "单摆能量转化",
+    "module": "P-14",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过单摆模板，观察摆球在最高点与最低点之间动能和重力势能的往复交换。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加固定点 anchor-top。",
+      "3. 添加摆球 bob-ball，并与 anchor-top 建立绳约束。",
+      "4. 以偏角初态释放，观察能量在 Ep 与 Ek 间转化。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-051.json",
+  "commandProgram": {
+    "templateId": "ENE-051",
+    "sceneName": "ENE-051 单摆能量转化",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "bob-ball",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 2,
+            "y": 5
+          },
+          "mass": 0.5,
+          "friction": 0.02,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-main",
+        "jointType": "rope",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "bob-ball",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

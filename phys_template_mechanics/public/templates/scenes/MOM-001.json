@@ -1,0 +1,85 @@
+{
+  "id": "template-scene-mom-001",
+  "name": "MOM-001 完全弹性碰撞",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 1.56
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-ball-left",
+      "type": "ball",
+      "label": "球体 #1",
+      "position": {
+        "x": -4.2,
+        "y": 1.86
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 2,
+      "friction": 0,
+      "restitution": 1,
+      "initialVelocity": {
+        "x": 5,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    },
+    {
+      "id": "body-ball-right",
+      "type": "ball",
+      "label": "球体 #2",
+      "position": {
+        "x": 1,
+        "y": 1.86
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 3,
+      "friction": 0,
+      "restitution": 1,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

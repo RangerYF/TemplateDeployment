@@ -1,0 +1,87 @@
+{
+  "id": "template-scene-mom-032",
+  "name": "MOM-032 凹槽滑块模型",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-groove-main",
+      "type": "groove",
+      "label": "V形槽 #1",
+      "position": {
+        "x": 0,
+        "y": 1.908
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 5,
+      "friction": 0.2,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "grooveWidth": 6,
+      "grooveDepth": 3.8,
+      "grooveThickness": 0.12
+    },
+    {
+      "id": "body-ball-main",
+      "type": "ball",
+      "label": "球体 #1",
+      "position": {
+        "x": -1.891662147997523,
+        "y": 2.7406608199805507
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": false,
+      "mass": 0.8,
+      "friction": 0.05,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 3,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 0.3
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

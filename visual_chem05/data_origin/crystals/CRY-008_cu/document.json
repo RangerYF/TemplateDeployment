@@ -1,0 +1,162 @@
+{
+  "id": "CRY-008",
+  "slug": "cry-008-cu",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-008",
+    "name_cn": "铜",
+    "formula": "Cu",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Fm3̄m",
+    "lattice_params": {
+      "a": 361.5,
+      "b": 361.5,
+      "c": 361.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Cu",
+        "label": "Cu2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Cu",
+        "label": "Cu3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "Cu",
+        "label": "Cu4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      }
+    ],
+    "bond_type": "metallic",
+    "coord_number": "12",
+    "z": 4,
+    "teaching_points": [
+      "面心立方(FCC)堆积，配位数12，空间利用率74.05%",
+      "堆积方式为ABCABC...（立方最密堆积CCP）",
+      "每个晶胞含4个Cu原子（顶点1/8×8=1，面心1/2×6=3）",
+      "12个最近邻原子距离均为a/√2=255pm",
+      "延展性极好（金属键无方向性），优良导体",
+      "Cu还可形成多种合金：黄铜(Cu-Zn)、青铜(Cu-Sn)等"
+    ],
+    "bond_lengths": {
+      "Cu-Cu": 255
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-008",
+    "name": "铜",
+    "formula": "Cu",
+    "formulaHtml": "Cu",
+    "category": "metallic",
+    "gradeLevel": "高中必修",
+    "structureType": "面心立方(FCC)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Fm3̄m",
+    "spaceGroupNumber": 225,
+    "lattice": {
+      "a": 361.5,
+      "b": 361.5,
+      "c": 361.5,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "Cu",
+        "label": "Cu2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "element": "Cu",
+        "label": "Cu3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ]
+      },
+      {
+        "element": "Cu",
+        "label": "Cu4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ]
+      }
+    ],
+    "bonds": [],
+    "neighborCutoff": 2.56,
+    "packingType": "FCC",
+    "packingEfficiency": 74.05,
+    "coordinationNumber": "12",
+    "coordinationGeometry": "立方八面体",
+    "teachingPoints": [
+      "面心立方(FCC)堆积，配位数12，空间利用率74.05%",
+      "堆积方式为ABCABC...（立方最密堆积CCP）",
+      "每个晶胞含4个Cu原子（顶点1/8×8=1，面心1/2×6=3）",
+      "12个最近邻原子距离均为a/√2=255pm",
+      "延展性极好（金属键无方向性），优良导体",
+      "Cu还可形成多种合金：黄铜(Cu-Zn)、青铜(Cu-Sn)等"
+    ],
+    "bondLengths": {
+      "Cu-Cu": 255
+    },
+    "codId": 9008468,
+    "dataSource": "COD #9008468 — Wyckoff, Crystal Structures 1, 7-83 (1963)"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "id": "MOT-031",
+    "name": "匀速圆周运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过匀速圆周运动模板，在去除地面参照的二维教学视角下，观察半径固定、速率近似不变时速度分量随时间的周期变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, 0)。",
+      "2. 将 ground 移出观察区域，避免误解为贴地侧视运动。",
+      "3. 添加圆心标记 anchor-center 与小球 ball-main。",
+      "4. 用 rod-main 固定转动半径，并给小球设置切向初速度，观察近似匀速圆周运动与 vx、vy 周期变化。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-031.json",
+  "commandProgram": {
+    "templateId": "MOT-031",
+    "sceneName": "MOT-031 匀速圆周运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": -1000
+          },
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-center",
+        "bodyType": "anchor",
+        "label": "圆心",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "center"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "label": "圆周小球",
+        "patch": {
+          "position": {
+            "x": 2.8,
+            "y": 9.2
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "initialVelocity": {
+            "x": 0,
+            "y": 4.8
+          }
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rod-main",
+        "jointType": "rod",
+        "bodyRefA": "anchor-center",
+        "bodyRefB": "ball-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,507 @@
+{
+  "id": "CRY-021",
+  "slug": "cry-021-yba2cu3o7-ybco",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-021",
+    "name_cn": "钇钡铜氧 (YBCO)",
+    "formula": "YBa2Cu3O7",
+    "level": "拓展",
+    "crystal_system": "orthorhombic",
+    "space_group": "Pmmm",
+    "lattice_params": {
+      "a": 382,
+      "b": 388.5,
+      "c": 1168.3,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Y",
+        "label": "Y1",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "+3"
+      },
+      {
+        "element": "Ba",
+        "label": "Ba1",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.184,
+        "charge": "+2"
+      },
+      {
+        "element": "Ba",
+        "label": "Ba2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.816,
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu2",
+        "x": 0,
+        "y": 0,
+        "z": 0.356,
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu3",
+        "x": 0,
+        "y": 0,
+        "z": 0.644,
+        "charge": "+2"
+      },
+      {
+        "element": "O",
+        "label": "O1",
+        "x": 0,
+        "y": 0.5,
+        "z": 0,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O2",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.378,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O3",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.378,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O4",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.622,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O5",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.622,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O6",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.159,
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O7",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.841,
+        "charge": "-2"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "Cu1:4(平面), Cu2/Cu3:5(锥形)",
+    "z": 1,
+    "teaching_points": [
+      "YBCO是第一个液氮温区高温超导体（Tc=92K，超过液氮77K）",
+      "结构由缺氧钙钛矿三层叠加而成：CuO链层-BaO层-CuO2面层-Y层-CuO2面层-BaO层-CuO链层",
+      "CuO2面（Cu2/Cu3位置）是超导电性的关键层",
+      "Cu1位于链位（平面四配位），Cu2/Cu3位于面位（四方锥五配位）",
+      "O含量对超导性至关重要：YBa2Cu3O7为超导体，YBa2Cu3O6为绝缘体",
+      "正交晶系(a≠b≠c)，由氧有序排列导致的对称性降低",
+      "1987年发现，开启高温超导研究热潮"
+    ],
+    "bond_lengths": {
+      "Cu1-O": 194,
+      "Cu2-O(面内)": 196,
+      "Cu2-O(顶点)": 230
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-021",
+    "name": "钇钡铜氧 (YBCO)",
+    "formula": "YBa2Cu3O7",
+    "formulaHtml": "YBa<sub>2</sub>Cu<sub>3</sub>O<sub>7</sub>",
+    "category": "ionic",
+    "gradeLevel": "拓展",
+    "structureType": "钙钛矿衍生型",
+    "crystalSystem": "orthorhombic",
+    "spaceGroup": "Pmmm",
+    "spaceGroupNumber": 47,
+    "lattice": {
+      "a": 382,
+      "b": 388.5,
+      "c": 1168.3,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 1,
+    "atomSites": [
+      {
+        "element": "Y",
+        "label": "Y1",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "charge": "+3"
+      },
+      {
+        "element": "Ba",
+        "label": "Ba1",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.184
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Ba",
+        "label": "Ba2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.816
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu2",
+        "fracCoords": [
+          0,
+          0,
+          0.356
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Cu",
+        "label": "Cu3",
+        "fracCoords": [
+          0,
+          0,
+          0.644
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "O",
+        "label": "O1",
+        "fracCoords": [
+          0,
+          0.5,
+          0
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O2",
+        "fracCoords": [
+          0.5,
+          0,
+          0.378
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O3",
+        "fracCoords": [
+          0,
+          0.5,
+          0.378
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O4",
+        "fracCoords": [
+          0.5,
+          0,
+          0.622
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O5",
+        "fracCoords": [
+          0,
+          0.5,
+          0.622
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O6",
+        "fracCoords": [
+          0,
+          0.5,
+          0.159
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "O",
+        "label": "O7",
+        "fracCoords": [
+          0,
+          0.5,
+          0.841
+        ],
+        "charge": "-2"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          3,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 194
+      },
+      {
+        "siteIndices": [
+          3,
+          6
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 194
+      },
+      {
+        "siteIndices": [
+          4,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          4,
+          7
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          4,
+          8
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          4,
+          8
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          4,
+          11
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 230
+      },
+      {
+        "siteIndices": [
+          5,
+          9
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          5,
+          9
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          5,
+          10
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          5,
+          10
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 196
+      },
+      {
+        "siteIndices": [
+          5,
+          12
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 230
+      }
+    ],
+    "coordinationNumber": "Cu1:4(平面), Cu2/Cu3:5(锥形)",
+    "coordinationGeometry": "Cu1:平面正方形, Cu2/Cu3:四方锥",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 3,
+        "label": "Cu1O4",
+        "polyhedronType": "other",
+        "neighborCutoff": 2
+      },
+      {
+        "centerSiteIndex": 4,
+        "label": "Cu2O5",
+        "polyhedronType": "other",
+        "neighborCutoff": 2.4
+      },
+      {
+        "centerSiteIndex": 5,
+        "label": "Cu3O5",
+        "polyhedronType": "other",
+        "neighborCutoff": 2.4
+      }
+    ],
+    "teachingPoints": [
+      "YBCO是第一个液氮温区高温超导体（Tc=92K，超过液氮77K）",
+      "结构由缺氧钙钛矿三层叠加而成：CuO链层-BaO层-CuO2面层-Y层-CuO2面层-BaO层-CuO链层",
+      "CuO2面（Cu2/Cu3位置）是超导电性的关键层",
+      "Cu1位于链位（平面四配位），Cu2/Cu3位于面位（四方锥五配位）",
+      "O含量对超导性至关重要：YBa2Cu3O7为超导体，YBa2Cu3O6为绝缘体",
+      "正交晶系(a≠b≠c)，由氧有序排列导致的对称性降低",
+      "1987年发现，开启高温超导研究热潮"
+    ],
+    "bondLengths": {
+      "Cu1-O": 194,
+      "Cu2-O(面内)": 196,
+      "Cu2-O(顶点)": 230
+    },
+    "codId": 1000030,
+    "dataSource": "COD #1000030 — YBa₂Cu₃O₆.₉ (Pmmm)"
+  }
+}

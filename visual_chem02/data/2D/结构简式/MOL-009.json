@@ -1,0 +1,43 @@
+{
+  "id": "MOL-009",
+  "name_cn": "一氧化碳",
+  "name_en": "Carbon monoxide",
+  "formula": "CO",
+  "category": "diatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -0.6,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0.6,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 3,
+      "length": 100
+    }
+  ]
+}

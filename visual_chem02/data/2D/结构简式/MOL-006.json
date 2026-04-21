@@ -1,0 +1,43 @@
+{
+  "id": "MOL-006",
+  "name_cn": "氟化氢",
+  "name_en": "Hydrogen fluoride",
+  "formula": "HF",
+  "category": "diatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -0.6,
+      "y": 0,
+      "element": "F",
+      "label": "F",
+      "hCount": 1,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0.6,
+      "y": 0,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "id": "CRY-009",
+  "slug": "cry-009-fe",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-009",
+    "name_cn": "α-铁",
+    "formula": "Fe",
+    "level": "高中必修",
+    "crystal_system": "cubic",
+    "space_group": "Im3̄m",
+    "lattice_params": {
+      "a": 286.7,
+      "b": 286.7,
+      "c": 286.7,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Fe",
+        "label": "Fe1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Fe",
+        "label": "Fe2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      }
+    ],
+    "bond_type": "metallic",
+    "coord_number": "8",
+    "z": 2,
+    "teaching_points": [
+      "体心立方(BCC)堆积，配位数8，空间利用率68.02%",
+      "每个晶胞含2个Fe原子（顶点1/8×8=1，体心1）",
+      "8个最近邻原子距离为a√3/2=249pm",
+      "铁在912°C以上转变为γ-Fe(FCC)，1394°C以上转为δ-Fe(BCC)",
+      "BCC不是最密堆积，但高温下Fe会转变为FCC最密堆积",
+      "α-Fe具有铁磁性（居里温度770°C）"
+    ],
+    "bond_lengths": {
+      "Fe-Fe": 249
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-009",
+    "name": "α-铁",
+    "formula": "Fe",
+    "formulaHtml": "Fe (α)",
+    "category": "metallic",
+    "gradeLevel": "高中必修",
+    "structureType": "体心立方(BCC)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Im3̄m",
+    "spaceGroupNumber": 229,
+    "lattice": {
+      "a": 286.7,
+      "b": 286.7,
+      "c": 286.7,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 2,
+    "atomSites": [
+      {
+        "element": "Fe",
+        "label": "Fe1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "Fe",
+        "label": "Fe2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    ],
+    "bonds": [],
+    "neighborCutoff": 2.49,
+    "packingType": "BCC",
+    "packingEfficiency": 68.02,
+    "coordinationNumber": "8",
+    "coordinationGeometry": "立方体",
+    "teachingPoints": [
+      "体心立方(BCC)堆积，配位数8，空间利用率68.02%",
+      "每个晶胞含2个Fe原子（顶点1/8×8=1，体心1）",
+      "8个最近邻原子距离为a√3/2=249pm",
+      "铁在912°C以上转变为γ-Fe(FCC)，1394°C以上转为δ-Fe(BCC)",
+      "BCC不是最密堆积，但高温下Fe会转变为FCC最密堆积",
+      "α-Fe具有铁磁性（居里温度770°C）"
+    ],
+    "bondLengths": {
+      "Fe-Fe": 249
+    },
+    "codId": 9008536,
+    "dataSource": "COD #9008536 — Wyckoff, Crystal Structures 1, 7-83 (1963)"
+  }
+}

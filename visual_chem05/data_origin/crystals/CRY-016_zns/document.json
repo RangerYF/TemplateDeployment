@@ -1,0 +1,281 @@
+{
+  "id": "CRY-016",
+  "slug": "cry-016-zns",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-016",
+    "name_cn": "硫化锌 (纤锌矿)",
+    "formula": "ZnS",
+    "level": "拓展",
+    "crystal_system": "hexagonal",
+    "space_group": "P6₃mc",
+    "lattice_params": {
+      "a": 381.1,
+      "b": 381.1,
+      "c": 623.4,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.5,
+        "charge": "+2"
+      },
+      {
+        "element": "S",
+        "label": "S1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0.375,
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.875,
+        "charge": "-2"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "4:4",
+    "z": 2,
+    "teaching_points": [
+      "纤锌矿是ZnS的六方变体，与闪锌矿为多晶型关系",
+      "Zn和S均为四面体配位（配位数4:4），与闪锌矿相同",
+      "区别在于堆积方式：纤锌矿ABAB(HCP)，闪锌矿ABCABC(CCP)",
+      "纤锌矿是ZnS的高温稳定相（>1020°C）",
+      "许多II-VI族半导体采用纤锌矿结构（如GaN、AlN、ZnO）",
+      "c/a比=1.638，接近理想值1.633"
+    ],
+    "bond_lengths": {
+      "Zn-S": 235
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-016",
+    "name": "硫化锌 (纤锌矿)",
+    "formula": "ZnS",
+    "formulaHtml": "ZnS (纤锌矿)",
+    "category": "ionic",
+    "gradeLevel": "拓展",
+    "structureType": "纤锌矿型",
+    "crystalSystem": "hexagonal",
+    "spaceGroup": "P6₃mc",
+    "spaceGroupNumber": 186,
+    "lattice": {
+      "a": 381.1,
+      "b": 381.1,
+      "c": 623.4,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 2,
+    "atomSites": [
+      {
+        "element": "Zn",
+        "label": "Zn1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Zn",
+        "label": "Zn2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.5
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "S",
+        "label": "S1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0.375
+        ],
+        "charge": "-2"
+      },
+      {
+        "element": "S",
+        "label": "S2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.875
+        ],
+        "charge": "-2"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          0,
+          3
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          1,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      },
+      {
+        "siteIndices": [
+          1,
+          2
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 235
+      }
+    ],
+    "coordinationNumber": "4:4",
+    "coordinationGeometry": "正四面体",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "ZnS4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 2.5
+      },
+      {
+        "centerSiteIndex": 1,
+        "label": "ZnS4",
+        "polyhedronType": "tetrahedron",
+        "neighborCutoff": 2.5
+      }
+    ],
+    "teachingPoints": [
+      "纤锌矿是ZnS的六方变体，与闪锌矿为多晶型关系",
+      "Zn和S均为四面体配位（配位数4:4），与闪锌矿相同",
+      "区别在于堆积方式：纤锌矿ABAB(HCP)，闪锌矿ABCABC(CCP)",
+      "纤锌矿是ZnS的高温稳定相（>1020°C）",
+      "许多II-VI族半导体采用纤锌矿结构（如GaN、AlN、ZnO）",
+      "c/a比=1.638，接近理想值1.633"
+    ],
+    "bondLengths": {
+      "Zn-S": 235
+    },
+    "codId": 9008878,
+    "dataSource": "COD #9008878 — Wyckoff, Crystal Structures 1, 85-237 (1963)"
+  }
+}

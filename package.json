@@ -1,0 +1,22 @@
+{
+  "name": "edumind-template-hub-control",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "install:all": "node scripts/install-all.mjs",
+    "install:chemistry": "node scripts/install-all.mjs chemistry",
+    "install:math": "node scripts/install-all.mjs math",
+    "install:physics": "node scripts/install-all.mjs physics",
+    "dev:all": "node scripts/dev-all.mjs",
+    "build:all": "node scripts/build-all.mjs",
+    "dev:chemistry": "node scripts/dev-all.mjs chemistry",
+    "dev:math": "node scripts/dev-all.mjs math",
+    "dev:physics": "node scripts/dev-all.mjs physics",
+    "serve": "node scripts/serve.mjs",
+    "serve:chemistry": "node scripts/serve.mjs chemistry",
+    "serve:math": "node scripts/serve.mjs math",
+    "serve:physics": "node scripts/serve.mjs physics",
+    "deploy": "node scripts/deploy.mjs"
+  }
+}

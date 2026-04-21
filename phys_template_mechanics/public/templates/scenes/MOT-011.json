@@ -1,0 +1,87 @@
+{
+  "id": "template-scene-mot-011",
+  "name": "MOT-011 斜面下滑",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-slope-main",
+      "type": "slope",
+      "label": "斜面 #1",
+      "position": {
+        "x": -0.3999999999999999,
+        "y": 0.9413333333333332
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 5,
+      "friction": 0.2,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "baseLength": 5.6,
+      "slopeHeight": 2.8
+    },
+    {
+      "id": "body-block-main",
+      "type": "block",
+      "label": "物块 #1",
+      "position": {
+        "x": -1.779058212586013,
+        "y": 2.4418835748279744
+      },
+      "angle": -0.4636476090008061,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.08,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.8,
+      "height": 0.6
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

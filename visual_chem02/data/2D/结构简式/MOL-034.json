@@ -1,0 +1,136 @@
+{
+  "id": "MOL-034",
+  "name_cn": "二氟化氙",
+  "name_en": "Xenon difluoride",
+  "formula": "XeF₂",
+  "category": "polyatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 7.347880794884119e-17,
+      "y": 1.2,
+      "element": "Br",
+      "label": "Br",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 1.2,
+      "y": 0,
+      "element": "Br",
+      "label": "Br",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 7.347880794884119e-17,
+      "y": -1.2,
+      "element": "Br",
+      "label": "Br",
+      "hCount": 0,
+      "lonePairs": 3,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": -1.7999999999999998,
+      "y": 1.0392304845413267,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": -1.7999999999999998,
+      "y": -1.0392304845413263,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -1.2,
+      "y": 1.4695761589768238e-16,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

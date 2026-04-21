@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "id": "SHM-001",
+    "name": "竖直弹簧振子",
+    "module": "P-05",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过无阻尼竖直弹簧振子模板，观察位移、速度与周期之间的稳定振动关系。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-top（anchor）。",
+      "3. 添加物体 mass-block（block）。",
+      "4. 添加更软的无阻尼弹簧 spring-main，观察更慢、更明显的上下振动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/SHM-001.json",
+  "commandProgram": {
+    "templateId": "SHM-001",
+    "sceneName": "SHM-001 竖直弹簧振子",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-top",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "mass-block",
+        "bodyType": "block",
+        "label": "振子物块",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 6.85
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 0.9,
+          "friction": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "anchor-top",
+        "bodyRefB": "mass-block",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0.25
+        },
+        "patch": {
+          "springLength": 1.35,
+          "stiffness": 0.75,
+          "damping": 0
+        }
+      }
+    ]
+  }
+}

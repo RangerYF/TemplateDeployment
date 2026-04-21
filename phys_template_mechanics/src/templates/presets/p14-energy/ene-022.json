@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "id": "ENE-022",
+    "name": "有摩擦斜面",
+    "module": "P-14",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过有摩擦斜面模板，观察机械能衰减并转化为摩擦热的过程。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加斜面 slope-main 并吸附到 ground。",
+      "3. 添加滑块 block-main 并吸附到 slope-main。",
+      "4. 设置斜面与滑块摩擦系数，运行仿真对比机械能衰减。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-022.json",
+  "commandProgram": {
+    "templateId": "ENE-022",
+    "sceneName": "ENE-022 有摩擦斜面",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "patch": {
+          "position": {
+            "x": 0.8,
+            "y": 0.2
+          },
+          "baseLength": 5,
+          "slopeHeight": 2.6,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.3
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -0.2,
+            "y": 2.4
+          },
+          "mass": 2,
+          "friction": 0.3,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "slope-main"
+        ],
+        "threshold": 1.8
+      }
+    ]
+  }
+}

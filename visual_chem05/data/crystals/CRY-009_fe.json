@@ -1,0 +1,260 @@
+{
+  "id": "CRY-009",
+  "name_cn": "α-铁",
+  "formula": "Fe",
+  "level": "高中必修",
+  "crystal_system": "立方",
+  "space_group": "Im3̄m (No. 229)",
+  "lattice_params": {
+    "a": 286.7,
+    "b": 286.7,
+    "c": 286.7,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 90
+  },
+  "atoms": [
+    {
+      "id": "Fe1",
+      "element": "Fe",
+      "label": "Fe1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "x_expr": "0",
+      "y_expr": "0",
+      "z_expr": "0",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Fe2",
+      "element": "Fe",
+      "label": "Fe2",
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5,
+      "x_expr": "1/2",
+      "y_expr": "1/2",
+      "z_expr": "1/2",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "金属键",
+  "coord_number": "8",
+  "z": 2,
+  "teaching_points": [
+    "体心立方(BCC)堆积，配位数8，空间利用率68.02%",
+    "每个晶胞含2个Fe原子（顶点1/8×8=1，体心1）",
+    "8个最近邻原子距离为a√3/2=249pm",
+    "铁在912°C以上转变为γ-Fe(FCC)，1394°C以上转为δ-Fe(BCC)",
+    "BCC不是最密堆积，但高温下Fe会转变为FCC最密堆积",
+    "α-Fe具有铁磁性（居里温度770°C）"
+  ],
+  "key_parameters": [
+    {
+      "id": "packing_sequence",
+      "label": "堆积方式",
+      "value": "体心立方（非密堆积）"
+    },
+    {
+      "id": "packing_efficiency",
+      "label": "空间利用率",
+      "value": "68.02%"
+    }
+  ],
+  "render": {
+    "category": "metallic",
+    "name": "α-铁",
+    "formula_html": "Fe (α)",
+    "grade_level": "高中必修",
+    "structure_type": "体心立方(BCC)",
+    "crystal_system_code": "cubic",
+    "space_group_symbol": "Im3̄m",
+    "space_group_number": 229,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "metallic",
+    "neighbor_cutoff_angstrom": 2.49,
+    "bond_types": [
+      "metallic"
+    ],
+    "bonds": [],
+    "polyhedra": [],
+    "coordination_geometry": "立方体",
+    "bond_lengths_pm": {
+      "Fe-Fe": 249
+    },
+    "hybridization": null,
+    "packing_type": "BCC",
+    "packing_efficiency": 0.6801999999999999,
+    "data_source": "COD #9008536 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+    "mp_material_id": "mp-13",
+    "representation_note": null,
+    "source_summary": "C-05 数据文档 + COD #9008536 — Wyckoff, Crystal Structures 1, 7-83 (1963) + Materials Project mp-13"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "c05",
+        "label": "C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+        "type": "document",
+        "path": "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md"
+      },
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-009_fe/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-009_fe/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008536 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008536.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-13",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-13"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "c05",
+        "origin"
+      ],
+      "name_cn": [
+        "c05",
+        "origin"
+      ],
+      "formula": [
+        "c05",
+        "origin"
+      ],
+      "level": [
+        "c05",
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "c05",
+        "origin"
+      ],
+      "space_group": [
+        "c05",
+        "origin"
+      ],
+      "lattice_params": [
+        "c05",
+        "origin"
+      ],
+      "atoms": [
+        "c05",
+        "origin"
+      ],
+      "bond_type": [
+        "chem",
+        "c05",
+        "origin"
+      ],
+      "coord_number": [
+        "c05",
+        "origin"
+      ],
+      "z": [
+        "c05",
+        "origin"
+      ],
+      "teaching_points": [
+        "c05",
+        "origin"
+      ],
+      "key_parameters": [
+        "c05",
+        "origin"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin",
+        "c05"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin",
+        "c05"
+      ],
+      "render.hybridization": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_type": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_efficiency": [
+        "origin",
+        "c05"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

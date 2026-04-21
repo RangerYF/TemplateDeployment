@@ -1,0 +1,279 @@
+{
+  "id": "MOL-074",
+  "name_cn": "五氧化二磷",
+  "name_en": "Phosphorus pentoxide",
+  "formula": "P₄O₁₀",
+  "category": "polyatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -2.4,
+      "y": -2.4,
+      "element": "P",
+      "label": "P",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 2.4,
+      "y": -2.4,
+      "element": "P",
+      "label": "P",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": -2.4,
+      "y": 2.4,
+      "element": "P",
+      "label": "P",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 2.4,
+      "y": 2.4,
+      "element": "P",
+      "label": "P",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 0,
+      "y": -2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": -2.4,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": -0.96,
+      "y": 0.96,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 0.96,
+      "y": -0.96,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": 2.4,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": 0,
+      "y": 2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 10,
+      "x": -3.5999999999999996,
+      "y": -2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 11,
+      "x": 3.5999999999999996,
+      "y": -2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 12,
+      "x": -3.5999999999999996,
+      "y": 2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    },
+    {
+      "index": 13,
+      "x": 3.5999999999999996,
+      "y": 2.4,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 10,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 11,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 12,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 13,
+      "order": 2,
+      "length": 100
+    }
+  ]
+}

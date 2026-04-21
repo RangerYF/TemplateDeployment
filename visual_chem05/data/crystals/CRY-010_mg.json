@@ -1,0 +1,260 @@
+{
+  "id": "CRY-010",
+  "name_cn": "镁",
+  "formula": "Mg",
+  "level": "高中选修",
+  "crystal_system": "六方",
+  "space_group": "P6₃/mmc (No. 194)",
+  "lattice_params": {
+    "a": 320.9,
+    "b": 320.9,
+    "c": 521,
+    "alpha": 90,
+    "beta": 90,
+    "gamma": 120
+  },
+  "atoms": [
+    {
+      "id": "Mg1",
+      "element": "Mg",
+      "label": "Mg1",
+      "x": 0.3333333333333333,
+      "y": 0.6666666666666666,
+      "z": 0.25,
+      "x_expr": "1/3",
+      "y_expr": "2/3",
+      "z_expr": "1/4",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    },
+    {
+      "id": "Mg2",
+      "element": "Mg",
+      "label": "Mg2",
+      "x": 0.6666666666666666,
+      "y": 0.3333333333333333,
+      "z": 0.75,
+      "x_expr": "2/3",
+      "y_expr": "1/3",
+      "z_expr": "3/4",
+      "charge": null,
+      "color_override": null,
+      "radius_override_angstrom": null
+    }
+  ],
+  "bond_type": "金属键",
+  "coord_number": "12",
+  "z": 2,
+  "teaching_points": [
+    "六方最密堆积(HCP)，配位数12，空间利用率74.05%（与FCC相同）",
+    "堆积方式为ABAB...（六方最密堆积）",
+    "每个晶胞含2个Mg原子",
+    "理想c/a比为√(8/3)≈1.633，Mg实际c/a=1.623接近理想值",
+    "12个最近邻：同层6个 + 上层3个 + 下层3个",
+    "Mg密度低(1.738 g/cm³)，是最轻的结构金属之一"
+  ],
+  "key_parameters": [
+    {
+      "id": "packing_sequence",
+      "label": "堆积方式",
+      "value": "ABABAB（六方密堆积）"
+    },
+    {
+      "id": "packing_efficiency",
+      "label": "空间利用率",
+      "value": "74.05%"
+    }
+  ],
+  "render": {
+    "category": "metallic",
+    "name": "镁",
+    "formula_html": "Mg",
+    "grade_level": "高中选修",
+    "structure_type": "六方最密堆积(HCP)",
+    "crystal_system_code": "hexagonal",
+    "space_group_symbol": "P6₃/mmc",
+    "space_group_number": 194,
+    "bond_generation": "explicit",
+    "fallback_bond_type": "metallic",
+    "neighbor_cutoff_angstrom": 3.21,
+    "bond_types": [
+      "metallic"
+    ],
+    "bonds": [],
+    "polyhedra": [],
+    "coordination_geometry": "反棱柱（三方反棱柱套三棱柱）",
+    "bond_lengths_pm": {
+      "Mg-Mg": 321
+    },
+    "hybridization": null,
+    "packing_type": "HCP",
+    "packing_efficiency": 0.7404999999999999,
+    "data_source": "COD #9008506 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+    "mp_material_id": "mp-153",
+    "representation_note": null,
+    "source_summary": "C-05 数据文档 + COD #9008506 — Wyckoff, Crystal Structures 1, 7-83 (1963) + Materials Project mp-153"
+  },
+  "provenance": {
+    "references": [
+      {
+        "id": "c05",
+        "label": "C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+        "type": "document",
+        "path": "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md"
+      },
+      {
+        "id": "prd",
+        "label": "C化学教具产品线 — 产品需求文档（PRD）.md",
+        "type": "document",
+        "path": "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+      },
+      {
+        "id": "origin",
+        "label": "data_origin/crystals/CRY-010_mg/document.json",
+        "type": "origin",
+        "path": "data_origin/crystals/CRY-010_mg/document.json"
+      },
+      {
+        "id": "cod",
+        "label": "COD #9008506 — Wyckoff, Crystal Structures 1, 7-83 (1963)",
+        "type": "database",
+        "url": "https://www.crystallography.net/cod/9008506.html"
+      },
+      {
+        "id": "mp",
+        "label": "Materials Project mp-153",
+        "type": "database",
+        "url": "https://next-gen.materialsproject.org/materials/mp-153"
+      },
+      {
+        "id": "chem",
+        "label": "基于结构类别、显式键定义和教师教学口径的化学类型整理",
+        "type": "inference"
+      }
+    ],
+    "field_sources": {
+      "id": [
+        "c05",
+        "origin"
+      ],
+      "name_cn": [
+        "c05",
+        "origin"
+      ],
+      "formula": [
+        "c05",
+        "origin"
+      ],
+      "level": [
+        "c05",
+        "prd",
+        "origin"
+      ],
+      "crystal_system": [
+        "c05",
+        "origin"
+      ],
+      "space_group": [
+        "c05",
+        "origin"
+      ],
+      "lattice_params": [
+        "c05",
+        "origin"
+      ],
+      "atoms": [
+        "c05",
+        "origin"
+      ],
+      "bond_type": [
+        "chem",
+        "c05",
+        "origin"
+      ],
+      "coord_number": [
+        "c05",
+        "origin"
+      ],
+      "z": [
+        "c05",
+        "origin"
+      ],
+      "teaching_points": [
+        "c05",
+        "origin"
+      ],
+      "key_parameters": [
+        "c05",
+        "origin"
+      ],
+      "render.category": [
+        "origin",
+        "prd"
+      ],
+      "render.structure_type": [
+        "origin",
+        "c05"
+      ],
+      "render.crystal_system_code": [
+        "origin"
+      ],
+      "render.space_group_symbol": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.space_group_number": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.bond_generation": [
+        "origin"
+      ],
+      "render.fallback_bond_type": [
+        "origin",
+        "chem"
+      ],
+      "render.neighbor_cutoff_angstrom": [
+        "origin"
+      ],
+      "render.bonds": [
+        "origin",
+        "chem",
+        "cod",
+        "mp"
+      ],
+      "render.polyhedra": [
+        "origin"
+      ],
+      "render.coordination_geometry": [
+        "origin"
+      ],
+      "render.bond_lengths_pm": [
+        "origin",
+        "c05"
+      ],
+      "render.hybridization": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_type": [
+        "origin",
+        "c05"
+      ],
+      "render.packing_efficiency": [
+        "origin",
+        "c05"
+      ],
+      "render.data_source": [
+        "origin",
+        "cod",
+        "mp"
+      ],
+      "render.representation_note": [
+        "origin"
+      ]
+    }
+  }
+}

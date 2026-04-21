@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  color: #1A1A2E;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Coin flip animation */
+@keyframes coin-flip {
+  0%   { transform: scaleX(1); }
+  50%  { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+.animate-coin-flip {
+  animation: coin-flip 600ms ease-in-out forwards;
+}

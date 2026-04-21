@@ -1,0 +1,131 @@
+{
+  "id": "P02-EM003-cyclotron-motion",
+  "version": "1.0",
+  "name": "带电粒子·磁场中圆周运动",
+  "description": "带电粒子以初速度进入匀强磁场，受洛伦兹力做匀速圆周运动。理论半径 R=mv/(qB)",
+  "category": "P-02",
+  "supportedViewports": ["force", "motion", "field"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 400, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 2.0,
+        "direction": "into",
+        "width": 8,
+        "height": 6
+      },
+      "transform": { "position": { "x": -4, "y": -3 }, "rotation": 0 },
+      "label": "匀强磁场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 1,
+        "mass": 1,
+        "initialVelocity": { "x": 2, "y": 0 },
+        "radius": 0.12
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "带电粒子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "particle-params",
+      "label": "粒子属性",
+      "params": [
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "C",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "kg",
+          "targetEntityId": "particle-1",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "v0",
+          "label": "初速度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m/s",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialVelocity.x"
+        }
+      ]
+    },
+    {
+      "key": "bfield-params",
+      "label": "磁场属性",
+      "params": [
+        {
+          "key": "B",
+          "label": "磁感应强度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "direction",
+          "label": "磁场方向",
+          "type": "select",
+          "options": [
+            { "value": "into", "label": "垂直纸面向内 \u00d7" },
+            { "value": "out", "label": "垂直纸面向外 \u00b7" }
+          ],
+          "default": "into",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "direction"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "charge": 1,
+    "mass": 1,
+    "v0": 2,
+    "B": 2,
+    "direction": "into"
+  },
+  "solveMode": "numerical",
+  "duration": 10,
+  "solverQualifier": { "interaction": "magnetic" }
+}

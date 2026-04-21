@@ -1,0 +1,880 @@
+[
+  {
+    "meta": {
+      "id": "ENE-001",
+      "name": "自由落体",
+      "module": "P-14",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过自由落体模板，观察重力势能向动能的持续转化以及机械能守恒。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加小球 ball-main 于较高位置。",
+        "3. 运行仿真观察下落过程中 Ep 减少、Ek 增大。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-001.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-002",
+      "name": "竖直上抛",
+      "module": "P-14",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过竖直上抛模板，观察上升与回落过程中动能和重力势能的双向转化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加小球 ball-main，并设置竖直向上初速度。",
+        "3. 运行仿真观察最高点速度趋近于 0 后回落。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-002.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-011",
+      "name": "阿特伍德机",
+      "module": "P-14",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过阿特伍德机模板，观察双物体系统中重力势能差转化为系统动能。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加滑轮座 pulley-main。",
+        "3. 添加两侧重物 block-heavy 与 block-light。",
+        "4. 添加滑轮约束 pulley-rope 连接两重物并运行仿真。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-011.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-021",
+      "name": "光滑斜面",
+      "module": "P-14",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过光滑斜面模板，观察重力势能向动能转化时机械能近似守恒。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加斜面 slope-main 并吸附到 ground。",
+        "3. 添加滑块 block-main 并吸附到 slope-main。",
+        "4. 设置斜面与滑块摩擦近似为 0，运行仿真观察能量转化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-021.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-022",
+      "name": "有摩擦斜面",
+      "module": "P-14",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过有摩擦斜面模板，观察机械能衰减并转化为摩擦热的过程。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加斜面 slope-main 并吸附到 ground。",
+        "3. 添加滑块 block-main 并吸附到 slope-main。",
+        "4. 设置斜面与滑块摩擦系数，运行仿真对比机械能衰减。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-022.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-041",
+      "name": "弹簧振子能量转化",
+      "module": "P-14",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过水平弹簧振子模板，观察动能与弹性势能在周期过程中的交替变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, 0)。",
+        "2. 添加固定墙 wall-left，并吸附到 ground。",
+        "3. 添加滑块 mass-block。",
+        "4. 添加弹簧 spring-main 连接 wall-left 与 mass-block 并设置无阻尼。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-041.json"
+  },
+  {
+    "meta": {
+      "id": "ENE-051",
+      "name": "单摆能量转化",
+      "module": "P-14",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过单摆模板，观察摆球在最高点与最低点之间动能和重力势能的往复交换。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加固定点 anchor-top。",
+        "3. 添加摆球 bob-ball，并与 anchor-top 建立绳约束。",
+        "4. 以偏角初态释放，观察能量在 Ep 与 Ek 间转化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/ENE-051.json"
+  },
+  {
+    "meta": {
+      "id": "FM-001",
+      "name": "水平面受力分解",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“水平面受力分解”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 block-main（block）。",
+        "3. 将物体 block-main 吸附到 ground。",
+        "4. 给物体 block-main 添加外力 applied-force。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-001.json",
+    "updatedAt": "2026-04-01T16:28:38.404Z"
+  },
+  {
+    "meta": {
+      "id": "FM-002",
+      "name": "水平面摩擦分析",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“水平面摩擦分析”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 block-main（block）。",
+        "3. 将物体 block-main 吸附到 ground。",
+        "4. 给物体 block-main 添加外力 push-force。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-002.json",
+    "updatedAt": "2026-04-01T16:29:24.985Z"
+  },
+  {
+    "meta": {
+      "id": "FM-011",
+      "name": "斜面受力",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过单一斜面受力模板，先观察默认 37° 斜面的临界静止状态，再通过右侧属性与初始运动设置验证不同角度和运动状态下的受力变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 使用 37° 斜面作为默认教学角度，可在右侧属性面板继续修改。",
+        "3. 先观察临界静止状态下 G∥、G⊥、支持力与静摩擦力。",
+        "4. 在右侧初始运动中设置沿斜面向上或向下的初速度。",
+        "5. 对比不同角度、静止、下滑、上滑三种状态下的受力与合力。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-011.json"
+  },
+  {
+    "meta": {
+      "id": "FM-021",
+      "name": "单绳悬挂",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“单绳悬挂”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 block-main（block）。",
+        "4. 添加约束 rope-main（rope），连接 anchor-top 与 block-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-021.json"
+  },
+  {
+    "meta": {
+      "id": "FM-022",
+      "name": "双绳悬挂",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“双绳悬挂”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-left（anchor）。",
+        "3. 添加物体 anchor-right（anchor）。",
+        "4. 添加物体 block-main（block）。",
+        "5. 添加约束 rope-left（rope），连接 anchor-left 与 block-main。",
+        "6. 添加约束 rope-right（rope），连接 anchor-right 与 block-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-022.json"
+  },
+  {
+    "meta": {
+      "id": "FM-023",
+      "name": "绳+杆悬挂",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“绳+杆悬挂”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-left（anchor）。",
+        "3. 添加物体 anchor-right（anchor）。",
+        "4. 添加物体 block-main（block）。",
+        "5. 添加约束 rope-left（rope），连接 anchor-left 与 block-main。",
+        "6. 添加约束 rod-right（rod），连接 anchor-right 与 block-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-023.json"
+  },
+  {
+    "meta": {
+      "id": "FM-031",
+      "name": "绳连水平面两物体",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“绳连水平面两物体”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 block-left（block）。",
+        "3. 将物体 block-left 吸附到 ground。",
+        "4. 添加物体 block-right（block）。",
+        "5. 将物体 block-right 吸附到 ground。",
+        "6. 添加约束 rope-main（rope），连接 block-left 与 block-right。",
+        "7. 给物体 block-left 添加外力 drive-force。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-031.json"
+  },
+  {
+    "meta": {
+      "id": "FM-032",
+      "name": "绳连斜面-悬挂",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“绳连斜面-悬挂”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 slope-main（slope）。",
+        "3. 将物体 slope-main 吸附到 ground。",
+        "4. 添加物体 block-slope（block）。",
+        "5. 将物体 block-slope 吸附到 slope-main。",
+        "6. 添加物体 pulley-main（pulley-mount）。",
+        "7. 添加物体 block-hanging（block）。",
+        "8. 添加约束 pulley-rope（pulley），连接 block-slope 与 block-hanging。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-032.json"
+  },
+  {
+    "meta": {
+      "id": "FM-033",
+      "name": "弹簧连接",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“弹簧连接”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, 0)。",
+        "2. 添加物体 block-left（block）。",
+        "3. 添加物体 block-right（block）。",
+        "4. 添加约束 spring-main（spring），连接 block-left 与 block-right。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-033.json",
+    "updatedAt": "2026-04-02T06:40:30.051Z"
+  },
+  {
+    "meta": {
+      "id": "FM-041",
+      "name": "圆盘摩擦模型",
+      "module": "P-01",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过圆盘摩擦模型的侧视图，观察圆盘上滑块随盘转动时的受力关系，重点理解静摩擦力提供向心力，并比较不同角速度下未打滑、临界与将打滑三种状态。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加转轴 axle-main，并在其上方放置圆盘侧视图 disk-main。",
+        "3. 添加盘上滑块 slider-main，作为随圆盘转动的研究对象。",
+        "4. 在右侧教学参数中调节角速度 ω，观察滑块的 G、N 和指向圆心的静摩擦力 f静。",
+        "5. 结合未打滑、临界、将打滑三种状态，比较所需向心力与最大静摩擦力。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-041.json"
+  },
+  {
+    "meta": {
+      "id": "FM-042",
+      "name": "圆锥摆受力",
+      "module": "P-01",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过“侧视图 + 顶视图”双视图圆锥摆模板，同时观察斜绳、水平圆轨迹和顶视圆周运动，理解张力的竖直分量平衡重力、水平分量提供向心力。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加固定点 anchor-top 与摆球 bob-ball，并保持斜绳初态。",
+        "3. 在主画面观察圆锥截面、竖直轴与水平圆轨迹的侧视投影。",
+        "4. 在右上角顶视图中观察摆球做水平圆周运动。",
+        "5. 结合 G 与 T 的分解理解圆锥摆的受力语义。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-042.json"
+  },
+  {
+    "meta": {
+      "id": "FM-043",
+      "name": "竖直圆周(绳连)",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“竖直圆周(绳连)”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 ball-main（ball）。",
+        "4. 添加约束 rope-main（rope），连接 anchor-top 与 ball-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-043.json"
+  },
+  {
+    "meta": {
+      "id": "FM-044",
+      "name": "竖直圆周(杆连)",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“竖直圆周(杆连)”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 ball-main（ball）。",
+        "4. 添加约束 rod-main（rod），连接 anchor-top 与 ball-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-044.json"
+  },
+  {
+    "meta": {
+      "id": "FM-051",
+      "name": "弹簧模型",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“弹簧模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 block-main（block）。",
+        "4. 添加约束 spring-main（spring），连接 anchor-top 与 block-main。",
+        "5. 给物体 block-main 添加外力 disturb-force。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-051.json",
+    "updatedAt": "2026-04-02T06:38:32.470Z"
+  },
+  {
+    "meta": {
+      "id": "FM-052",
+      "name": "杆模型",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“杆模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 block-main（block）。",
+        "4. 添加约束 rod-main（rod），连接 anchor-top 与 block-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-052.json"
+  },
+  {
+    "meta": {
+      "id": "FM-053",
+      "name": "半球模型",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“半球模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 hemisphere-main（hemisphere）。",
+        "3. 将物体 hemisphere-main 吸附到 ground。",
+        "4. 添加物体 ball-main（ball）。",
+        "5. 将物体 ball-main 吸附到 hemisphere-main。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-053.json",
+    "updatedAt": "2026-04-01T16:15:00.956Z"
+  },
+  {
+    "meta": {
+      "id": "FM-054",
+      "name": "传送带模型",
+      "module": "P-01",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过单一传送带模板，先观察默认水平传送带，再通过右侧属性和初始运动切换倾角、同向/反向速度，比较不同状态下的运动变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 使用水平传送带作为默认初始状态。",
+        "3. 在右侧属性中修改传送带倾角与皮带速度。",
+        "4. 在右侧初始运动中设置物块同向或反向初速度。",
+        "5. 结合 v-t / vx-t / vy-t 观察不同状态下的变化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/FM-054.json"
+  },
+  {
+    "meta": {
+      "id": "FM-055",
+      "name": "凹槽模型",
+      "module": "P-01",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过“凹槽模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 groove-main（groove）。",
+        "3. 将物体 groove-main 吸附到 ground。",
+        "4. 添加物体 ball-main（ball）。",
+        "5. 将物体 ball-main 吸附到 groove-main。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/FM-055.json",
+    "updatedAt": "2026-04-02T06:37:51.382Z"
+  },
+  {
+    "meta": {
+      "id": "MOM-001",
+      "name": "完全弹性碰撞",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过完全弹性碰撞模板，观察一维碰撞中总动量与总动能同时守恒的特征。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加球体 ball-left 与 ball-right，并吸附到低摩擦 ground。",
+        "3. 设置 ball-left 以更易观察的速度向右运动，ball-right 初速度为 0。",
+        "4. 将两球恢复系数设为 1，构造更清晰的一维完全弹性碰撞。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/MOM-001.json",
+    "updatedAt": "2026-04-02T09:43:40.191Z"
+  },
+  {
+    "meta": {
+      "id": "MOM-003",
+      "name": "部分弹性碰撞",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过部分弹性碰撞模板，对比恢复系数小于 1 时动量守恒与动能损失并存的现象。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加球体 ball-left 与 ball-right，并吸附到 ground。",
+        "3. 设置 ball-left 初速度为向右，ball-right 初速度为 0。",
+        "4. 将两球恢复系数设为 0.5，构造部分弹性碰撞。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-003.json"
+  },
+  {
+    "meta": {
+      "id": "MOM-011",
+      "name": "爬坡模型",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过滑块冲坡模板，观察滑块动量与机械能在斜面系统中的转化过程。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 将地面设置为光滑水平面，并放置可在水平面上运动的斜面。",
+        "3. 添加滑块 block-main 并放在斜面低端。",
+        "4. 给滑块设置沿斜面向上的初速度，观察冲坡过程中斜面反向运动与最高点共速。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-011.json"
+  },
+  {
+    "meta": {
+      "id": "MOM-012",
+      "name": "弹簧压缩释放",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过双物体弹簧释放模板，观察系统总动量近似为零时两物体反向分离的规律。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, 0)。",
+        "2. 添加两个滑块 block-left 与 block-right。",
+        "3. 添加弹簧 spring-main 连接两个滑块，并设置预压缩初态。",
+        "4. 运行仿真观察两滑块反向分离与动量分配。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-012.json"
+  },
+  {
+    "meta": {
+      "id": "MOM-013",
+      "name": "滑块模型",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过滑块碰撞后滑行模板，分段观察碰撞阶段动量关系与碰后摩擦耗散。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加有限平台 platform-main，并在平台上放置两个滑块。",
+        "3. 设置 block-a 初速度使其追碰 block-b。",
+        "4. 观察碰撞阶段与碰后平台摩擦滑行阶段的分段变化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-013.json"
+  },
+  {
+    "meta": {
+      "id": "MOM-031",
+      "name": "人在船上行走",
+      "module": "P-12",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“人-船”近似模型，观察系统总动量接近零时主体与承载体的反向运动关系。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)，并将地面设置为近似无摩擦。",
+        "2. 添加更长的 boat-main（船）并吸附到 ground。",
+        "3. 添加 person-main（人）并吸附到船上。",
+        "4. 设置更慢的相对运动速度，观察人船反向位移关系。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-031.json"
+  },
+  {
+    "meta": {
+      "id": "MOM-032",
+      "name": "凹槽滑块模型",
+      "module": "P-12",
+      "status": "planned"
+    },
+    "teaching": {
+      "teachingObjective": "通过凹槽约束滑块模板，观察受约束路径下动量与速度方向的连续变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加凹槽 groove-main 并吸附到 ground。",
+        "3. 添加小球 ball-main 并吸附到 groove-main。",
+        "4. 设置 ball-main 沿槽方向初速度，观察受约束运动。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOM-032.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-001",
+      "name": "匀速直线运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“匀速直线运动”模板，让学生建立现象、受力与运动规律之间的对应。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 cart（block）。",
+        "3. 将物体 cart 吸附到 ground。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-001.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-002",
+      "name": "匀加速直线运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“匀加速直线运动”模板，让学生建立位移、速度与加速度之间的对应关系。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 直接使用超长地面作为水平支撑面，保证观察阶段内等效无限长。",
+        "3. 添加物体 cart-acc（block）并吸附到 ground。",
+        "4. 给物体 cart-acc 添加外力 drive-force，观察稳定的匀加速直线运动。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-002.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-011",
+      "name": "斜面下滑",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“斜面下滑”模板，让学生观察重力沿斜面分量导致的匀加速运动。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 slope-main（slope）。",
+        "3. 将物体 slope-main 吸附到 ground。",
+        "4. 添加物体 block-main（block）。",
+        "5. 将物体 block-main 吸附到 slope-main。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/MOT-011.json",
+    "updatedAt": "2026-04-02T09:05:05.705Z"
+  },
+  {
+    "meta": {
+      "id": "MOT-012",
+      "name": "斜面上滑",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过斜面上滑模板，让学生观察初速度与重力分量共同作用下的减速、回滑与落地后的继续运动。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 slope-main（slope）。",
+        "3. 将物体 slope-main 吸附到 ground。",
+        "4. 添加物体 block-main（block），并设置沿斜面向上的较慢初速度。",
+        "5. 将物体 block-main 吸附到 slope-main，观察回滑后更平滑地沿水平面继续运动。"
+      ]
+    },
+    "sceneSource": "manual",
+    "sceneJsonPath": "/templates/scenes/MOT-012.json",
+    "updatedAt": "2026-04-02T09:06:14.320Z"
+  },
+  {
+    "meta": {
+      "id": "MOT-021",
+      "name": "平抛运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“平抛运动”模板，让学生观察水平方向匀速与竖直方向匀加速叠加形成的抛物线轨迹。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 ball-main（ball），并设置水平方向初速度。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-021.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-022",
+      "name": "斜抛运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“斜抛运动”模板，让学生观察速度分解对射程与最高点的影响。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 ball-main（ball），并设置斜向初速度。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-022.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-031",
+      "name": "匀速圆周运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过匀速圆周运动模板，在去除地面参照的二维教学视角下，观察半径固定、速率近似不变时速度分量随时间的周期变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, 0)。",
+        "2. 将 ground 移出观察区域，避免误解为贴地侧视运动。",
+        "3. 添加圆心标记 anchor-center 与小球 ball-main。",
+        "4. 用 rod-main 固定转动半径，并给小球设置切向初速度，观察近似匀速圆周运动与 vx、vy 周期变化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-031.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-033",
+      "name": "竖直圆周运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过“竖直圆周运动”模板，让学生观察临界速度条件下绳约束运动的动力学特征。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 ball-main（ball），并设置切向初速度。",
+        "4. 添加约束 rope-main（rope），连接 anchor-top 与 ball-main。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-033.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-034",
+      "name": "木板-物块相对运动",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过木板与物块的相对运动模板，观察地面摩擦和板-块摩擦共同作用下两物体速度的耦合变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加更长的木板 board-main（block）并吸附到 ground。",
+        "3. 添加物块 block-top（block）并吸附到 board-main 左侧，形成更明显的相对滑动过程。",
+        "4. 设置更慢的木板初速度，观察木板与物块的双速度曲线和位移变化。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-034.json"
+  },
+  {
+    "meta": {
+      "id": "MOT-035",
+      "name": "斜面上平抛",
+      "module": "P-02",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过斜面上平抛模板，观察物体从斜面高处做水平抛出后重新落回斜面的过程，并对比 vx、vy 随时间的变化。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加长斜面 slope-main 并吸附到 ground。",
+        "3. 在斜面高端附近放置质点化小球 ball-main。",
+        "4. 给小球设置水平方向初速度，观察其落回斜面。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/MOT-035.json"
+  },
+  {
+    "meta": {
+      "id": "SHM-001",
+      "name": "竖直弹簧振子",
+      "module": "P-05",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过无阻尼竖直弹簧振子模板，观察位移、速度与周期之间的稳定振动关系。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 mass-block（block）。",
+        "4. 添加更软的无阻尼弹簧 spring-main，观察更慢、更明显的上下振动。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/SHM-001.json"
+  },
+  {
+    "meta": {
+      "id": "SHM-002",
+      "name": "水平弹簧振子",
+      "module": "P-05",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过无阻尼水平弹簧振子模板，观察回复力与位移方向相反时更清晰的往复振动过程。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, 0)。",
+        "2. 添加物体 wall-left（wall）。",
+        "3. 将物体 wall-left 吸附到 ground。",
+        "4. 添加物体 mass-block（block）。",
+        "5. 添加更软的无阻尼弹簧 spring-main，观察更大振幅、更慢的水平振动。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/SHM-002.json"
+  },
+  {
+    "meta": {
+      "id": "SHM-003",
+      "name": "单摆",
+      "module": "P-05",
+      "status": "ready"
+    },
+    "teaching": {
+      "teachingObjective": "通过更长摆长、无明显耗散的单摆模板，观察摆动幅度、速度与周期之间的关系。",
+      "constructionSteps": [
+        "1. 设置场景重力为 (0, -10)。",
+        "2. 添加物体 anchor-top（anchor）。",
+        "3. 添加物体 bob-ball（ball）。",
+        "4. 添加更长的 rope-main（rope），用更明显的初始偏角和更慢节奏观察摆动。"
+      ]
+    },
+    "sceneSource": "command",
+    "sceneJsonPath": "/templates/scenes/SHM-003.json"
+  }
+]

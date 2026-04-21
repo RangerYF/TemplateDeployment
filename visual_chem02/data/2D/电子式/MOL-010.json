@@ -1,0 +1,43 @@
+{
+  "id": "MOL-010",
+  "name_cn": "一氧化氮",
+  "name_en": "Nitric oxide",
+  "formula": "NO",
+  "category": "diatomic",
+  "atoms": [
+    {
+      "index": 0,
+      "x": -0.6,
+      "y": 0,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 0.6,
+      "y": 0,
+      "element": "O",
+      "label": "O",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 2,
+      "length": 100
+    }
+  ]
+}

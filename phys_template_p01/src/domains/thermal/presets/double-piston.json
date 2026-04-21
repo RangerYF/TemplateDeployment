@@ -1,0 +1,182 @@
+{
+  "id": "P07-THM-032-double-piston",
+  "version": "1.0",
+  "name": "双活塞气缸",
+  "description": "竖直气缸中两个活塞封住气体。上活塞和下活塞质量不同，分析各段气体压强和体积变化。",
+  "category": "P-07",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 350, "y": 550 }
+  },
+  "entities": [
+    {
+      "ref": "container-1",
+      "type": "gas-container",
+      "properties": {
+        "containerType": "cylinder",
+        "width": 0.5,
+        "height": 3.0,
+        "openEnd": "top",
+        "inclineAngle": 0
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气缸"
+    },
+    {
+      "ref": "gas-A",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 150325,
+        "volume": 1e-4,
+        "temperature": 300,
+        "length": 0.5,
+        "crossSection": 2e-4,
+        "chartType": "V-T",
+        "chartData": [],
+        "initialPressure": 150325,
+        "initialVolume": 1e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-A",
+        "positionOffset": 0.2
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气体A（上活塞下方）"
+    },
+    {
+      "ref": "gas-B",
+      "type": "gas-column",
+      "properties": {
+        "pressure": 199325,
+        "volume": 1e-4,
+        "temperature": 300,
+        "length": 0.5,
+        "crossSection": 2e-4,
+        "chartType": "V-T",
+        "chartData": [],
+        "initialPressure": 199325,
+        "initialVolume": 1e-4,
+        "initialTemperature": 300,
+        "columnId": "gas-B",
+        "positionOffset": -0.5
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "气体B（下活塞下方）"
+    },
+    {
+      "ref": "piston-upper",
+      "type": "piston",
+      "properties": {
+        "mass": 1.0,
+        "crossSection": 2e-4,
+        "orientation": "vertical",
+        "positionOffset": 0.7,
+        "width": 0.5,
+        "thickness": 0.08,
+        "pistonId": "upper"
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "上活塞"
+    },
+    {
+      "ref": "piston-lower",
+      "type": "piston",
+      "properties": {
+        "mass": 1.0,
+        "crossSection": 2e-4,
+        "orientation": "vertical",
+        "positionOffset": -0.05,
+        "width": 0.5,
+        "thickness": 0.08,
+        "pistonId": "lower"
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "下活塞"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-A",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "gas-B",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "piston-upper",
+      "properties": {}
+    },
+    {
+      "type": "contains",
+      "sourceRef": "container-1",
+      "targetRef": "piston-lower",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "gas-params",
+      "label": "气体状态",
+      "params": [
+        {
+          "key": "temperature",
+          "label": "温度",
+          "type": "slider",
+          "min": 200,
+          "max": 600,
+          "step": 1,
+          "default": 300,
+          "unit": "K",
+          "targetEntityId": "gas-A",
+          "targetProperty": "temperature"
+        }
+      ]
+    },
+    {
+      "key": "piston-params",
+      "label": "活塞",
+      "params": [
+        {
+          "key": "upperMass",
+          "label": "上活塞质量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.0,
+          "unit": "kg",
+          "targetEntityId": "piston-upper",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "lowerMass",
+          "label": "下活塞质量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.0,
+          "unit": "kg",
+          "targetEntityId": "piston-lower",
+          "targetProperty": "mass"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "temperature": 300,
+    "upperMass": 1.0,
+    "lowerMass": 1.0
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "thermal": "double-piston" }
+}

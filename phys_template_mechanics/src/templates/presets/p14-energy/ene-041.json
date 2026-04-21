@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "id": "ENE-041",
+    "name": "弹簧振子能量转化",
+    "module": "P-14",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过水平弹簧振子模板，观察动能与弹性势能在周期过程中的交替变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, 0)。",
+      "2. 添加固定墙 wall-left，并吸附到 ground。",
+      "3. 添加滑块 mass-block。",
+      "4. 添加弹簧 spring-main 连接 wall-left 与 mass-block 并设置无阻尼。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-041.json",
+  "commandProgram": {
+    "templateId": "ENE-041",
+    "sceneName": "ENE-041 弹簧振子能量转化",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "wall-left",
+        "bodyType": "wall",
+        "patch": {
+          "position": {
+            "x": -3.2,
+            "y": 2.2
+          },
+          "wallWidth": 0.15,
+          "wallHeight": 4.4,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.3,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "wall-left",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "mass-block",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -0.6,
+            "y": 2.2
+          },
+          "mass": 0.5,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "wall-left",
+        "bodyRefB": "mass-block",
+        "anchorA": {
+          "x": 0.075,
+          "y": 0
+        },
+        "anchorB": {
+          "x": -0.4,
+          "y": 0
+        },
+        "patch": {
+          "springLength": 1.6,
+          "stiffness": 2.2,
+          "damping": 0
+        }
+      }
+    ]
+  }
+}

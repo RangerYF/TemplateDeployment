@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "id": "MOT-021",
+    "name": "平抛运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“平抛运动”模板，让学生观察水平方向匀速与竖直方向匀加速叠加形成的抛物线轨迹。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 ball-main（ball），并设置水平方向初速度。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-021.json",
+  "commandProgram": {
+    "templateId": "MOT-021",
+    "sceneName": "MOT-021 平抛运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "label": "平抛小球",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -4.8,
+            "y": 4.2
+          },
+          "radius": 0.2,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 7.2,
+            "y": 0
+          }
+        }
+      }
+    ]
+  }
+}

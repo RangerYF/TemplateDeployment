@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+@theme {
+  /* EduMind Design System Colors */
+  --color-eduMind-primary: #32D583;
+  --color-eduMind-primaryHover: #28B86D;
+  --color-eduMind-primaryLight: #32D583;
+  --color-eduMind-dark: #1A1A1E;
+  --color-eduMind-neutral: #6B6B70;
+  --color-eduMind-light: #FAFAF9;
+  --color-eduMind-lightAlt: #F5F5F5;
+  --color-eduMind-border: #E5E5E5;
+  --color-eduMind-white: #FFFFFF;
+  --color-eduMind-placeholder: #A0A0A0;
+  --color-eduMind-success: #10B981;
+  --color-eduMind-successAlt: #52C41A;
+  --color-eduMind-warning: #F59E0B;
+  --color-eduMind-error: #EF4444;
+  --color-eduMind-danger: #F5222D;
+  --color-eduMind-info: #3B82F6;
+
+  /* Extended border radius */
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}

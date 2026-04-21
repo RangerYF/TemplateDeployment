@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "id": "FM-023",
+    "name": "绳+杆悬挂",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“绳+杆悬挂”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 anchor-left（anchor）。",
+      "3. 添加物体 anchor-right（anchor）。",
+      "4. 添加物体 block-main（block）。",
+      "5. 添加约束 rope-left（rope），连接 anchor-left 与 block-main。",
+      "6. 添加约束 rod-right（rod），连接 anchor-right 与 block-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-023.json",
+  "commandProgram": {
+    "templateId": "FM-023",
+    "sceneName": "FM-023 绳+杆悬挂",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-left",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": -2.6,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "anchor-right",
+        "bodyType": "anchor",
+        "patch": {
+          "position": {
+            "x": 2.6,
+            "y": 9.2
+          },
+          "mountSide": "top"
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 4.5
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1.5,
+          "friction": 0.25,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rope-left",
+        "jointType": "rope",
+        "bodyRefA": "anchor-left",
+        "bodyRefB": "block-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": -0.3,
+          "y": 0.3
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "rod-right",
+        "jointType": "rod",
+        "bodyRefA": "anchor-right",
+        "bodyRefB": "block-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0
+        },
+        "anchorB": {
+          "x": 0.3,
+          "y": 0.3
+        }
+      }
+    ]
+  }
+}

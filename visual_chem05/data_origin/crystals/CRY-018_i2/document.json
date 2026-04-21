@@ -1,0 +1,335 @@
+{
+  "id": "CRY-018",
+  "slug": "cry-018-i2",
+  "requirementSources": [
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-018",
+    "name_cn": "碘",
+    "formula": "I2",
+    "level": "高中选修",
+    "crystal_system": "orthorhombic",
+    "space_group": "Cmca",
+    "lattice_params": {
+      "a": 725.5,
+      "b": 479.5,
+      "c": 978,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "I",
+        "label": "I1a",
+        "x": 0,
+        "y": 0.1539,
+        "z": 0.1174,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I1b",
+        "x": 0,
+        "y": 0.3461,
+        "z": 0.3826,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I2a",
+        "x": 0.5,
+        "y": 0.6539,
+        "z": 0.1174,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I2b",
+        "x": 0.5,
+        "y": 0.8461,
+        "z": 0.3826,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I3a",
+        "x": 0,
+        "y": 0.8461,
+        "z": 0.6174,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I3b",
+        "x": 0,
+        "y": 0.6539,
+        "z": 0.8826,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I4a",
+        "x": 0.5,
+        "y": 0.3461,
+        "z": 0.6174,
+        "charge": null
+      },
+      {
+        "element": "I",
+        "label": "I4b",
+        "x": 0.5,
+        "y": 0.1539,
+        "z": 0.8826,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "1 (分子内)",
+    "z": 4,
+    "teaching_points": [
+      "I2是典型的分子晶体，I-I共价键(267pm)在分子内，分子间靠范德华力",
+      "碘分子排列在正交晶格中，每个晶胞含4个I2分子",
+      "碘在常温下为紫黑色固体，易升华（分子间力弱）",
+      "分子间最短距离约350pm，远大于I-I共价键长267pm",
+      "碘分子的色散力较强（分子量大，电子云易极化）",
+      "对比：碘的共价键(I-I 151kJ/mol) vs 分子间力(~40kJ/mol)"
+    ],
+    "bond_lengths": {
+      "I-I": 267
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-018",
+    "name": "碘",
+    "formula": "I2",
+    "formulaHtml": "I<sub>2</sub>",
+    "category": "molecular",
+    "gradeLevel": "高中选修",
+    "structureType": "分子晶体(正交)",
+    "crystalSystem": "orthorhombic",
+    "spaceGroup": "Cmca",
+    "spaceGroupNumber": 64,
+    "lattice": {
+      "a": 725.5,
+      "b": 479.5,
+      "c": 978,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "I",
+        "label": "I1a",
+        "fracCoords": [
+          0,
+          0.1539,
+          0.1174
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I1b",
+        "fracCoords": [
+          0,
+          0.3461,
+          0.3826
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I2a",
+        "fracCoords": [
+          0.5,
+          0.6539,
+          0.1174
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I2b",
+        "fracCoords": [
+          0.5,
+          0.8461,
+          0.3826
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I3a",
+        "fracCoords": [
+          0,
+          0.8461,
+          0.6174
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I3b",
+        "fracCoords": [
+          0,
+          0.6539,
+          0.8826
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I4a",
+        "fracCoords": [
+          0.5,
+          0.3461,
+          0.6174
+        ]
+      },
+      {
+        "element": "I",
+        "label": "I4b",
+        "fracCoords": [
+          0.5,
+          0.1539,
+          0.8826
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 267
+      },
+      {
+        "siteIndices": [
+          2,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 267
+      },
+      {
+        "siteIndices": [
+          4,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 267
+      },
+      {
+        "siteIndices": [
+          6,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 267
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 350
+      },
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 350
+      },
+      {
+        "siteIndices": [
+          1,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 350
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 350
+      }
+    ],
+    "coordinationNumber": "1 (分子内)",
+    "coordinationGeometry": "哑铃形分子",
+    "teachingPoints": [
+      "I2是典型的分子晶体，I-I共价键(267pm)在分子内，分子间靠范德华力",
+      "碘分子排列在正交晶格中，每个晶胞含4个I2分子",
+      "碘在常温下为紫黑色固体，易升华（分子间力弱）",
+      "分子间最短距离约350pm，远大于I-I共价键长267pm",
+      "碘分子的色散力较强（分子量大，电子云易极化）",
+      "对比：碘的共价键(I-I 151kJ/mol) vs 分子间力(~40kJ/mol)"
+    ],
+    "bondLengths": {
+      "I-I": 267
+    },
+    "codId": 1010091,
+    "dataSource": "COD #1010091 — Harris, Mack & Blake (1928)"
+  }
+}

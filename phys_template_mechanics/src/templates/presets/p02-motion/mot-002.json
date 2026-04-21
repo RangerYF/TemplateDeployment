@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "id": "MOT-002",
+    "name": "匀加速直线运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“匀加速直线运动”模板，让学生建立位移、速度与加速度之间的对应关系。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 直接使用超长地面作为水平支撑面，保证观察阶段内等效无限长。",
+      "3. 添加物体 cart-acc（block）并吸附到 ground。",
+      "4. 给物体 cart-acc 添加外力 drive-force，观察稳定的匀加速直线运动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-002.json",
+  "commandProgram": {
+    "templateId": "MOT-002",
+    "sceneName": "MOT-002 匀加速直线运动",
+    "version": "1.0",
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "cart-acc",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -2.4,
+            "y": 0.35
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "cart-acc",
+        "targetBodyRefs": [
+          "ground"
+        ]
+      },
+      {
+        "kind": "addForce",
+        "ref": "drive-force",
+        "targetBodyRef": "cart-acc",
+        "patch": {
+          "magnitude": 6,
+          "direction": 0,
+          "decompose": true,
+          "decomposeAngle": 0
+        }
+      }
+    ]
+  }
+}

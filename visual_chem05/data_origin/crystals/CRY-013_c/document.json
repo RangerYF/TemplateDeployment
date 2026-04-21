@@ -1,0 +1,273 @@
+{
+  "id": "CRY-013",
+  "slug": "cry-013-c",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-013",
+    "name_cn": "石墨",
+    "formula": "C",
+    "level": "高中必修",
+    "crystal_system": "hexagonal",
+    "space_group": "P6₃/mmc",
+    "lattice_params": {
+      "a": 245.6,
+      "b": 245.6,
+      "c": 669.6,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "C",
+        "label": "C1",
+        "x": 0,
+        "y": 0,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "x": 0,
+        "y": 0,
+        "z": 0.75,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.75,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "3 (层内)",
+    "z": 4,
+    "teaching_points": [
+      "每个C原子在层内与3个C以sp2杂化成键，平面六元环结构",
+      "C-C键长142pm（介于单键154pm和双键134pm之间），键级约1.33",
+      "层间距335pm，层间以范德华力结合（容易滑动→润滑性）",
+      "离域π电子可自由移动→石墨能导电（沿层方向）",
+      "石墨同时具有原子晶体（层内共价键）和分子晶体（层间范德华力）的特征",
+      "注意对比金刚石(sp3, 3D网络)和石墨(sp2, 2D层状)"
+    ],
+    "bond_lengths": {
+      "C-C(层内)": 142,
+      "C···C(层间)": 335
+    },
+    "hybridization": "sp2",
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-013",
+    "name": "石墨",
+    "formula": "C",
+    "formulaHtml": "C (石墨)",
+    "category": "layered",
+    "gradeLevel": "高中必修",
+    "structureType": "层状结构",
+    "crystalSystem": "hexagonal",
+    "spaceGroup": "P6₃/mmc",
+    "spaceGroupNumber": 194,
+    "lattice": {
+      "a": 245.6,
+      "b": 245.6,
+      "c": 669.6,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "C",
+        "label": "C1",
+        "fracCoords": [
+          0,
+          0,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "fracCoords": [
+          0,
+          0,
+          0.75
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.75
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          0,
+          1
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          2,
+          3
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          2,
+          3
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          2,
+          3
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1.5,
+        "expectedLength": 142
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 335
+      },
+      {
+        "siteIndices": [
+          0,
+          2
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "vanDerWaals",
+        "expectedLength": 335
+      }
+    ],
+    "coordinationNumber": "3 (层内)",
+    "coordinationGeometry": "平面三角形(层内)",
+    "hybridization": "sp2",
+    "teachingPoints": [
+      "每个C原子在层内与3个C以sp2杂化成键，平面六元环结构",
+      "C-C键长142pm（介于单键154pm和双键134pm之间），键级约1.33",
+      "层间距335pm，层间以范德华力结合（容易滑动→润滑性）",
+      "离域π电子可自由移动→石墨能导电（沿层方向）",
+      "石墨同时具有原子晶体（层内共价键）和分子晶体（层间范德华力）的特征",
+      "注意对比金刚石(sp3, 3D网络)和石墨(sp2, 2D层状)"
+    ],
+    "bondLengths": {
+      "C-C(层内)": 142,
+      "C···C(层间)": 335
+    },
+    "codId": 9008569,
+    "dataSource": "COD #9008569 — Wyckoff, Crystal Structures 1, 7-83 (1963)"
+  }
+}

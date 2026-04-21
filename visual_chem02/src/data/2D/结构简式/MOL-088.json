@@ -1,0 +1,195 @@
+{
+  "id": "MOL-088",
+  "name_cn": "硫氰酸铁",
+  "name_en": "Iron(III) thiocyanate",
+  "formula": "Fe(SCN)₃",
+  "category": "coordination",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 3,
+      "y": 1.0392304845413263,
+      "element": "Fe",
+      "label": "Fe",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 3,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 2.4,
+      "y": 0,
+      "element": "S",
+      "label": "S",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 4.2,
+      "y": 1.0392304845413263,
+      "element": "S",
+      "label": "S",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 2.400000000000001,
+      "y": 2.078460969082653,
+      "element": "S",
+      "label": "S",
+      "hCount": 0,
+      "lonePairs": 2,
+      "merged": false,
+      "formalCharge": -1,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 0,
+      "y": 0,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": 5.4,
+      "y": 3.117691453623979,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 8.881784197001252e-16,
+      "y": 2.0784609690826557,
+      "element": "N",
+      "label": "N",
+      "hCount": 0,
+      "lonePairs": 1,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 1.2,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": 4.800000000000001,
+      "y": 2.0784609690826525,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": 1.2000000000000008,
+      "y": 2.0784609690826543,
+      "element": "C",
+      "label": "C",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 3,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 4,
+      "to": 7,
+      "order": 3,
+      "length": 100
+    },
+    {
+      "from": 5,
+      "to": 8,
+      "order": 3,
+      "length": 100
+    },
+    {
+      "from": 6,
+      "to": 9,
+      "order": 3,
+      "length": 100
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "id": "MOT-022",
+    "name": "斜抛运动",
+    "module": "P-02",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“斜抛运动”模板，让学生观察速度分解对射程与最高点的影响。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 ball-main（ball），并设置斜向初速度。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOT-022.json",
+  "commandProgram": {
+    "templateId": "MOT-022",
+    "sceneName": "MOT-022 斜抛运动",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "allowCustomBodySize": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "label": "斜抛小球",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -4.8,
+            "y": 2.8
+          },
+          "radius": 0.2,
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": 6.6,
+            "y": 5.6
+          }
+        }
+      }
+    ]
+  }
+}

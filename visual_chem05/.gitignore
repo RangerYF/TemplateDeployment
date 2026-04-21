@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Local env files
+.env.local
+.env.*.local
+
+# Vite cache
+.vite/
+
+# Editor directories and files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript build info
+*.tsbuildinfo
+.vercel

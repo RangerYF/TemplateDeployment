@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "id": "MOM-012",
+    "name": "弹簧压缩释放",
+    "module": "P-12",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过双物体弹簧释放模板，观察系统总动量近似为零时两物体反向分离的规律。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, 0)。",
+      "2. 添加两个滑块 block-left 与 block-right。",
+      "3. 添加弹簧 spring-main 连接两个滑块，并设置预压缩初态。",
+      "4. 运行仿真观察两滑块反向分离与动量分配。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOM-012.json",
+  "commandProgram": {
+    "templateId": "MOM-012",
+    "sceneName": "MOM-012 弹簧压缩释放",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-left",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -1.4,
+            "y": 2.6
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-right",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": 0.2,
+            "y": 2.6
+          },
+          "mass": 2,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "spring-main",
+        "jointType": "spring",
+        "bodyRefA": "block-left",
+        "bodyRefB": "block-right",
+        "anchorA": {
+          "x": 0.4,
+          "y": 0
+        },
+        "anchorB": {
+          "x": -0.4,
+          "y": 0
+        },
+        "patch": {
+          "springLength": 1.2,
+          "stiffness": 3,
+          "damping": 0
+        }
+      }
+    ]
+  }
+}

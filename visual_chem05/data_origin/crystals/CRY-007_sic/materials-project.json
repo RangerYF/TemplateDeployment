@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-007",
+  "folder": "CRY-007_sic",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "SiC",
+    "spaceGroupNumber": 216,
+    "structureType": "闪锌矿型(3C)"
+  },
+  "materialId": "mp-8062",
+  "downloadedAt": "2026-04-02T07:25:15.670648+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 28,
+  "checkedAt": "2026-04-02T07:25:15.344463+00:00",
+  "formulaPretty": "SiC",
+  "spaceGroupNumber": 216,
+  "spaceGroupSymbol": "F-43m",
+  "energyAboveHull": 0.00016855236842100001,
+  "isStable": false,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-8062"
+}

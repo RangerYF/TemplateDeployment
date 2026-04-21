@@ -1,0 +1,3297 @@
+[
+  {
+    "config_id": "cube-line-plane-parallel-midpoint",
+    "canonical_description": "正方体中过中点的线面平行关系",
+    "geometry_type": "正方体",
+    "task_type": "证明线面平行",
+    "original_signatures": [
+      "正方体中直线与过棱中点平面的平行关系",
+      "正方体中，过各棱中点的线面平行关系",
+      "正方体中，面对角线上等分点构成的线面平行",
+      "正方体中，多个中点连线与平面的平行关系",
+      "正方体中，棱中点连线与面的位置关系",
+      "正方体中，截面与底面交线的位置关系",
+      "正方体中，对角线与过特定点的平面位置关系",
+      "正方体中线面平行关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15462",
+      "geo-cmm-15476",
+      "geo-cmm-15692",
+      "geo-cmm-15694",
+      "geo-cmm-16009",
+      "geo-cmm-15718",
+      "geo-cmm-16086",
+      "geo-cmm-16058"
+    ],
+    "frequency": 8,
+    "scores": {
+      "exam_frequency": 4,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 4.15
+    }
+  },
+  {
+    "config_id": "cylinder-oblique-section-ellipse",
+    "canonical_description": "圆柱斜截面椭圆的参数计算",
+    "geometry_type": "圆柱",
+    "task_type": "椭圆参数计算",
+    "original_signatures": [
+      "圆柱被斜平面截取形成椭圆",
+      "圆柱斜截面椭圆的焦距计算",
+      "圆柱斜截面椭圆的焦点距离",
+      "圆柱斜截面椭圆的离心率计算",
+      "圆柱中，斜截面椭圆的离心率",
+      "圆柱中，斜截面椭圆的焦点距离",
+      "圆柱中，斜截面椭圆的几何参数"
+    ],
+    "question_ids": [
+      "geo-cmm-21137",
+      "geo-cmm-22691",
+      "geo-cmm-22692",
+      "geo-cmm-22708",
+      "geo-cmm-22695",
+      "geo-cmm-22701",
+      "geo-cmm-22702"
+    ],
+    "frequency": 7,
+    "scores": {
+      "exam_frequency": 4,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.85
+    }
+  },
+  {
+    "config_id": "cube-skew-distance",
+    "canonical_description": "正方体中异面距离",
+    "geometry_type": "正方体",
+    "task_type": "求异面距离",
+    "original_signatures": [
+      "正方体中，面中心到对角线上点的距离",
+      "正方体中，过指定点的平面截面长度",
+      "正方体中，两个平行平面间的距离",
+      "正方体中，面心点与对角线上点的距离",
+      "正方体中，平面间距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15487",
+      "geo-cmm-15489",
+      "geo-cmm-21012",
+      "geo-cmm-16070",
+      "geo-cmm-21015"
+    ],
+    "frequency": 5,
+    "scores": {
+      "exam_frequency": 3,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.8
+    }
+  },
+  {
+    "config_id": "cube-line-length-range",
+    "canonical_description": "正方体中线段长度范围问题",
+    "geometry_type": "正方体",
+    "task_type": "求线段长度范围",
+    "original_signatures": [
+      "正方体中，线段平行于截面的动点轨迹",
+      "正方体中，侧面动点与面平行的长度范围",
+      "正方体中，面内动点与面平行约束下的距离范围"
+    ],
+    "question_ids": [
+      "geo-cmm-15737",
+      "geo-cmm-15697",
+      "geo-cmm-15717"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.7
+    }
+  },
+  {
+    "config_id": "cube-vector-dot-product",
+    "canonical_description": "正方体中向量数量积问题",
+    "geometry_type": "正方体",
+    "task_type": "建系求向量",
+    "original_signatures": [
+      "正方体中，动点在对角线上的向量数量积取值范围",
+      "正方体中，线面平行约束下的向量最值"
+    ],
+    "question_ids": [
+      "geo-cmm-21007",
+      "geo-cmm-15702"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.7
+    }
+  },
+  {
+    "config_id": "pyramid4-dihedral-angle",
+    "canonical_description": "正四棱锥中二面角问题",
+    "geometry_type": "正四棱锥",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "正四棱锥中，过特定点的线面平行和二面角",
+      "四棱锥中侧棱垂直底面时的二面角问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15687",
+      "geo-cmm-15888"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.7
+    }
+  },
+  {
+    "config_id": "pyramid4-dynamic-point",
+    "canonical_description": "正四棱锥中动点问题",
+    "geometry_type": "正四棱锥",
+    "task_type": "其他",
+    "original_signatures": [
+      "正四棱锥中，动点在棱上运动的几何性质",
+      "正四棱锥中，满足向量垂直条件的动点轨迹"
+    ],
+    "question_ids": [
+      "geo-cmm-15733",
+      "geo-cmm-15814"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.7
+    }
+  },
+  {
+    "config_id": "cuboid-trajectory-angle",
+    "canonical_description": "长方体中动点轨迹与直线夹角最值",
+    "geometry_type": "长方体",
+    "task_type": "求线线角",
+    "original_signatures": [
+      "长方体中，动点轨迹与直线所成角的最值"
+    ],
+    "question_ids": [
+      "geo-cmm-15895"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 5,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.6
+    }
+  },
+  {
+    "config_id": "cube-projection-area",
+    "canonical_description": "正方体中图形的正投影面积",
+    "geometry_type": "正方体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正方体中三角形在各面的正投影",
+      "正方体中四边形在各面的正投影",
+      "正方体中动点形成四边形的投影面积",
+      "正方体中，动点三角形在三个面上的正投影面积关系",
+      "正方体中，三角形在各表面的投影"
+    ],
+    "question_ids": [
+      "geo-cmm-15583",
+      "geo-cmm-15594",
+      "geo-cmm-15600",
+      "geo-cmm-15627",
+      "geo-cmm-15592"
+    ],
+    "frequency": 5,
+    "scores": {
+      "exam_frequency": 3,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.5
+    }
+  },
+  {
+    "config_id": "cube-section-area",
+    "canonical_description": "正方体中截面面积计算",
+    "geometry_type": "正方体",
+    "task_type": "求截面面积",
+    "original_signatures": [
+      "正方体中，过三点的截面面积",
+      "正方体中，过三点确定的截面"
+    ],
+    "question_ids": [
+      "geo-cmm-15500",
+      "geo-cmm-15753"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "cube-section-perimeter",
+    "canonical_description": "正方体中截面周长计算",
+    "geometry_type": "正方体",
+    "task_type": "求截面周长",
+    "original_signatures": [
+      "正方体中，过棱中点的四点截面",
+      "正方体中，过对角顶点和侧棱中点的截面周长",
+      "正方体中，过指定点的截面周长"
+    ],
+    "question_ids": [
+      "geo-cmm-15734",
+      "geo-cmm-16064",
+      "geo-cmm-15481"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "cube-moving-point-diagonal-comprehensive",
+    "canonical_description": "正方体中动点在对角线上的综合性质",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，动点在面对角线上的综合性质",
+      "正方体中，动点在顶面对角线上的综合问题",
+      "正方体中，对角线上动点的几何性质",
+      "正方体中，棱上动点的几何性质"
+    ],
+    "question_ids": [
+      "geo-cmm-15693",
+      "geo-cmm-15742",
+      "geo-cmm-15680",
+      "geo-cmm-15822"
+    ],
+    "frequency": 4,
+    "scores": {
+      "exam_frequency": 3,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "cuboid-skew-lines-angle",
+    "canonical_description": "长方体中异面直线夹角",
+    "geometry_type": "长方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "长方体中，体对角线与侧面对角线的异面直线夹角",
+      "长方体中，过各棱中点的异面直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-21006",
+      "geo-cmm-15836"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "pyramid4-skew-lines-angle",
+    "canonical_description": "正四棱锥中异面直线所成角",
+    "geometry_type": "正四棱锥",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正四棱锥中，侧棱中点与对角顶点连线的异面直线所成角",
+      "正四棱锥中，过侧棱中点的直线与另一侧棱的异面直线所成角",
+      "四棱锥中，底边与过棱中点的直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15853",
+      "geo-cmm-15841",
+      "geo-cmm-15843"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "pyramid4-surface-area",
+    "canonical_description": "正四棱锥表面积计算",
+    "geometry_type": "正四棱锥",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正四棱锥底面内接大圆的外接球表面积",
+      "正四棱锥中，顶点垂直于底面的侧面积",
+      "正四棱锥表面积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15672",
+      "geo-cmm-15759",
+      "geo-cmm-16020"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "pyramid4-volume",
+    "canonical_description": "正四棱锥体积计算",
+    "geometry_type": "正四棱锥",
+    "task_type": "求体积",
+    "original_signatures": [
+      "正四棱锥的展开与折叠问题",
+      "正四棱锥中，侧面积和体积计算",
+      "四棱锥中，过对角线中点与棱中点的三棱锥体积"
+    ],
+    "question_ids": [
+      "geo-cmm-15553",
+      "geo-cmm-16013",
+      "geo-cmm-15786"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "prism3-skew-lines-angle",
+    "canonical_description": "三棱柱中异面直线所成角",
+    "geometry_type": "三棱柱",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "直三棱柱中异面直线夹角",
+      "正三棱柱中，过侧棱中点和对角中点的异面直线所成角",
+      "正三棱柱中，对角直线间的异面直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-21275",
+      "geo-cmm-21287",
+      "geo-cmm-15842"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "prism3-skew-angle-general",
+    "canonical_description": "直三棱柱中异面直线所成角",
+    "geometry_type": "直三棱柱",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "直三棱柱中，体对角线与底面边的夹角",
+      "直三棱柱中，异面直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15851",
+      "geo-cmm-20999"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "prism3-circumsphere-surface",
+    "canonical_description": "直三棱柱外接球表面积",
+    "geometry_type": "直三棱柱",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "直三棱柱中，已知底面和高求外接球表面积",
+      "直角三棱柱中，外接球表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15648",
+      "geo-cmm-15662"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.45
+    }
+  },
+  {
+    "config_id": "tetrahedron-circumsphere-special",
+    "canonical_description": "特殊四面体的外接球问题",
+    "geometry_type": "四面体",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "直角三面角四面体的外接球",
+      "特殊三棱锥的外接球，球心在棱上",
+      "特殊四面体的外接球"
+    ],
+    "question_ids": [
+      "geo-cmm-15563",
+      "geo-cmm-15782",
+      "geo-cmm-16044"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.4
+    }
+  },
+  {
+    "config_id": "cuboid-line-plane-distance",
+    "canonical_description": "长方体中直线与平面的距离",
+    "geometry_type": "长方体",
+    "task_type": "求线段长度最小值",
+    "original_signatures": [
+      "长方体中，直线平行于平面的最短距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15755"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "prism3-dihedral-angle",
+    "canonical_description": "正三棱柱中截面与底面二面角",
+    "geometry_type": "三棱柱",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "正三棱柱中，过顶点的截面与底面的二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15877"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "cylinder-random-point-probability",
+    "canonical_description": "圆柱内随机点到上下底面圆心距离的概率",
+    "geometry_type": "圆柱",
+    "task_type": "概率计算",
+    "original_signatures": [
+      "圆柱内随机点到上下底面圆心距离的概率"
+    ],
+    "question_ids": [
+      "geo-cmm-17159"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "folded-geometry-circumsphere",
+    "canonical_description": "翻折几何体中，三垂直结构的外接球",
+    "geometry_type": "翻折几何体",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "翻折几何体中，三垂直结构的外接球"
+    ],
+    "question_ids": [
+      "geo-cmm-15665"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "sphere-inscribed-cone-surface",
+    "canonical_description": "球的内接圆锥侧面积最值问题",
+    "geometry_type": "球圆锥组合体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球的内接圆锥侧面积最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15651"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "section-prism-dihedral-volume",
+    "canonical_description": "截面四棱柱中的二面角和体积",
+    "geometry_type": "截面四棱柱",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "截面四棱柱中的二面角和体积"
+    ],
+    "question_ids": [
+      "geo-cmm-15654"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "cuboid-oblique-section-volume",
+    "canonical_description": "长方体被斜平面截断的组合体",
+    "geometry_type": "截断长方体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "长方体被斜平面截断的组合体"
+    ],
+    "question_ids": [
+      "geo-cmm-15744"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "tetrahedron-equilateral-base-circumsphere-area",
+    "canonical_description": "等边三角形底四面体外接球表面积最值问题",
+    "geometry_type": "四面体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "等边三角形底四面体外接球表面积最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15676"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "tetrahedron-vertex-perpendicular-point-plane-distance",
+    "canonical_description": "四面体中顶点到底面垂直时求点到侧面距离",
+    "geometry_type": "四面体",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "四面体中，顶点到底面垂直时求点到侧面距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15765"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "regular-tetrahedron-section-area",
+    "canonical_description": "正四面体外接球中截面面积问题",
+    "geometry_type": "正四面体",
+    "task_type": "求截面面积",
+    "original_signatures": [
+      "正四面体外接球中平行截面的面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15564"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "regular-tetrahedron-incircle-section",
+    "canonical_description": "正四面体中过棱中点截面与内切球的交线面积",
+    "geometry_type": "正四面体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正四面体中，过棱中点的截面与内切球的交线面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15549"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "pyramid3-folding-circumsphere-volume",
+    "canonical_description": "折叠三棱锥的外接球体积",
+    "geometry_type": "三棱锥",
+    "task_type": "求体积",
+    "original_signatures": [
+      "折叠三棱锥的外接球体积"
+    ],
+    "question_ids": [
+      "geo-cmm-15674"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "cone-volume-inscribed-cube",
+    "canonical_description": "圆锥内接正方体的棱长计算",
+    "geometry_type": "圆锥",
+    "task_type": "求体积",
+    "original_signatures": [
+      "圆锥内接正方体的棱长"
+    ],
+    "question_ids": [
+      "geo-cmm-15552"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "pyramid3-line-face-angle",
+    "canonical_description": "正三棱锥中侧棱与侧面的线面角",
+    "geometry_type": "正三棱锥",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "正三棱锥中，侧棱与侧面的线面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15775"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "pyramid3-surface-area",
+    "canonical_description": "正三棱锥中已知外接球和底边长求侧面积",
+    "geometry_type": "正三棱锥",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正三棱锥中，已知外接球和底边长求侧面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15548"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "pyramid3-lateral-base-dihedral",
+    "canonical_description": "正三棱锥中侧面与底面的二面角",
+    "geometry_type": "正三棱锥",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "正三棱锥中，侧面与底面的二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15882"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "prism4-point-distance-ratio",
+    "canonical_description": "正四棱柱中顶点到对角线和平面的距离比值关系",
+    "geometry_type": "正四棱柱",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "正四棱柱中，顶点到对角线和平面的距离比值关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15560"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "prism-quad-trajectory-midpoint",
+    "canonical_description": "直四棱柱中线面平行约束下中点轨迹长度",
+    "geometry_type": "直四棱柱",
+    "task_type": "求轨迹",
+    "original_signatures": [
+      "直四棱柱中，线面平行约束下中点的轨迹长度"
+    ],
+    "question_ids": [
+      "geo-cmm-15722"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "triangular-frustum-skew-lines-base-center",
+    "canonical_description": "正三棱台中过底面中心的直线夹角",
+    "geometry_type": "正三棱台",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正三棱台中，过底面中心的直线夹角"
+    ],
+    "question_ids": [
+      "geo-cmm-15555"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "triangular-pyramid-dihedral-edge-midpoint",
+    "canonical_description": "三角锥中过边中点截面的二面角",
+    "geometry_type": "三角锥",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "三角锥中，过边中点的截面相关二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15808"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.35
+    }
+  },
+  {
+    "config_id": "cube-dihedral-other",
+    "canonical_description": "正方体中其他二面角问题",
+    "geometry_type": "正方体",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "正方体中，三角形内动点到平面距离等于到直线距离的轨迹上二面角比较"
+    ],
+    "question_ids": [
+      "geo-cmm-15817"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 5,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.3
+    }
+  },
+  {
+    "config_id": "cube-skew-angle-midpoint-general",
+    "canonical_description": "正方体中各种中点连线的异面直线所成角",
+    "geometry_type": "正方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正方体中面对角线中点连线与面对角线的异面角",
+      "正方体中异面直线夹角",
+      "正方体中，异面直线所成角",
+      "正方体中，顶点与对面棱中点连线的异面直线夹角",
+      "正方体中，底面中心与侧棱中点连线和面对角线的异面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15439",
+      "geo-cmm-21286",
+      "geo-cmm-20998",
+      "geo-cmm-15838",
+      "geo-cmm-15748"
+    ],
+    "frequency": 5,
+    "scores": {
+      "exam_frequency": 3,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "cube-plane-plane-parallel",
+    "canonical_description": "正方体中面面平行关系",
+    "geometry_type": "正方体",
+    "task_type": "证明面面平行",
+    "original_signatures": [
+      "正方体中，过底面中心与动点的轨迹面与对应截面平行",
+      "正方体中，过对角线中点和侧棱中点的截面与侧面平行",
+      "正方体中，面面平行关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15473",
+      "geo-cmm-15704",
+      "geo-cmm-15700"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 4,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "cube-line-plane-angle",
+    "canonical_description": "正方体中线面角",
+    "geometry_type": "正方体",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "正方体中，过棱中点的直线与底面的线面角",
+      "正方体中，顶点到侧面中心连线与底面的夹角"
+    ],
+    "question_ids": [
+      "geo-cmm-15771",
+      "geo-cmm-15811"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "cuboid-parallel-plane-section",
+    "canonical_description": "长方体中平行平面的截面关系",
+    "geometry_type": "长方体",
+    "task_type": "证明面面平行",
+    "original_signatures": [
+      "长方体中，平行平面的截面比例关系",
+      "长方体中，平行于给定平面的截面"
+    ],
+    "question_ids": [
+      "geo-cmm-15503",
+      "geo-cmm-15752"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "pyramid4-line-plane-angle",
+    "canonical_description": "正四棱锥中直线与平面所成角",
+    "geometry_type": "正四棱锥",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "正四棱锥中，侧棱与底面的夹角",
+      "正四棱锥中，直线与平面所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15792",
+      "geo-cmm-21016"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "tetrahedron-perpendicular-midpoint",
+    "canonical_description": "四面体中基于中点的垂直关系证明",
+    "geometry_type": "四面体",
+    "task_type": "证明垂直关系",
+    "original_signatures": [
+      "四面体中，等腰条件下的面面垂直",
+      "正四面体中，各边中点形成的线面关系",
+      "四面体中，棱中点构成的截面与原棱的平行关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15523",
+      "geo-cmm-15528",
+      "geo-cmm-16091"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "sphere-section-volume",
+    "canonical_description": "球与截面圆的几何关系求体积",
+    "geometry_type": "球",
+    "task_type": "求体积",
+    "original_signatures": [
+      "球被平面截取的几何关系",
+      "球与截面圆的几何关系"
+    ],
+    "question_ids": [
+      "geo-cmm-16034",
+      "geo-cmm-16049"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.2
+    }
+  },
+  {
+    "config_id": "cube-dihedral-diagonal-face",
+    "canonical_description": "正方体中对角截面与底面的二面角",
+    "geometry_type": "正方体",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "正方体中，对角截面与底面的二面角",
+      "正方体中，对角线与面的二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15526",
+      "geo-cmm-15790",
+      "geo-cmm-15780"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.15
+    }
+  },
+  {
+    "config_id": "cube-line-line-perpendicular",
+    "canonical_description": "正方体中线线垂直关系",
+    "geometry_type": "正方体",
+    "task_type": "证明线线垂直",
+    "original_signatures": [
+      "正方体中，边中点连线与体对角线垂直"
+    ],
+    "question_ids": [
+      "geo-cmm-15764"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cube-point-plane-distance",
+    "canonical_description": "正方体中点到平面距离",
+    "geometry_type": "正方体",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "正方体中，点到过棱中点截面的距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15769"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cuboid-line-plane-angle",
+    "canonical_description": "长方体中直线与平面所成角",
+    "geometry_type": "长方体",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "长方体中，直线与平面所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-21013"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cuboid-dihedral-angle",
+    "canonical_description": "长方体中过平行线的二面角",
+    "geometry_type": "长方体",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "长方体中过平行线的二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-16399"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cuboid-diagonal-section-perpendicular",
+    "canonical_description": "长方体中体对角线与截面垂直",
+    "geometry_type": "长方体",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "长方体中，体对角线与过顶面边中点的截面垂直"
+    ],
+    "question_ids": [
+      "geo-cmm-15766"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "pyramid4-parallel-proof",
+    "canonical_description": "四棱锥中平行关系证明",
+    "geometry_type": "四棱锥",
+    "task_type": "证明线面平行",
+    "original_signatures": [
+      "四棱锥中，侧棱与过棱中点的截面平行"
+    ],
+    "question_ids": [
+      "geo-cmm-15768"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "pyramid4-probability",
+    "canonical_description": "四棱锥内接球概率问题",
+    "geometry_type": "四棱锥",
+    "task_type": "其他",
+    "original_signatures": [
+      "四棱锥内接于球的概率问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15661"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism3-line-face-angle",
+    "canonical_description": "正三棱柱中线面角",
+    "geometry_type": "三棱柱",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "正三棱柱中，从底面中心到顶点的线面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15774"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism3-point-face-distance",
+    "canonical_description": "直三棱柱中点到平面距离",
+    "geometry_type": "三棱柱",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "直三棱柱中，底面顶点到对角截面的距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15761"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism3-face-face-perpendicular",
+    "canonical_description": "直三棱柱中面面垂直关系",
+    "geometry_type": "三棱柱",
+    "task_type": "证明面面垂直",
+    "original_signatures": [
+      "直三棱柱中，过棱中点的截面与侧面垂直"
+    ],
+    "question_ids": [
+      "geo-cmm-15785"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism-construction-design",
+    "canonical_description": "判断棱柱并设计截面构造三棱柱",
+    "geometry_type": "棱柱",
+    "task_type": "其他",
+    "original_signatures": [
+      "判断棱柱并设计截面构造三棱柱"
+    ],
+    "question_ids": [
+      "geo-cmm-15550"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "chuying-geometry-properties",
+    "canonical_description": "刍营几何体中，线面平行与线线垂直性质",
+    "geometry_type": "刍营几何体",
+    "task_type": "其他",
+    "original_signatures": [
+      "刍营几何体中，线面平行与线线垂直性质"
+    ],
+    "question_ids": [
+      "geo-cmm-15716"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "truncated-cuboid-skew-angle",
+    "canonical_description": "截角长方体中，异面直线所成角",
+    "geometry_type": "截角长方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "截角长方体中，异面直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15844"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "sphere-cube-container-volume",
+    "canonical_description": "球与正方体容器的组合体积问题",
+    "geometry_type": "球正方体组合体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "球与正方体容器的组合体积问题"
+    ],
+    "question_ids": [
+      "geo-gk-008"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "tetrahedron-section-parallel",
+    "canonical_description": "四面体中截面与原有棱边的平行关系",
+    "geometry_type": "四面体",
+    "task_type": "证明线面平行",
+    "original_signatures": [
+      "四面体中截面与原有棱边的平行关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15463"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "tetrahedron-edge-midpoint-skew-angle",
+    "canonical_description": "四面体中棱中点连线与对棱的夹角",
+    "geometry_type": "四面体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "四面体中，棱中点连线与对棱的夹角"
+    ],
+    "question_ids": [
+      "geo-cmm-15850"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "tetrahedron-angle-midpoint",
+    "canonical_description": "特殊四面体中过棱中点的角度计算",
+    "geometry_type": "四面体",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "特殊四面体中，过棱中点的角度计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15525"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "sphere-perpendicular-chords",
+    "canonical_description": "球中过一点作三条两两垂直弦的平方和",
+    "geometry_type": "球",
+    "task_type": "其他",
+    "original_signatures": [
+      "球中，过一点作三条两两垂直弦的平方和"
+    ],
+    "question_ids": [
+      "geo-cmm-15566"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "sphere-radius-from-section",
+    "canonical_description": "球中根据平行截面面积求球半径",
+    "geometry_type": "球",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "球中，根据平行截面面积求球半径"
+    ],
+    "question_ids": [
+      "geo-cmm-15966"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism3-parallel-section",
+    "canonical_description": "三棱柱中过侧棱中点的截面与底边相关面平行",
+    "geometry_type": "三棱柱",
+    "task_type": "证明面面平行",
+    "original_signatures": [
+      "三棱柱中，过侧棱中点的截面与底边相关面平行"
+    ],
+    "question_ids": [
+      "geo-cmm-15705"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cone-surface-area-inscribed-sphere",
+    "canonical_description": "圆锥内切球表面积计算",
+    "geometry_type": "圆锥",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "圆锥中，内切球表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15649"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "pyramid4-dihedral-lateral-lateral",
+    "canonical_description": "底面为矩形的四棱锥中，侧面与侧面的二面角",
+    "geometry_type": "四棱锥",
+    "task_type": "求二面角",
+    "original_signatures": [
+      "底面为矩形的四棱锥中，侧面与侧面的二面角"
+    ],
+    "question_ids": [
+      "geo-cmm-21010"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "pyramid4-line-face-angle-rhombus-equilateral",
+    "canonical_description": "四棱锥中，底面菱形侧面等边三角形时的线面角",
+    "geometry_type": "四棱锥",
+    "task_type": "求线面角",
+    "original_signatures": [
+      "四棱锥中，底面菱形侧面等边三角形时的线面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15763"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "pyramid3-unfold-shortest-path",
+    "canonical_description": "正三棱锥中沿侧面展开的最短路径",
+    "geometry_type": "正三棱锥",
+    "task_type": "求异面距离",
+    "original_signatures": [
+      "正三棱锥中，沿侧面展开的最短路径"
+    ],
+    "question_ids": [
+      "geo-cmm-15906"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism4-circumsphere-surface",
+    "canonical_description": "正四棱柱的外接球关系",
+    "geometry_type": "正四棱柱",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正四棱柱的外接球关系"
+    ],
+    "question_ids": [
+      "geo-cmm-16050"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "prism-quad-diagonal-perpendicular",
+    "canonical_description": "直四棱柱中对角直线垂直的条件",
+    "geometry_type": "直四棱柱",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "直四棱柱中，对角直线垂直的条件"
+    ],
+    "question_ids": [
+      "geo-cmm-16348"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "frustum4-lateral-area",
+    "canonical_description": "正四棱台侧面积计算",
+    "geometry_type": "正四棱台",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正四棱台中，侧面积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-16025"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 3.1
+    }
+  },
+  {
+    "config_id": "cube-surface-curve",
+    "canonical_description": "正方体表面曲线长度",
+    "geometry_type": "正方体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正方体表面上，等距离点形成的曲线"
+    ],
+    "question_ids": [
+      "geo-cmm-23009"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cuboid-section-optimization",
+    "canonical_description": "长方体中过顶点截面的面积最值",
+    "geometry_type": "长方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "长方体中，过顶点的截面与侧棱成定角时的截面面积最值"
+    ],
+    "question_ids": [
+      "geo-cmm-15544"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cuboid-section-comprehensive",
+    "canonical_description": "长方体中动点截面的综合性质",
+    "geometry_type": "长方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "长方体中，动点截面的综合性质"
+    ],
+    "question_ids": [
+      "geo-cmm-15762"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cylinder-dandelin-sphere-ellipse",
+    "canonical_description": "圆柱Dandelin双球截面椭圆的离心率",
+    "geometry_type": "圆柱",
+    "task_type": "椭圆参数计算",
+    "original_signatures": [
+      "圆柱Dandelin双球截面椭圆的离心率"
+    ],
+    "question_ids": [
+      "geo-cmm-22707"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cube-inscribed-cylinder-surface",
+    "canonical_description": "正方体内接轴向圆柱的最大侧面积",
+    "geometry_type": "正方体圆柱组合体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正方体内接轴向圆柱的最大侧面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15581"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "tetrahedron-equal-edges-circumsphere",
+    "canonical_description": "对棱相等四面体的外接球和体积",
+    "geometry_type": "四面体",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "对棱相等四面体的外接球和体积"
+    ],
+    "question_ids": [
+      "geo-cmm-15582"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "prism3-line-plane-perpendicular",
+    "canonical_description": "直三棱柱中直线与平面垂直的条件",
+    "geometry_type": "直三棱柱",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "直三棱柱中，直线与平面垂直的条件"
+    ],
+    "question_ids": [
+      "geo-cmm-21000"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "pyramid3-right-circumsphere-constraint",
+    "canonical_description": "直角三棱锥中已知体积和垂直关系求外接球表面积最值",
+    "geometry_type": "三棱锥",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "直角三棱锥中，已知体积和垂直关系求外接球表面积最值"
+    ],
+    "question_ids": [
+      "geo-cmm-15567"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cone-ellipse-oblique-section-axis",
+    "canonical_description": "圆锥斜截面椭圆的短半轴长计算",
+    "geometry_type": "圆锥",
+    "task_type": "其他",
+    "original_signatures": [
+      "圆锥斜截面椭圆的短半轴长"
+    ],
+    "question_ids": [
+      "geo-cmm-22714"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "pyramid4-point-face-distance-vertical-lateral",
+    "canonical_description": "四棱锥中，侧面与底面垂直时求点到侧面距离",
+    "geometry_type": "四棱锥",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "四棱锥中，侧面与底面垂直时求点到侧面距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15725"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 3.05
+    }
+  },
+  {
+    "config_id": "cube-tetrahedron-comprehensive",
+    "canonical_description": "正方体中四面体综合性质",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，多个几何性质的综合判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15779"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 5,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 3.0
+    }
+  },
+  {
+    "config_id": "cuboid-parallel-midpoint-section",
+    "canonical_description": "长方体中过棱中点的截面平行关系",
+    "geometry_type": "长方体",
+    "task_type": "证明平行关系",
+    "original_signatures": [
+      "长方体中，过对棱中点的两个平面关系",
+      "长方体中，过侧棱中点的截面与底边平行",
+      "长方体中，过棱中点的截面与底边的位置关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15471",
+      "geo-cmm-15485",
+      "geo-cmm-16056"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 4,
+      "uniqueness": 5,
+      "total": 2.95
+    }
+  },
+  {
+    "config_id": "pyramid4-perpendicular-proof",
+    "canonical_description": "四棱锥中垂直关系证明",
+    "geometry_type": "四棱锥",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "四棱锥中利用勾股定理证明线面垂直",
+      "正四棱锥中，线线垂直关系的判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15507",
+      "geo-cmm-15813"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 4,
+      "uniqueness": 5,
+      "total": 2.95
+    }
+  },
+  {
+    "config_id": "prism3-line-face-parallel",
+    "canonical_description": "三棱柱中直线与平面平行关系",
+    "geometry_type": "三棱柱",
+    "task_type": "证明线面平行",
+    "original_signatures": [
+      "正三棱柱中底边中点连线与截面的平行关系",
+      "直三棱柱中，连线与顶面的平行关系",
+      "三棱柱中，过边中点的直线与侧面平行"
+    ],
+    "question_ids": [
+      "geo-cmm-15464",
+      "geo-cmm-15684",
+      "geo-cmm-15804"
+    ],
+    "frequency": 3,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 4,
+      "uniqueness": 5,
+      "total": 2.95
+    }
+  },
+  {
+    "config_id": "cylinder-volume-calculation",
+    "canonical_description": "圆柱体积计算",
+    "geometry_type": "圆柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "等边圆柱的体积计算",
+      "圆柱体积最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-16041",
+      "geo-cmm-20159"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 4,
+      "uniqueness": 5,
+      "total": 2.95
+    }
+  },
+  {
+    "config_id": "equal-volume-surface-comparison",
+    "canonical_description": "等体积几何体的表面积比较",
+    "geometry_type": "多几何体组合",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "等体积几何体的表面积比较"
+    ],
+    "question_ids": [
+      "geo-cmm-16035"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.85
+    }
+  },
+  {
+    "config_id": "prism3-projection-area-optimization",
+    "canonical_description": "直三棱柱变角度投影下正侧视图面积乘积最值",
+    "geometry_type": "直三棱柱",
+    "task_type": "其他",
+    "original_signatures": [
+      "直三棱柱中，变角度投影下正侧视图面积乘积最值"
+    ],
+    "question_ids": [
+      "geo-cmm-15589"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.85
+    }
+  },
+  {
+    "config_id": "cube-volume-sphere-region",
+    "canonical_description": "正方体中球形区域体积",
+    "geometry_type": "正方体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "正方体中，球形区域的概率计算"
+    ],
+    "question_ids": [
+      "geo-cmm-17167"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cube-center-midpoint-relation",
+    "canonical_description": "正方体中面中心与中点连线关系",
+    "geometry_type": "正方体",
+    "task_type": "证明线线平行",
+    "original_signatures": [
+      "正方体中面中心连线与底边中点连线的位置关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15435"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cuboid-projection-area",
+    "canonical_description": "长方体中三角形在对角面上的正投影面积",
+    "geometry_type": "长方体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "长方体中，三角形在对角面上的正投影面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15585"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "pyramid4-point-plane-distance",
+    "canonical_description": "四棱锥中点到平面距离",
+    "geometry_type": "四棱锥",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "四棱锥中，顶点到过边中点的截面距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15824"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "prism3-path-optimization",
+    "canonical_description": "正三棱柱中动点路径最值问题",
+    "geometry_type": "三棱柱",
+    "task_type": "其他",
+    "original_signatures": [
+      "正三棱柱中，含动点的三角形周长最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15561"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cube-circumsphere",
+    "canonical_description": "正方体的外接球表面积",
+    "geometry_type": "正方体",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "正方体的外接球表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-16040"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cube-cylinder-hole-surface",
+    "canonical_description": "正方体挖圆柱孔后的表面积",
+    "geometry_type": "正方体圆柱组合体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正方体挖圆柱孔后的表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-16021"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "tetrahedron-square-section-properties",
+    "canonical_description": "四面体中正方形截面的几何性质",
+    "geometry_type": "四面体",
+    "task_type": "其他",
+    "original_signatures": [
+      "四面体中，正方形截面的几何性质"
+    ],
+    "question_ids": [
+      "geo-cmm-15729"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "prism3-diagonal-perpendicular-condition",
+    "canonical_description": "直三棱柱中对角直线垂直的条件",
+    "geometry_type": "直三棱柱",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "直三棱柱中，对角直线垂直的条件"
+    ],
+    "question_ids": [
+      "geo-cmm-16333"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "pyramid3-perpendicular-face-circumsphere",
+    "canonical_description": "三棱锥中面面垂直且含等腰直角三角形的外接球",
+    "geometry_type": "三棱锥",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "三棱锥中，面面垂直且含等腰直角三角形的外接球"
+    ],
+    "question_ids": [
+      "geo-cmm-15666"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cone-ellipse-oblique-section-eccentricity",
+    "canonical_description": "圆锥斜截面的离心率计算",
+    "geometry_type": "圆锥",
+    "task_type": "其他",
+    "original_signatures": [
+      "圆锥斜截面的离心率计算"
+    ],
+    "question_ids": [
+      "geo-cmm-22722"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "pyramid4-point-face-distance-vertical-base",
+    "canonical_description": "四棱锥中，侧棱垂直底面时求点到侧面距离",
+    "geometry_type": "四棱锥",
+    "task_type": "求点面距离",
+    "original_signatures": [
+      "四棱锥中，侧棱垂直底面时求点到侧面距离"
+    ],
+    "question_ids": [
+      "geo-cmm-15745"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.8
+    }
+  },
+  {
+    "config_id": "cube-midpoint-triangle-properties",
+    "canonical_description": "正方体中多个中点构成的三角形性质",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，多个中点构成的三角形性质判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15678"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.75
+    }
+  },
+  {
+    "config_id": "prism3-volume-circumsphere",
+    "canonical_description": "三棱柱内接于球的体积最值问题",
+    "geometry_type": "三棱柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "三棱柱内接于球的体积最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15659"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 4,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.75
+    }
+  },
+  {
+    "config_id": "cube-volume-tetrahedron",
+    "canonical_description": "正方体中四面体体积计算",
+    "geometry_type": "正方体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "正方体中，四面体的体积计算",
+      "正方体中四棱锥体积比例"
+    ],
+    "question_ids": [
+      "geo-cmm-16012",
+      "geo-cmm-16046"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 3,
+      "total": 2.65
+    }
+  },
+  {
+    "config_id": "cube-skew-angle-midpoint-diagonal",
+    "canonical_description": "正方体中棱中点连线与体对角线的异面直线所成角",
+    "geometry_type": "正方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正方体中，体对角线与棱中点连线的异面直线所成角",
+      "正方体中，过棱中点的直线与对角线的异面直线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15854",
+      "geo-cmm-15840"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "cube-inscribed-sphere-section",
+    "canonical_description": "正方体内接球截面形状",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体内接球的过球心截面形状",
+      "正方体内接球中，过球心的截面图形判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15579",
+      "geo-cmm-15569"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "cuboid-coordinate-vector",
+    "canonical_description": "长方体的坐标系与向量计算",
+    "geometry_type": "长方体",
+    "task_type": "建系求向量",
+    "original_signatures": [
+      "长方体的坐标系与向量计算"
+    ],
+    "question_ids": [
+      "geo-cmm-21268"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "pyramid4-right-triangle",
+    "canonical_description": "四棱锥中直角三角形问题",
+    "geometry_type": "四棱锥",
+    "task_type": "求直角三角形个数",
+    "original_signatures": [
+      "四棱锥中，顶点到底面垂直时的直角三角形"
+    ],
+    "question_ids": [
+      "geo-cmm-15515"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "prism3-line-perpendicular",
+    "canonical_description": "直三棱柱中对角线垂直条件",
+    "geometry_type": "三棱柱",
+    "task_type": "证明线线垂直",
+    "original_signatures": [
+      "直三棱柱中，对角线垂直的条件"
+    ],
+    "question_ids": [
+      "geo-cmm-15505"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "multi-cylinder-eccentricity-compare",
+    "canonical_description": "两圆柱截面椭圆离心率比较",
+    "geometry_type": "圆柱",
+    "task_type": "椭圆参数比较",
+    "original_signatures": [
+      "两圆柱截面椭圆离心率比较"
+    ],
+    "question_ids": [
+      "geo-cmm-22711"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "cylinder-circumscribed-sphere",
+    "canonical_description": "圆柱外接球表面积计算",
+    "geometry_type": "圆柱",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "圆柱中，已知轴截面面积求外接球表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15664"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "sphere-cylinder-circumscribed",
+    "canonical_description": "球与圆柱的外切关系",
+    "geometry_type": "球圆柱组合体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球与圆柱的外切关系"
+    ],
+    "question_ids": [
+      "geo-cmm-16051"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "sphere-section-circle-area",
+    "canonical_description": "球的截面圆面积计算",
+    "geometry_type": "球",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球的垂直截面圆面积计算",
+      "球被平面截取的几何计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15551",
+      "geo-cmm-16037"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "pyramid3-inscribed-sphere-formula",
+    "canonical_description": "三棱锥内切球半径公式的类比推理",
+    "geometry_type": "三棱锥",
+    "task_type": "其他",
+    "original_signatures": [
+      "三棱锥内切球半径公式的类比推理"
+    ],
+    "question_ids": [
+      "geo-cmm-20647"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "prism4-edge-midpoint-relation",
+    "canonical_description": "正四棱柱中棱中点连线的位置关系判断",
+    "geometry_type": "正四棱柱",
+    "task_type": "其他",
+    "original_signatures": [
+      "正四棱柱中，棱中点连线的位置关系判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15810"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "parallelepiped-analogy-diagonal",
+    "canonical_description": "平行六面体中对角线关系的类比推理",
+    "geometry_type": "平行六面体",
+    "task_type": "类比推理",
+    "original_signatures": [
+      "平行六面体中对角线关系的类比推理"
+    ],
+    "question_ids": [
+      "geo-cmm-20473"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.6
+    }
+  },
+  {
+    "config_id": "cube-fold-line-path",
+    "canonical_description": "正方体中折线路径问题",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，折线路径长度的最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15562"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "cube-line-plane-position-comprehensive",
+    "canonical_description": "正方体中线面位置关系综合判断",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，线面位置关系的判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15681"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "cube-moving-point-plane-sweep",
+    "canonical_description": "正方体中动点扫过平面问题",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，动点扫过的平面与给定平面的平行性"
+    ],
+    "question_ids": [
+      "geo-cmm-16007"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "cube-perpendicular-trajectory",
+    "canonical_description": "正方体中满足垂直条件的动点轨迹",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，满足垂直条件的动点轨迹"
+    ],
+    "question_ids": [
+      "geo-cmm-16445"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "cube-diagonal-parallel-properties",
+    "canonical_description": "正方体中对角线与平行关系",
+    "geometry_type": "正方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正方体中，对角线与对角线的异面角"
+    ],
+    "question_ids": [
+      "geo-cmm-15682"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "prism3-circumsphere-volume",
+    "canonical_description": "直三棱柱外接球体积计算",
+    "geometry_type": "三棱柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "直三棱柱内接于球的体积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15668"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "prism3-pyramid-volume-ratio",
+    "canonical_description": "三棱柱中三棱锥体积比",
+    "geometry_type": "三棱柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "三棱柱中三棱锥体积比"
+    ],
+    "question_ids": [
+      "geo-cmm-16052"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "sphere-projection-ellipse",
+    "canonical_description": "球的平行投影与椭圆的关系",
+    "geometry_type": "球",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球的平行投影与椭圆的关系"
+    ],
+    "question_ids": [
+      "geo-cmm-22676"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "prism3-volume-tetrahedron",
+    "canonical_description": "三棱柱中过底边中点的四面体体积",
+    "geometry_type": "三棱柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "三棱柱中，过底边中点的四面体体积"
+    ],
+    "question_ids": [
+      "geo-cmm-15728"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.5
+    }
+  },
+  {
+    "config_id": "cube-line-position-relation",
+    "canonical_description": "正方体中直线位置关系判断",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，棱中点连线的位置关系",
+      "正方体中直线位置关系判断",
+      "正方体中，过顶点与棱中点的直线与各面的位置关系",
+      "正方体中过棱中点直线与面的位置关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15440",
+      "geo-cmm-15979",
+      "geo-cmm-15740",
+      "geo-cmm-15940"
+    ],
+    "frequency": 4,
+    "scores": {
+      "exam_frequency": 3,
+      "teaching_value": 1,
+      "visualization_value": 4,
+      "uniqueness": 1,
+      "total": 2.45
+    }
+  },
+  {
+    "config_id": "tetrahedron-vector-calculation",
+    "canonical_description": "四面体中向量运算",
+    "geometry_type": "四面体",
+    "task_type": "建系求向量",
+    "original_signatures": [
+      "四面体中向量运算",
+      "四面体中向量表示"
+    ],
+    "question_ids": [
+      "geo-cmm-21259",
+      "geo-cmm-21274"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.45
+    }
+  },
+  {
+    "config_id": "prism3-vector-midpoint",
+    "canonical_description": "三棱柱中侧棱中点的向量表示",
+    "geometry_type": "三棱柱",
+    "task_type": "建系求向量",
+    "original_signatures": [
+      "三棱柱中向量表示",
+      "三棱柱中，侧棱中点的向量表示"
+    ],
+    "question_ids": [
+      "geo-cmm-21284",
+      "geo-cmm-21297"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.45
+    }
+  },
+  {
+    "config_id": "cuboid-face-area-diagonal",
+    "canonical_description": "长方体中由面积求对角线和体积",
+    "geometry_type": "长方体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "长方体中，根据三个共顶点面的面积求对角线长",
+      "长方体中，已知三个面面积求体对角线和表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15905",
+      "geo-cmm-15650"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.4
+    }
+  },
+  {
+    "config_id": "prism3-line-position-identification",
+    "canonical_description": "三棱柱中直线位置关系识别",
+    "geometry_type": "三棱柱",
+    "task_type": "其他",
+    "original_signatures": [
+      "三棱柱中直线位置关系判断",
+      "正三棱柱中异面直线的识别"
+    ],
+    "question_ids": [
+      "geo-cmm-15978",
+      "geo-cmm-15985"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.4
+    }
+  },
+  {
+    "config_id": "cube-skew-angle-diagonal-face",
+    "canonical_description": "正方体中面对角线与体对角线的异面直线所成角",
+    "geometry_type": "正方体",
+    "task_type": "求异面直线所成角",
+    "original_signatures": [
+      "正方体中面对角线与体对角线的异面直线所成角",
+      "正方体中，体对角线与面对角线所成角"
+    ],
+    "question_ids": [
+      "geo-cmm-15993",
+      "geo-cmm-15845"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.35
+    }
+  },
+  {
+    "config_id": "cube-parallel-line-plane",
+    "canonical_description": "正方体中平行直线与平面关系",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体中，平面内与给定平面平行的直线",
+      "正方体中，棱中点连线与给定平面平行的直线计数"
+    ],
+    "question_ids": [
+      "geo-cmm-15502",
+      "geo-cmm-22077"
+    ],
+    "frequency": 2,
+    "scores": {
+      "exam_frequency": 2,
+      "teaching_value": 2,
+      "visualization_value": 4,
+      "uniqueness": 1,
+      "total": 2.35
+    }
+  },
+  {
+    "config_id": "cuboid-volume-optimization",
+    "canonical_description": "长方体的体积优化问题",
+    "geometry_type": "长方体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "长方体的优化问题"
+    ],
+    "question_ids": [
+      "geo-cmm-20168"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.3
+    }
+  },
+  {
+    "config_id": "prism3-surface-area-optimization",
+    "canonical_description": "正三棱柱表面积最值问题",
+    "geometry_type": "三棱柱",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "正三棱柱表面积最值问题"
+    ],
+    "question_ids": [
+      "geo-cmm-20164"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.3
+    }
+  },
+  {
+    "config_id": "tetrahedron-volume-formula-analogy",
+    "canonical_description": "四面体体积公式的类比推理",
+    "geometry_type": "四面体",
+    "task_type": "其他",
+    "original_signatures": [
+      "四面体体积公式的类比推理"
+    ],
+    "question_ids": [
+      "geo-cmm-21402"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.3
+    }
+  },
+  {
+    "config_id": "hexagonal-prism-pyramid-counting",
+    "canonical_description": "正六棱柱中特定四棱锥的计数问题",
+    "geometry_type": "正六棱柱",
+    "task_type": "计数问题",
+    "original_signatures": [
+      "正六棱柱中，满足特定条件的四棱锥计数问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15558"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 2.3
+    }
+  },
+  {
+    "config_id": "cube-line-plane-perpendicular",
+    "canonical_description": "正方体中线面垂直关系",
+    "geometry_type": "正方体",
+    "task_type": "证明线面垂直",
+    "original_signatures": [
+      "正方体中，体对角线与某平面垂直"
+    ],
+    "question_ids": [
+      "geo-cmm-15509"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "cylinder-angle-from-eccentricity",
+    "canonical_description": "由椭圆离心率求平面与母线夹角",
+    "geometry_type": "圆柱",
+    "task_type": "角度计算",
+    "original_signatures": [
+      "由椭圆离心率求平面与母线夹角"
+    ],
+    "question_ids": [
+      "geo-cmm-22710"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "cylinder-sphere-surface-area",
+    "canonical_description": "圆柱与球表面积相等的参数关系",
+    "geometry_type": "圆柱与球",
+    "task_type": "表面积关系",
+    "original_signatures": [
+      "圆柱与球表面积相等的参数关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15667"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "cylinder-axial-section-area",
+    "canonical_description": "圆柱轴截面面积计算",
+    "geometry_type": "圆柱",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "圆柱轴截面面积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15959"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "cylinder-cone-volume-comparison",
+    "canonical_description": "圆柱圆锥轴截面相等时的体积比",
+    "geometry_type": "圆柱圆锥组合体",
+    "task_type": "求体积",
+    "original_signatures": [
+      "圆柱圆锥轴截面相等时的体积比"
+    ],
+    "question_ids": [
+      "geo-cmm-15546"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "pentagonal-prism-counting-diagonal",
+    "canonical_description": "正五棱柱对角线计数问题",
+    "geometry_type": "正五棱柱",
+    "task_type": "计数问题",
+    "original_signatures": [
+      "五棱柱对角线计数问题"
+    ],
+    "question_ids": [
+      "geo-cmm-15914"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 5,
+      "total": 2.1
+    }
+  },
+  {
+    "config_id": "cube-unfold-relation",
+    "canonical_description": "正方体展开图中线线关系",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体展开图中的线线关系判断"
+    ],
+    "question_ids": [
+      "geo-cmm-15430"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.0
+    }
+  },
+  {
+    "config_id": "sphere-area-triangle-inscribed",
+    "canonical_description": "球面上等边三角形与球心距离关系求表面积",
+    "geometry_type": "球",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球面上等边三角形与球心距离关系求表面积"
+    ],
+    "question_ids": [
+      "geo-cmm-15545"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 3,
+      "visualization_value": 3,
+      "uniqueness": 1,
+      "total": 2.0
+    }
+  },
+  {
+    "config_id": "prism3-volume-partition",
+    "canonical_description": "三棱柱中棱锥与剩余部分的体积关系",
+    "geometry_type": "三棱柱",
+    "task_type": "求体积",
+    "original_signatures": [
+      "三棱柱中，棱锥与剩余部分的体积关系"
+    ],
+    "question_ids": [
+      "geo-cmm-16048"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 5,
+      "uniqueness": 1,
+      "total": 2.0
+    }
+  },
+  {
+    "config_id": "cube-line-plane-parallel-section",
+    "canonical_description": "正方体中截面与底面交线的平行关系",
+    "geometry_type": "正方体",
+    "task_type": "证明线线平行",
+    "original_signatures": [
+      "正方体中，截面与底面交线的平行关系"
+    ],
+    "question_ids": [
+      "geo-cmm-15727"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 1.8
+    }
+  },
+  {
+    "config_id": "cube-circumsphere",
+    "canonical_description": "正方体外接球问题",
+    "geometry_type": "正方体",
+    "task_type": "求外接球",
+    "original_signatures": [
+      "正方体中，已知外接球表面积求棱长"
+    ],
+    "question_ids": [
+      "geo-cmm-15645"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 1.8
+    }
+  },
+  {
+    "config_id": "cuboid-circumsphere-surface",
+    "canonical_description": "长方体外接球表面积",
+    "geometry_type": "长方体",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "长方体外接球表面积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-15671"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 1.8
+    }
+  },
+  {
+    "config_id": "cuboid-position-comprehensive",
+    "canonical_description": "长方体中线面位置关系的综合分析",
+    "geometry_type": "长方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "长方体中线面位置关系的综合分析"
+    ],
+    "question_ids": [
+      "geo-cmm-15884"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 1.8
+    }
+  },
+  {
+    "config_id": "hexagonal-prism-count-parallel-faces",
+    "canonical_description": "正六棱柱中平行面的计数",
+    "geometry_type": "正六棱柱",
+    "task_type": "计数问题",
+    "original_signatures": [
+      "正六边形柱中，平行面的计数"
+    ],
+    "question_ids": [
+      "geo-cmm-15472"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 3,
+      "total": 1.8
+    }
+  },
+  {
+    "config_id": "cube-sphere-comparison",
+    "canonical_description": "正方体内接球与外接球比较",
+    "geometry_type": "正方体",
+    "task_type": "其他",
+    "original_signatures": [
+      "正方体外接球与内切球的体积表面积比"
+    ],
+    "question_ids": [
+      "geo-cmm-15670"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 1,
+      "total": 1.5
+    }
+  },
+  {
+    "config_id": "sphere-volume-area-ratio",
+    "canonical_description": "球的体积表面积比值关系",
+    "geometry_type": "球",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "球的体积表面积比值关系"
+    ],
+    "question_ids": [
+      "geo-cmm-16033"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 3,
+      "uniqueness": 1,
+      "total": 1.5
+    }
+  },
+  {
+    "config_id": "prism3-surface-lateral",
+    "canonical_description": "三棱柱侧面积计算",
+    "geometry_type": "三棱柱",
+    "task_type": "求表面积",
+    "original_signatures": [
+      "三棱柱侧面积计算"
+    ],
+    "question_ids": [
+      "geo-cmm-16014"
+    ],
+    "frequency": 1,
+    "scores": {
+      "exam_frequency": 1,
+      "teaching_value": 1,
+      "visualization_value": 1,
+      "uniqueness": 3,
+      "total": 1.3
+    }
+  }
+]

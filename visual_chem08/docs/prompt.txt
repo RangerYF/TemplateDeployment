@@ -1,0 +1,6 @@
+visual_template文件夹中的项目实现了如下功能的页面搭建：visual_template\
+  docs\数学教具产品线 —
+  产品需求文档（PRD）.docx中的需求。我现在需要根据它的架构、交互风格和开
+  发风格实现并列部分的代码。我希望你首先了解Skill/文件夹中的skill，特别是design-align中对于UI的要求，按照visual_chem08\docs\chem08-需求.md 中的需求，以尽量和visual_template相同的框架完
+  成这部分网页搭建，使用类似的风格和组件。visual_template中有详细的架构概览和文档结构划分，请你
+  按照它完成。工作代码仓库为visual_chem08。

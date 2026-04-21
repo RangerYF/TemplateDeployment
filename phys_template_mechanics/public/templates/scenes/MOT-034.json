@@ -1,0 +1,87 @@
+{
+  "id": "template-scene-mot-034",
+  "name": "MOT-034 木板-物块相对运动",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.08,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-board-main",
+      "type": "block",
+      "label": "木板",
+      "position": {
+        "x": -0.20000000000000018,
+        "y": 0.183
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 5.5,
+      "friction": 0.1,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 2.6,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 6.4,
+      "height": 0.35
+    },
+    {
+      "id": "body-block-top",
+      "type": "block",
+      "label": "板上物块",
+      "position": {
+        "x": -2.5,
+        "y": 0.6659999999999999
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.38,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.8,
+      "height": 0.6
+    }
+  ],
+  "joints": [],
+  "forces": [],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

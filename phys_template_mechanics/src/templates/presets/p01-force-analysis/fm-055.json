@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "id": "FM-055",
+    "name": "凹槽模型",
+    "module": "P-01",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过“凹槽模型”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 groove-main（groove）。",
+      "3. 将物体 groove-main 吸附到 ground。",
+      "4. 添加物体 ball-main（ball）。",
+      "5. 将物体 ball-main 吸附到 groove-main。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-055.json",
+  "commandProgram": {
+    "templateId": "FM-055",
+    "sceneName": "FM-055 凹槽模型",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "groove-main",
+        "bodyType": "groove",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 1.9
+          },
+          "grooveWidth": 6,
+          "grooveDepth": 3.8,
+          "grooveThickness": 0.12,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.35
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "groove-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -1.9,
+            "y": 2.8
+          },
+          "radius": 0.3,
+          "mass": 0.7,
+          "friction": 0.08,
+          "restitution": 0.05
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "ball-main",
+        "targetBodyRefs": [
+          "groove-main"
+        ],
+        "threshold": 1.6
+      }
+    ]
+  },
+  "sceneSource": "manual",
+  "updatedAt": "2026-04-02T06:37:51.382Z"
+}

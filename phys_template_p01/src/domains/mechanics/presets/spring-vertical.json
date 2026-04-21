@@ -1,0 +1,121 @@
+{
+  "id": "P01-FM051-spring-vertical",
+  "version": "1.0",
+  "name": "竖直悬挂",
+  "description": "弹簧竖直悬挂物块，分析平衡态下重力与弹簧弹力",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 500, "y": 150 }
+  },
+  "entities": [
+    {
+      "ref": "pivot-top",
+      "type": "pivot",
+      "properties": { "radius": 0.05 },
+      "transform": { "position": { "x": 0, "y": 2.5 }, "rotation": 0 },
+      "label": "固定点"
+    },
+    {
+      "ref": "spring-1",
+      "type": "spring",
+      "properties": {
+        "stiffness": 100,
+        "naturalLength": 1.0,
+        "pivotEntityId": "pivot-top",
+        "blockEntityId": "block-A"
+      },
+      "transform": { "position": { "x": 0, "y": 2.5 }, "rotation": 0 },
+      "label": "弹簧"
+    },
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 1, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 1.0 }, "rotation": 0 },
+      "label": "物块"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "block-A",
+      "targetRef": "pivot-top",
+      "properties": { "connector": "spring-1" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "spring-params",
+      "label": "弹簧",
+      "params": [
+        {
+          "key": "stiffness",
+          "label": "劲度系数 k",
+          "type": "slider",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "default": 100,
+          "unit": "N/m",
+          "targetEntityId": "spring-1",
+          "targetProperty": "stiffness"
+        }
+      ]
+    },
+    {
+      "key": "block-params",
+      "label": "物块",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量 m",
+          "type": "slider",
+          "min": 0.1,
+          "max": 20,
+          "step": 0.1,
+          "default": 1,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "appliedForce",
+          "label": "外力 F",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0,
+          "unit": "N",
+          "targetEntityId": "block-A"
+        },
+        {
+          "key": "forceAngle",
+          "label": "方向角 θ",
+          "type": "slider",
+          "min": -180,
+          "max": 180,
+          "step": 1,
+          "default": 0,
+          "unit": "°",
+          "targetEntityId": "block-A"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "stiffness": 100,
+    "mass": 1,
+    "appliedForce": 0,
+    "forceAngle": 0
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "spring": "vertical" },
+  "group": "spring-model",
+  "groupLabel": "弹簧模型",
+  "groupOrder": 1
+}

@@ -1,0 +1,128 @@
+{
+  "id": "CRY-010",
+  "slug": "cry-010-mg",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-010",
+    "name_cn": "镁",
+    "formula": "Mg",
+    "level": "高中选修",
+    "crystal_system": "hexagonal",
+    "space_group": "P6₃/mmc",
+    "lattice_params": {
+      "a": 320.9,
+      "b": 320.9,
+      "c": 521,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "atoms": [
+      {
+        "element": "Mg",
+        "label": "Mg1",
+        "x": 0.3333333333333333,
+        "y": 0.6666666666666666,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "Mg",
+        "label": "Mg2",
+        "x": 0.6666666666666666,
+        "y": 0.3333333333333333,
+        "z": 0.75,
+        "charge": null
+      }
+    ],
+    "bond_type": "metallic",
+    "coord_number": "12",
+    "z": 2,
+    "teaching_points": [
+      "六方最密堆积(HCP)，配位数12，空间利用率74.05%（与FCC相同）",
+      "堆积方式为ABAB...（六方最密堆积）",
+      "每个晶胞含2个Mg原子",
+      "理想c/a比为√(8/3)≈1.633，Mg实际c/a=1.623接近理想值",
+      "12个最近邻：同层6个 + 上层3个 + 下层3个",
+      "Mg密度低(1.738 g/cm³)，是最轻的结构金属之一"
+    ],
+    "bond_lengths": {
+      "Mg-Mg": 321
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-010",
+    "name": "镁",
+    "formula": "Mg",
+    "formulaHtml": "Mg",
+    "category": "metallic",
+    "gradeLevel": "高中选修",
+    "structureType": "六方最密堆积(HCP)",
+    "crystalSystem": "hexagonal",
+    "spaceGroup": "P6₃/mmc",
+    "spaceGroupNumber": 194,
+    "lattice": {
+      "a": 320.9,
+      "b": 320.9,
+      "c": 521,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 120
+    },
+    "z": 2,
+    "atomSites": [
+      {
+        "element": "Mg",
+        "label": "Mg1",
+        "fracCoords": [
+          0.3333333333333333,
+          0.6666666666666666,
+          0.25
+        ]
+      },
+      {
+        "element": "Mg",
+        "label": "Mg2",
+        "fracCoords": [
+          0.6666666666666666,
+          0.3333333333333333,
+          0.75
+        ]
+      }
+    ],
+    "bonds": [],
+    "neighborCutoff": 3.21,
+    "packingType": "HCP",
+    "packingEfficiency": 74.05,
+    "coordinationNumber": "12",
+    "coordinationGeometry": "反棱柱（三方反棱柱套三棱柱）",
+    "teachingPoints": [
+      "六方最密堆积(HCP)，配位数12，空间利用率74.05%（与FCC相同）",
+      "堆积方式为ABAB...（六方最密堆积）",
+      "每个晶胞含2个Mg原子",
+      "理想c/a比为√(8/3)≈1.633，Mg实际c/a=1.623接近理想值",
+      "12个最近邻：同层6个 + 上层3个 + 下层3个",
+      "Mg密度低(1.738 g/cm³)，是最轻的结构金属之一"
+    ],
+    "bondLengths": {
+      "Mg-Mg": 321
+    },
+    "codId": 9008506,
+    "dataSource": "COD #9008506 — Wyckoff, Crystal Structures 1, 7-83 (1963)"
+  }
+}

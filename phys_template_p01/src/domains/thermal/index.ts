@@ -1,0 +1,85 @@
+import { presetRegistry } from '@/core/registries/preset-registry';
+import { registerGasContainerEntity } from './entities/gas-container';
+import { registerGasColumnEntity } from './entities/gas-column';
+import { registerPistonEntity } from './entities/piston';
+import { registerLiquidColumnEntity } from './entities/liquid-column';
+import { registerGasMoleculesEntity } from './entities/gas-molecules';
+import { registerBrownianParticleEntity } from './entities/brownian-particle';
+import { registerIsothermalProcessSolver } from './solvers/isothermal-process';
+import { registerIsobaricProcessSolver } from './solvers/isobaric-process';
+import { registerIsochoricProcessSolver } from './solvers/isochoric-process';
+import { registerSealedTubeOpenTopSolver } from './solvers/sealed-tube-open-top';
+import { registerSealedTubeOpenBottomSolver } from './solvers/sealed-tube-open-bottom';
+import { registerSealedTubeHorizontalSolver } from './solvers/sealed-tube-horizontal';
+import { registerSealedTubeInclinedSolver } from './solvers/sealed-tube-inclined';
+import { registerUTubeSolver } from './solvers/u-tube';
+import { registerDoubleSealedTubeSolver } from './solvers/double-sealed-tube';
+import { registerSinglePistonSolver } from './solvers/single-piston';
+import { registerDoublePistonSolver } from './solvers/double-piston';
+import { registerGasMolecularMotionSolver } from './solvers/gas-molecular-motion';
+import { registerBrownianMotionSolver } from './solvers/brownian-motion';
+import { registerGasContainerRenderer } from './renderers/gas-container-renderer';
+import { registerGasColumnRenderer } from './renderers/gas-column-renderer';
+import { registerPistonRenderer } from './renderers/piston-renderer';
+import { registerLiquidColumnRenderer } from './renderers/liquid-column-renderer';
+import { registerGasMoleculesRenderer } from './renderers/gas-molecules-renderer';
+import { registerBrownianParticleRenderer } from './renderers/brownian-particle-renderer';
+import isothermalPreset from './presets/isothermal-process.json';
+import isobaricPreset from './presets/isobaric-process.json';
+import isochoricPreset from './presets/isochoric-process.json';
+import sealedTubeOpenTopPreset from './presets/sealed-tube-open-top.json';
+import sealedTubeOpenBottomPreset from './presets/sealed-tube-open-bottom.json';
+import sealedTubeHorizontalPreset from './presets/sealed-tube-horizontal.json';
+import sealedTubeInclinedPreset from './presets/sealed-tube-inclined.json';
+import uTubePreset from './presets/u-tube.json';
+import doubleSealedTubePreset from './presets/double-sealed-tube.json';
+import singlePistonPreset from './presets/single-piston.json';
+import doublePistonPreset from './presets/double-piston.json';
+import gasMolecularMotionPreset from './presets/gas-molecular-motion.json';
+import brownianMotionPreset from './presets/brownian-motion.json';
+import type { PresetData } from '@/core/types';
+
+export function registerThermalDomain(): void {
+  // 实体
+  registerGasContainerEntity();
+  registerGasColumnEntity();
+  registerPistonEntity();
+  registerLiquidColumnEntity();
+  registerGasMoleculesEntity();
+  registerBrownianParticleEntity();
+  // 求解器
+  registerIsothermalProcessSolver();
+  registerIsobaricProcessSolver();
+  registerIsochoricProcessSolver();
+  registerSealedTubeOpenTopSolver();
+  registerSealedTubeOpenBottomSolver();
+  registerSealedTubeHorizontalSolver();
+  registerSealedTubeInclinedSolver();
+  registerUTubeSolver();
+  registerDoubleSealedTubeSolver();
+  registerSinglePistonSolver();
+  registerDoublePistonSolver();
+  registerGasMolecularMotionSolver();
+  registerBrownianMotionSolver();
+  // 渲染器
+  registerGasContainerRenderer();
+  registerGasColumnRenderer();
+  registerPistonRenderer();
+  registerLiquidColumnRenderer();
+  registerGasMoleculesRenderer();
+  registerBrownianParticleRenderer();
+  // 预设
+  presetRegistry.register(isothermalPreset as unknown as PresetData);
+  presetRegistry.register(isobaricPreset as unknown as PresetData);
+  presetRegistry.register(isochoricPreset as unknown as PresetData);
+  presetRegistry.register(sealedTubeOpenTopPreset as unknown as PresetData);
+  presetRegistry.register(sealedTubeOpenBottomPreset as unknown as PresetData);
+  presetRegistry.register(sealedTubeHorizontalPreset as unknown as PresetData);
+  presetRegistry.register(sealedTubeInclinedPreset as unknown as PresetData);
+  presetRegistry.register(uTubePreset as unknown as PresetData);
+  presetRegistry.register(doubleSealedTubePreset as unknown as PresetData);
+  presetRegistry.register(singlePistonPreset as unknown as PresetData);
+  presetRegistry.register(doublePistonPreset as unknown as PresetData);
+  presetRegistry.register(gasMolecularMotionPreset as unknown as PresetData);
+  presetRegistry.register(brownianMotionPreset as unknown as PresetData);
+}

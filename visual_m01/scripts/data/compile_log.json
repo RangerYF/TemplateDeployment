@@ -1,0 +1,572 @@
+{
+  "cube-line-plane-parallel-midpoint": {
+    "representative_question_id": "geo-cmm-15476",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cylinder-oblique-section-ellipse": {
+    "representative_question_id": "geo-cmm-22701",
+    "compile_success": true,
+    "retries": 2
+  },
+  "cube-skew-distance": {
+    "representative_question_id": "geo-cmm-15489",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cube-line-length-range": {
+    "representative_question_id": "geo-cmm-15717",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-vector-dot-product": {
+    "representative_question_id": "geo-cmm-15702",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-dihedral-angle": {
+    "representative_question_id": "geo-cmm-15888",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-dynamic-point": {
+    "representative_question_id": "geo-cmm-15733",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-trajectory-angle": {
+    "representative_question_id": "geo-cmm-15895",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-projection-area": {
+    "representative_question_id": "geo-cmm-15627",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-section-area": {
+    "representative_question_id": "geo-cmm-15753",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cube-section-perimeter": {
+    "representative_question_id": "geo-cmm-15734",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-moving-point-diagonal-comprehensive": {
+    "representative_question_id": "geo-cmm-15822",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-skew-lines-angle": {
+    "representative_question_id": "geo-cmm-15836",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-skew-lines-angle": {
+    "representative_question_id": "geo-cmm-15843",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-surface-area": {
+    "representative_question_id": "geo-cmm-16020",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-volume": {
+    "representative_question_id": "geo-cmm-15553",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-skew-lines-angle": {
+    "representative_question_id": "geo-cmm-21275",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-skew-angle-general": {
+    "representative_question_id": "geo-cmm-15851",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-circumsphere-surface": {
+    "representative_question_id": "geo-cmm-15662",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-circumsphere-special": {
+    "representative_question_id": "geo-cmm-15782",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-line-plane-distance": {
+    "representative_question_id": "geo-cmm-15755",
+    "compile_success": true,
+    "retries": 1
+  },
+  "prism3-dihedral-angle": {
+    "representative_question_id": "geo-cmm-15877",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cylinder-random-point-probability": {
+    "representative_question_id": "geo-cmm-17159",
+    "compile_success": true,
+    "retries": 2
+  },
+  "tetrahedron-equilateral-base-circumsphere-area": {
+    "representative_question_id": "geo-cmm-15676",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-vertex-perpendicular-point-plane-distance": {
+    "representative_question_id": "geo-cmm-15765",
+    "compile_success": true,
+    "retries": 1
+  },
+  "regular-tetrahedron-section-area": {
+    "representative_question_id": "geo-cmm-15564",
+    "compile_success": true,
+    "retries": 0
+  },
+  "regular-tetrahedron-incircle-section": {
+    "representative_question_id": "geo-cmm-15549",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-folding-circumsphere-volume": {
+    "representative_question_id": "geo-cmm-15674",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cone-volume-inscribed-cube": {
+    "representative_question_id": "geo-cmm-15552",
+    "compile_success": true,
+    "retries": 1
+  },
+  "pyramid3-line-face-angle": {
+    "representative_question_id": "geo-cmm-15775",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-surface-area": {
+    "representative_question_id": "geo-cmm-15548",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-lateral-base-dihedral": {
+    "representative_question_id": "geo-cmm-15882",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism4-point-distance-ratio": {
+    "representative_question_id": "geo-cmm-15560",
+    "compile_success": true,
+    "retries": 1
+  },
+  "prism-quad-trajectory-midpoint": {
+    "representative_question_id": "geo-cmm-15722",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-dihedral-other": {
+    "representative_question_id": "geo-cmm-15817",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cube-skew-angle-midpoint-general": {
+    "representative_question_id": "geo-cmm-15748",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-plane-plane-parallel": {
+    "representative_question_id": "geo-cmm-15704",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-line-plane-angle": {
+    "representative_question_id": "geo-cmm-15771",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-parallel-plane-section": {
+    "representative_question_id": "geo-cmm-15752",
+    "compile_success": true,
+    "retries": 1
+  },
+  "pyramid4-line-plane-angle": {
+    "representative_question_id": "geo-cmm-15792",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-perpendicular-midpoint": {
+    "representative_question_id": "geo-cmm-16091",
+    "compile_success": true,
+    "retries": 0
+  },
+  "sphere-section-volume": {
+    "representative_question_id": "geo-cmm-16049",
+    "compile_success": true,
+    "retries": 2
+  },
+  "cube-dihedral-diagonal-face": {
+    "representative_question_id": "geo-cmm-15526",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-line-line-perpendicular": {
+    "representative_question_id": "geo-cmm-15764",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-point-plane-distance": {
+    "representative_question_id": "geo-cmm-15769",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-line-plane-angle": {
+    "representative_question_id": "geo-cmm-21013",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-dihedral-angle": {
+    "representative_question_id": "geo-cmm-16399",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-diagonal-section-perpendicular": {
+    "representative_question_id": "geo-cmm-15766",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-parallel-proof": {
+    "representative_question_id": "geo-cmm-15768",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-probability": {
+    "representative_question_id": "geo-cmm-15661",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-line-face-angle": {
+    "representative_question_id": "geo-cmm-15774",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-point-face-distance": {
+    "representative_question_id": "geo-cmm-15761",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-face-face-perpendicular": {
+    "representative_question_id": "geo-cmm-15785",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-section-parallel": {
+    "representative_question_id": "geo-cmm-15463",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-edge-midpoint-skew-angle": {
+    "representative_question_id": "geo-cmm-15850",
+    "compile_success": true,
+    "retries": 0
+  },
+  "tetrahedron-angle-midpoint": {
+    "representative_question_id": "geo-cmm-15525",
+    "compile_success": true,
+    "retries": 1
+  },
+  "sphere-perpendicular-chords": {
+    "representative_question_id": "geo-cmm-15566",
+    "compile_success": true,
+    "retries": 0
+  },
+  "sphere-radius-from-section": {
+    "representative_question_id": "geo-cmm-15966",
+    "compile_success": false,
+    "error": "[DSL] sphere-radius-from-section → construction [step 2]: 面至少需要3个顶点，当前只有1个",
+    "retries": 2
+  },
+  "prism3-parallel-section": {
+    "representative_question_id": "geo-cmm-15705",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cone-surface-area-inscribed-sphere": {
+    "representative_question_id": "geo-cmm-15649",
+    "compile_success": false,
+    "error": "Cannot read properties of undefined (reading '0')",
+    "retries": 2
+  },
+  "pyramid4-dihedral-lateral-lateral": {
+    "representative_question_id": "geo-cmm-21010",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-line-face-angle-rhombus-equilateral": {
+    "representative_question_id": "geo-cmm-15763",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-unfold-shortest-path": {
+    "representative_question_id": "geo-cmm-15906",
+    "compile_success": true,
+    "retries": 1
+  },
+  "prism4-circumsphere-surface": {
+    "representative_question_id": "geo-cmm-16050",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism-quad-diagonal-perpendicular": {
+    "representative_question_id": "geo-cmm-16348",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-surface-curve": {
+    "representative_question_id": "geo-cmm-23009",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cuboid-section-optimization": {
+    "representative_question_id": "geo-cmm-15544",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-section-comprehensive": {
+    "representative_question_id": "geo-cmm-15762",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cylinder-dandelin-sphere-ellipse": {
+    "representative_question_id": "geo-cmm-22707",
+    "compile_success": true,
+    "retries": 1
+  },
+  "tetrahedron-equal-edges-circumsphere": {
+    "representative_question_id": "geo-cmm-15582",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-line-plane-perpendicular": {
+    "representative_question_id": "geo-cmm-21000",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-right-circumsphere-constraint": {
+    "representative_question_id": "geo-cmm-15567",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cone-ellipse-oblique-section-axis": {
+    "representative_question_id": "geo-cmm-22714",
+    "compile_success": false,
+    "error": "[DSL] cone-ellipse-oblique-section-axis → measurement: 无法解析线引用 [Q1, C]。该线段既不是内置棱，也不是已创建的自定义线段",
+    "retries": 2
+  },
+  "pyramid4-point-face-distance-vertical-lateral": {
+    "representative_question_id": "geo-cmm-15725",
+    "compile_success": true,
+    "retries": 2
+  },
+  "cube-tetrahedron-comprehensive": {
+    "representative_question_id": "geo-cmm-15779",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-parallel-midpoint-section": {
+    "representative_question_id": "geo-cmm-16056",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-perpendicular-proof": {
+    "representative_question_id": "geo-cmm-15507",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-line-face-parallel": {
+    "representative_question_id": "geo-cmm-15804",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cylinder-volume-calculation": {
+    "representative_question_id": "geo-cmm-20159",
+    "compile_success": false,
+    "error": "Cannot read properties of undefined (reading '0')",
+    "retries": 2
+  },
+  "prism3-projection-area-optimization": {
+    "representative_question_id": "geo-cmm-15589",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-volume-sphere-region": {
+    "representative_question_id": "geo-cmm-17167",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cube-center-midpoint-relation": {
+    "representative_question_id": "geo-cmm-15435",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-projection-area": {
+    "representative_question_id": "geo-cmm-15585",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-point-plane-distance": {
+    "representative_question_id": "geo-cmm-15824",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-path-optimization": {
+    "representative_question_id": "geo-cmm-15561",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-circumsphere": {
+    "representative_question_id": "geo-cmm-16040",
+    "compile_success": true,
+    "retries": 1
+  },
+  "tetrahedron-square-section-properties": {
+    "representative_question_id": "geo-cmm-15729",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-diagonal-perpendicular-condition": {
+    "representative_question_id": "geo-cmm-16333",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid3-perpendicular-face-circumsphere": {
+    "representative_question_id": "geo-cmm-15666",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cone-ellipse-oblique-section-eccentricity": {
+    "representative_question_id": "geo-cmm-22722",
+    "compile_success": false,
+    "error": "[DSL] cone-ellipse-oblique-section-eccentricity → measurement: 无法解析线引用 [O, P]。该线段既不是内置棱，也不是已创建的自定义线段",
+    "retries": 2
+  },
+  "pyramid4-point-face-distance-vertical-base": {
+    "representative_question_id": "geo-cmm-15745",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-midpoint-triangle-properties": {
+    "representative_question_id": "geo-cmm-15678",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-volume-circumsphere": {
+    "representative_question_id": "geo-cmm-15659",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-volume-tetrahedron": {
+    "representative_question_id": "geo-cmm-16012",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-skew-angle-midpoint-diagonal": {
+    "representative_question_id": "geo-cmm-15840",
+    "compile_success": true,
+    "retries": 1
+  },
+  "cube-inscribed-sphere-section": {
+    "representative_question_id": "geo-cmm-15569",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cuboid-coordinate-vector": {
+    "representative_question_id": "geo-cmm-21268",
+    "compile_success": true,
+    "retries": 0
+  },
+  "pyramid4-right-triangle": {
+    "representative_question_id": "geo-cmm-15515",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-line-perpendicular": {
+    "representative_question_id": "geo-cmm-15505",
+    "compile_success": true,
+    "retries": 0
+  },
+  "multi-cylinder-eccentricity-compare": {
+    "representative_question_id": "geo-cmm-22711",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cylinder-circumscribed-sphere": {
+    "representative_question_id": "geo-cmm-15664",
+    "compile_success": true,
+    "retries": 1
+  },
+  "sphere-section-circle-area": {
+    "representative_question_id": "geo-cmm-16037",
+    "compile_success": true,
+    "retries": 1
+  },
+  "pyramid3-inscribed-sphere-formula": {
+    "representative_question_id": "geo-cmm-20647",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism4-edge-midpoint-relation": {
+    "representative_question_id": "geo-cmm-15810",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-fold-line-path": {
+    "representative_question_id": "geo-cmm-15562",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-line-plane-position-comprehensive": {
+    "representative_question_id": "geo-cmm-15681",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-moving-point-plane-sweep": {
+    "representative_question_id": "geo-cmm-16007",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-perpendicular-trajectory": {
+    "representative_question_id": "geo-cmm-16445",
+    "compile_success": true,
+    "retries": 0
+  },
+  "cube-diagonal-parallel-properties": {
+    "representative_question_id": "geo-cmm-15682",
+    "compile_success": true,
+    "retries": 1
+  },
+  "prism3-circumsphere-volume": {
+    "representative_question_id": "geo-cmm-15668",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-pyramid-volume-ratio": {
+    "representative_question_id": "geo-cmm-16052",
+    "compile_success": true,
+    "retries": 0
+  },
+  "sphere-projection-ellipse": {
+    "representative_question_id": "geo-cmm-22676",
+    "compile_success": true,
+    "retries": 0
+  },
+  "prism3-volume-tetrahedron": {
+    "representative_question_id": "geo-cmm-15728",
+    "compile_success": true,
+    "retries": 0
+  }
+}

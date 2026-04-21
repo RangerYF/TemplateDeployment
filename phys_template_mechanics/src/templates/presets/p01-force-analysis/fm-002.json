@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "id": "FM-002",
+    "name": "水平面摩擦分析",
+    "module": "P-01",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过“水平面摩擦分析”模板，让学生建立现象、受力与运动规律之间的对应。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加物体 block-main（block）。",
+      "3. 将物体 block-main 吸附到 ground。",
+      "4. 给物体 block-main 添加外力 push-force。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/FM-002.json",
+  "commandProgram": {
+    "templateId": "FM-002",
+    "sceneName": "FM-002 水平面摩擦分析",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -0.8,
+            "y": 0.35
+          },
+          "width": 0.8,
+          "height": 0.6,
+          "mass": 2,
+          "friction": 0.6,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "ground"
+        ]
+      },
+      {
+        "kind": "addForce",
+        "ref": "push-force",
+        "targetBodyRef": "block-main",
+        "patch": {
+          "magnitude": 8,
+          "direction": 0,
+          "decompose": true,
+          "decomposeAngle": 0
+        }
+      }
+    ]
+  },
+  "sceneSource": "manual",
+  "updatedAt": "2026-04-01T16:29:24.985Z"
+}

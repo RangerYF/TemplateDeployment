@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "id": "MOM-032",
+    "name": "凹槽滑块模型",
+    "module": "P-12",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过凹槽约束滑块模板，观察受约束路径下动量与速度方向的连续变化。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加凹槽 groove-main 并吸附到 ground。",
+      "3. 添加小球 ball-main 并吸附到 groove-main。",
+      "4. 设置 ball-main 沿槽方向初速度，观察受约束运动。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOM-032.json",
+  "commandProgram": {
+    "templateId": "MOM-032",
+    "sceneName": "MOM-032 凹槽滑块模型",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "groove-main",
+        "bodyType": "groove",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 1.9
+          },
+          "grooveWidth": 6,
+          "grooveDepth": 3.8,
+          "grooveThickness": 0.12,
+          "isStatic": true,
+          "fixedRotation": true,
+          "friction": 0.2
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "groove-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": -1.8,
+            "y": 2.8
+          },
+          "mass": 0.8,
+          "friction": 0.05,
+          "restitution": 0,
+          "initialVelocity": {
+            "x": 3,
+            "y": 0
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "ball-main",
+        "targetBodyRefs": [
+          "groove-main"
+        ],
+        "threshold": 1.6
+      }
+    ]
+  }
+}

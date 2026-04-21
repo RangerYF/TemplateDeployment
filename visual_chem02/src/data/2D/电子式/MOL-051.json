@@ -1,0 +1,233 @@
+{
+  "id": "MOL-051",
+  "name_cn": "1-丁烯",
+  "name_en": "1-Butene",
+  "formula": "C₄H₈",
+  "category": "alkene",
+  "atoms": [
+    {
+      "index": 0,
+      "x": 1.8,
+      "y": 1.0392304845413263,
+      "element": "C",
+      "label": "C",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 1,
+      "x": 2.4000000000000004,
+      "y": 2.0784609690826525,
+      "element": "C",
+      "label": "C",
+      "hCount": 3,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 2,
+      "x": 1.2,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 1,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 3,
+      "x": 0,
+      "y": 0,
+      "element": "C",
+      "label": "C",
+      "hCount": 2,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 4,
+      "x": 2.76,
+      "y": 1.0392304845413263,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 5,
+      "x": 0.8400000000000001,
+      "y": 1.039230484541326,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 6,
+      "x": 2.4000000000000004,
+      "y": 3.0384609690826525,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 7,
+      "x": 3.3600000000000003,
+      "y": 2.0784609690826525,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 8,
+      "x": 1.4400000000000004,
+      "y": 2.0784609690826525,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 9,
+      "x": 1.6800000000000002,
+      "y": -0.831384387633061,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 10,
+      "x": -0.47999999999999976,
+      "y": 0.8313843876330611,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    },
+    {
+      "index": 11,
+      "x": -0.47999999999999976,
+      "y": -0.8313843876330611,
+      "element": "H",
+      "label": "H",
+      "hCount": 0,
+      "lonePairs": 0,
+      "merged": false,
+      "formalCharge": 0,
+      "aldehydeOxygen": false,
+      "carboxylicOH": false
+    }
+  ],
+  "bonds": [
+    {
+      "from": 0,
+      "to": 1,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 4,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 1,
+      "to": 8,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "order": 2,
+      "length": 100
+    },
+    {
+      "from": 2,
+      "to": 9,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 10,
+      "order": 1,
+      "length": 100
+    },
+    {
+      "from": 3,
+      "to": 11,
+      "order": 1,
+      "length": 100
+    }
+  ]
+}

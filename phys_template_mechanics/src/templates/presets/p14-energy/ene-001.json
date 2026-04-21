@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "id": "ENE-001",
+    "name": "自由落体",
+    "module": "P-14",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过自由落体模板，观察重力势能向动能的持续转化以及机械能守恒。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加小球 ball-main 于较高位置。",
+      "3. 运行仿真观察下落过程中 Ep 减少、Ek 增大。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-001.json",
+  "commandProgram": {
+    "templateId": "ENE-001",
+    "sceneName": "ENE-001 自由落体",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "ball-main",
+        "bodyType": "ball",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 6.5
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0
+        }
+      }
+    ]
+  }
+}

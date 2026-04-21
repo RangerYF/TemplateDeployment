@@ -1,0 +1,522 @@
+{
+  "id": "CRY-003",
+  "slug": "cry-003-caf2",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-003",
+    "name_cn": "氟化钙 (萤石)",
+    "formula": "CaF2",
+    "level": "高中选修",
+    "crystal_system": "cubic",
+    "space_group": "Fm3̄m",
+    "lattice_params": {
+      "a": 546.2,
+      "b": 546.2,
+      "c": 546.2,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Ca",
+        "label": "Ca1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": "+2"
+      },
+      {
+        "element": "F",
+        "label": "F1",
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F2",
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.25,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F3",
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.75,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F4",
+        "x": 0.25,
+        "y": 0.75,
+        "z": 0.75,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F5",
+        "x": 0.25,
+        "y": 0.75,
+        "z": 0.25,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F6",
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.25,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F7",
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.75,
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F8",
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.75,
+        "charge": "-1"
+      }
+    ],
+    "bond_type": "ionic",
+    "coord_number": "Ca:8, F:4",
+    "z": 4,
+    "teaching_points": [
+      "Ca2+配位数为8（立方体配位），F-配位数为4（正四面体配位）",
+      "晶胞含4个CaF2（Ca在FCC位置4个，F填充全部8个四面体空隙）",
+      "反萤石结构：阳离子和阴离子位置互换（如Na2O）",
+      "F-形成简单立方子晶格，Ca2+占据交替的立方体空隙",
+      "萤石是重要的光学材料和冶金助熔剂"
+    ],
+    "bond_lengths": {
+      "Ca-F": 236
+    },
+    "hybridization": null,
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-003",
+    "name": "氟化钙 (萤石)",
+    "formula": "CaF2",
+    "formulaHtml": "CaF<sub>2</sub>",
+    "category": "ionic",
+    "gradeLevel": "高中选修",
+    "structureType": "萤石型",
+    "crystalSystem": "cubic",
+    "spaceGroup": "Fm3̄m",
+    "spaceGroupNumber": 225,
+    "lattice": {
+      "a": 546.2,
+      "b": 546.2,
+      "c": 546.2,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "Ca",
+        "label": "Ca1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "Ca",
+        "label": "Ca4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ],
+        "charge": "+2"
+      },
+      {
+        "element": "F",
+        "label": "F1",
+        "fracCoords": [
+          0.25,
+          0.25,
+          0.25
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F2",
+        "fracCoords": [
+          0.75,
+          0.75,
+          0.25
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F3",
+        "fracCoords": [
+          0.75,
+          0.25,
+          0.75
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F4",
+        "fracCoords": [
+          0.25,
+          0.75,
+          0.75
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F5",
+        "fracCoords": [
+          0.25,
+          0.75,
+          0.25
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F6",
+        "fracCoords": [
+          0.75,
+          0.25,
+          0.25
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F7",
+        "fracCoords": [
+          0.25,
+          0.25,
+          0.75
+        ],
+        "charge": "-1"
+      },
+      {
+        "element": "F",
+        "label": "F8",
+        "fracCoords": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "charge": "-1"
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          5
+        ],
+        "cellOffset": [
+          -1,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          6
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          7
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          8
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          9
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          10
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          0,
+          11
+        ],
+        "cellOffset": [
+          -1,
+          -1,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          8
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          9
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          10
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          11
+        ],
+        "cellOffset": [
+          0,
+          0,
+          -1
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          6
+        ],
+        "cellOffset": [
+          0,
+          -1,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      },
+      {
+        "siteIndices": [
+          1,
+          7
+        ],
+        "cellOffset": [
+          -1,
+          0,
+          0
+        ],
+        "bondType": "ionic",
+        "expectedLength": 236
+      }
+    ],
+    "coordinationNumber": "Ca:8, F:4",
+    "coordinationGeometry": "Ca:立方体, F:正四面体",
+    "polyhedra": [
+      {
+        "centerSiteIndex": 0,
+        "label": "CaF8",
+        "polyhedronType": "cube",
+        "neighborCutoff": 2.5
+      }
+    ],
+    "teachingPoints": [
+      "Ca2+配位数为8（立方体配位），F-配位数为4（正四面体配位）",
+      "晶胞含4个CaF2（Ca在FCC位置4个，F填充全部8个四面体空隙）",
+      "反萤石结构：阳离子和阴离子位置互换（如Na2O）",
+      "F-形成简单立方子晶格，Ca2+占据交替的立方体空隙",
+      "萤石是重要的光学材料和冶金助熔剂"
+    ],
+    "bondLengths": {
+      "Ca-F": 236
+    },
+    "codId": 1000043,
+    "dataSource": "COD #1000043 — Cheetham et al., J. Phys. C 4, 3107-3121 (1971)"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "id": "MOM-011",
+    "name": "爬坡模型",
+    "module": "P-12",
+    "status": "ready"
+  },
+  "teaching": {
+    "teachingObjective": "通过滑块冲坡模板，观察滑块动量与机械能在斜面系统中的转化过程。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 将地面设置为光滑水平面，并放置可在水平面上运动的斜面。",
+      "3. 添加滑块 block-main 并放在斜面低端。",
+      "4. 给滑块设置沿斜面向上的初速度，观察冲坡过程中斜面反向运动与最高点共速。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/MOM-011.json",
+  "commandProgram": {
+    "templateId": "MOM-011",
+    "sceneName": "MOM-011 爬坡模型",
+    "version": "1.0",
+    "allowNonZeroInitialVelocity": true,
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "patchBody",
+        "bodyRef": "ground",
+        "patch": {
+          "friction": 0,
+          "restitution": 0
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "slope-main",
+        "bodyType": "slope",
+        "label": "可动斜面",
+        "patch": {
+          "position": {
+            "x": 0.8,
+            "y": 0.2
+          },
+          "baseLength": 5,
+          "slopeHeight": 2.6,
+          "isStatic": false,
+          "fixedRotation": true,
+          "mass": 5,
+          "friction": 0
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "slope-main",
+        "targetBodyRefs": [
+          "ground"
+        ],
+        "threshold": 8
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-main",
+        "bodyType": "block",
+        "label": "冲坡滑块",
+        "patch": {
+          "position": {
+            "x": 2.1,
+            "y": 1.3
+          },
+          "mass": 1,
+          "friction": 0,
+          "restitution": 0,
+          "fixedRotation": true,
+          "initialVelocity": {
+            "x": -7.091,
+            "y": 3.704
+          }
+        }
+      },
+      {
+        "kind": "snapTo",
+        "bodyRef": "block-main",
+        "targetBodyRefs": [
+          "slope-main"
+        ],
+        "threshold": 1.8
+      }
+    ]
+  }
+}

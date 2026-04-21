@@ -1,0 +1,453 @@
+{
+  "id": "CRY-007",
+  "slug": "cry-007-sic",
+  "requirementSources": [
+    "docs/需求文档md/C-05 化学键与晶体结构查看器 — 晶体结构数据.md",
+    "docs/需求文档md/C化学教具产品线 — 产品需求文档（PRD）.md"
+  ],
+  "requirementSnapshot": {
+    "id": "CRY-007",
+    "name_cn": "碳化硅",
+    "formula": "SiC",
+    "level": "拓展",
+    "crystal_system": "cubic",
+    "space_group": "F̄43m",
+    "lattice_params": {
+      "a": 435.8,
+      "b": 435.8,
+      "c": 435.8,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "atoms": [
+      {
+        "element": "Si",
+        "label": "Si1",
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Si",
+        "label": "Si2",
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0,
+        "charge": null
+      },
+      {
+        "element": "Si",
+        "label": "Si3",
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "Si",
+        "label": "Si4",
+        "x": 0,
+        "y": 0.5,
+        "z": 0.5,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C1",
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.25,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.75,
+        "charge": null
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "x": 0.25,
+        "y": 0.75,
+        "z": 0.75,
+        "charge": null
+      }
+    ],
+    "bond_type": "covalent-sigma",
+    "coord_number": "4",
+    "z": 4,
+    "teaching_points": [
+      "与金刚石结构相同（闪锌矿型），但交替排列Si和C",
+      "每个Si与4个C成键，每个C与4个Si成键，均为sp3杂化",
+      "Si-C键长189pm，介于Si-Si(235pm)和C-C(154pm)之间",
+      "SiC硬度极高（莫氏硬度9.5），仅次于金刚石",
+      "第三代半导体材料，耐高温、高击穿电压",
+      "自然界极罕见，主要为人工合成"
+    ],
+    "bond_lengths": {
+      "Si-C": 189
+    },
+    "hybridization": "sp3",
+    "render_hints": {
+      "default_render_mode": "ballAndStick",
+      "supported_render_modes": [
+        "ballAndStick",
+        "spaceFilling",
+        "polyhedral",
+        "wireframe"
+      ],
+      "show_unit_cell": true,
+      "show_bonds": true
+    }
+  },
+  "viewerStructure": {
+    "id": "CRY-007",
+    "name": "碳化硅",
+    "formula": "SiC",
+    "formulaHtml": "SiC",
+    "category": "atomic",
+    "gradeLevel": "拓展",
+    "structureType": "闪锌矿型(3C)",
+    "crystalSystem": "cubic",
+    "spaceGroup": "F̄43m",
+    "spaceGroupNumber": 216,
+    "lattice": {
+      "a": 435.8,
+      "b": 435.8,
+      "c": 435.8,
+      "alpha": 90,
+      "beta": 90,
+      "gamma": 90
+    },
+    "z": 4,
+    "atomSites": [
+      {
+        "element": "Si",
+        "label": "Si1",
+        "fracCoords": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "element": "Si",
+        "label": "Si2",
+        "fracCoords": [
+          0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "element": "Si",
+        "label": "Si3",
+        "fracCoords": [
+          0.5,
+          0,
+          0.5
+        ]
+      },
+      {
+        "element": "Si",
+        "label": "Si4",
+        "fracCoords": [
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C1",
+        "fracCoords": [
+          0.25,
+          0.25,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C2",
+        "fracCoords": [
+          0.75,
+          0.75,
+          0.25
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C3",
+        "fracCoords": [
+          0.75,
+          0.25,
+          0.75
+        ]
+      },
+      {
+        "element": "C",
+        "label": "C4",
+        "fracCoords": [
+          0.25,
+          0.75,
+          0.75
+        ]
+      }
+    ],
+    "bonds": [
+      {
+        "siteIndices": [
+          0,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          1,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          2,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          3,
+          4
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          1,
+          5
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          5,
+          0
+        ],
+        "cellOffset": [
+          1,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          5,
+          2
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          5,
+          3
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          2,
+          6
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          6,
+          0
+        ],
+        "cellOffset": [
+          1,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          6,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          6,
+          3
+        ],
+        "cellOffset": [
+          1,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          3,
+          7
+        ],
+        "cellOffset": [
+          0,
+          0,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          7,
+          0
+        ],
+        "cellOffset": [
+          0,
+          1,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          7,
+          1
+        ],
+        "cellOffset": [
+          0,
+          0,
+          1
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      },
+      {
+        "siteIndices": [
+          7,
+          2
+        ],
+        "cellOffset": [
+          0,
+          1,
+          0
+        ],
+        "bondType": "covalent-sigma",
+        "bondOrder": 1,
+        "expectedLength": 189
+      }
+    ],
+    "coordinationNumber": "4",
+    "coordinationGeometry": "正四面体",
+    "hybridization": "sp3",
+    "teachingPoints": [
+      "与金刚石结构相同（闪锌矿型），但交替排列Si和C",
+      "每个Si与4个C成键，每个C与4个Si成键，均为sp3杂化",
+      "Si-C键长189pm，介于Si-Si(235pm)和C-C(154pm)之间",
+      "SiC硬度极高（莫氏硬度9.5），仅次于金刚石",
+      "第三代半导体材料，耐高温、高击穿电压",
+      "自然界极罕见，主要为人工合成"
+    ],
+    "bondLengths": {
+      "Si-C": 189
+    },
+    "codId": 1011031,
+    "dataSource": "COD #1011031 — Moissanite 3C (cubic SiC)"
+  }
+}

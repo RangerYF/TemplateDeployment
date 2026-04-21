@@ -1,0 +1,118 @@
+{
+  "id": "template-scene-fm-051",
+  "name": "FM-051 弹簧模型",
+  "bodies": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "label": "地面",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 0,
+      "friction": 0.6,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "body-anchor-top",
+      "type": "anchor",
+      "label": "固定锚点 #1",
+      "position": {
+        "x": -1.2,
+        "y": 9.2
+      },
+      "angle": 0,
+      "isStatic": true,
+      "fixedRotation": true,
+      "mass": 1,
+      "friction": 0.3,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorRadius": 0.15,
+      "mountSide": "top"
+    },
+    {
+      "id": "body-block-main",
+      "type": "block",
+      "label": "物块 #1",
+      "position": {
+        "x": -1.2,
+        "y": 5.8999999999999995
+      },
+      "angle": 0,
+      "isStatic": false,
+      "fixedRotation": true,
+      "mass": 0.9,
+      "friction": 0.1,
+      "restitution": 0,
+      "initialVelocity": {
+        "x": 0,
+        "y": 0
+      },
+      "initialAcceleration": {
+        "x": 0,
+        "y": 0
+      },
+      "width": 0.8,
+      "height": 0.6
+    }
+  ],
+  "joints": [
+    {
+      "id": "joint-spring-main",
+      "type": "spring",
+      "label": "弹簧",
+      "bodyIdA": "body-anchor-top",
+      "bodyIdB": "body-block-main",
+      "anchorA": {
+        "x": 0,
+        "y": 0
+      },
+      "anchorB": {
+        "x": 0,
+        "y": 0.3
+      },
+      "springLength": 3,
+      "stiffness": 2.4,
+      "damping": 0.1
+    }
+  ],
+  "forces": [
+    {
+      "id": "force-disturb-force",
+      "type": "external",
+      "targetBodyId": "body-block-main",
+      "label": "F1",
+      "magnitude": 4,
+      "direction": 0,
+      "visible": true,
+      "decompose": false,
+      "decomposeAngle": 0
+    }
+  ],
+  "settings": {
+    "gravity": {
+      "x": 0,
+      "y": -10
+    }
+  }
+}

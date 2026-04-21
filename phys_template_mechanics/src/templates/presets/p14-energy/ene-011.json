@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "ENE-011",
+    "name": "阿特伍德机",
+    "module": "P-14",
+    "status": "planned"
+  },
+  "teaching": {
+    "teachingObjective": "通过阿特伍德机模板，观察双物体系统中重力势能差转化为系统动能。",
+    "constructionSteps": [
+      "1. 设置场景重力为 (0, -10)。",
+      "2. 添加滑轮座 pulley-main。",
+      "3. 添加两侧重物 block-heavy 与 block-light。",
+      "4. 添加滑轮约束 pulley-rope 连接两重物并运行仿真。"
+    ]
+  },
+  "sceneJsonPath": "/templates/scenes/ENE-011.json",
+  "commandProgram": {
+    "templateId": "ENE-011",
+    "sceneName": "ENE-011 阿特伍德机",
+    "version": "1.0",
+    "commands": [
+      {
+        "kind": "setGravity",
+        "gravity": {
+          "x": 0,
+          "y": -10
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "pulley-main",
+        "bodyType": "pulley-mount",
+        "patch": {
+          "position": {
+            "x": 0,
+            "y": 6.8
+          },
+          "pulleyRadius": 0.28
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-heavy",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": -1.7,
+            "y": 4.4
+          },
+          "mass": 3,
+          "friction": 0.05,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addBody",
+        "ref": "block-light",
+        "bodyType": "block",
+        "patch": {
+          "position": {
+            "x": 1.7,
+            "y": 3.6
+          },
+          "mass": 2,
+          "friction": 0.05,
+          "restitution": 0,
+          "fixedRotation": true
+        }
+      },
+      {
+        "kind": "addJoint",
+        "ref": "pulley-rope",
+        "jointType": "pulley",
+        "bodyRefA": "block-heavy",
+        "bodyRefB": "block-light",
+        "pulleyMountRef": "pulley-main",
+        "anchorA": {
+          "x": 0,
+          "y": 0.25
+        },
+        "anchorB": {
+          "x": 0,
+          "y": 0.25
+        },
+        "patch": {
+          "ratio": 1
+        }
+      }
+    ]
+  }
+}

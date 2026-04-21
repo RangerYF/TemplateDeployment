@@ -1,0 +1,29 @@
+{
+  "crystalId": "CRY-012",
+  "folder": "CRY-012_co2",
+  "status": "downloaded",
+  "apiSource": "Materials Project mp-api",
+  "query": {
+    "formula": "CO2",
+    "spaceGroupNumber": 205,
+    "structureType": "分子晶体(FCC)"
+  },
+  "materialId": "mp-20066",
+  "downloadedAt": "2026-04-02T07:25:20.143063+00:00",
+  "cifFile": "materials-project.cif",
+  "notes": [
+    "Structure downloaded via Materials Project mp-api and written to CIF with pymatgen.",
+    "The saved CIF uses the conventional unit cell returned by mp-api.",
+    "Matched by formula and ranked by space group / stability."
+  ],
+  "candidateCount": 12,
+  "checkedAt": "2026-04-02T07:25:19.813346+00:00",
+  "formulaPretty": "CO2",
+  "spaceGroupNumber": 205,
+  "spaceGroupSymbol": "Pa-3",
+  "energyAboveHull": 0.0,
+  "isStable": true,
+  "theoretical": false,
+  "deprecated": false,
+  "sourceUrl": "https://next-gen.materialsproject.org/materials/mp-20066"
+}
