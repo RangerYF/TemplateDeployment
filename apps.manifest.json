@@ -72,16 +72,51 @@
   {
     "id": "p01",
     "subject": "physics",
-    "title": "受力分析器",
-    "path": "phys_template_p01",
+    "title": "P-01 受力分析",
+    "path": "phys_template_mechanics",
     "port": 5180
+  },
+  {
+    "id": "p02",
+    "subject": "physics",
+    "title": "P-02 运动模拟",
+    "path": "phys_template_mechanics",
+    "port": 5187
+  },
+  {
+    "id": "p05",
+    "subject": "physics",
+    "title": "P-05 简谐运动",
+    "path": "phys_template_mechanics",
+    "port": 5188
+  },
+  {
+    "id": "p12",
+    "subject": "physics",
+    "title": "P-12 动量守恒",
+    "path": "phys_template_mechanics",
+    "port": 5189
+  },
+  {
+    "id": "p14",
+    "subject": "physics",
+    "title": "P-14 机械能守恒",
+    "path": "phys_template_mechanics",
+    "port": 5190
   },
   {
     "id": "p-mechanics",
     "subject": "physics",
-    "title": "力学模板集",
+    "title": "力学模板总入口",
     "path": "phys_template_mechanics",
     "port": 5181
+  },
+  {
+    "id": "p01-standalone",
+    "subject": "physics",
+    "title": "受力分析器（独立版）",
+    "path": "phys_template_p01",
+    "port": 5186
   },
   {
     "id": "p03",

@@ -9,6 +9,9 @@ const manifestPath = path.join(rootDir, "apps.manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const filter = process.argv[2];
 const selected = filter ? manifest.filter((app) => app.subject === filter || app.id === filter) : manifest;
+const selectedProjects = Array.from(
+  new Map(selected.map((app) => [app.path, app])).values(),
+);
 
 if (selected.length === 0) {
   console.error(`未找到匹配的模板：${filter}`);
@@ -50,7 +53,7 @@ function runApp(app) {
   children.push(child);
 }
 
-for (const app of selected) {
+for (const app of selectedProjects) {
   runApp(app);
 }
 

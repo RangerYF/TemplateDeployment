@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Scene3D } from '@/components/scene/Scene3D';
 import { initEditor, resetEditor, initEditorWithSnapshot } from '@/editor/init';
@@ -19,6 +19,7 @@ import {
 
 export function EditorPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const presetId = searchParams.get('preset');
   const locationState = location.state as {
@@ -173,7 +174,7 @@ export function EditorPage() {
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <p style={{ color: COLORS.error }}>{error}</p>
           <button
-            onClick={() => window.location.assign('/')}
+            onClick={() => navigate('/')}
             className="px-4 py-2 rounded-md text-sm"
             style={{ backgroundColor: COLORS.primary, color: COLORS.white }}
           >
