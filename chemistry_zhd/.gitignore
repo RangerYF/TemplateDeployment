@@ -1,0 +1,6 @@
+node_modules
+.claude
+.vercel
+.env*.local
+.tasks/*.png
+.tasks/chrome-profile/

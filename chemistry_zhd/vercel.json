@@ -1,0 +1,10 @@
+{
+  "buildCommand": "pnpm build:c03 && pnpm build:c04 && pnpm build:c07c09 && cp portal/index.html dist/index.html",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/c07", "destination": "/C-07-reaction-rate-equilibrium.html" },
+    { "source": "/c09", "destination": "/C-09-organic-pathways.html" },
+    { "source": "/c03", "destination": "/C-03-化学方程式配平器.html" },
+    { "source": "/c04", "destination": "/C-04-元素周期表.html" }
+  ]
+}

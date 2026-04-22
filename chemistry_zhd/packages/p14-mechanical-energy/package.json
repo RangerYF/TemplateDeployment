@@ -1,0 +1,13 @@
+{
+  "name": "@physics/p14-mechanical-energy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@physics/core": "workspace:*"
+  }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>化学可视化教学工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#070b14;--card:#0d1525;--card-hover:#111a2e;--border:rgba(255,255,255,0.07);--text:#e8edf5;--text2:#6b7fa0;--blue:#4d9ef6;--green:#34d399;--purple:#a78bfa}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Noto Sans SC',sans-serif}
+.hero{text-align:center;padding:80px 40px 48px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(77,158,246,0.06) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:42px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#e8edf5 0%,#4d9ef6 50%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.hero p{font-size:18px;color:var(--text2);max-width:780px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:40px;max-width:1280px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.2s}
+.card:hover{background:var(--card-hover);border-color:rgba(255,255,255,0.12);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.card:hover::before{opacity:1}
+.card:active{transform:translateY(0)}
+.card[data-c="blue"]::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.card[data-c="purple"]::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.card[data-c="green"]::before{background:linear-gradient(90deg,var(--green),transparent)}
+.card[data-c="amber"]::before{background:linear-gradient(90deg,#f6ad55,transparent)}
+.card-id{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:0.5px}
+.card-name{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.card-desc{font-size:14px;color:var(--text2);line-height:1.6}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid rgba(255,255,255,0.06)}
+.footer{text-align:center;padding:40px;color:var(--text2);font-size:13px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>化学可视化教学工具</h1>
+  <p>面向课堂演示的化学模块库，浏览器直接打开即可使用。当前已整合配平、周期表、速率与平衡、有机反应路径等模块。</p>
+</div>
+<div class="grid">
+  <a class="card" data-c="blue" href="/c04">
+    <span class="card-id">C-04</span>
+    <span class="card-name">元素周期表</span>
+    <span class="card-desc">118 种元素的交互查询，支持多种颜色分类模式与详情面板。</span>
+    <div class="card-tags"><span class="tag">交互查询</span><span class="tag">元素详情</span></div>
+  </a>
+  <a class="card" data-c="purple" href="/c03">
+    <span class="card-id">C-03</span>
+    <span class="card-name">化学方程式配平器</span>
+    <span class="card-desc">输入未配平方程式，自动用矩阵消元法求系数，并展示守恒校验与教学步骤。</span>
+    <div class="card-tags"><span class="tag">矩阵消元</span><span class="tag">守恒验证</span></div>
+  </a>
+  <a class="card" data-c="green" href="/c07">
+    <span class="card-id">C-07</span>
+    <span class="card-name">化学反应速率与平衡模拟器</span>
+    <span class="card-desc">预设工业反应、微观碰撞示意、实时图表联动与等效平衡教学卡片，适合课堂演示速率和平衡。</span>
+    <div class="card-tags"><span class="tag">速率平衡</span><span class="tag">微观动画</span><span class="tag">图表联动</span></div>
+  </a>
+  <a class="card" data-c="amber" href="/c09">
+    <span class="card-id">C-09</span>
+    <span class="card-name">有机化学反应路径图</span>
+    <span class="card-desc">轮盘式官能团转化网络、路径高亮与同分异构体预设查询，用于高中有机化学梳理与比较。</span>
+    <div class="card-tags"><span class="tag">有机转化</span><span class="tag">路径高亮</span><span class="tag">异构体</span></div>
+  </a>
+</div>
+<div class="footer">化学可视化教学工具</div>
+</body>
+</html>

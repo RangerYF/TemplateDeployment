@@ -18,6 +18,14 @@ for (const app of manifest) {
   }
   const dest = path.join(outDir, app.id);
   cpSync(distDir, dest, { recursive: true });
+  const entryFile = app.distEntry || "index.html";
+  const entrySource = path.join(dest, entryFile);
+  if (!existsSync(entrySource)) {
+    console.warn(`[warn] ${app.id} -> 入口文件不存在: ${entryFile}`);
+  } else {
+    const entryHtml = readFileSync(entrySource, "utf8");
+    writeFileSync(path.join(dest, "index.html"), entryHtml, "utf8");
+  }
   console.log(`[merge] ${app.id} -> _site/${app.id}/`);
   entries.push(app);
 }

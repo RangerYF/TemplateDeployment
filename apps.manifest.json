@@ -28,6 +28,46 @@
     "port": 5176
   },
   {
+    "id": "chemistry-zhd",
+    "subject": "chemistry",
+    "title": "化学专题工具总入口",
+    "path": "chemistry_zhd",
+    "port": 5191,
+    "distEntry": "index.html"
+  },
+  {
+    "id": "c03",
+    "subject": "chemistry",
+    "title": "C-03 化学方程式配平器",
+    "path": "chemistry_zhd",
+    "port": 5192,
+    "distEntry": "C-03-化学方程式配平器.html"
+  },
+  {
+    "id": "c04",
+    "subject": "chemistry",
+    "title": "C-04 元素周期表",
+    "path": "chemistry_zhd",
+    "port": 5193,
+    "distEntry": "C-04-元素周期表.html"
+  },
+  {
+    "id": "c07",
+    "subject": "chemistry",
+    "title": "C-07 化学反应速率与平衡模拟器",
+    "path": "chemistry_zhd",
+    "port": 5194,
+    "distEntry": "C-07-reaction-rate-equilibrium.html"
+  },
+  {
+    "id": "c09",
+    "subject": "chemistry",
+    "title": "C-09 有机化学反应路径图",
+    "path": "chemistry_zhd",
+    "port": 5195,
+    "distEntry": "C-09-organic-pathways.html"
+  },
+  {
     "id": "m01",
     "subject": "math",
     "title": "立体几何展示台",
