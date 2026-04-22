@@ -35,6 +35,27 @@
     "port": 5177
   },
   {
+    "id": "m02",
+    "subject": "math",
+    "title": "函数图像实验室",
+    "path": "M02-math",
+    "port": 5183
+  },
+  {
+    "id": "m03",
+    "subject": "math",
+    "title": "解析几何画板",
+    "path": "M02-math",
+    "port": 5184
+  },
+  {
+    "id": "m04",
+    "subject": "math",
+    "title": "三角函数演示台",
+    "path": "M02-math",
+    "port": 5185
+  },
+  {
     "id": "m05",
     "subject": "math",
     "title": "概率统计模拟器",
@@ -68,12 +89,5 @@
     "title": "光学实验台",
     "path": "phys_template_p03",
     "port": 5182
-  },
-  {
-    "id": "m02",
-    "subject": "math",
-    "title": "函数图像实验室",
-    "path": "M02-math",
-    "port": 5183
   }
 ]

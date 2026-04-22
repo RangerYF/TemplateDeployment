@@ -17,6 +17,7 @@
     "serve:chemistry": "node scripts/serve.mjs chemistry",
     "serve:math": "node scripts/serve.mjs math",
     "serve:physics": "node scripts/serve.mjs physics",
-    "deploy": "node scripts/deploy.mjs"
+    "deploy": "node scripts/deploy.mjs",
+    "cf:build": "node scripts/install-all.mjs && node scripts/build-all.mjs --base=./ && node scripts/merge-dist.mjs"
   }
 }
