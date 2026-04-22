@@ -7,7 +7,9 @@ import { detectPkgManager, runCmd } from "./utils.mjs";
 const rootDir = process.cwd();
 const manifestPath = path.join(rootDir, "apps.manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-const filter = process.argv[2];
+const args = process.argv.slice(2);
+const extraArgs = args.filter((a) => a.startsWith("--")).join(" ");
+const filter = args.find((a) => !a.startsWith("--"));
 const selected = filter ? manifest.filter((app) => app.subject === filter || app.id === filter) : manifest;
 const selectedProjects = Array.from(
   new Map(selected.map((app) => [app.path, app])).values(),
@@ -38,7 +40,7 @@ async function runBuild(app) {
     throw new Error(`${app.id} 目录不存在: ${cwd}`);
   }
   const pm = detectPkgManager(cwd);
-  const cmd = runCmd(pm, "build");
+  const cmd = runCmd(pm, "build", extraArgs);
   console.log(`[build] ${app.id} (${pm}) -> ${cwd}`);
   await runBuildCommand(cmd, cwd);
 }
