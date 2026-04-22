@@ -36,7 +36,7 @@
     "build:p12": "pnpm --filter @physics/p12-momentum build",
     "build:p13": "pnpm --filter @physics/p13-em-induction build",
     "build:p14": "pnpm --filter @physics/p14-mechanical-energy build",
-    "build:all": "pnpm -r --workspace-concurrency=1 build && pnpm build:c07c09 && node scripts/copy-portal-index.mjs",
+    "build:all": "pnpm build:c03 && pnpm build:c04 && pnpm build:c07c09 && node scripts/copy-portal-index.mjs",
     "test": "vitest",
     "validate": "tsx scripts/validate-output.ts"
   },

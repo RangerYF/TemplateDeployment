@@ -7,7 +7,6 @@ import {
   buildModuleHash,
   buildModuleSceneHash,
   parseHash,
-  resolveInitialHash,
 } from '@/routes/hashRoutes'
 import {
   createDefaultSceneDraft,
@@ -27,25 +26,11 @@ const ThumbnailGenerator = lazy(() =>
 )
 
 function App() {
-  const [hash, setHash] = useState(() =>
-    resolveInitialHash(window.location.pathname, window.location.hash),
-  )
+  const [hash, setHash] = useState(window.location.hash)
   const workspaceModuleId = useModuleWorkspaceStore((state) => state.moduleId)
   const activeSceneId = useModuleWorkspaceStore((state) => state.activeSceneId)
   const sceneDrafts = useModuleWorkspaceStore((state) => state.sceneDrafts)
   const route = useMemo(() => parseHash(hash), [hash])
-
-  useEffect(() => {
-    const nextHash = resolveInitialHash(window.location.pathname, window.location.hash)
-    if (!nextHash || window.location.hash === nextHash) return
-
-    window.history.replaceState(
-      null,
-      '',
-      `${window.location.pathname}${window.location.search}${nextHash}`,
-    )
-    setHash(nextHash)
-  }, [])
 
   useEffect(() => {
     const onHashChange = () => setHash(window.location.hash)

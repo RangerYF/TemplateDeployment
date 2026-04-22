@@ -6,14 +6,6 @@ export type RouteState =
   | { page: 'module'; moduleId: TemplateModule }
   | { page: 'module-scene'; moduleId: TemplateModule; sceneId: string }
 
-const MODULE_MOUNT_ALIASES: Record<string, TemplateModule> = {
-  p01: 'P-01',
-  p02: 'P-02',
-  p05: 'P-05',
-  p12: 'P-12',
-  p14: 'P-14',
-}
-
 export function parseHash(hash: string): RouteState {
   if (hash === '#thumbnails') return { page: 'thumbnails' }
 
@@ -67,23 +59,6 @@ export function buildModuleHash(moduleId: TemplateModule): string {
 
 export function buildModuleSceneHash(moduleId: TemplateModule, sceneId: string): string {
   return `#modules/${encodeURIComponent(moduleId)}/scenes/${encodeURIComponent(sceneId)}`
-}
-
-export function resolveMountedModule(pathname: string): TemplateModule | null {
-  const firstSegment = pathname
-    .replace(/^\/+|\/+$/g, '')
-    .split('/')
-    .filter(Boolean)[0]
-    ?.toLowerCase()
-
-  if (!firstSegment) return null
-  return MODULE_MOUNT_ALIASES[firstSegment] ?? null
-}
-
-export function resolveInitialHash(pathname: string, hash: string): string {
-  if (hash) return hash
-  const moduleId = resolveMountedModule(pathname)
-  return moduleId ? buildModuleHash(moduleId) : hash
 }
 
 function isTemplateModule(value: unknown): value is TemplateModule {

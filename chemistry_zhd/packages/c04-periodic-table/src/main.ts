@@ -1104,3 +1104,77 @@ window[TEMPLATE_BRIDGE_GLOBAL_KEY] = {
   loadSnapshot,
   validateSnapshot,
 };
+
+function handleBridgeMessage(event: MessageEvent) {
+  const message = event.data;
+  if (!message || typeof message !== 'object') return;
+
+  const data = message as {
+    namespace?: string;
+    type?: string;
+    requestId?: string;
+    payload?: unknown;
+  };
+
+  if (data.namespace !== 'edumind.templateBridge') return;
+
+  let response:
+    | { namespace: string; type: string; requestId?: string; success: true; payload?: unknown }
+    | { namespace: string; type: string; requestId?: string; success: false; error: string };
+
+  try {
+    switch (data.type) {
+      case 'getDefaultSnapshot':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: getDefaultSnapshot(),
+        };
+        break;
+      case 'getSnapshot':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: getSnapshot(),
+        };
+        break;
+      case 'loadSnapshot':
+        loadSnapshot(data.payload);
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: { loaded: true },
+        };
+        break;
+      case 'validateSnapshot':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: validateSnapshot(data.payload),
+        };
+        break;
+      default:
+        return;
+    }
+  } catch (error) {
+    response = {
+      namespace: 'edumind.templateBridge',
+      type: 'response',
+      requestId: data.requestId,
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+
+  event.source?.postMessage(response, { targetOrigin: '*' });
+}
+
+window.addEventListener('message', handleBridgeMessage);

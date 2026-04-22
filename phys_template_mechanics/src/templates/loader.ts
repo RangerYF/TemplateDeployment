@@ -7,6 +7,7 @@ import {
 import { getTemplateById } from './index'
 import { isScene } from './sceneSchema'
 import type { TemplateDefinition } from './schema'
+import { resolveAssetUrl } from '@/runtime/assetBase'
 
 export type LoadTemplateResult =
   | { ok: true; template: TemplateDefinition }
@@ -99,9 +100,10 @@ async function loadSceneJson(path: string): Promise<
   | { ok: false; reason: 'scene_json_parse_failed'; detail: string }
   | { ok: false; reason: 'scene_json_invalid' }
 > {
+  const resolvedPath = resolveAssetUrl(path)
   let response: Response
   try {
-    response = await fetch(path)
+    response = await fetch(resolvedPath)
   } catch {
     return {
       ok: false,

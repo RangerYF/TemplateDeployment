@@ -18,6 +18,7 @@ import {
   setCurrentDragJointType,
   setPendingJointType,
 } from './dragState'
+import { resolveAssetUrl } from '@/runtime/assetBase'
 
 const CATEGORIES = [
   { key: 'basic', title: '基础物体' },
@@ -123,7 +124,7 @@ function DraggableItem({ desc }: { desc: BodyTypeDescriptor }) {
     createBodyAtCanvasCenter(desc)
   }
 
-  const thumbnailSrc = `/thumbnails/${desc.type}.png`
+  const thumbnailSrc = resolveAssetUrl(`thumbnails/${desc.type}.png`)
   const Icon = desc.icon
 
   return (
@@ -199,7 +200,7 @@ function DraggableJointItem({
   }
 
   const tooltip = `拖入画布后并选择要连接的物体可创建${desc.label}`
-  const thumbnailSrc = `/thumbnails/joint-${type}.png`
+  const thumbnailSrc = resolveAssetUrl(`thumbnails/joint-${type}.png`)
 
   return (
     <Tip text={tooltip}>

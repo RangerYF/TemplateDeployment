@@ -3785,6 +3785,71 @@
         validateSnapshot,
       };
 
+      function handleBridgeMessage(event) {
+        const message = event.data;
+        if (!message || typeof message !== "object") return;
+
+        const data = message;
+        if (data.namespace !== "edumind.templateBridge") return;
+
+        let response;
+        try {
+          switch (data.type) {
+            case "getDefaultSnapshot":
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: getDefaultSnapshot(),
+              };
+              break;
+            case "getSnapshot":
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: getSnapshot(),
+              };
+              break;
+            case "loadSnapshot":
+              loadSnapshot(data.payload);
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: { loaded: true },
+              };
+              break;
+            case "validateSnapshot":
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: validateSnapshot(data.payload),
+              };
+              break;
+            default:
+              return;
+          }
+        } catch (error) {
+          response = {
+            namespace: "edumind.templateBridge",
+            type: "response",
+            requestId: data.requestId,
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+          };
+        }
+
+        event.source?.postMessage(response, { targetOrigin: "*" });
+      }
+
+      window.addEventListener("message", handleBridgeMessage);
+
       function initialize() {
         bindTabs();
         populateSelectors();
