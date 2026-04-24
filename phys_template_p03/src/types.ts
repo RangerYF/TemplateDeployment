@@ -6,7 +6,7 @@ type ModuleId = 'refraction' | 'lens' | 'doubleslit' | 'diffraction' | 'thinfilm
 
 interface Point { x: number; y: number; }
 
-type ShapeKind = 'interface' | 'slab' | 'half' | 'sphere' | 'hollow' | 'fiber';
+type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber';
 type MaterialKey = 'air' | 'water' | 'glass' | 'crown' | 'flint' | 'diamond' | 'ice' | 'fiber';
 type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004';
 type HemisphereMode = 'center' | 'plane';
@@ -17,8 +17,15 @@ interface RefractionSettings {
   experimentId: RefractionExperimentId;
   shape: ShapeKind;
   material: MaterialKey;
-  theta1Deg: number;
   wavelength: number;
+  sourceAnchorX: number;
+  sourceY?: number;
+  sourceAngleDeg?: number;
+  elementCenterX: number;
+  elementCenterY?: number;
+  canvasPanX?: number;
+  canvasPanY?: number;
+  canvasZoom?: number;
   medium1N: number;
   medium2N: number;
   slabIndex: number;
@@ -38,13 +45,22 @@ interface RefractionSettings {
 
 type LensKind = 'convex' | 'concave';
 type LensExperimentId = 'opt-011' | 'opt-012';
+type LensSourceType = 'object' | 'point' | 'parallel';
 
 interface LensSettings {
   experimentId: LensExperimentId;
   lensType: LensKind;
+  sourceType: LensSourceType;
   focalLength: number;
   objectDistance: number;
   objectHeight: number;
+  lensCenterX: number;
+  objectX: number;
+  screenX: number;
+  canvasPanX?: number;
+  canvasPanY?: number;
+  canvasZoom?: number;
+  showScreen: boolean;
   showRays: boolean;
   showFormula: boolean;
   rayThick: number;
@@ -56,6 +72,9 @@ interface DoubleSlitSettings {
   slitWidth: number;
   screenDistance: number;
   wavelength: number;
+  sourceX: number;
+  slitX: number;
+  screenX: number;
   whiteLight: boolean;
   showColor: boolean;
   showIntensity: boolean;
@@ -72,6 +91,9 @@ interface DiffractionSettings {
   diameter: number;
   wavelength: number;
   screenDistance: number;
+  sourceX: number;
+  apertureX: number;
+  screenX: number;
   showColor: boolean;
   showIntensity: boolean;
   showFormula: boolean;

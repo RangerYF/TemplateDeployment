@@ -11,6 +11,7 @@ async function bootstrap() {
   await import('./data/p03-experiments');
   await import('./theme');
   await import('./ui');
+  await import('./optics-primitives');
   await import('./module-refraction');
   await import('./module-lens');
   await import('./module-doubleslit');

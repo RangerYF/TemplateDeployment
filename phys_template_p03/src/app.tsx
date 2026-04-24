@@ -99,12 +99,15 @@ function App() {
           ))}
         </nav>
         <div className="topbar-right">
-          <span className="topbar-meta">Build 2026.04 · Demo · TS</span>
+          <span className="topbar-meta">教学演示器</span>
+          <span className="topbar-pill">{experimentLabel || mod.full}</span>
         </div>
       </header>
 
       <div className="main">
-        <aside className="panel-left">{Ctrls}</aside>
+        <aside className="panel-left">
+          <div className="side-card side-card-primary">{Ctrls}</div>
+        </aside>
 
         <section className="stage">
           <div className="stage-toolbar">
@@ -117,8 +120,14 @@ function App() {
         </section>
 
         <aside className="panel-right">
-          {Reads}
-          {experimentMeta && <ExperimentInfoCard experiment={experimentMeta} />}
+          <div className="side-card side-card-primary">
+            {Reads}
+          </div>
+          {experimentMeta && (
+            <div className="side-card side-card-muted">
+              <ExperimentInfoCard experiment={experimentMeta} />
+            </div>
+          )}
         </aside>
       </div>
 

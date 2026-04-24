@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P03 模块1 折射与全反射 · 产品原型</title>
+  <style>
+    :root {
+      --bg: #f4f1e7;
+      --paper: #fbf8f1;
+      --panel: rgba(255, 253, 247, 0.82);
+      --panel-strong: #fffdf8;
+      --line: #d7d0bf;
+      --line-strong: #bfb49d;
+      --ink: #1f2b2b;
+      --ink-soft: #526160;
+      --ink-faint: #7f8b88;
+      --accent: #1f8a78;
+      --accent-soft: #d7f0e8;
+      --accent-strong: #0e6659;
+      --warn: #c4663e;
+      --warn-soft: #f8e3d8;
+      --gold: #b18b38;
+      --shadow: 0 18px 48px rgba(42, 52, 48, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(31, 138, 120, 0.10), transparent 26%),
+        radial-gradient(circle at top right, rgba(177, 139, 56, 0.12), transparent 20%),
+        linear-gradient(180deg, #f8f5ee 0%, #f1ecdf 100%);
+      color: var(--ink);
+      font-family: "Aptos", "Segoe UI Variable", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      padding: 22px;
+    }
+
+    .shell {
+      min-height: calc(100vh - 44px);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 22px;
+      background: rgba(255, 252, 246, 0.78);
+      border: 1px solid rgba(191, 180, 157, 0.5);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 280px;
+    }
+
+    .brand-badge {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent) 0%, #43a692 100%);
+      color: #fff;
+      border-radius: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      box-shadow: 0 10px 24px rgba(31, 138, 120, 0.22);
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: var(--ink-faint);
+      margin-top: 4px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .top-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(191, 180, 157, 0.55);
+      font-size: 12px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+
+    .main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 360px;
+      gap: 18px;
+    }
+
+    .panel {
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid rgba(191, 180, 157, 0.52);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-inner {
+      height: 100%;
+      overflow: auto;
+      padding: 22px;
+    }
+
+    .section + .section {
+      margin-top: 24px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(191, 180, 157, 0.4);
+    }
+
+    .section-head strong {
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-head span {
+      color: var(--ink-faint);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .family-list,
+    .scene-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .family-btn,
+    .scene-btn,
+    .preset-btn {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--ink-soft);
+      text-align: left;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font: inherit;
+    }
+
+    .family-btn:hover,
+    .scene-btn:hover,
+    .preset-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(31, 138, 120, 0.24);
+      color: var(--ink);
+    }
+
+    .family-btn.active,
+    .scene-btn.active {
+      background: linear-gradient(180deg, #effaf6 0%, #e3f4ee 100%);
+      border-color: rgba(31, 138, 120, 0.35);
+      color: var(--accent-strong);
+      box-shadow: inset 0 0 0 1px rgba(31, 138, 120, 0.10);
+    }
+
+    .family-btn .sub,
+    .scene-btn .sub {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink-faint);
+      font-size: 12px;
+    }
+
+    .slider {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .slider-head b {
+      font-weight: 600;
+    }
+
+    .slider-head span {
+      color: var(--ink-faint);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .preset-grid,
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .preset-btn.active {
+      background: var(--accent-soft);
+      border-color: rgba(31, 138, 120, 0.3);
+      color: var(--accent-strong);
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(191, 180, 157, 0.42);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .toggle input {
+      accent-color: var(--accent);
+    }
+
+    .stage {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .stage-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid rgba(191, 180, 157, 0.4);
+    }
+
+    .stage-title strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .stage-title span {
+      display: block;
+      margin-top: 5px;
+      font-size: 13px;
+      color: var(--ink-faint);
+    }
+
+    .stage-flags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .flag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(191, 180, 157, 0.52);
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+
+    .stage-canvas-wrap {
+      position: relative;
+      min-height: 0;
+      padding: 18px;
+    }
+
+    .stage-canvas {
+      height: 100%;
+      min-height: 420px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(247, 244, 236, 0.92)),
+        linear-gradient(90deg, rgba(31, 138, 120, 0.04), rgba(177, 139, 56, 0.05));
+      border: 1px solid rgba(191, 180, 157, 0.42);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(191, 180, 157, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(191, 180, 157, 0.16) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.55));
+    }
+
+    .stage-overlay {
+      position: absolute;
+      left: 22px;
+      bottom: 22px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: calc(100% - 44px);
+    }
+
+    .chip {
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink-soft);
+      border: 1px solid rgba(191, 180, 157, 0.42);
+      backdrop-filter: blur(8px);
+    }
+
+    .chip.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+      border-color: rgba(196, 102, 62, 0.24);
+    }
+
+    .stage-bottom {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      padding: 0 18px 18px;
+    }
+
+    .callout,
+    .script-card {
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(191, 180, 157, 0.42);
+      padding: 16px;
+    }
+
+    .callout strong,
+    .script-card strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .callout p,
+    .script-card ol {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .script-card ol {
+      padding-left: 18px;
+    }
+
+    .readouts {
+      display: grid;
+      gap: 10px;
+    }
+
+    .readout {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(191, 180, 157, 0.42);
+    }
+
+    .readout.highlight {
+      background: linear-gradient(180deg, #effaf6 0%, #e5f5ef 100%);
+      border-color: rgba(31, 138, 120, 0.26);
+    }
+
+    .readout .label {
+      color: var(--ink-faint);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .readout .value {
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+
+    .readout .hint {
+      margin-top: 7px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .formula-box,
+    .risk-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(191, 180, 157, 0.42);
+      color: var(--ink-soft);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .formula-box strong,
+    .risk-box strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .formula-line {
+      display: block;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      color: var(--accent-strong);
+    }
+
+    .mini-note {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(31, 138, 120, 0.08);
+      color: var(--accent-strong);
+      font-size: 13px;
+      line-height: 1.6;
+      border: 1px solid rgba(31, 138, 120, 0.14);
+    }
+
+    .svg-wrap {
+      position: absolute;
+      inset: 0;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .label {
+      fill: var(--ink);
+      font: 13px "Aptos", "Segoe UI Variable", "PingFang SC", sans-serif;
+    }
+
+    .label.small {
+      fill: var(--ink-faint);
+      font-size: 12px;
+    }
+
+    .ray {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .ray-main {
+      stroke: #e78239;
+      stroke-width: 4;
+    }
+
+    .ray-sub {
+      stroke: #2f87d8;
+      stroke-width: 3;
+      opacity: 0.9;
+    }
+
+    .ray-reflect {
+      stroke: #ad5a39;
+      stroke-width: 3.5;
+      stroke-dasharray: 10 8;
+    }
+
+    .normal {
+      stroke: #708482;
+      stroke-width: 2;
+      stroke-dasharray: 8 8;
+    }
+
+    .glass {
+      fill: rgba(127, 208, 188, 0.22);
+      stroke: rgba(31, 138, 120, 0.58);
+      stroke-width: 2;
+    }
+
+    .water {
+      fill: rgba(77, 145, 220, 0.15);
+      stroke: rgba(77, 145, 220, 0.45);
+      stroke-width: 2;
+    }
+
+    .fiber-core {
+      fill: rgba(31, 138, 120, 0.22);
+      stroke: rgba(31, 138, 120, 0.55);
+      stroke-width: 2;
+    }
+
+    .fiber-clad {
+      fill: rgba(141, 188, 179, 0.18);
+      stroke: rgba(111, 151, 143, 0.38);
+      stroke-width: 2;
+    }
+
+    @media (max-width: 1280px) {
+      .main {
+        grid-template-columns: 290px minmax(0, 1fr) 330px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .stage-bottom {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">M1</div>
+        <div class="brand-copy">
+          <strong>折射与全反射 · 产品原型</strong>
+          <span>Topic Module Prototype / Review Draft</span>
+        </div>
+      </div>
+      <div class="top-meta">
+        <div class="pill">原型目的：评审信息架构与教学流程</div>
+        <div class="pill">当前保真度：高保真产品形态 / 低保真物理解算</div>
+        <div class="pill">建议：先评审场景与能力，再进入开发</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <aside class="panel">
+        <div class="panel-inner">
+          <section class="section">
+            <div class="section-head">
+              <strong>场景族</strong>
+              <span>Families</span>
+            </div>
+            <div id="familyList" class="family-list"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>子场景</strong>
+              <span>Scenes</span>
+            </div>
+            <div id="sceneList" class="scene-list"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>关键参数</strong>
+              <span>Params</span>
+            </div>
+            <div class="slider">
+              <div class="slider-head"><b>入射角 θ</b><span id="thetaValue">30°</span></div>
+              <input id="thetaSlider" type="range" min="0" max="89" value="30" />
+            </div>
+            <div class="slider">
+              <div class="slider-head"><b>介质折射率 n₁</b><span id="n1Value">1.000</span></div>
+              <input id="n1Slider" type="range" min="100" max="242" value="100" />
+            </div>
+            <div class="slider">
+              <div class="slider-head"><b>介质折射率 n₂</b><span id="n2Value">1.500</span></div>
+              <input id="n2Slider" type="range" min="100" max="242" value="150" />
+            </div>
+            <div class="slider">
+              <div class="slider-head"><b>结构参数</b><span id="shapeValue">5.0 cm</span></div>
+              <input id="shapeSlider" type="range" min="10" max="100" value="50" />
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>材料预设</strong>
+              <span>Materials</span>
+            </div>
+            <div id="presetGrid" class="preset-grid"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>显示选项</strong>
+              <span>Display</span>
+            </div>
+            <div class="toggle-grid">
+              <label class="toggle"><input type="checkbox" checked /> 法线</label>
+              <label class="toggle"><input type="checkbox" checked /> 角度标注</label>
+              <label class="toggle"><input type="checkbox" checked /> 颜色</label>
+              <label class="toggle"><input type="checkbox" checked /> 公式验证</label>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <main class="panel stage">
+        <div class="stage-top">
+          <div class="stage-title">
+            <strong id="stageTitle">平行界面折射</strong>
+            <span id="stageSubtitle">默认课堂入口：先讲角度定义，再讲折射方向与临界角。</span>
+          </div>
+          <div id="stageFlags" class="stage-flags"></div>
+        </div>
+
+        <div class="stage-canvas-wrap">
+          <div class="stage-canvas">
+            <div class="grid"></div>
+            <div class="svg-wrap" id="stageSvg"></div>
+            <div class="stage-overlay" id="stageChips"></div>
+          </div>
+        </div>
+
+        <div class="stage-bottom">
+          <div class="script-card">
+            <strong>建议讲解顺序</strong>
+            <ol id="scriptList"></ol>
+          </div>
+          <div class="callout">
+            <strong>模块边界提醒</strong>
+            <p id="boundaryText"></p>
+          </div>
+        </div>
+      </main>
+
+      <aside class="panel">
+        <div class="panel-inner">
+          <section class="section">
+            <div class="section-head">
+              <strong>实时读数</strong>
+              <span>Readouts</span>
+            </div>
+            <div id="readoutList" class="readouts"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>关键公式</strong>
+              <span>Formula</span>
+            </div>
+            <div id="formulaBox" class="formula-box"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <strong>教学风险点</strong>
+              <span>Risks</span>
+            </div>
+            <div id="riskBox" class="risk-box"></div>
+          </section>
+
+          <div class="mini-note">
+            这个原型的重点是帮助我们判断“模块 1 的产品形态和信息组织是否对”，不是拿来验证最终求解精度。你可以重点看：场景切换是不是顺、老师是否知道先讲什么、右侧读数够不够用。
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const materials = [
+      { id: "air", label: "空气", n: 1.0 },
+      { id: "water", label: "水", n: 1.333 },
+      { id: "glass", label: "普通玻璃", n: 1.5 },
+      { id: "crown", label: "冕牌玻璃", n: 1.52 },
+      { id: "flint", label: "火石玻璃", n: 1.65 },
+      { id: "diamond", label: "金刚石", n: 2.417 }
+    ];
+
+    const families = [
+      {
+        id: "interface",
+        label: "界面折射族",
+        sub: "折射、临界角、全反射",
+        scenes: [
+          "空气 -> 玻璃",
+          "玻璃 -> 空气",
+          "空气 -> 水",
+          "临界角演示",
+          "全反射演示"
+        ],
+        title: "平行界面折射",
+        subtitle: "默认课堂入口：先讲角度定义，再讲折射方向与临界角。",
+        flags: ["标准入口", "默认可上课", "单束光 / 平行光"],
+        chips: [
+          "适合先讲入射角、折射角、反射角定义",
+          "适合用材料切换说明偏折方向",
+          "临界角提示应始终可见"
+        ],
+        script: [
+          "先指出法线，明确所有角度都相对法线测量。",
+          "把 n1 固定为空气，切换 n2 为玻璃或水，讲折射方向变化。",
+          "逐步增大入射角，引出临界角与全反射。"
+        ],
+        boundary: "这里可以自由切材料、改角度、切单束光 / 平行光，但不扩展成多介质拼装。它的任务是把基础规律讲清，而不是搭复杂光路。",
+        readouts: [
+          { label: "入射角 θ₁", value: "30.0°", hint: "相对法线测量" },
+          { label: "折射角 θ₂", value: "19.5°", hint: "n₂ > n₁ 时更靠近法线", highlight: true },
+          { label: "临界角 θc", value: "41.8°", hint: "只有从光密到光疏时才有意义" },
+          { label: "状态", value: "未发生全反射", hint: "继续增大入射角可进入 TIR" }
+        ],
+        formula: [
+          "斯涅尔定律",
+          "n₁ sin θ₁ = n₂ sin θ₂",
+          "临界角：sin θc = n₂ / n₁（当 n₁ > n₂）"
+        ],
+        risks: [
+          "角度若画成相对界面的角度，课堂会直接讲错。",
+          "临界角只有在从光密到光疏时才有意义。",
+          "全反射不是“折射角很大”，而是折射光不再存在。"
+        ],
+        stage: "interface"
+      },
+      {
+        id: "slab",
+        label: "平板介质族",
+        sub: "双界面折射、侧移、平行出射",
+        scenes: [
+          "矩形玻璃砖标准演示",
+          "厚度变化对侧移影响",
+          "折射率变化对侧移影响",
+          "平行光穿过玻璃砖"
+        ],
+        title: "矩形玻璃砖",
+        subtitle: "课堂重点不是“又折射一次”，而是“出射光为什么仍与入射光平行”。",
+        flags: ["双界面", "侧移读数", "平行出射"],
+        chips: [
+          "出射光与入射光平行",
+          "厚度与折射率共同影响侧移量",
+          "适合讲双界面折射"
+        ],
+        script: [
+          "先看第一界面折射，再跟踪光线在玻璃砖内传播。",
+          "指出第二次折射后，出射光重新与入射光平行。",
+          "调厚度和折射率，解释侧移为何变化。"
+        ],
+        boundary: "这里的自由度重点是厚度、折射率、入射点和光束模式，不扩展到任意多块介质组合。老师要的是把平行出射讲明白，而不是做拼图。",
+        readouts: [
+          { label: "入射角 θ₁", value: "45.0°", hint: "保持相对法线定义" },
+          { label: "砖内折射角 θ₂", value: "28.1°", hint: "由空气进入玻璃" },
+          { label: "侧向位移 Δ", value: "2.46 cm", hint: "课堂上最好能直接读出来", highlight: true },
+          { label: "出射关系", value: "与入射光平行", hint: "这是本场景最关键结论" }
+        ],
+        formula: [
+          "第一界面：n₁ sin θ₁ = n₂ sin θ₂",
+          "侧移：Δ = d sin(θ₁ - θ₂) / cos θ₂"
+        ],
+        risks: [
+          "如果画面上看不出“平行”，学生会误以为方向变了。",
+          "如果只给公式不给路径，老师不好讲“为什么会侧移”。"
+        ],
+        stage: "slab"
+      },
+      {
+        id: "hemisphere",
+        label: "半球介质族",
+        sub: "球心入射、平面入射、曲面法线",
+        scenes: [
+          "球心入射",
+          "平面入射",
+          "平面入射后曲面折射",
+          "平面入射后曲面全反射",
+          "挖空半球示意"
+        ],
+        title: "半球形玻璃砖",
+        subtitle: "这一族的核心不是多一个形状，而是让老师把“曲面法线怎么找”讲扎实。",
+        flags: ["曲面法线", "球心入射", "平面入射"],
+        chips: [
+          "半径方向就是曲面法线",
+          "球心入射时曲面处入射角为 0°",
+          "适合讲临界角在曲面处如何判断"
+        ],
+        script: [
+          "先演示球心入射，让学生建立“半径即法线”的直觉。",
+          "切到平面入射，说明光线先在平面折射再到曲面。",
+          "对比曲面处入射角与临界角，讲何时出现全反射。"
+        ],
+        boundary: "这里允许切换入射方式、调半径、拖入射点，但不扩展到任意曲面编辑。它的目标是服务法线判断，不是做几何造型器。",
+        readouts: [
+          { label: "当前模式", value: "平面入射", hint: "可切换为球心入射" },
+          { label: "曲面处入射角", value: "38.6°", hint: "课堂关键读数", highlight: true },
+          { label: "曲面临界角", value: "41.8°", hint: "与当前入射角直接对比" },
+          { label: "状态", value: "仍有折射光", hint: "再增大入射角可触发全反射" }
+        ],
+        formula: [
+          "球心入射：曲面处入射角 = 0°",
+          "曲面临界角：sin θc = 1 / n"
+        ],
+        risks: [
+          "曲面法线如果不画准，整个半球教学价值会掉下来。",
+          "球心入射若没有足够强调，学生很难理解“为什么不再折射”。"
+        ],
+        stage: "hemisphere"
+      },
+      {
+        id: "sphere",
+        label: "球形介质族",
+        sub: "球面法线的进一步对比",
+        scenes: [
+          "球形玻璃砖基本折射",
+          "不同入射点对路径影响",
+          "球形与半球法线对比"
+        ],
+        title: "球形玻璃砖",
+        subtitle: "这是半球之后的深化场景，用来强化球面法线和双曲面路径判断。",
+        flags: ["深化场景", "球面法线", "路径对比"],
+        chips: [
+          "强调法线始终指向球心",
+          "适合对比半球与球体的教学差异",
+          "适合讲不同入射点造成的路径变化"
+        ],
+        script: [
+          "先用单一入射点展示球体中的完整路径。",
+          "再改变入射点，让学生看法线方向如何变化。",
+          "最后和半球场景对比，强化“球面法线就是半径方向”。"
+        ],
+        boundary: "这是专题深化场景，不要求做成高自由度球面编辑器。它的价值在于帮助老师把曲面法线和路径判断讲透。",
+        readouts: [
+          { label: "入射点位置", value: "偏上 18%", hint: "不同位置会改变法线方向" },
+          { label: "第一次折射角", value: "21.3°", hint: "进入球体后的偏折" },
+          { label: "球面法线", value: "指向球心", hint: "这一点要在视觉上被强调", highlight: true },
+          { label: "教学用途", value: "法线对比", hint: "适合半球场景后使用" }
+        ],
+        formula: [
+          "球面处法线 = 过接触点的球半径",
+          "局部仍满足 n₁ sin θ₁ = n₂ sin θ₂"
+        ],
+        risks: [
+          "如果没有明显教学增益，它容易沦为“多一个形状”。",
+          "必须明确它的存在是为了讲法线，不是为了增加复杂度。"
+        ],
+        stage: "sphere"
+      },
+      {
+        id: "fiber",
+        label: "光纤应用族",
+        sub: "连续全反射与导光应用",
+        scenes: [
+          "直光纤导光",
+          "弯曲光纤导光",
+          "弯曲半径减小后的漏光趋势",
+          "纤芯 / 包层折射率对比"
+        ],
+        title: "光导纤维模型",
+        subtitle: "这个场景的意义是把抽象规律带到真实应用，完成“临界角 -> 连续全反射 -> 导光”的闭环。",
+        flags: ["应用场景", "导光 / 漏光", "连续反射路径"],
+        chips: [
+          "纤芯折射率必须大于包层",
+          "弯曲半径越小越容易漏光",
+          "适合做“规律到应用”的收束"
+        ],
+        script: [
+          "先在直光纤中展示连续反射路径。",
+          "再调节包层和纤芯折射率，说明为什么能导光。",
+          "最后减小弯曲半径，讲为什么会出现漏光风险。"
+        ],
+        boundary: "这里只讲导光原理与趋势，不扩展成通信工程级模拟器。老师需要的是“为什么能导光、为什么会漏”，不是复杂工程参数。",
+        readouts: [
+          { label: "纤芯 n₁", value: "1.500", hint: "必须大于包层折射率" },
+          { label: "包层 n₂", value: "1.300", hint: "与纤芯的差决定临界角" },
+          { label: "临界角 θc", value: "60.1°", hint: "用于判断是否持续全反射" },
+          { label: "状态", value: "多次全反射导光", hint: "减小弯曲半径后可能转为漏光", highlight: true }
+        ],
+        formula: [
+          "临界角：sin θc = n₂ / n₁",
+          "导光条件：纤芯-包层界面持续满足全反射"
+        ],
+        risks: [
+          "如果只看到折线不理解界面条件，老师很难把应用讲通。",
+          "漏光趋势要表现得足够直观，否则“弯曲损耗”只是口头说明。"
+        ],
+        stage: "fiber"
+      }
+    ];
+
+    let activeFamily = families[0].id;
+    let activeMaterial = "glass";
+
+    const familyList = document.getElementById("familyList");
+    const sceneList = document.getElementById("sceneList");
+    const stageTitle = document.getElementById("stageTitle");
+    const stageSubtitle = document.getElementById("stageSubtitle");
+    const stageFlags = document.getElementById("stageFlags");
+    const stageChips = document.getElementById("stageChips");
+    const stageSvg = document.getElementById("stageSvg");
+    const scriptList = document.getElementById("scriptList");
+    const boundaryText = document.getElementById("boundaryText");
+    const readoutList = document.getElementById("readoutList");
+    const formulaBox = document.getElementById("formulaBox");
+    const riskBox = document.getElementById("riskBox");
+    const presetGrid = document.getElementById("presetGrid");
+
+    const thetaSlider = document.getElementById("thetaSlider");
+    const n1Slider = document.getElementById("n1Slider");
+    const n2Slider = document.getElementById("n2Slider");
+    const shapeSlider = document.getElementById("shapeSlider");
+
+    const thetaValue = document.getElementById("thetaValue");
+    const n1Value = document.getElementById("n1Value");
+    const n2Value = document.getElementById("n2Value");
+    const shapeValue = document.getElementById("shapeValue");
+
+    function currentFamily() {
+      return families.find((item) => item.id === activeFamily);
+    }
+
+    function drawStage(type) {
+      if (type === "interface") {
+        return `
+          <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet">
+            <rect x="0" y="260" width="900" height="260" class="glass"></rect>
+            <line x1="430" y1="90" x2="430" y2="430" class="normal"></line>
+            <path d="M 180 100 L 430 260" class="ray ray-main"></path>
+            <path d="M 430 260 L 640 395" class="ray ray-sub"></path>
+            <path d="M 430 260 L 650 115" class="ray ray-reflect"></path>
+            <path d="M 430 260 A 38 38 0 0 1 408 225" class="ray ray-sub"></path>
+            <path d="M 430 260 A 58 58 0 0 0 462 304" class="ray ray-sub"></path>
+            <text x="90" y="72" class="label">空气 / 真空</text>
+            <text x="90" y="302" class="label">玻璃介质</text>
+            <text x="444" y="160" class="label small">法线</text>
+            <text x="332" y="208" class="label small">θ₁</text>
+            <text x="470" y="340" class="label small">θ₂</text>
+          </svg>`;
+      }
+      if (type === "slab") {
+        return `
+          <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet">
+            <rect x="300" y="100" width="280" height="250" rx="6" class="glass"></rect>
+            <line x1="300" y1="70" x2="300" y2="390" class="normal"></line>
+            <line x1="580" y1="70" x2="580" y2="390" class="normal"></line>
+            <path d="M 120 110 L 300 180 L 580 300 L 760 370" class="ray ray-main"></path>
+            <path d="M 120 110 L 300 180" class="ray ray-reflect"></path>
+            <path d="M 120 125 L 300 195 L 580 315 L 760 385" class="ray ray-sub"></path>
+            <text x="350" y="235" class="label">玻璃砖</text>
+            <text x="605" y="254" class="label small">平行出射</text>
+            <text x="390" y="388" class="label small">侧向位移 Δ</text>
+          </svg>`;
+      }
+      if (type === "hemisphere") {
+        return `
+          <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet">
+            <path d="M 260 290 L 640 290 A 190 190 0 0 0 260 290 Z" class="glass"></path>
+            <line x1="430" y1="40" x2="430" y2="290" class="normal"></line>
+            <line x1="550" y1="173" x2="695" y2="46" class="normal"></line>
+            <path d="M 210 95 L 380 290 L 547 177" class="ray ray-main"></path>
+            <path d="M 547 177 L 730 120" class="ray ray-sub"></path>
+            <path d="M 547 177 L 696 286" class="ray ray-reflect"></path>
+            <circle cx="450" cy="290" r="4" fill="#0e6659"></circle>
+            <text x="460" y="284" class="label small">球心</text>
+            <text x="598" y="152" class="label small">曲面法线</text>
+            <text x="330" y="370" class="label">半球形玻璃砖</text>
+          </svg>`;
+      }
+      if (type === "sphere") {
+        return `
+          <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet">
+            <circle cx="470" cy="255" r="168" class="glass"></circle>
+            <line x1="470" y1="255" x2="622" y2="158" class="normal"></line>
+            <path d="M 190 120 L 322 168 L 471 255 L 624 158 L 740 135" class="ray ray-main"></path>
+            <circle cx="470" cy="255" r="4" fill="#0e6659"></circle>
+            <text x="480" y="250" class="label small">球心</text>
+            <text x="634" y="148" class="label small">法线 = 半径方向</text>
+            <text x="388" y="445" class="label">球形玻璃砖</text>
+          </svg>`;
+      }
+      return `
+        <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet">
+          <path d="M 145 170 C 230 115, 330 116, 408 155 C 520 210, 635 206, 740 151" class="fiber-clad"></path>
+          <path d="M 145 206 C 230 151, 330 152, 408 191 C 520 246, 635 242, 740 187" class="fiber-core"></path>
+          <path d="M 145 242 C 230 187, 330 188, 408 227 C 520 282, 635 278, 740 223" class="fiber-clad"></path>
+          <path d="M 180 197 L 260 187 L 350 208 L 426 175 L 520 208 L 610 177 L 700 205" class="ray ray-main"></path>
+          <path d="M 700 205 L 810 234" class="ray ray-sub"></path>
+          <text x="145" y="110" class="label">光纤横截路径示意</text>
+          <text x="514" y="135" class="label small">连续全反射</text>
+          <text x="620" y="280" class="label small">弯曲半径越小，越易漏光</text>
+        </svg>`;
+      }
+    }
+
+    function renderFamilies() {
+      familyList.innerHTML = families.map((family) => `
+        <button class="family-btn ${family.id === activeFamily ? "active" : ""}" data-family="${family.id}">
+          ${family.label}
+          <span class="sub">${family.sub}</span>
+        </button>
+      `).join("");
+
+      familyList.querySelectorAll("[data-family]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeFamily = button.dataset.family;
+          render();
+        });
+      });
+    }
+
+    function renderScenes(family) {
+      sceneList.innerHTML = family.scenes.map((scene, index) => `
+        <button class="scene-btn ${index === 0 ? "active" : ""}">
+          ${scene}
+          <span class="sub">${index === 0 ? "默认主场景" : "扩展讲解场景"}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderPresets() {
+      presetGrid.innerHTML = materials.map((material) => `
+        <button class="preset-btn ${material.id === activeMaterial ? "active" : ""}" data-material="${material.id}">
+          ${material.label}<br />
+          n = ${material.n.toFixed(3)}
+        </button>
+      `).join("");
+
+      presetGrid.querySelectorAll("[data-material]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeMaterial = button.dataset.material;
+          renderPresets();
+        });
+      });
+    }
+
+    function renderStage(family) {
+      stageTitle.textContent = family.title;
+      stageSubtitle.textContent = family.subtitle;
+      stageFlags.innerHTML = family.flags.map((item) => `<div class="flag">${item}</div>`).join("");
+      stageChips.innerHTML = family.chips.map((item, index) => `<div class="chip ${index === family.chips.length - 1 && family.id === "fiber" ? "warn" : ""}">${item}</div>`).join("");
+      stageSvg.innerHTML = drawStage(family.stage);
+      scriptList.innerHTML = family.script.map((item) => `<li>${item}</li>`).join("");
+      boundaryText.textContent = family.boundary;
+    }
+
+    function renderReadouts(family) {
+      readoutList.innerHTML = family.readouts.map((item) => `
+        <div class="readout ${item.highlight ? "highlight" : ""}">
+          <div class="label">${item.label}</div>
+          <div class="value">${item.value}</div>
+          <div class="hint">${item.hint}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderFormula(family) {
+      formulaBox.innerHTML = `
+        <strong>${family.formula[0]}</strong>
+        ${family.formula.slice(1).map((line) => `<span class="formula-line">${line}</span>`).join("")}
+      `;
+    }
+
+    function renderRisks(family) {
+      riskBox.innerHTML = `
+        <strong>评审时请重点看</strong>
+        ${family.risks.map((item) => `<div>• ${item}</div>`).join("")}
+      `;
+    }
+
+    function syncSliderValues() {
+      thetaValue.textContent = `${thetaSlider.value}°`;
+      n1Value.textContent = (Number(n1Slider.value) / 100).toFixed(3);
+      n2Value.textContent = (Number(n2Slider.value) / 100).toFixed(3);
+      shapeValue.textContent = `${(Number(shapeSlider.value) / 10).toFixed(1)} cm`;
+    }
+
+    function render() {
+      const family = currentFamily();
+      renderFamilies();
+      renderScenes(family);
+      renderPresets();
+      renderStage(family);
+      renderReadouts(family);
+      renderFormula(family);
+      renderRisks(family);
+      syncSliderValues();
+    }
+
+    [thetaSlider, n1Slider, n2Slider, shapeSlider].forEach((input) => {
+      input.addEventListener("input", syncSliderValues);
+    });
+
+    render();
+  </script>
+</body>
+</html>
