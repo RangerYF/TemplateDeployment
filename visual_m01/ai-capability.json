@@ -1,0 +1,158 @@
+{
+  "$schema": "../schemas/ai-capability.schema.json",
+  "templateKey": "m01",
+  "aiLevel": "L1",
+  "supportsAiBuild": true,
+  "description": "立体几何展示台，支持基于当前三维场景调整实体显示、点标签、线段样式和基础讲解高亮。",
+  "supportedIntents": [
+    "adjust-scene-style",
+    "highlight-existing-entities",
+    "label-existing-points",
+    "simplify-current-scene"
+  ],
+  "payloadSchema": {
+    "scene": {
+      "type": "object",
+      "description": "M01 编辑器场景快照。V1 只建议基于当前 snapshot 修改已有实体，不建议从零生成复杂实体图。",
+      "required": true,
+      "risk": "high",
+      "children": {
+        "entities": {
+          "type": "record",
+          "description": "实体表，key 为实体 ID。AI patch 应优先只包含当前 snapshot 中已经存在的实体 ID。",
+          "risk": "high",
+          "additionalProperties": {
+            "type": "object",
+            "description": "单个已有实体的局部 patch。",
+            "children": {
+              "visible": {
+                "type": "boolean",
+                "description": "是否显示该实体。适合隐藏干扰元素或显示关键元素。",
+                "risk": "low"
+              },
+              "locked": {
+                "type": "boolean",
+                "description": "是否锁定该实体，防止误操作。",
+                "risk": "low"
+              },
+              "properties": {
+                "type": "object",
+                "description": "实体属性局部 patch。V1 推荐只修改点标签、线段样式等低风险字段。",
+                "risk": "high",
+                "children": {
+                  "label": {
+                    "type": "string",
+                    "description": "点或线段的展示标签，例如 A、B、M、N、A1。",
+                    "risk": "low"
+                  },
+                  "style": {
+                    "type": "object",
+                    "description": "线段样式。仅用于 type 为 segment 的实体。",
+                    "risk": "low",
+                    "children": {
+                      "color": {
+                        "type": "string",
+                        "description": "线段颜色，使用十六进制颜色值，例如 #e74c3c。",
+                        "risk": "low"
+                      },
+                      "dashed": {
+                        "type": "boolean",
+                        "description": "线段是否显示为虚线。",
+                        "risk": "low"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nextId": {
+          "type": "number",
+          "description": "下一个实体 ID。只在替换整份 scene 时需要提供；局部 patch 不应修改。",
+          "range": [1, 10000],
+          "risk": "high"
+        },
+        "activeGeometryId": {
+          "type": "string",
+          "description": "当前主几何体实体 ID，通常为当前 snapshot 中 type=geometry 的实体 ID。",
+          "risk": "high"
+        }
+      }
+    }
+  },
+  "constraints": [
+    "AI 输出只能是 payload patch，不能包含 envelope。",
+    "V1 试点优先修改当前 snapshot 中已经存在的实体 ID，不要编造不存在的实体 ID。",
+    "不要直接修改 geometry.properties.params；M01 当前 loadSnapshot 不会根据参数自动重建内置顶点、棱和面。",
+    "不要自由新增 point、segment、face 等实体，除非后续提供确定性的场景生成器或完整预置场景。",
+    "如果用户要求从零搭建复杂立体图，V1 应提示先选择一个预置场景或基于当前场景继续高亮/标注。",
+    "线段样式只应修改 segment 实体的 properties.style.color 和 properties.style.dashed。",
+    "点标签只应修改 point 实体的 properties.label。",
+    "动画、相机视角、撤销历史和临时 hover/选中态不属于当前 snapshot 可恢复能力。"
+  ],
+  "examples": [
+    {
+      "instruction": "把当前图形里的辅助线突出显示，适合讲解关键线段。",
+      "patch": {
+        "scene": {
+          "entities": {
+            "10": {
+              "properties": {
+                "style": {
+                  "color": "#e74c3c",
+                  "dashed": true
+                }
+              }
+            },
+            "11": {
+              "properties": {
+                "style": {
+                  "color": "#e74c3c",
+                  "dashed": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "explanation": "已将当前场景中指定线段改为红色虚线，用于突出辅助线。实际生成时应优先选择当前 snapshot 中存在且 type 为 segment 的实体 ID。"
+    },
+    {
+      "instruction": "把 A 点和 B 点标清楚，方便学生看图。",
+      "patch": {
+        "scene": {
+          "entities": {
+            "2": {
+              "properties": {
+                "label": "A"
+              }
+            },
+            "3": {
+              "properties": {
+                "label": "B"
+              }
+            }
+          }
+        }
+      },
+      "explanation": "已为当前场景中的两个已有点实体设置标签。实际生成时应根据当前 snapshot 中 point 实体的 ID 修改 label。"
+    },
+    {
+      "instruction": "把不需要讲的元素先隐藏，只保留主体图形。",
+      "patch": {
+        "scene": {
+          "entities": {
+            "24": {
+              "visible": false
+            },
+            "25": {
+              "visible": false
+            }
+          }
+        }
+      },
+      "explanation": "已隐藏指定实体，用于简化当前讲解画面。实际生成时应只隐藏当前 snapshot 中确实存在的实体。"
+    }
+  ]
+}

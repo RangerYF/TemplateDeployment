@@ -1,3 +1,5 @@
+import { createP03Bridge, installP03BridgeMessageListener, type P03SnapshotPayload } from './snapshot-bridge';
+
 // P-03 光学实验台 — App shell (TypeScript)
 const React = (window as any).React;
 const ReactDOM = (window as any).ReactDOM;
@@ -42,6 +44,42 @@ function App() {
   useEffect(() => saveState('doubleslit', dbl), [dbl]);
   useEffect(() => saveState('diffraction', diff), [diff]);
   useEffect(() => saveState('thinfilm', film), [film]);
+
+  useEffect(() => installP03BridgeMessageListener(), []);
+
+  useEffect(() => {
+    W.__EDUMIND_TEMPLATE_BRIDGE__ = createP03Bridge({
+      defaults: {
+        refraction: DEFAULTS.refraction,
+        lens: DEFAULTS.lens,
+        doubleslit: DEFAULTS.doubleslit,
+        diffraction: DEFAULTS.diffraction,
+        thinfilm: DEFAULTS.thinfilm,
+      },
+      getState: () => ({
+        active,
+        theme,
+        rayThick,
+        refr,
+        lens,
+        dbl,
+        diff,
+        film,
+      }),
+      setPayload: (payload: P03SnapshotPayload) => {
+        W.__TWEAKS = { ...(W.__TWEAKS || {}), theme: payload.presentation.theme, rayThick: payload.presentation.rayThick };
+        setActive(payload.activeModule);
+        setTheme(payload.presentation.theme);
+        setRayThick(payload.presentation.rayThick);
+        setRefr(payload.modules.refraction);
+        setLens(payload.modules.lens);
+        setDbl(payload.modules.doubleslit);
+        setDiff(payload.modules.diffraction);
+        setFilm(payload.modules.thinfilm);
+        setTweaksOpen(false);
+      },
+    });
+  }, [active, theme, rayThick, refr, lens, dbl, diff, film]);
 
   useEffect(() => {
     function handler(e: MessageEvent): void {
