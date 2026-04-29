@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { EditorLayout } from '@/components/layout/EditorLayout'
+import { P06WavePage } from '@/components/p06/P06WavePage'
 import { ModuleHubPage } from '@/components/workbench/ModuleHubPage'
 import { ModulePage } from '@/components/workbench/ModulePage'
+import { WorkbenchPage } from '@/components/workbench/WorkbenchPage'
 import { ToastProvider } from '@/components/ui/toast'
 import {
   buildModuleHash,
@@ -16,7 +18,7 @@ import {
 } from '@/templates/editorRuntime'
 import { loadTemplateById } from '@/templates/loader'
 import { installTemplateBridge, uninstallTemplateBridge } from '@/templates/templateBridge'
-import { getModuleGroup } from '@/templates'
+import { getModuleGroup, getTemplateById } from '@/templates'
 import { useModuleWorkspaceStore } from '@/store/moduleWorkspaceStore'
 import { useSelectionStore } from '@/store/selectionStore'
 
@@ -31,6 +33,7 @@ function App() {
   const activeSceneId = useModuleWorkspaceStore((state) => state.activeSceneId)
   const sceneDrafts = useModuleWorkspaceStore((state) => state.sceneDrafts)
   const route = useMemo(() => parseHash(hash), [hash])
+  const p06ModuleId = route.page === 'p06' ? route.moduleId : null
 
   useEffect(() => {
     const onHashChange = () => setHash(window.location.hash)
@@ -61,6 +64,10 @@ function App() {
       return () => {
         uninstallTemplateBridge()
       }
+    }
+
+    if (route.page === 'p06') {
+      return undefined
     }
 
     uninstallTemplateBridge()
@@ -149,6 +156,20 @@ function App() {
     navigateTo(buildModuleSceneHash(moduleId, sceneId))
   }
 
+  const openTemplate = (templateId: string) => {
+    const template = getTemplateById(templateId)
+    if (!template) {
+      navigateTo('#modules')
+      return
+    }
+    navigateTo(buildModuleSceneHash(template.meta.module, template.meta.id))
+  }
+
+  const openP06 = (moduleId?: string | null) => {
+    const query = moduleId ? `?module=${encodeURIComponent(moduleId)}` : ''
+    navigateTo(`#p06${query}`)
+  }
+
   if (route.page === 'thumbnails') {
     return (
       <Suspense fallback={<div>Loading...</div>}>
@@ -160,7 +181,19 @@ function App() {
   }
 
   if (route.page === 'modules') {
-    return <ModuleHubPage onOpenModule={openModule} />
+    return <WorkbenchPage onOpenTemplate={openTemplate} onOpenP06={() => openP06()} />
+  }
+
+  if (route.page === 'p06') {
+    return (
+      <ToastProvider>
+        <P06WavePage
+          moduleId={p06ModuleId}
+          onChangeModule={(nextModuleId) => openP06(nextModuleId)}
+          onBack={() => navigateTo('#modules')}
+        />
+      </ToastProvider>
+    )
   }
 
   if (route.page === 'module') {
@@ -168,13 +201,13 @@ function App() {
     if (!group) {
       return <ModuleHubPage onOpenModule={openModule} />
     }
-      return (
-        <ModulePage
-          group={group}
-          onOpenScene={(sceneId) => openScene(group.module, sceneId)}
-          editedSceneIds={new Set(Object.keys(sceneDrafts))}
-          activeSceneId={activeSceneId}
-        />
+    return (
+      <ModulePage
+        group={group}
+        onOpenScene={(sceneId) => openScene(group.module, sceneId)}
+        editedSceneIds={new Set(Object.keys(sceneDrafts))}
+        activeSceneId={activeSceneId}
+      />
     )
   }
 

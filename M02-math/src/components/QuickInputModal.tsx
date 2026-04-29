@@ -14,6 +14,7 @@ import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
 import { FUNCTION_COLORS, DEFAULT_TRANSFORM } from '@/types';
 import type { FunctionEntry, PiecewiseSegment } from '@/types';
 import { COLORS } from '@/styles/colors';
+import { createId } from '@/lib/id';
 
 // ─── Quick-insert buttons ────────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ interface SegmentDraft {
 
 function makeSegmentDraft(): SegmentDraft {
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     exprStr: '',
     xMin: '',
     xMax: '',
@@ -131,7 +132,7 @@ export function QuickInputModal({ onClose }: { onClose: () => void }) {
       const mergedParams = detectAndMergeCoefficients(expr, []) ?? [];
 
       const entry: FunctionEntry = {
-        id:          crypto.randomUUID(),
+        id:          createId(),
         label:       nextLabel,
         mode:        'standard',
         exprStr:     expr,
@@ -155,7 +156,7 @@ export function QuickInputModal({ onClose }: { onClose: () => void }) {
       const entrySegments = validSegments.map(segmentDraftToEntry);
 
       const entry: FunctionEntry = {
-        id:          crypto.randomUUID(),
+        id:          createId(),
         label:       nextLabel,
         mode:        'piecewise',
         exprStr:     entrySegments[0].exprStr,

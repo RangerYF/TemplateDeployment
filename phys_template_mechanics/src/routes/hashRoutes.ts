@@ -3,6 +3,7 @@ import { TEMPLATE_MODULES, type TemplateModule, getTemplateById } from '@/templa
 export type RouteState =
   | { page: 'thumbnails' }
   | { page: 'modules' }
+  | { page: 'p06'; moduleId: string | null }
   | { page: 'module'; moduleId: TemplateModule }
   | { page: 'module-scene'; moduleId: TemplateModule; sceneId: string }
 
@@ -15,6 +16,13 @@ export function parseHash(hash: string): RouteState {
   }
 
   const [path, query = ''] = raw.split('?')
+  if (path === 'p06') {
+    const params = new URLSearchParams(query)
+    return {
+      page: 'p06',
+      moduleId: params.get('module'),
+    }
+  }
   if (path === 'editor') {
     const params = new URLSearchParams(query)
     const templateId = params.get('template')

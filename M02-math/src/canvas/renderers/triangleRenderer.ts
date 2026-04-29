@@ -5,7 +5,7 @@
  *
  * Coordinate strategy:
  *   Local triangle: A at origin, B along +x, C above AB.
- *   Scaled to fit ≤65% of the smaller viewport dimension.
+ *   Rendered in true math units so side lengths match the visible grid.
  *   Centred at the given math-space (cx, cy).
  *
  * Annotations:
@@ -26,15 +26,13 @@ const R2D = 180 / Math.PI;
 
 /**
  * Compute canvas-pixel vertices [A, B, C] for a triangle centred at (cx, cy)
- * in math coordinates.  The returned scale is the math-units-per-side-unit.
+ * in math coordinates. Side lengths are not display-scaled.
  */
 function triangleToCanvas(
   triangle: Triangle,
   viewport: Viewport,
   cx: number,
   cy: number,
-  fitXRange = viewport.xRange,
-  fitYRange = viewport.yRange,
 ): [number, number][] {
   const { b, c, A } = triangle;
 
@@ -44,26 +42,13 @@ function triangleToCanvas(
   const Cx = b * Math.cos(A);
   const Cy = b * Math.sin(A);
 
-  // Bounding box
-  const xVals = [Ax, Bx, Cx];
-  const yVals = [Ay, By, Cy];
-  const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
-  const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
-  const localW = xMax - xMin || 1;
-  const localH = yMax - yMin || 1;
-
-  // Scale to fit 65% of the available range, maintaining aspect ratio
-  const scaleX = fitXRange * 0.65 / localW;
-  const scaleY = fitYRange * 0.65 / localH;
-  const scale  = Math.min(scaleX, scaleY);
-
   // Centroid of local triangle
   const gx = (Ax + Bx + Cx) / 3;
   const gy = (Ay + By + Cy) / 3;
 
   // Transform to math coords (centred at cx, cy)
   function toMath(lx: number, ly: number): [number, number] {
-    return [cx + (lx - gx) * scale, cy + (ly - gy) * scale];
+    return [cx + (lx - gx), cy + (ly - gy)];
   }
 
   const mA = toMath(Ax, Ay);
@@ -200,10 +185,8 @@ export function renderSSADualSolutions(
   const cx1 = viewport.xMin + viewport.xRange * 0.28;
   const cx2 = viewport.xMax - viewport.xRange * 0.28;
 
-  // Each triangle gets half the x-range for scale calculation, full viewport for toCanvas
-  const halfX = viewport.xRange / 2;
-  const v1 = triangleToCanvas(triangle1, viewport, cx1, cy, halfX, viewport.yRange);
-  const v2 = triangleToCanvas(triangle2, viewport, cx2, cy, halfX, viewport.yRange);
+  const v1 = triangleToCanvas(triangle1, viewport, cx1, cy);
+  const v2 = triangleToCanvas(triangle2, viewport, cx2, cy);
 
   // Solution labels
   ctx.save();

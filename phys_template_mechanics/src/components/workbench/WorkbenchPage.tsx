@@ -8,6 +8,7 @@ import { COLORS, FEEDBACK_VISUAL, RADIUS } from '@/styles/tokens'
 
 interface WorkbenchPageProps {
   onOpenTemplate: (templateId: string) => void
+  onOpenP06: () => void
 }
 
 const STATUS_TEXT: Record<TemplateStatus, string> = {
@@ -89,7 +90,7 @@ function TemplateCardItem({
   )
 }
 
-export function WorkbenchPage({ onOpenTemplate }: WorkbenchPageProps) {
+export function WorkbenchPage({ onOpenTemplate, onOpenP06 }: WorkbenchPageProps) {
   const readyGroups = templateCatalog
     .map((group) => ({
       ...group,
@@ -119,6 +120,62 @@ export function WorkbenchPage({ onOpenTemplate }: WorkbenchPageProps) {
             顶部标签切换模块，进入编辑器后可继续编辑场景。
           </p>
         </div>
+
+        <section className="mb-6">
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <div
+              className="text-xs font-semibold tracking-wide"
+              style={{ color: COLORS.textMuted }}
+            >
+              独立演示台
+            </div>
+            <div
+              className="text-[11px]"
+              style={{ color: COLORS.primary }}
+            >
+              阶段 1-4 已接入
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenP06}
+            className="w-full text-left px-4 py-4"
+            style={{
+              border: `1px solid ${COLORS.border}`,
+              borderRadius: RADIUS.card,
+              backgroundColor: COLORS.bg,
+              transition: 'background-color 0.12s ease, border-color 0.12s ease',
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.borderColor = COLORS.primary
+              event.currentTarget.style.backgroundColor = COLORS.primaryLight
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.borderColor = COLORS.border
+              event.currentTarget.style.backgroundColor = COLORS.bg
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                  P06 波动与振动演示台
+                </div>
+                <div className="mt-1 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
+                  已覆盖一维传播、双波叠加、驻波和多普勒，支持干涉、拍现象、固定端驻波与波前压缩演示。
+                </div>
+              </div>
+              <div
+                className="rounded-full px-3 py-1.5 text-[11px] font-semibold"
+                style={{
+                  backgroundColor: COLORS.primaryLight,
+                  color: COLORS.primary,
+                }}
+              >
+                打开演示台
+              </div>
+            </div>
+          </button>
+        </section>
 
         {readyGroups.length > 0 ? (
           <Tabs

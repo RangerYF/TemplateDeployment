@@ -91,7 +91,7 @@ export function Slider({
   return (
     <div
       className={cn(
-        'relative flex h-5 w-full touch-none select-none items-center',
+        'relative flex h-5 w-full touch-none select-none items-center overflow-hidden',
         disabled && 'pointer-events-none opacity-50',
         className,
       )}

@@ -6,6 +6,8 @@ import type { SimulationSnapshot } from './editor/store/simulationStore';
 import type { UIStoreSnapshot } from './editor/store/uiStore';
 import type { SimulationReplayMetadata, SimulationResult } from './types/simulation';
 import { rebuildSimulationResultFromReplay } from './engine/simulationRunner';
+import { buildM05AiContext, type M05AiContext } from './runtime/aiContext';
+import { applyM05AiOperations, type M05BridgeOperationResult } from './runtime/aiOperations';
 
 const TEMPLATE_KEY = 'm05';
 const RUNTIME_KEY = 'visual-m05';
@@ -43,6 +45,8 @@ interface TemplateBridge {
   getSnapshot(): VisualM05SnapshotDocument;
   loadSnapshot(snapshot: unknown): void;
   validateSnapshot(snapshot: unknown): ValidationResult;
+  getAiContext(): M05AiContext;
+  applyOperations(operations: unknown): M05BridgeOperationResult;
 }
 
 interface PersistedSimulationResult {
@@ -276,6 +280,8 @@ function createBridge(): TemplateBridge {
     getSnapshot: getVisualM05Snapshot,
     loadSnapshot: loadVisualM05Snapshot,
     validateSnapshot: validateVisualM05Snapshot,
+    getAiContext: buildM05AiContext,
+    applyOperations: applyM05AiOperations,
   };
 }
 
@@ -332,6 +338,24 @@ export function registerTemplateBridge(): void {
             requestId: data.requestId,
             success: true,
             payload: bridge.validateSnapshot(data.payload),
+          };
+          break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.applyOperations(data.payload),
           };
           break;
         default:

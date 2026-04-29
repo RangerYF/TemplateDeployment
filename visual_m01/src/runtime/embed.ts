@@ -30,11 +30,25 @@ export interface BridgeValidationResult {
   errors: string[];
 }
 
+export interface BridgeOperationResult {
+  ok: boolean;
+  errors: string[];
+  applied: number;
+}
+
+export interface TemplateAiContext {
+  templateKey: string;
+  summary: string;
+  [key: string]: unknown;
+}
+
 export interface EdumindTemplateBridge {
   getDefaultSnapshot: () => M01SnapshotEnvelope;
   getSnapshot: () => M01SnapshotEnvelope;
+  getAiContext?: () => TemplateAiContext;
   loadSnapshot: (snapshot: unknown) => void;
   validateSnapshot: (snapshot: unknown) => BridgeValidationResult;
+  applyOperations?: (operations: unknown) => BridgeOperationResult | Promise<BridgeOperationResult>;
 }
 
 declare global {

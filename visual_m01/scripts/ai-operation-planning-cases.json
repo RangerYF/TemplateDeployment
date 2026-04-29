@@ -1,0 +1,149 @@
+[
+  {
+    "id": "simple-sphere-radius",
+    "instruction": "生成一个球体，半径为 2。",
+    "expectedOperationTypes": ["setGeometry"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "sphere" }
+    ],
+    "expectedWarnings": [],
+    "notes": "简单几何体创建应只使用一个 setGeometry。"
+  },
+  {
+    "id": "cube-face-center-o1",
+    "instruction": "生成正方体，在底面 ABCD 的中心标 O1。",
+    "expectedOperationTypes": ["setGeometry", "addFaceCenterPoint"],
+    "forbiddenOperationTypes": ["loadPresetScene", "addCenterPoint"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "point", "label": "O1" }
+    ],
+    "expectedWarnings": [],
+    "notes": "底面中心是面中心，不是整体几何体中心。"
+  },
+  {
+    "id": "cube-body-center-o",
+    "instruction": "生成正方体，并标出它的中心 O。",
+    "expectedOperationTypes": ["setGeometry", "addCenterPoint"],
+    "forbiddenOperationTypes": ["loadPresetScene", "addFaceCenterPoint"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "point", "label": "O" }
+    ],
+    "expectedWarnings": [],
+    "notes": "整体中心应使用 addCenterPoint。"
+  },
+  {
+    "id": "cube-diagonal-highlight",
+    "instruction": "生成正方体，连接 A 和 C1，并把 AC1 标红。",
+    "expectedOperationTypes": ["setGeometry", "addSegmentByLabels"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "segment", "label": "AC1", "style": { "color": "#e74c3c" } }
+    ],
+    "expectedWarnings": [],
+    "notes": "正方体空间对角线在 M01 标签协议中使用 C1，不使用 G。"
+  },
+  {
+    "id": "midpoint-and-segment",
+    "instruction": "在 AB 上取中点 M，再连接 M 和 C1。",
+    "expectedOperationTypes": ["addPointOnEdge", "addSegmentByLabels"],
+    "forbiddenOperationTypes": ["loadPresetScene", "setGeometry"],
+    "expectedEntities": [
+      { "type": "point", "label": "M" },
+      { "type": "segment", "label": "MC1" }
+    ],
+    "expectedWarnings": [],
+    "notes": "已有正方体场景下不应重新 setGeometry。"
+  },
+  {
+    "id": "cross-section-three-points",
+    "instruction": "用 A、C、A1 三点作一个截面。",
+    "expectedOperationTypes": ["addCrossSectionByLabels"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "face", "role": "crossSection" }
+    ],
+    "expectedWarnings": [],
+    "notes": "多面体三点截面应使用确定性截面原语。"
+  },
+  {
+    "id": "auxiliary-face",
+    "instruction": "生成正方体，并用 A、C、C1 三点作辅助平面。",
+    "expectedOperationTypes": ["setGeometry", "addAuxiliaryFaceByLabels"],
+    "forbiddenOperationTypes": ["loadPresetScene", "addCrossSectionByLabels"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "face", "role": "auxiliary" }
+    ],
+    "expectedWarnings": [],
+    "notes": "辅助平面和截面不是同一意图。"
+  },
+  {
+    "id": "circumsphere",
+    "instruction": "生成正方体，并添加它的外接球。",
+    "expectedOperationTypes": ["setGeometry", "addCircumsphere"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "circumSphere" }
+    ],
+    "expectedWarnings": [],
+    "notes": "普通外接球构造优先 operation，不直接加载专题 preset。"
+  },
+  {
+    "id": "point-face-distance",
+    "instruction": "生成正方体，标出 A1 到底面 ABCD 的距离。",
+    "expectedOperationTypes": ["setGeometry", "addDistanceMeasurement"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "distanceMeasurement", "kind": "pointFace" }
+    ],
+    "expectedWarnings": [],
+    "notes": "距离数值必须由 M01 计算。"
+  },
+  {
+    "id": "line-face-angle",
+    "instruction": "生成正方体，标出 AC1 与底面 ABCD 所成的角。",
+    "expectedOperationTypes": ["setGeometry", "addSegmentByLabels", "addAngleMeasurement"],
+    "forbiddenOperationTypes": ["loadPresetScene"],
+    "expectedEntities": [
+      { "type": "geometry", "geometryType": "cube" },
+      { "type": "angleMeasurement", "kind": "lineFace" }
+    ],
+    "expectedWarnings": [],
+    "notes": "线面角可先补出 AC1，再添加 lineFace 角度度量。"
+  },
+  {
+    "id": "preset-sphere-section",
+    "instruction": "我要讲球的截面圆面积，帮我直接进入合适的图。",
+    "expectedOperationTypes": ["loadPresetScene"],
+    "forbiddenOperationTypes": ["setGeometry"],
+    "expectedEntities": [
+      { "type": "presetScene", "presetId": "sphere-section-circle-area" }
+    ],
+    "expectedWarnings": [],
+    "notes": "明确专题快捷入口才允许使用 preset。"
+  },
+  {
+    "id": "ambiguous-section",
+    "instruction": "帮我在这个正方体里做一个截面。",
+    "expectedOperationTypes": [],
+    "forbiddenOperationTypes": ["loadPresetScene", "addCrossSectionByLabels"],
+    "expectedEntities": [],
+    "expectedWarnings": ["需要确认截面经过哪些点"],
+    "notes": "缺少点名时不应猜测。"
+  },
+  {
+    "id": "unknown-point-label",
+    "instruction": "连接 A 和 G。",
+    "expectedOperationTypes": [],
+    "forbiddenOperationTypes": ["addSegmentByLabels"],
+    "expectedEntities": [],
+    "expectedWarnings": ["点名 G 不在当前 M01 正方体标签协议中"],
+    "notes": "M01 正方体使用 A,B,C,D,A1,B1,C1,D1，不自动把 G 映射为 C1。"
+  }
+]

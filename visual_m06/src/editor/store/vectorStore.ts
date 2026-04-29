@@ -106,6 +106,19 @@ export interface VectorSnapshot {
   basis1: Vec2D;
   basis2: Vec2D;
   activePresetId: string | null;
+  showGrid?: boolean;
+  showAngleArc?: boolean;
+  showProjection?: boolean;
+  showDecompParallel?: boolean;
+  angleUnit?: 'deg' | 'rad';
+  showPerspective?: boolean;
+  show3DGrid?: boolean;
+  parallelogramAnimTick?: number;
+  decimalPlaces?: number;
+  surdMode?: boolean;
+  unitCircleAngle?: number;
+  unitCirclePlaying?: boolean;
+  showPolarization?: boolean;
 }
 
 export const useVectorStore = create<VectorStoreState>()((set, get) => ({
@@ -302,6 +315,19 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       basis1: s.basis1,
       basis2: s.basis2,
       activePresetId: s.activePresetId,
+      showGrid: s.showGrid,
+      showAngleArc: s.showAngleArc,
+      showProjection: s.showProjection,
+      showDecompParallel: s.showDecompParallel,
+      angleUnit: s.angleUnit,
+      showPerspective: s.showPerspective,
+      show3DGrid: s.show3DGrid,
+      parallelogramAnimTick: s.parallelogramAnimTick,
+      decimalPlaces: s.decimalPlaces,
+      surdMode: s.surdMode,
+      unitCircleAngle: s.unitCircleAngle,
+      unitCirclePlaying: s.unitCirclePlaying,
+      showPolarization: s.showPolarization,
     };
   },
 
@@ -318,6 +344,19 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       basis1: snap.basis1,
       basis2: snap.basis2,
       activePresetId: snap.activePresetId,
+      showGrid: snap.showGrid ?? true,
+      showAngleArc: snap.showAngleArc ?? true,
+      showProjection: snap.showProjection ?? true,
+      showDecompParallel: snap.showDecompParallel ?? true,
+      angleUnit: snap.angleUnit ?? 'deg',
+      showPerspective: snap.showPerspective ?? true,
+      show3DGrid: snap.show3DGrid ?? true,
+      parallelogramAnimTick: snap.parallelogramAnimTick ?? 0,
+      decimalPlaces: snap.decimalPlaces ?? 2,
+      surdMode: snap.surdMode ?? false,
+      unitCircleAngle: snap.unitCircleAngle ?? 0,
+      unitCirclePlaying: snap.unitCirclePlaying ?? false,
+      showPolarization: snap.showPolarization ?? false,
     });
   },
 }));

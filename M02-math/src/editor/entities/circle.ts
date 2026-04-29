@@ -1,13 +1,14 @@
 import type { CircleEntity, CircleParams, BaseEntityMeta } from '@/types';
 import { ENTITY_COLORS } from '@/types';
 import { computeCircleDerived } from '@/engine/conicAnalysis';
+import { createId } from '@/lib/id';
 
 export function createCircle(
   params:    CircleParams,
   overrides?: Partial<BaseEntityMeta>,
 ): CircleEntity {
   return {
-    id:      crypto.randomUUID(),
+    id:      createId(),
     type:    'circle',
     visible: true,
     color:   ENTITY_COLORS[0],

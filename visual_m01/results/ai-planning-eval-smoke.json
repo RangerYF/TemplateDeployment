@@ -1,0 +1,158 @@
+{
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "accuracy": 1,
+    "byCategory": {
+      "seed": {
+        "total": 3,
+        "passed": 3,
+        "accuracy": 1
+      }
+    },
+    "topFailureReasons": []
+  },
+  "results": [
+    {
+      "case": {
+        "id": "simple-sphere-radius",
+        "instruction": "生成一个球体，半径为 2。",
+        "expectedOperationTypes": [
+          "setGeometry"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "seed",
+        "notes": "简单几何体创建应只使用一个 setGeometry。"
+      },
+      "score": {
+        "passed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry"
+        ],
+        "warnings": [],
+        "explanation": "已切换为半径为 2 的球体，系统会自动生成球体所需的内置点、曲线和面。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "sphere",
+            "params": {
+              "radius": 2
+            }
+          }
+        ],
+        "explanation": "已切换为半径为 2 的球体，系统会自动生成球体所需的内置点、曲线和面。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "cube-face-center-o1",
+        "instruction": "生成正方体，在底面 ABCD 的中心标 O1。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addFaceCenterPoint"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene",
+          "addCenterPoint"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "seed",
+        "notes": "底面中心是面中心，不是整体几何体中心。"
+      },
+      "score": {
+        "passed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addFaceCenterPoint"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，并在底面 ABCD 的中心标出 O1。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addFaceCenterPoint",
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "O1"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，并在底面 ABCD 的中心标出 O1。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "cube-body-center-o",
+        "instruction": "生成正方体，并标出它的中心 O。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addCenterPoint"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene",
+          "addFaceCenterPoint"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "seed",
+        "notes": "整体中心应使用 addCenterPoint。"
+      },
+      "score": {
+        "passed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addCenterPoint"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，并标出几何体中心 O。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addCenterPoint",
+            "label": "O"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，并标出几何体中心 O。",
+        "warnings": []
+      }
+    }
+  ]
+}

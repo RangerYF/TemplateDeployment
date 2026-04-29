@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Viewport } from '@/canvas/Viewport';
 import { COLORS } from '@/styles/colors';
 import { renderAxis } from '@/canvas/renderers/axisRenderer';
@@ -31,6 +31,9 @@ import { PanZoomTool } from '@/editor/tools/PanZoomTool';
 import { PointOnCurveTool } from '@/editor/tools/PointOnCurveTool';
 import { LineDragTool } from '@/editor/tools/LineDragTool';
 import { TwoPointLineTool } from '@/editor/tools/TwoPointLineTool';
+import { projectOntoEntity } from '@/engine/curveParameterization';
+import { UpdateMovablePointCommand } from '@/editor/commands/UpdateMovablePointCommand';
+import { executeM03Command } from '@/editor/commands/m03Execute';
 import { useEntityStore } from '@/editor/store/entityStore';
 import { useAnimationStore } from '@/editor/store/animationStore';
 import { useM03InteractionStore } from '@/editor/store/m03InteractionStore';
@@ -70,7 +73,6 @@ export function GeometryCanvas() {
   const viewport          = useEntityStore((s) => s.viewport);
   const displayOptions    = useEntityStore((s) => s.displayOptions);
   const activeTool        = useEntityStore((s) => s.activeTool);
-  const setActiveTool     = useEntityStore((s) => s.setActiveTool);
   const focalConstraint   = useEntityStore((s) => s.focalConstraint);
   const activeEntityId    = useEntityStore((s) => s.activeEntityId);
   const hoveredEntityId   = useEntityStore((s) => s.hoveredEntityId);
@@ -80,6 +82,7 @@ export function GeometryCanvas() {
   const isDraggingRef = useRef(false);
   // Track current hoveredEntityId in a ref for cursor without re-render
   const [cursorHovered, setCursorHovered] = useState(false);
+  const [cursorMode, setCursorMode] = useState<'none' | 'curve' | 'point'>('none');
 
   // M03 pinned points
   const pinnedPoints        = useM03InteractionStore((s) => s.pinnedPoints);
@@ -138,8 +141,7 @@ export function GeometryCanvas() {
     const steps = isAnimating ? 400 : 800;
 
     // 2–3. Curves + derived elements per entity
-    // All curves render in uniform dark; the active one gets primary highlight
-    const CURVE_COLOR  = '#6B7280';
+    // Keep each entity's own color; active entities get a primary glow.
     const ACTIVE_COLOR = COLORS.primary;
 
     const lineEntities:  LineEntity[]  = [];
@@ -150,7 +152,7 @@ export function GeometryCanvas() {
       if (!entity.visible) continue;
 
       const isActive  = entity.id === activeEntityId;
-      const drawColor = isActive ? ACTIVE_COLOR : CURVE_COLOR;
+      const drawColor = entity.color;
 
       if (entity.type === 'line') {
         if (isActive) {
@@ -274,7 +276,7 @@ export function GeometryCanvas() {
 
     // 9. Movable points
     const trajectories = useMovablePointStore.getState().trajectories;
-    renderMovablePoints(ctx, vp, movablePoints, trajectories);
+    renderMovablePoints(ctx, vp, movablePoints, trajectories, activeEntityId);
 
   }, [entities, viewport, displayOptions, canvasSize, staticRef, isAnimating,
       activeEntityId, pinnedPoints, pinnedIntersections, locusRenderTick, locusPreset, locusEntityId,
@@ -326,7 +328,39 @@ export function GeometryCanvas() {
         );
         renderImplicitCurve(ctx, result, vp, glowColor, { lineWidth: 3.5 });
       }
-    } else if (entity.type !== 'movable-point') {
+    } else if (entity.type === 'movable-point') {
+      // Hover glow for movable point: highlight ring + coordinate label
+      const [pcx, pcy] = vp.toCanvas(entity.params.mathX, entity.params.mathY);
+      ctx.strokeStyle = glowColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(pcx, pcy, 12, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Light card label
+      const ptLabel = `(${entity.params.mathX.toFixed(2)}, ${entity.params.mathY.toFixed(2)})`;
+      ctx.font = '700 13px -apple-system,"Helvetica Neue",Arial,sans-serif';
+      ctx.textBaseline = 'middle';
+      const ptw = ctx.measureText(ptLabel).width;
+      const plx = Math.round(pcx + 14);
+      const ply = Math.round(pcy - 16);
+      const ppw = ptw + 14;
+      const pph = 22;
+
+      ctx.shadowColor = 'rgba(0,0,0,0.12)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 2;
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.beginPath();
+      ctx.roundRect(plx - 7, ply - pph / 2, ppw, pph, 8);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      ctx.fillStyle = '#1A1A2E';
+      ctx.fillText(ptLabel, plx, ply);
+    } else {
       const result = sampleConicEntity(entity, vp, 400);
       if (Array.isArray(result)) {
         renderParametricCurve(ctx, result, vp, glowColor, { lineWidth: 3.5 });
@@ -372,30 +406,85 @@ export function GeometryCanvas() {
     }
   }, [activeTool, focalConstraint, editorRef, dynamicRef]);
 
-  // ── Escape key: cancel TwoPointLineTool ───────────────────────────────────
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape' && activeTool === 'line-two-point') {
-      setActiveTool('pan-zoom');
-    }
-  }, [activeTool, setActiveTool]);
-
   // ── Pointer event forwarding ───────────────────────────────────────────────
 
   const downPosRef = useRef<{ x: number; y: number } | null>(null);
+  const draggingPointRef = useRef<{ id: string; before: MovablePointEntity } | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     dynamicRef.current?.setPointerCapture(e.pointerId);
     const rect = e.currentTarget.getBoundingClientRect();
     downPosRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     isDraggingRef.current = true;
+
+    // In pan-zoom mode, check if clicking a movable point to start drag
+    const tool = useEntityStore.getState().activeTool;
+    if (tool === 'pan-zoom') {
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const vp = useEntityStore.getState().viewport;
+      const vpObj = new Viewport(vp.xMin, vp.xMax, vp.yMin, vp.yMax, rect.width, rect.height);
+      const [mx, my] = vpObj.toMath(cx, cy);
+      const HIT_PX = 10;
+      const mathPerPx = (vp.xMax - vp.xMin) / rect.width;
+      const hitRadius = HIT_PX * mathPerPx;
+
+      const store = useEntityStore.getState();
+      const movablePoints = store.entities.filter(
+        (ent): ent is MovablePointEntity => ent.type === 'movable-point' && ent.visible,
+      );
+      for (const pt of movablePoints) {
+        const dx = mx - pt.params.mathX;
+        const dy = my - pt.params.mathY;
+        if (Math.sqrt(dx * dx + dy * dy) < hitRadius) {
+          draggingPointRef.current = { id: pt.id, before: { ...pt, params: { ...pt.params } } };
+          store.setActiveEntityId(pt.id);
+          return; // don't forward to PanZoomTool
+        }
+      }
+    }
+
     editorRef.current?.dispatchPointerDown(buildToolEvent(e.nativeEvent));
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const tool = useEntityStore.getState().activeTool;
+
+    // ── Pan-zoom drag of a movable point ────────────────────────────
+    if (draggingPointRef.current && tool === 'pan-zoom') {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const vp = useEntityStore.getState().viewport;
+      const vpObj = new Viewport(vp.xMin, vp.xMax, vp.yMin, vp.yMax, rect.width, rect.height);
+      const [mx, my] = vpObj.toMath(cx, cy);
+
+      const store = useEntityStore.getState();
+      const point = store.entities.find(
+        (ent): ent is MovablePointEntity => ent.id === draggingPointRef.current!.id && ent.type === 'movable-point',
+      );
+      if (point) {
+        const constraint = store.entities.find((ent) => ent.id === point.params.constraintEntityId);
+        if (constraint) {
+          const projected = projectOntoEntity(constraint, mx, my, vpObj);
+          if (projected) {
+            const updated: MovablePointEntity = {
+              ...point,
+              params: { ...point.params, t: projected.t, mathX: projected.mathX, mathY: projected.mathY, branch: projected.branch },
+            };
+            store.updateEntity(point.id, updated);
+            if (point.params.showTrajectory) {
+              useMovablePointStore.getState().pushTracePoint(point.id, projected.mathX, projected.mathY);
+            }
+          }
+        }
+      }
+      return;
+    }
+
     editorRef.current?.dispatchPointerMove(buildToolEvent(e.nativeEvent));
 
     // Hover snap in pan-zoom mode (suppress during drag)
-    const tool = useEntityStore.getState().activeTool;
     if (tool !== 'pan-zoom' || isDraggingRef.current) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -409,12 +498,39 @@ export function GeometryCanvas() {
 
     const [mx, my] = vpObj.toMath(cx, cy);
 
-    // Convert 20px snap radius to math units
-    const SNAP_PX = 20;
+    // Convert snap radius to math units
     const mathPerPx = (vp.xMax - vp.xMin) / cssW;
-    const snapRadius = SNAP_PX * mathPerPx;
 
+    // 1. Check movable points first (10px hit radius)
+    const HIT_PX = 10;
+    const hitRadius = HIT_PX * mathPerPx;
     const currentEntities = useEntityStore.getState().entities;
+    const movablePoints = currentEntities.filter(
+      (ent): ent is MovablePointEntity => ent.type === 'movable-point' && ent.visible,
+    );
+    let hitPointId: string | null = null;
+    for (const pt of movablePoints) {
+      const dx = mx - pt.params.mathX;
+      const dy = my - pt.params.mathY;
+      if (Math.sqrt(dx * dx + dy * dy) < hitRadius) {
+        hitPointId = pt.id;
+        break;
+      }
+    }
+
+    if (hitPointId) {
+      const prevId = useEntityStore.getState().hoveredEntityId;
+      if (hitPointId !== prevId) {
+        useEntityStore.getState().setHoveredEntityId(hitPointId);
+        setCursorHovered(true);
+        setCursorMode('point');
+      }
+      return;
+    }
+
+    // 2. Fallback: curve snap
+    const SNAP_PX = 20;
+    const snapRadius = SNAP_PX * mathPerPx;
     const snap = findNearestOnAnyEntity(currentEntities, mx, my, vpObj, snapRadius);
 
     const newId = snap ? snap.entity.id : null;
@@ -422,11 +538,34 @@ export function GeometryCanvas() {
     if (newId !== prevId) {
       useEntityStore.getState().setHoveredEntityId(newId);
       setCursorHovered(newId !== null);
+      setCursorMode(newId !== null ? 'curve' : 'none');
     }
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
     dynamicRef.current?.releasePointerCapture(e.pointerId);
+
+    // Commit movable point drag if active
+    if (draggingPointRef.current) {
+      const store = useEntityStore.getState();
+      const afterEntity = store.entities.find(
+        (ent): ent is MovablePointEntity => ent.id === draggingPointRef.current!.id && ent.type === 'movable-point',
+      );
+      if (afterEntity && draggingPointRef.current.before) {
+        const dx = afterEntity.params.mathX - draggingPointRef.current.before.params.mathX;
+        const dy = afterEntity.params.mathY - draggingPointRef.current.before.params.mathY;
+        if (dx * dx + dy * dy > 1e-10) {
+          executeM03Command(
+            new UpdateMovablePointCommand(draggingPointRef.current.id, draggingPointRef.current.before, afterEntity),
+          );
+        }
+      }
+      draggingPointRef.current = null;
+      isDraggingRef.current = false;
+      downPosRef.current = null;
+      return;
+    }
+
     editorRef.current?.dispatchPointerUp(buildToolEvent(e.nativeEvent));
     isDraggingRef.current = false;
 
@@ -454,6 +593,7 @@ export function GeometryCanvas() {
     editorRef.current?.dispatchPointerLeave();
     useEntityStore.getState().setHoveredEntityId(null);
     setCursorHovered(false);
+    setCursorMode('none');
   };
 
   const handleDblClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -475,6 +615,7 @@ export function GeometryCanvas() {
     activeTool === 'movable-point'  ? 'crosshair' :
     activeTool === 'line-drag'      ? 'move'       :
     activeTool === 'line-two-point' ? 'crosshair'  :
+    (activeTool === 'pan-zoom' && cursorHovered && cursorMode === 'point') ? 'grab' :
     (activeTool === 'pan-zoom' && cursorHovered) ? 'pointer' : 'grab';
 
   return (
@@ -482,7 +623,6 @@ export function GeometryCanvas() {
       ref={containerRef}
       style={{ position: 'relative', width: '100%', height: '100%' }}
       tabIndex={-1}
-      onKeyDown={handleKeyDown}
     >
       <canvas
         ref={staticRef}

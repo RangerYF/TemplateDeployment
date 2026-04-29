@@ -44,6 +44,15 @@ export function M03Layout() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Esc → reset tool to default (skip if focus is on an input/textarea)
+      if (e.key === 'Escape') {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (useEntityStore.getState().activeTool !== 'pan-zoom') {
+          useEntityStore.getState().setActiveTool('pan-zoom');
+        }
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         useHistoryStore.getState().undo();

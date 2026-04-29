@@ -1,0 +1,2235 @@
+{
+  "summary": {
+    "total": 40,
+    "passed": 32,
+    "failed": 8,
+    "accuracy": 0.8,
+    "strictPassed": 27,
+    "semanticPassed": 32,
+    "strictFailed": 13,
+    "semanticFailed": 8,
+    "strictAccuracy": 0.675,
+    "semanticAccuracy": 0.8,
+    "byCategory": {
+      "point": {
+        "total": 8,
+        "strictPassed": 5,
+        "semanticPassed": 8,
+        "strictAccuracy": 0.625,
+        "semanticAccuracy": 1
+      },
+      "measurement": {
+        "total": 10,
+        "strictPassed": 7,
+        "semanticPassed": 7,
+        "strictAccuracy": 0.7,
+        "semanticAccuracy": 0.7
+      },
+      "style-label-visible": {
+        "total": 7,
+        "strictPassed": 6,
+        "semanticPassed": 7,
+        "strictAccuracy": 0.8571428571428571,
+        "semanticAccuracy": 1
+      },
+      "negative": {
+        "total": 6,
+        "strictPassed": 3,
+        "semanticPassed": 3,
+        "strictAccuracy": 0.5,
+        "semanticAccuracy": 0.5
+      },
+      "combo": {
+        "total": 9,
+        "strictPassed": 6,
+        "semanticPassed": 7,
+        "strictAccuracy": 0.6666666666666666,
+        "semanticAccuracy": 0.7777777777777778
+      }
+    },
+    "topFailureReasons": [
+      {
+        "reason": "missing warnings [\"需要确认\"]",
+        "count": 2
+      },
+      {
+        "reason": "expected [\"addDistanceMeasurement\"] got []; semantic expected [\"addDistanceMeasurement\"] got []",
+        "count": 1
+      },
+      {
+        "reason": "expected [\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"addAngleMeasurement\"]; semantic expected [\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"addAngleMeasurement\"]",
+        "count": 1
+      },
+      {
+        "reason": "expected [\"addAngleMeasurement\"] got []; semantic expected [\"addAngleMeasurement\"] got []",
+        "count": 1
+      },
+      {
+        "reason": "expected [] got [\"setGeometry\"]; missing warnings [\"需要确认\"]",
+        "count": 1
+      },
+      {
+        "reason": "expected [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addAngleMeasurement\"]; semantic expected [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addAngleMeasurement\"]",
+        "count": 1
+      },
+      {
+        "reason": "expected [\"setGeometry\",\"addCircumsphere\",\"addCenterPoint\",\"addDistanceMeasurement\"] got [\"setGeometry\",\"addCircumsphere\",\"addDistanceMeasurement\"]; semantic expected [\"setGeometry\",\"addCircumsphere\",\"addCenterPoint\",\"addDistanceMeasurement\"] got [\"setGeometry\",\"addCircumsphere\",\"addDistanceMeasurement\"]",
+        "count": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "case": {
+        "id": "mid-ab-m",
+        "instruction": "生成正方体，在 AB 上取中点 M。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，并在 AB 棱的中点处创建点 M。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addPointOnEdge",
+            "edgeLabels": [
+              "A",
+              "B"
+            ],
+            "t": 0.5,
+            "label": "M"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，并在 AB 棱的中点处创建点 M。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-ab-m-connect-c1",
+        "instruction": "生成正方体，在 AB 上取中点 M，再连接 M 和 C1。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，在 AB 中点处创建点 M，并连接 M 和 C1。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addPointOnEdge",
+            "edgeLabels": [
+              "A",
+              "B"
+            ],
+            "t": 0.5,
+            "label": "M"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "M",
+              "C1"
+            ],
+            "label": "MC1"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，在 AB 中点处创建点 M，并连接 M 和 C1。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-current-ab-m",
+        "instruction": "在 AB 上取中点 M。",
+        "expectedOperationTypes": [
+          "addPointOnEdge"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": false,
+        "semanticPassed": true,
+        "reason": "expected [\"addPointOnEdge\"] got [\"addMidpointByLabels\"]",
+        "actualOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已在 AB 的中点处创建点 M。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "A",
+              "B"
+            ],
+            "label": "M"
+          }
+        ],
+        "explanation": "已在 AB 的中点处创建点 M。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-current-a1c1-n",
+        "instruction": "取 A1C1 的中点 N。",
+        "expectedOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已取 A1C1 的中点 N。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "A1",
+              "C1"
+            ],
+            "label": "N"
+          }
+        ],
+        "explanation": "已取 A1C1 的中点 N。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "point-ab-t-quarter",
+        "instruction": "在 AB 上取点 P，使 AP 是 AB 的四分之一。",
+        "expectedOperationTypes": [
+          "addPointOnEdge"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addPointOnEdge"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addPointOnEdge"
+        ],
+        "warnings": [],
+        "explanation": "已在 AB 上距 A 四分之一处创建点 P。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addPointOnEdge",
+            "edgeLabels": [
+              "A",
+              "B"
+            ],
+            "t": 0.25,
+            "label": "P"
+          }
+        ],
+        "explanation": "已在 AB 上距 A 四分之一处创建点 P。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-free-ac-o",
+        "instruction": "取 AC 的中点 O。",
+        "expectedOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已取 AC 的中点 O。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "A",
+              "C"
+            ],
+            "label": "O"
+          }
+        ],
+        "explanation": "已取 AC 的中点 O。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-connect-two",
+        "instruction": "取 BC 的中点 M，再连接 M 和 A1。",
+        "expectedOperationTypes": [
+          "addPointOnEdge",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": false,
+        "semanticPassed": true,
+        "reason": "expected [\"addPointOnEdge\",\"addSegmentByLabels\"] got [\"addMidpointByLabels\",\"addSegmentByLabels\"]",
+        "actualOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已在 BC 上取中点 M，并连接 M 和 A1。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "B",
+              "C"
+            ],
+            "label": "M"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "M",
+              "A1"
+            ],
+            "label": "MA1"
+          }
+        ],
+        "explanation": "已在 BC 上取中点 M，并连接 M 和 A1。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "mid-top-connect",
+        "instruction": "取 B1C1 的中点 N，连接 N 和 D。",
+        "expectedOperationTypes": [
+          "addPointOnEdge",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "point",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": false,
+        "semanticPassed": true,
+        "reason": "expected [\"addPointOnEdge\",\"addSegmentByLabels\"] got [\"addMidpointByLabels\",\"addSegmentByLabels\"]",
+        "actualOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已在 B1C1 的中点创建 N，并连接 N 和 D。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "B1",
+              "C1"
+            ],
+            "label": "N"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "N",
+              "D"
+            ],
+            "label": "ND"
+          }
+        ],
+        "explanation": "已在 B1C1 的中点创建 N，并连接 N 和 D。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "dist-a-a1",
+        "instruction": "生成正方体，标出 A 到 A1 的距离。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，并添加 A 到 A1 的距离度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointPoint",
+            "labels": [
+              "A",
+              "A1"
+            ],
+            "label": "AA1"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，并添加 A 到 A1 的距离度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "dist-a1-bottom",
+        "instruction": "生成正方体，标出 A1 到底面 ABCD 的距离。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为2的正方体，并添加了A1到底面ABCD的距离度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointFace",
+            "labels": [
+              "A1",
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为2的正方体，并添加了A1到底面ABCD的距离度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "dist-current-a1-bottom",
+        "instruction": "标出 A1 到底面 ABCD 的距离。",
+        "expectedOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已添加点 A1 到底面 ABCD 的距离度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointFace",
+            "labels": [
+              "A1",
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "d(A1,底面ABCD)"
+          }
+        ],
+        "explanation": "已添加点 A1 到底面 ABCD 的距离度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "dist-current-a-line-bc",
+        "instruction": "标出 A 到直线 BC 的距离。",
+        "expectedOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已添加点 A 到直线 BC 的距离度量，数值由系统自动计算并显示。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointLine",
+            "labels": [
+              "A",
+              "B",
+              "C"
+            ],
+            "label": "d(A,BC)"
+          }
+        ],
+        "explanation": "已添加点 A 到直线 BC 的距离度量，数值由系统自动计算并显示。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "dist-current-ab-cd",
+        "instruction": "标出直线 AB 和 CD 的距离。",
+        "expectedOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [\"addDistanceMeasurement\"] got []; semantic expected [\"addDistanceMeasurement\"] got []",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "直线 AB 和 CD 在正方体中共面且相交于 B 点，不是异面直线，无法计算异面直线距离。请确认测量对象。"
+        ],
+        "explanation": "当前场景中直线 AB 和 CD 是两条相交于 B 点的线段，无法计算异面直线距离。请确认您想测量的是哪两条异面直线（例如 AB 和 C1D1），或者是否要测量点线距离。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "当前场景中直线 AB 和 CD 是两条相交于 B 点的线段，无法计算异面直线距离。请确认您想测量的是哪两条异面直线（例如 AB 和 C1D1），或者是否要测量点线距离。",
+        "warnings": [
+          "直线 AB 和 CD 在正方体中共面且相交于 B 点，不是异面直线，无法计算异面直线距离。请确认测量对象。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "angle-line-line",
+        "instruction": "生成正方体，标出 AB 与 CD 所成的角。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为2的正方体，并添加了AB与CD所成角的度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineLine",
+            "labels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为2的正方体，并添加了AB与CD所成角的度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "angle-line-face",
+        "instruction": "生成正方体，标出 AC1 与底面 ABCD 所成的角。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，连接 A 和 C1 得到空间对角线 AC1，并添加了 AC1 与底面 ABCD 所成角的度量。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "label": "AC1"
+          },
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineFace",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，连接 A 和 C1 得到空间对角线 AC1，并添加了 AC1 与底面 ABCD 所成角的度量。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "angle-current-line-face",
+        "instruction": "标出 AC1 与底面 ABCD 所成的角。",
+        "expectedOperationTypes": [
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"addAngleMeasurement\"]; semantic expected [\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"addAngleMeasurement\"]",
+        "actualOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已添加 AC1 与底面 ABCD 所成角的度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineFace",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "线面角"
+          }
+        ],
+        "explanation": "已添加 AC1 与底面 ABCD 所成角的度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "angle-dihedral",
+        "instruction": "标出面 ABCD 与面 ABB1A1 的二面角。",
+        "expectedOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [\"addAngleMeasurement\"] got []; semantic expected [\"addAngleMeasurement\"] got []",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [],
+        "explanation": "已为底面 ABCD 与侧面 ABB1A1 添加二面角度量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "已为底面 ABCD 与侧面 ABB1A1 添加二面角度量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "angle-skew",
+        "instruction": "标出 AB 与 C1D1 的夹角。",
+        "expectedOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "measurement",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已添加 AB 与 C1D1 的夹角测量，数值由系统自动计算。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineLine",
+            "labels": [
+              "A",
+              "B",
+              "C1",
+              "D1"
+            ]
+          }
+        ],
+        "explanation": "已添加 AB 与 C1D1 的夹角测量，数值由系统自动计算。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "label-a-p",
+        "instruction": "把 A 点改名为 P。",
+        "expectedOperationTypes": [
+          "setLabel"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setLabel"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setLabel"
+        ],
+        "warnings": [],
+        "explanation": "已将点 A 的标签改为 P。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setLabel",
+            "label": "P",
+            "fromLabel": "A"
+          }
+        ],
+        "explanation": "已将点 A 的标签改为 P。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "style-ab-red-dashed",
+        "instruction": "把 AB 这条线改成红色虚线。",
+        "expectedOperationTypes": [
+          "setStyle"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setStyle"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setStyle"
+        ],
+        "warnings": [],
+        "explanation": "已将线段 AB 的样式改为红色虚线。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setStyle",
+            "labels": [
+              "A",
+              "B"
+            ],
+            "style": {
+              "color": "#e74c3c",
+              "dashed": true
+            }
+          }
+        ],
+        "explanation": "已将线段 AB 的样式改为红色虚线。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "visible-hide-bottom",
+        "instruction": "隐藏底面 ABCD。",
+        "expectedOperationTypes": [
+          "setVisible"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setVisible"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setVisible"
+        ],
+        "warnings": [],
+        "explanation": "已隐藏底面 ABCD 的四个顶点，系统会自动隐藏关联的底面边和面。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setVisible",
+            "visible": false,
+            "labels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已隐藏底面 ABCD 的四个顶点，系统会自动隐藏关联的底面边和面。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "visible-only-main",
+        "instruction": "简化当前场景，只保留正方体主体。",
+        "expectedOperationTypes": [
+          "setVisible"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setVisible"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setVisible"
+        ],
+        "warnings": [],
+        "explanation": "已隐藏所有棱的标签，只保留正方体主体几何体。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setVisible",
+            "visible": false,
+            "labels": [
+              "AB",
+              "BC",
+              "CD",
+              "DA",
+              "A1B1",
+              "B1C1",
+              "C1D1",
+              "D1A1",
+              "AA1",
+              "BB1",
+              "CC1",
+              "DD1"
+            ]
+          }
+        ],
+        "explanation": "已隐藏所有棱的标签，只保留正方体主体几何体。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "style-connect-new-red",
+        "instruction": "连接 A 和 C1，并把这条线标红。",
+        "expectedOperationTypes": [
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已连接 A、C1 两点，空间对角线 AC1 使用红色实线突出显示。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "style": {
+              "color": "#e74c3c",
+              "dashed": false
+            },
+            "label": "AC1"
+          }
+        ],
+        "explanation": "已连接 A、C1 两点，空间对角线 AC1 使用红色实线突出显示。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "label-new-midpoint",
+        "instruction": "在 AB 中点标 M。",
+        "expectedOperationTypes": [
+          "addPointOnEdge"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": false,
+        "semanticPassed": true,
+        "reason": "expected [\"addPointOnEdge\"] got [\"addMidpointByLabels\"]",
+        "actualOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已在 AB 的中点处创建点 M。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "A",
+              "B"
+            ],
+            "label": "M"
+          }
+        ],
+        "explanation": "已在 AB 的中点处创建点 M。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "label-new-face-center",
+        "instruction": "在底面中心标 O1。",
+        "expectedOperationTypes": [
+          "addFaceCenterPoint"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "style-label-visible",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addFaceCenterPoint"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addFaceCenterPoint"
+        ],
+        "warnings": [],
+        "explanation": "已在底面 ABCD 的中心标出 O1。当前场景已有正方体，无需重新创建。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addFaceCenterPoint",
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "O1"
+          }
+        ],
+        "explanation": "已在底面 ABCD 的中心标出 O1。当前场景已有正方体，无需重新创建。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "unknown-g",
+        "instruction": "连接 A 和 G。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addSegmentByLabels"
+        ],
+        "expectedWarnings": [
+          "G"
+        ],
+        "context": "cube",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "当前场景中没有名为 G 的点，请确认 G 是哪个点（例如是 B1、C1 或其他点），或者是否需要先创建该点。"
+        ],
+        "explanation": "当前场景中可用的点名为 A、B、C、D、A1、B1、C1、D1，没有名为 G 的点。无法直接连接 A 和 G。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "当前场景中可用的点名为 A、B、C、D、A1、B1、C1、D1，没有名为 G 的点。无法直接连接 A 和 G。",
+        "warnings": [
+          "当前场景中没有名为 G 的点，请确认 G 是哪个点（例如是 B1、C1 或其他点），或者是否需要先创建该点。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "unknown-x",
+        "instruction": "连接 X 和 A。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addSegmentByLabels"
+        ],
+        "expectedWarnings": [
+          "X"
+        ],
+        "context": "cube",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "当前可用点名为 A, B, C, D, A1, B1, C1, D1，未找到点名 X，请确认 X 是哪个点或需要先创建该点。"
+        ],
+        "explanation": "当前场景中没有名为 X 的点，无法执行连接操作。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "当前场景中没有名为 X 的点，无法执行连接操作。",
+        "warnings": [
+          "当前可用点名为 A, B, C, D, A1, B1, C1, D1，未找到点名 X，请确认 X 是哪个点或需要先创建该点。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "unknown-face-center",
+        "instruction": "在面 PQRS 的中心标 O。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addFaceCenterPoint"
+        ],
+        "expectedWarnings": [
+          "PQRS"
+        ],
+        "context": "cube",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "当前场景中不存在点 P、Q、R、S，无法确定面 PQRS。请确认该面是否由当前正方体的顶点组成，或提供正确的面顶点名称（例如底面 ABCD、顶面 A1B1C1D1 等）。"
+        ],
+        "explanation": "当前场景中可用的点名为 A、B、C、D、A1、B1、C1、D1，没有面 PQRS 所需的 P、Q、R、S 点。无法确定面 PQRS 的位置，请确认该面是否在当前正方体上，或提供正确的面顶点名称。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "当前场景中可用的点名为 A、B、C、D、A1、B1、C1、D1，没有面 PQRS 所需的 P、Q、R、S 点。无法确定面 PQRS 的位置，请确认该面是否在当前正方体上，或提供正确的面顶点名称。",
+        "warnings": [
+          "当前场景中不存在点 P、Q、R、S，无法确定面 PQRS。请确认该面是否由当前正方体的顶点组成，或提供正确的面顶点名称（例如底面 ABCD、顶面 A1B1C1D1 等）。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "missing-face-distance",
+        "instruction": "标出点到平面的距离。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addDistanceMeasurement"
+        ],
+        "expectedWarnings": [
+          "需要确认"
+        ],
+        "context": "cube",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "missing warnings [\"需要确认\"]",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "点到平面距离测量需要明确指定点和平面，当前指令未提供具体点名和面名。",
+          "请补充完整需求，例如：标出点 A 到平面 BCD 的距离，或标出点 C1 到底面 ABCD 的距离。"
+        ],
+        "explanation": "当前指令“标出点到平面的距离”缺少具体对象——未指定是哪个点到哪个平面。请确认需要测量哪个点到哪个平面的距离，例如“点 A 到平面 BCD 的距离”或“点 C1 到底面 ABCD 的距离”。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "当前指令“标出点到平面的距离”缺少具体对象——未指定是哪个点到哪个平面。请确认需要测量哪个点到哪个平面的距离，例如“点 A 到平面 BCD 的距离”或“点 C1 到底面 ABCD 的距离”。",
+        "warnings": [
+          "点到平面距离测量需要明确指定点和平面，当前指令未提供具体点名和面名。",
+          "请补充完整需求，例如：标出点 A 到平面 BCD 的距离，或标出点 C1 到底面 ABCD 的距离。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "missing-angle-objects",
+        "instruction": "标出这个图里的二面角。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addAngleMeasurement",
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [
+          "需要确认"
+        ],
+        "context": "cube",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "missing warnings [\"需要确认\"]",
+        "actualOperationTypes": [],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [],
+        "warnings": [
+          "二面角对象不完整：未指定两个面。请确认要测量哪两个面之间的二面角。"
+        ],
+        "explanation": "您提到“这个图里的二面角”，但未指定是哪两个面之间的二面角。当前场景是一个正方体，有多个面（如底面、顶面、侧面），请明确要测量哪两个面（例如“底面 ABCD 与侧面 ABB1A1 的二面角”或“截面与底面的二面角”），以便我添加角度测量。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [],
+        "explanation": "您提到“这个图里的二面角”，但未指定是哪两个面之间的二面角。当前场景是一个正方体，有多个面（如底面、顶面、侧面），请明确要测量哪两个面（例如“底面 ABCD 与侧面 ABB1A1 的二面角”或“截面与底面的二面角”），以便我添加角度测量。",
+        "warnings": [
+          "二面角对象不完整：未指定两个面。请确认要测量哪两个面之间的二面角。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "curve-section-free",
+        "instruction": "生成球体，再随便作一个复杂截面。",
+        "expectedOperationTypes": [],
+        "forbiddenOperationTypes": [
+          "addCrossSectionByLabels"
+        ],
+        "expectedWarnings": [
+          "需要确认"
+        ],
+        "context": "empty",
+        "category": "negative",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [] got [\"setGeometry\"]; missing warnings [\"需要确认\"]",
+        "actualOperationTypes": [
+          "setGeometry"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry"
+        ],
+        "warnings": [
+          "球体属于曲面体，不支持通过三点作截面或辅助面片的方式自由创建复杂截面。如需展示球截面圆，建议使用预设的球截面圆面积通用图。"
+        ],
+        "explanation": "已创建半径为 1 的球体。对于球体的复杂截面，系统不支持通过 addCrossSectionByLabels 或 addAuxiliaryFaceByLabels 在曲面体上自由创建截面，建议您使用预设的球截面圆面积通用图（loadPresetScene: sphere-section-circle-area）来展示球截面圆的相关关系。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "sphere",
+            "params": {
+              "radius": 1
+            }
+          }
+        ],
+        "explanation": "已创建半径为 1 的球体。对于球体的复杂截面，系统不支持通过 addCrossSectionByLabels 或 addAuxiliaryFaceByLabels 在曲面体上自由创建截面，建议您使用预设的球截面圆面积通用图（loadPresetScene: sphere-section-circle-area）来展示球截面圆的相关关系。",
+        "warnings": [
+          "球体属于曲面体，不支持通过三点作截面或辅助面片的方式自由创建复杂截面。如需展示球截面圆，建议使用预设的球截面圆面积通用图。"
+        ]
+      }
+    },
+    {
+      "case": {
+        "id": "combo-cube-center-diagonal",
+        "instruction": "生成正方体，标出中心 O，并连接 A 和 C1。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，标出几何体中心 O，并连接 A 和 C1 作为空间对角线。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addCenterPoint",
+            "label": "O"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "label": "AC1"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，标出几何体中心 O，并连接 A 和 C1 作为空间对角线。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-face-center-segment",
+        "instruction": "生成正方体，在底面 ABCD 中心标 O1，并连接 O1 和 A1。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addFaceCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addFaceCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addFaceCenterPoint",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，在底面 ABCD 中心标出 O1，并连接 O1 与 A1。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addFaceCenterPoint",
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "O1"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "O1",
+              "A1"
+            ],
+            "label": "O1A1"
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，在底面 ABCD 中心标出 O1，并连接 O1 与 A1。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-mid-section",
+        "instruction": "生成正方体，在 AB 中点标 M，用 M、C、A1 作截面。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addCrossSectionByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addCrossSectionByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addPointOnEdge",
+          "addCrossSectionByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为2的正方体，在AB中点处创建点M，并用M、C、A1三点生成截面。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addPointOnEdge",
+            "edgeLabels": [
+              "A",
+              "B"
+            ],
+            "t": 0.5,
+            "label": "M"
+          },
+          {
+            "type": "addCrossSectionByLabels",
+            "labels": [
+              "M",
+              "C",
+              "A1"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为2的正方体，在AB中点处创建点M，并用M、C、A1三点生成截面。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-aux-angle",
+        "instruction": "生成正方体，作辅助面 ACC1，并标出 AC1 与底面 ABCD 的线面角。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addAuxiliaryFaceByLabels",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addAngleMeasurement\"]; semantic expected [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"setGeometry\",\"addAuxiliaryFaceByLabels\",\"addAngleMeasurement\"]",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addAuxiliaryFaceByLabels",
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addAuxiliaryFaceByLabels",
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，并添加辅助面 ACC1（由 A、C、C1 三点确定），最后添加 AC1 与底面 ABCD 的线面角测量。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addAuxiliaryFaceByLabels",
+            "labels": [
+              "A",
+              "C",
+              "C1"
+            ]
+          },
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineFace",
+            "labels": [
+              "A",
+              "C1"
+            ],
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，并添加辅助面 ACC1（由 A、C、C1 三点确定），最后添加 AC1 与底面 ABCD 的线面角测量。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-circ-distance",
+        "instruction": "生成正方体，添加外接球，并标出 O 到 A 的距离。",
+        "expectedOperationTypes": [
+          "setGeometry",
+          "addCircumsphere",
+          "addCenterPoint",
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "empty",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": false,
+        "strictPassed": false,
+        "semanticPassed": false,
+        "reason": "expected [\"setGeometry\",\"addCircumsphere\",\"addCenterPoint\",\"addDistanceMeasurement\"] got [\"setGeometry\",\"addCircumsphere\",\"addDistanceMeasurement\"]; semantic expected [\"setGeometry\",\"addCircumsphere\",\"addCenterPoint\",\"addDistanceMeasurement\"] got [\"setGeometry\",\"addCircumsphere\",\"addDistanceMeasurement\"]",
+        "actualOperationTypes": [
+          "setGeometry",
+          "addCircumsphere",
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "setGeometry",
+          "addCircumsphere",
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已创建棱长为 2 的正方体，添加外接球，并标出球心 O 到顶点 A 的距离（即外接球半径）。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "setGeometry",
+            "geometryType": "cube",
+            "params": {
+              "sideLength": 2
+            }
+          },
+          {
+            "type": "addCircumsphere"
+          },
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointPoint",
+            "labels": [
+              "O",
+              "A"
+            ]
+          }
+        ],
+        "explanation": "已创建棱长为 2 的正方体，添加外接球，并标出球心 O 到顶点 A 的距离（即外接球半径）。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-current-center-distance",
+        "instruction": "在当前正方体中标出中心 O，并标出 O 到 A 的距离。",
+        "expectedOperationTypes": [
+          "addCenterPoint",
+          "addDistanceMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addCenterPoint",
+          "addDistanceMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addCenterPoint",
+          "addDistanceMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已在正方体中心标出 O，并添加了 O 到 A 的距离度量 OA。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addCenterPoint",
+            "label": "O"
+          },
+          {
+            "type": "addDistanceMeasurement",
+            "kind": "pointPoint",
+            "labels": [
+              "O",
+              "A"
+            ],
+            "label": "OA"
+          }
+        ],
+        "explanation": "已在正方体中心标出 O，并添加了 O 到 A 的距离度量 OA。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-current-face-center-lines",
+        "instruction": "在底面 ABCD 中心标 O1，连接 O1A 和 O1C。",
+        "expectedOperationTypes": [
+          "addFaceCenterPoint",
+          "addSegmentByLabels",
+          "addSegmentByLabels"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addFaceCenterPoint",
+          "addSegmentByLabels",
+          "addSegmentByLabels"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addFaceCenterPoint",
+          "addSegmentByLabels",
+          "addSegmentByLabels"
+        ],
+        "warnings": [],
+        "explanation": "已在底面 ABCD 中心标出 O1，并连接 O1A 和 O1C 两条线段。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addFaceCenterPoint",
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "label": "O1"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "O1",
+              "A"
+            ],
+            "label": "O1A"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "O1",
+              "C"
+            ],
+            "label": "O1C"
+          }
+        ],
+        "explanation": "已在底面 ABCD 中心标出 O1，并连接 O1A 和 O1C 两条线段。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-current-mid-angle",
+        "instruction": "取 AB 中点 M，连接 MC1，并标出 MC1 与底面 ABCD 的角。",
+        "expectedOperationTypes": [
+          "addPointOnEdge",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": false,
+        "semanticPassed": true,
+        "reason": "expected [\"addPointOnEdge\",\"addSegmentByLabels\",\"addAngleMeasurement\"] got [\"addMidpointByLabels\",\"addSegmentByLabels\",\"addAngleMeasurement\"]",
+        "actualOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addMidpointByLabels",
+          "addSegmentByLabels",
+          "addAngleMeasurement"
+        ],
+        "warnings": [],
+        "explanation": "已取 AB 中点 M，连接 MC1，并添加 MC1 与底面 ABCD 的线面角测量。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addMidpointByLabels",
+            "labels": [
+              "A",
+              "B"
+            ],
+            "label": "M"
+          },
+          {
+            "type": "addSegmentByLabels",
+            "labels": [
+              "M",
+              "C1"
+            ],
+            "label": "MC1"
+          },
+          {
+            "type": "addAngleMeasurement",
+            "kind": "lineFace",
+            "labels": [
+              "M",
+              "C1"
+            ],
+            "faceLabels": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ]
+          }
+        ],
+        "explanation": "已取 AB 中点 M，连接 MC1，并添加 MC1 与底面 ABCD 的线面角测量。",
+        "warnings": []
+      }
+    },
+    {
+      "case": {
+        "id": "combo-current-section-style",
+        "instruction": "用 A、C、A1 作截面，并把 AC 标红。",
+        "expectedOperationTypes": [
+          "addCrossSectionByLabels",
+          "setStyle"
+        ],
+        "forbiddenOperationTypes": [
+          "loadPresetScene"
+        ],
+        "expectedWarnings": [],
+        "context": "cube",
+        "category": "combo",
+        "notes": ""
+      },
+      "score": {
+        "passed": true,
+        "strictPassed": true,
+        "semanticPassed": true,
+        "reason": "",
+        "actualOperationTypes": [
+          "addCrossSectionByLabels",
+          "setStyle"
+        ],
+        "patchOperationTypes": [],
+        "semanticOperationTypes": [
+          "addCrossSectionByLabels",
+          "setStyle"
+        ],
+        "warnings": [],
+        "explanation": "已根据 A、C、A1 三点生成截面，并将线段 AC 标红。"
+      },
+      "assist": {
+        "type": "result",
+        "patch": {},
+        "operations": [
+          {
+            "type": "addCrossSectionByLabels",
+            "labels": [
+              "A",
+              "C",
+              "A1"
+            ]
+          },
+          {
+            "type": "setStyle",
+            "labels": [
+              "A",
+              "C"
+            ],
+            "style": {
+              "color": "#e74c3c"
+            }
+          }
+        ],
+        "explanation": "已根据 A、C、A1 三点生成截面，并将线段 AC 标红。",
+        "warnings": []
+      }
+    }
+  ]
+}

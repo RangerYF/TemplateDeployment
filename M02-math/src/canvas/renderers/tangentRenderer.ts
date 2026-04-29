@@ -35,6 +35,12 @@ export function renderTangent(
       // Vertical tangent line
       ctx.moveTo(cx, 0);
       ctx.lineTo(cx, ctx.canvas.height);
+    } else if (Math.abs(slope) < 1e-10) {
+      // Horizontal tangent line. Avoid dividing by a near-zero slope.
+      const [cxL, cyL] = viewport.toCanvas(viewport.xMin, y0);
+      const [cxR, cyR] = viewport.toCanvas(viewport.xMax, y0);
+      ctx.moveTo(cxL, cyL);
+      ctx.lineTo(cxR, cyR);
     } else {
       // y - y0 = slope*(x - x0)  →  x = (y - y0)/slope + x0
       // Compute canvas x at canvas y=0 and y=height

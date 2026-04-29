@@ -33,7 +33,9 @@ import { useHistoryStore } from '@/editor/store/historyStore';
 import { useFunctionStore } from '@/editor/store/functionStore';
 import { editorInstance } from '@/editor/core/Editor';
 import { UpdateFunctionParamCommand } from '@/editor/commands/UpdateFunctionParamCommand';
+import { useCanvasToolStore } from '@/editor/store/canvasToolStore';
 import { COLORS } from '@/styles/colors';
+import { createId } from '@/lib/id';
 
 export function M02Layout() {
   const canvasRef        = useRef<FunctionCanvasHandle>(null);
@@ -69,7 +71,7 @@ export function M02Layout() {
     let nextSegments = fn.segments;
     if (nextMode === 'piecewise' && fn.segments.length === 0) {
       nextSegments = [{
-        id: crypto.randomUUID(),
+        id: createId(),
         exprStr: 'x',
         domain: { xMin: 0, xMax: 1, xMinInclusive: true, xMaxInclusive: false },
       }];
@@ -83,6 +85,15 @@ export function M02Layout() {
   // Keyboard shortcuts
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // Esc → reset tool to default (skip if focus is on an input/textarea)
+      if (e.key === 'Escape') {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (useCanvasToolStore.getState().mode !== 'pan-zoom') {
+          useCanvasToolStore.getState().setMode('pan-zoom');
+        }
+        return;
+      }
       const ctrl = e.ctrlKey || e.metaKey;
       if (!ctrl) return;
       if (e.key === 'z' && !e.shiftKey) {

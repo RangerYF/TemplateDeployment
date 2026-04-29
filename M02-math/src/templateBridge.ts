@@ -1,6 +1,10 @@
 import { navigate } from '@/lib/navigate';
 import { useFunctionStore, type FunctionStoreSnapshot } from '@/editor/store/functionStore';
 import {
+  useInteractionStore,
+  type M02InteractionSnapshot,
+} from '@/editor/store/interactionStore';
+import {
   useParamAnimationStore,
   type ParamAnimationStoreSnapshot,
 } from '@/editor/store/paramAnimationStore';
@@ -19,6 +23,12 @@ import {
 } from '@/editor/store/triangleSolverStore';
 import { useTrigStore, type TrigStoreSnapshot } from '@/editor/store/trigStore';
 import { useM04UiStore, type M04UiStoreSnapshot } from '@/editor/store/m04UiStore';
+import { buildM02AiContext, type M02AiContext } from '@/runtime/aiContext';
+import { applyAiOperations, type BridgeOperationResult } from '@/runtime/aiOperations';
+import { buildM03AiContext, type M03AiContext } from '@/runtime/m03AiContext';
+import { applyM03AiOperations, type M03BridgeOperationResult } from '@/runtime/m03AiOperations';
+import { buildM04AiContext, type M04AiContext } from '@/runtime/m04AiContext';
+import { applyM04AiOperations, type M04BridgeOperationResult } from '@/runtime/m04AiOperations';
 
 const RUNTIME_KEY = 'visual-math-suite';
 const BRIDGE_VERSION = '1.0.0';
@@ -40,6 +50,7 @@ interface VisualMathSuiteSnapshotPayload {
   };
   m02?: {
     function: FunctionStoreSnapshot;
+    interaction?: M02InteractionSnapshot;
     paramAnimation: ParamAnimationStoreSnapshot;
   };
   m03?: {
@@ -70,6 +81,8 @@ interface SnapshotValidationResult {
 interface TemplateBridge {
   getDefaultSnapshot(): VisualMathSuiteSnapshotDocument;
   getSnapshot(): VisualMathSuiteSnapshotDocument;
+  getAiContext(): M02AiContext | M03AiContext | M04AiContext | null;
+  applyOperations(operations: unknown): Promise<BridgeOperationResult | M03BridgeOperationResult | M04BridgeOperationResult>;
   loadSnapshot(snapshot: unknown): SnapshotValidationResult;
   validateSnapshot(snapshot: unknown): SnapshotValidationResult;
 }
@@ -134,6 +147,7 @@ function ensureRoute(templateKey: SupportedTemplateKey) {
 
 export function getM02Snapshot(): VisualMathSuiteSnapshotDocument {
   const functionState = cloneSerializable(useFunctionStore.getState().getSnapshot());
+  const interaction = cloneSerializable(useInteractionStore.getState().getSnapshot());
   const paramAnimation = cloneSerializable(useParamAnimationStore.getState().getSnapshot());
   currentSnapshotCreatedAt = currentSnapshotCreatedAt ?? getChinaIso();
 
@@ -145,6 +159,7 @@ export function getM02Snapshot(): VisualMathSuiteSnapshotDocument {
       },
       m02: {
         function: functionState,
+        interaction,
         paramAnimation,
       },
     },
@@ -265,6 +280,12 @@ export function validateM02Snapshot(snapshot: unknown): SnapshotValidationResult
         if (!m02.function || typeof m02.function !== 'object' || Array.isArray(m02.function)) {
           errors.push('payload.m02.function 缺失或非法');
         }
+        if (
+          m02.interaction !== undefined &&
+          (!m02.interaction || typeof m02.interaction !== 'object' || Array.isArray(m02.interaction))
+        ) {
+          errors.push('payload.m02.interaction 非法');
+        }
         if (!m02.paramAnimation || typeof m02.paramAnimation !== 'object' || Array.isArray(m02.paramAnimation)) {
           errors.push('payload.m02.paramAnimation 缺失或非法');
         }
@@ -327,6 +348,7 @@ export function loadM02Snapshot(snapshot: unknown): SnapshotValidationResult {
   ensureRoute(activeSkill);
   if (activeSkill === 'm02' && doc.payload.m02) {
     useFunctionStore.getState().loadSnapshot(doc.payload.m02.function);
+    useInteractionStore.getState().loadSnapshot(doc.payload.m02.interaction);
     useParamAnimationStore.getState().loadSnapshot(doc.payload.m02.paramAnimation);
   } else if (activeSkill === 'm03' && doc.payload.m03) {
     useEntityStore.getState().loadSnapshot(doc.payload.m03.entity);
@@ -347,6 +369,24 @@ function createBridge(): TemplateBridge {
   return {
     getDefaultSnapshot: () => getDefaultSnapshotForTemplate(resolveActiveTemplate()),
     getSnapshot: () => getDefaultSnapshotForTemplate(resolveActiveTemplate()),
+    getAiContext: () => {
+      const template = resolveActiveTemplate();
+      if (template === 'm02') return buildM02AiContext();
+      if (template === 'm03') return buildM03AiContext();
+      if (template === 'm04') return buildM04AiContext();
+      return null;
+    },
+    applyOperations: (operations: unknown) => {
+      const template = resolveActiveTemplate();
+      if (template === 'm02') return applyAiOperations(operations);
+      if (template === 'm03') return applyM03AiOperations(operations);
+      if (template === 'm04') return applyM04AiOperations(operations);
+      return Promise.resolve({
+        ok: false,
+        errors: ['当前模板暂不支持 AI operations'],
+        applied: 0,
+      });
+    },
     loadSnapshot: loadM02Snapshot,
     validateSnapshot: validateM02Snapshot,
   };
@@ -359,7 +399,7 @@ export function registerTemplateBridge(): void {
   const bridge = createBridge();
   window.__EDUMIND_TEMPLATE_BRIDGE__ = bridge;
 
-  const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
     const message = event.data;
     if (!message || typeof message !== 'object') return;
 
@@ -378,6 +418,15 @@ export function registerTemplateBridge(): void {
 
     try {
       switch (data.type) {
+        case 'getDefaultSnapshot':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getDefaultSnapshot(),
+          };
+          break;
         case 'getSnapshot':
           response = {
             namespace: 'edumind.templateBridge',
@@ -387,6 +436,34 @@ export function registerTemplateBridge(): void {
             payload: bridge.getSnapshot(),
           };
           break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations': {
+          const result = await bridge.applyOperations(data.payload);
+          response = result.ok
+            ? {
+                namespace: 'edumind.templateBridge',
+                type: 'response',
+                requestId: data.requestId,
+                success: true,
+                payload: result,
+              }
+            : {
+                namespace: 'edumind.templateBridge',
+                type: 'response',
+                requestId: data.requestId,
+                success: false,
+                error: result.errors.join('; '),
+              };
+          break;
+        }
         case 'loadSnapshot': {
           const result = bridge.loadSnapshot(data.payload);
           if (result.ok) {

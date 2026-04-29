@@ -26,6 +26,7 @@ import { computeFivePoints } from '@/engine/fivePointEngine';
 import { synthesizeAuxiliaryAngle } from '@/engine/auxiliaryAngleEngine';
 import { renderFivePoints } from '@/canvas/renderers/fivePointRenderer';
 import { COLORS } from '@/styles/colors';
+import { LabelPlacer } from '@/canvas/renderers/labelStrategy';
 import type { FnType } from '@/types';
 
 // ─── Colour map ───────────────────────────────────────────────────────────────
@@ -204,13 +205,19 @@ export function FunctionGraphCanvas() {
       const traceY = evalTrig(fnType, transform, traceX);
       const color  = FN_COLOR[fnType];
 
-      // ── Ghost trail ──────────────────────────────────────────────────
+      // Shared label placer for this frame
+      const placer = new LabelPlacer(vp.width, vp.height);
+
+      // ── Ghost trail (lighter, skip every other for density) ────────
       if (traceHistory.length > 1) {
         ctx.save();
-        for (let i = 0; i < traceHistory.length; i++) {
+        // Only draw every 2nd point when trail is dense
+        const step = traceHistory.length > 100 ? 2 : 1;
+        for (let i = 0; i < traceHistory.length; i += step) {
           const pt    = traceHistory[i];
-          const alpha = (i / traceHistory.length) * 0.55;
-          const r     = 1.5 + (i / traceHistory.length) * 1.5;
+          const frac  = i / traceHistory.length;
+          const alpha = frac * 0.35;        // reduced max opacity (was 0.55)
+          const r     = 1.0 + frac * 1.2;   // slightly smaller dots
           const [hx, hy] = vp.toCanvas(pt.x, pt.y);
           ctx.beginPath();
           ctx.arc(hx, hy, r, 0, Math.PI * 2);
@@ -221,25 +228,25 @@ export function FunctionGraphCanvas() {
       }
 
       if (!isFinite(traceY)) {
-        // Tan asymptote — nothing to draw; clear syncY
         useSyncLineStore.getState().setSyncY(null);
         return;
       }
 
       const [cx, cy] = vp.toCanvas(traceX, traceY);
 
-      // ── Vertical guide at x = traceX ────────────────────────────────
+      // ── Guides (subtler) ───────────────────────────────────────────
       ctx.save();
-      ctx.strokeStyle = `${color}55`;
-      ctx.lineWidth   = 1;
-      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = `${color}35`;  // was 55 → lighter
+      ctx.lineWidth   = 0.8;
+      ctx.setLineDash([4, 5]);
 
+      // Vertical guide
       ctx.beginPath();
       ctx.moveTo(cx, 0);
       ctx.lineTo(cx, vp.height);
       ctx.stroke();
 
-      // ── Horizontal guide at y = traceY ──────────────────────────────
+      // Horizontal guide
       ctx.beginPath();
       ctx.moveTo(0, cy);
       ctx.lineTo(vp.width, cy);
@@ -248,52 +255,66 @@ export function FunctionGraphCanvas() {
       ctx.setLineDash([]);
       ctx.restore();
 
-      // ── Trace point ──────────────────────────────────────────────────
+      // Reserve the trace point area
+      placer.reserve(cx, cy, 10, 10);
+
+      // ── Trace point ────────────────────────────────────────────────
       ctx.save();
 
-      // Outer glow
+      // Outer glow (smaller)
       ctx.beginPath();
-      ctx.arc(cx, cy, 13, 0, Math.PI * 2);
-      ctx.fillStyle = `${color}25`;
+      ctx.arc(cx, cy, 10, 0, Math.PI * 2);   // was 13
+      ctx.fillStyle = `${color}20`;            // was 25
       ctx.fill();
 
-      // Filled circle (projector-visible)
+      // Filled circle
       ctx.beginPath();
-      ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);    // was 7
       ctx.fillStyle   = color;
       ctx.fill();
       ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth   = 2;
       ctx.stroke();
 
-      // Value label (larger, high-contrast)
-      ctx.fillStyle    = color;
-      ctx.font         = 'bold 13px monospace';
-      ctx.textBaseline = 'bottom';
-      ctx.textAlign    = cx > vp.width * 0.75 ? 'right' : 'left';
-      const offsetX    = cx > vp.width * 0.75 ? -12 : 12;
-      ctx.fillText(
-        `${FN_LABEL[fnType]} = ${traceY.toFixed(4)}`,
-        cx + offsetX,
-        cy - 6,
-      );
+      // Value label — smart placement via LabelPlacer
+      {
+        const labelText = `${FN_LABEL[fnType]} = ${traceY.toFixed(4)}`;
+        ctx.font = 'bold 12px monospace';
+        const tw = ctx.measureText(labelText).width;
+        const th = 12;
+
+        // Prefer top-right, but adapt
+        const prefDir = cx > vp.width * 0.75 ? 3 : 1;  // top-left or top-right
+        const result = placer.place({
+          text: labelText,
+          anchorX: cx,
+          anchorY: cy,
+          textWidth: tw,
+          textHeight: th,
+          offset: 10,
+          preferredDir: prefDir,
+        });
+        if (result) {
+          ctx.fillStyle    = color;
+          ctx.font         = 'bold 12px monospace';
+          ctx.textAlign    = result.textAlign;
+          ctx.textBaseline = result.textBaseline;
+          ctx.fillText(labelText, result.x, result.y);
+        }
+      }
 
       ctx.restore();
 
-      // ── Publish sync pixel-y for divider marker ──────────────────────
-      // Use the unit circle's viewport to compute the sync dot position,
-      // so that the dot aligns with point P's y-position on the left canvas
-      // regardless of independent zoom/pan on the function graph.
+      // ── Publish sync pixel-y for divider marker ────────────────────
       {
         const ucYRange = ucViewport.yMax - ucViewport.yMin;
-        // The unit circle canvas shares the same pixel height (same flex row)
         const syncPixelY = canvasSize.height - (traceY - ucViewport.yMin) / ucYRange * canvasSize.height;
         useSyncLineStore.getState().setSyncY(syncPixelY);
       }
 
-      // ── Five-point markers ────────────────────────────────────────────
+      // ── Five-point markers ─────────────────────────────────────────
       if (fivePointStep > 0) {
-        renderFivePoints(ctx, fivePoints, fivePointStep, vp);
+        renderFivePoints(ctx, fivePoints, fivePointStep, vp, placer);
       }
     });
   }, [

@@ -1,0 +1,178 @@
+UPDATE visual_template_definitions
+SET
+  entry_url = 'http://localhost:5175/',
+  capabilities = JSON_OBJECT(
+    '$schema', '../schemas/ai-capability.schema.json',
+    'templateKey', 'm05',
+    'aiLevel', 'L2',
+    'supportsAiBuild', CAST('true' AS JSON),
+    'description', '概率统计模拟器，支持通过结构化 operations 切换实验类型、设置模拟参数、配置数据源、运行模拟、控制动画模式和载入典型教学预设。',
+    'supportedIntents', JSON_ARRAY(
+      'set-simulation-type',
+      'update-simulation-params',
+      'set-data-source',
+      'run-simulation',
+      'reset-simulation-result',
+      'set-animation-mode',
+      'set-animation-speed',
+      'set-result-panel-visible',
+      'run-single-step',
+      'load-preset-experiment',
+      'load-teaching-scenario',
+      'simplify-current-scene'
+    ),
+    'operations', JSON_ARRAY(
+      JSON_OBJECT(
+        'type', 'setSimulationType',
+        'description', '切换或创建模拟实验。payload: { simulationType: "coinFlip"|"diceRoll"|"twoDiceSum"|"ballDraw"|"monteCarloPi"|"meetingProblem"|"buffonsNeedle"|"histogram"|"stemLeaf"|"binomialDist"|"hypergeometricDist"|"normalDist"|"linearRegression"|"lawOfLargeNumbers", params?: object, run?: boolean }。',
+        'payloadSchema', JSON_OBJECT('simulationType', JSON_OBJECT('type', 'string'), 'simType', JSON_OBJECT('type', 'string'), 'params', JSON_OBJECT('type', 'object'), 'run', JSON_OBJECT('type', 'boolean')),
+        'useWhen', '用户要求切换到某个概率实验、分布演示、统计图或回归/大数定律演示。',
+        'doNotUseWhen', '只修改当前实验参数时使用 updateSimulationParams。'
+      ),
+      JSON_OBJECT(
+        'type', 'updateSimulationParams',
+        'description', '修改当前或指定模拟的参数。payload: { simId?: string, params?: object }，也允许把参数字段直接放在 operation 顶层。',
+        'payloadSchema', JSON_OBJECT('simId', JSON_OBJECT('type', 'string'), 'params', JSON_OBJECT('type', 'object')),
+        'useWhen', '用户要求修改试验次数 n、概率 p、骰子数量、正态分布 μ/σ、摸球数量、数据分组等参数。',
+        'doNotUseWhen', '目标实验类型不明确时先使用 setSimulationType 或返回 warnings。'
+      ),
+      JSON_OBJECT(
+        'type', 'setDataSource',
+        'description', '配置直方图或茎叶图数据源。payload: { simId?: string, mode?: "preset"|"manual", presetId?: string, customText?: string, filterMin?: number|null, filterMax?: number|null, precision?: 0|1|2 }。',
+        'payloadSchema', JSON_OBJECT('simId', JSON_OBJECT('type', 'string'), 'mode', JSON_OBJECT('type', 'string'), 'presetId', JSON_OBJECT('type', 'string'), 'customText', JSON_OBJECT('type', 'string'), 'filterMin', JSON_OBJECT('type', 'number'), 'filterMax', JSON_OBJECT('type', 'number'), 'precision', JSON_OBJECT('type', 'number')),
+        'useWhen', '用户要求选择预设数据集、输入一组数据、筛选数据或设置小数精度。',
+        'doNotUseWhen', '非 histogram/stemLeaf 模拟不要使用。'
+      ),
+      JSON_OBJECT(
+        'type', 'runSimulation',
+        'description', '运行当前或指定模拟。payload: { simId?: string, autoStartAnimation?: boolean, seed?: string }。模拟结果由 M05 引擎计算；随机模拟可通过 seed 复现。',
+        'payloadSchema', JSON_OBJECT('simId', JSON_OBJECT('type', 'string'), 'autoStartAnimation', JSON_OBJECT('type', 'boolean'), 'seed', JSON_OBJECT('type', 'string')),
+        'useWhen', '用户要求开始模拟、生成统计结果、查看分布图或完成当前实验。',
+        'doNotUseWhen', '不要手写 result；需要先设置参数时先输出 updateSimulationParams。'
+      ),
+      JSON_OBJECT(
+        'type', 'resetSimulationResult',
+        'description', '清空当前或指定模拟结果。payload: { simId?: string }。',
+        'payloadSchema', JSON_OBJECT('simId', JSON_OBJECT('type', 'string')),
+        'useWhen', '用户要求重置结果、清空模拟或重新开始。',
+        'doNotUseWhen', '切换典型场景时使用 loadPresetExperiment。'
+      ),
+      JSON_OBJECT(
+        'type', 'setAnimationMode',
+        'description', '设置动画模式。payload: { mode: "single"|"multi" }。',
+        'payloadSchema', JSON_OBJECT('mode', JSON_OBJECT('type', 'string')),
+        'useWhen', '用户要求单次模拟、逐次模拟或多次模拟。',
+        'doNotUseWhen', '不要用它修改实验参数。'
+      ),
+      JSON_OBJECT(
+        'type', 'setAnimationSpeed',
+        'description', '设置动画速度。payload: { speed: 1|2|3|4|5 }。',
+        'payloadSchema', JSON_OBJECT('speed', JSON_OBJECT('type', 'number')),
+        'useWhen', '用户要求调快/调慢动画播放速度。',
+        'doNotUseWhen', '不要用它修改模拟次数 n。'
+      ),
+      JSON_OBJECT(
+        'type', 'setResultPanelVisible',
+        'description', '显示或隐藏统计结果面板。payload: { visible?: boolean, show?: boolean }。',
+        'payloadSchema', JSON_OBJECT('visible', JSON_OBJECT('type', 'boolean'), 'show', JSON_OBJECT('type', 'boolean')),
+        'useWhen', '用户要求显示/隐藏结果、统计指标或右侧结果面板。',
+        'doNotUseWhen', '不要用它运行模拟。'
+      ),
+      JSON_OBJECT(
+        'type', 'runSingleStep',
+        'description', '执行若干次单步模拟。payload: { simId?: string, count?: number }。仅适用于 coinFlip、diceRoll、twoDiceSum、ballDraw、meetingProblem。',
+        'payloadSchema', JSON_OBJECT('simId', JSON_OBJECT('type', 'string'), 'count', JSON_OBJECT('type', 'number')),
+        'useWhen', '用户要求单次/逐次抛硬币、掷骰子、摸球或约会问题试验。',
+        'doNotUseWhen', '批量统计实验优先使用 runSimulation。'
+      ),
+      JSON_OBJECT(
+        'type', 'loadPresetExperiment',
+        'description', '载入典型教学实验。payload: { presetId: "coin-fairness"|"dice-even-event"|"two-dice-sum"|"monte-carlo-pi"|"normal-standard"|"binomial-fair-coin"|"histogram-scores"|"linear-regression-sales"|"law-large-numbers-coin" }。',
+        'payloadSchema', JSON_OBJECT('presetId', JSON_OBJECT('type', 'string')),
+        'useWhen', '用户要求切换到标准抛硬币、两骰子点数和、蒙特卡洛求π、标准正态、二项分布、成绩直方图、线性回归或大数定律等典型场景。',
+        'doNotUseWhen', '用户明确要求保留当前实验并只做局部修改时使用具体 set/update operation。'
+      ),
+      JSON_OBJECT(
+        'type', 'loadTeachingScenario',
+        'description', '载入更偏课堂讲解的教学场景。payload: { scenarioId: "law-large-numbers-frequency"|"binomial-normal-approx"|"normal-sigma-rule"|"sampling-without-replacement"|"histogram-skewed-income"|"regression-nonlinear-caution"|"geometric-meeting-problem"|"buffon-pi-estimation" }。',
+        'payloadSchema', JSON_OBJECT('scenarioId', JSON_OBJECT('type', 'string'), 'presetId', JSON_OBJECT('type', 'string')),
+        'useWhen', '用户要求讲解大数定律、二项分布正态近似、正态 68-95-99.7 法则、不放回抽样、偏态数据、非线性回归提醒、几何概率或布丰投针等教学主题。',
+        'doNotUseWhen', '用户只要求普通实验切换时使用 loadPresetExperiment 或 setSimulationType。'
+      )
+    ),
+    'payloadSchema', JSON_OBJECT(
+      'm05', JSON_OBJECT(
+        'type', 'object',
+        'description', 'M05 概率统计模拟器快照。结构性搭建优先使用 operations；patch 只作为低风险兜底。',
+        'required', CAST('true' AS JSON),
+        'risk', 'high',
+        'children', JSON_OBJECT(
+          'simulation', JSON_OBJECT('type', 'object', 'description', '模拟实体、激活模拟、参数和结果。AI 应通过 setSimulationType/updateSimulationParams/runSimulation 修改。', 'risk', 'high'),
+          'ui', JSON_OBJECT('type', 'object', 'description', '当前分类、结果面板显示和播放速度。', 'risk', 'low'),
+          'animation', JSON_OBJECT('type', 'object', 'description', '单次/多次动画模式和单步模拟状态。AI 应通过 setAnimationMode/setAnimationSpeed/runSingleStep 修改。', 'risk', 'high')
+        )
+      )
+    ),
+    'constraints', JSON_ARRAY(
+      'AI 输出只能是 JSON 对象，允许包含 operations、patch、explanation、warnings，不能包含 envelope。',
+      '结构性搭建必须优先使用 operations，不要直接手写 simulation、ui 或 animation 状态树。',
+      'M05 只处理概率统计模拟器，不要输出 M02/M03/M04/M06 相关 payload 或 operation。',
+      '模拟结果、随机样本、统计表、轨迹点和回归计算结果由 M05 引擎计算；AI 不应手写 result、data 或 stats。',
+      '随机模拟应通过 runSimulation 或 runSingleStep 生成；需要可复现结果时由模板保存 replay seed。',
+      '需要解释结果时应基于 aiContext.activeSimulation.stats 和 aiContext.resultInterpretationHints，不要编造不存在的统计结论。',
+      '修改参数前必须确认 simulationType；不同模拟类型参数不可混用。',
+      '正态分布 sigma 必须大于 0；概率 p 必须在 0 到 1 之间；超几何分布必须满足 M <= N 且 n <= N。',
+      '直方图和茎叶图的数据源优先使用 aiContext.datasets.histogram 中的 presetId；手动数据必须是数字列表。',
+      '线性回归数据集必须来自 aiContext.datasets.regression。',
+      'operations 必须最小充分；单个 operation 可满足时不要额外添加操作。'
+    ),
+    'examples', JSON_ARRAY(
+      JSON_OBJECT(
+        'instruction', '用固定种子 demo-coin 演示抛硬币 100 次，方便复现实验。',
+        'operations', JSON_ARRAY(
+          JSON_OBJECT('type', 'setSimulationType', 'simulationType', 'coinFlip', 'params', JSON_OBJECT('n', 100, 'speed', 2)),
+          JSON_OBJECT('type', 'runSimulation', 'seed', 'demo-coin')
+        ),
+        'patch', JSON_OBJECT(),
+        'explanation', '已使用固定随机种子运行抛硬币实验，便于复现。'
+      ),
+      JSON_OBJECT(
+        'instruction', '演示抛硬币频率趋近 1/2，模拟 200 次。',
+        'operations', JSON_ARRAY(
+          JSON_OBJECT('type', 'setSimulationType', 'simulationType', 'coinFlip', 'params', JSON_OBJECT('n', 200, 'speed', 2)),
+          JSON_OBJECT('type', 'runSimulation', 'autoStartAnimation', CAST('true' AS JSON))
+        ),
+        'patch', JSON_OBJECT(),
+        'explanation', '已设置抛硬币实验并运行 200 次模拟。'
+      ),
+      JSON_OBJECT(
+        'instruction', '讲解二项分布如何近似正态分布。',
+        'operations', JSON_ARRAY(JSON_OBJECT('type', 'loadTeachingScenario', 'scenarioId', 'binomial-normal-approx')),
+        'patch', JSON_OBJECT(),
+        'explanation', '已载入二项分布正态近似教学场景。'
+      ),
+      JSON_OBJECT(
+        'instruction', '显示两颗骰子点数和的分布。',
+        'operations', JSON_ARRAY(JSON_OBJECT('type', 'loadPresetExperiment', 'presetId', 'two-dice-sum')),
+        'patch', JSON_OBJECT(),
+        'explanation', '已载入两骰子点数和分布实验。'
+      ),
+      JSON_OBJECT(
+        'instruction', '画标准正态分布并显示 1σ、2σ、3σ 区域。',
+        'operations', JSON_ARRAY(JSON_OBJECT('type', 'setSimulationType', 'simulationType', 'normalDist', 'params', JSON_OBJECT('mu', 0, 'sigma', 1, 'showSigmaRegions', CAST('true' AS JSON)), 'run', CAST('true' AS JSON))),
+        'patch', JSON_OBJECT(),
+        'explanation', '已生成标准正态分布并显示 σ 区域。'
+      )
+    ),
+    'planningRules', JSON_ARRAY(
+      '先判断用户目标属于古典概型、几何概型、统计图、概率分布、回归分析还是大数定律。',
+      '每个可见目标必须映射为确定 operation；例如设置参数并查看图像时需要运行模拟。',
+      '典型教学场景可优先使用 loadPresetExperiment；局部修改使用具体 set/update operation。',
+      '统计、分布、回归类确定性图像设置参数后可直接 runSimulation。',
+      '随机模拟结果由 M05 生成；AI 只输出参数、运行请求和动画控制。',
+      '讲解型需求优先考虑 loadTeachingScenario；结果解释必须依据 aiContext 中已有 stats 和 hints。',
+      '不要根据测试集个例添加多余操作，保持 operations 最小充分。'
+    )
+  ),
+  updated_at = NOW()
+WHERE template_key = 'm05';

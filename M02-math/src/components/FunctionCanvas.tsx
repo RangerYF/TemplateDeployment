@@ -15,7 +15,7 @@ import { renderAxis } from '@/canvas/renderers/axisRenderer';
 import { renderCurve } from '@/canvas/renderers/curveRenderer';
 import { renderDynamic } from '@/canvas/renderers/dynamicRenderer';
 import { renderTangent } from '@/canvas/renderers/tangentRenderer';
-import { renderSegmentEndpoints } from '@/canvas/renderers/featurePointRenderer';
+import { renderFeaturePoints, renderSegmentEndpoints } from '@/canvas/renderers/featurePointRenderer';
 import { hiDpiClear } from '@/editor/tools/canvasUtils';
 import { compileExpression, isParseError, compileDerivative } from '@/engine/expressionEngine';
 import { buildFunctionScope, getKnownFunctionNames } from '@/engine/compositionEngine';
@@ -27,6 +27,7 @@ import type { SamplePoint } from '@/engine/sampler';
 import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
 import { FUNCTION_COLORS, DEFAULT_TRANSFORM, type FunctionEntry } from '@/types';
 import { COLORS } from '@/styles/colors';
+import { createId } from '@/lib/id';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -346,6 +347,10 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
         }
       }
 
+      if (features.showFeaturePoints) {
+        renderFeaturePoints(ctx, functions, vp);
+      }
+
       ctx.restore();
 
       // Update debug info for DebugOverlay
@@ -369,7 +374,7 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     }
     useInteractionStore.getState().setHoveredPoint(null);
     useInteractionStore.getState().setHoveredIntersection(null);
-  }, [functions, activeFunctionId, viewport, features.showGrid, features.showAxisLabels, features.showDerivative, canvasSize, isAnimating]);
+  }, [functions, activeFunctionId, viewport, features.showGrid, features.showAxisLabels, features.showDerivative, features.showFeaturePoints, canvasSize, isAnimating]);
 
   // ── T6.4: Tangent line on dynamic layer ────────────────────────────────
   useEffect(() => {
@@ -890,7 +895,7 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     const exprStr = `${s} * (x - (${x0s})) + ${y0s}`;
 
     const entry: FunctionEntry = {
-      id:          crypto.randomUUID(),
+      id:          createId(),
       label:       LABELS[count] ?? `t${count}(x)`,
       mode:        'standard',
       exprStr,

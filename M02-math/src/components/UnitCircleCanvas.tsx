@@ -23,11 +23,47 @@ import { useUnitCircleStore } from '@/editor/store/unitCircleStore';
 import { AngleDragTool } from '@/editor/tools/AngleDragTool';
 import { renderAxis } from '@/canvas/renderers/axisRenderer';
 import { hiDpiClear } from '@/editor/tools/canvasUtils';
+import type { ViewportState } from '@/types';
 import {
   renderStaticUnitCircle,
   renderDynamicAngle,
   type UnitCircleRenderOptions,
 } from '@/canvas/renderers/unitCircleRenderer';
+
+const EPS = 1e-9;
+
+function equalScaleViewport(state: ViewportState, width: number, height: number): Viewport {
+  const safeWidth = Math.max(width, 1);
+  const safeHeight = Math.max(height, 1);
+  const cx = (state.xMin + state.xMax) / 2;
+  const cy = (state.yMin + state.yMax) / 2;
+  let xRange = state.xMax - state.xMin;
+  let yRange = state.yMax - state.yMin;
+  const targetRatio = safeWidth / safeHeight;
+  const currentRatio = xRange / yRange;
+
+  if (currentRatio < targetRatio) {
+    xRange = yRange * targetRatio;
+  } else if (currentRatio > targetRatio) {
+    yRange = xRange / targetRatio;
+  }
+
+  return new Viewport(
+    cx - xRange / 2,
+    cx + xRange / 2,
+    cy - yRange / 2,
+    cy + yRange / 2,
+    safeWidth,
+    safeHeight,
+  );
+}
+
+function nearlySameViewport(a: ViewportState, b: Viewport): boolean {
+  return Math.abs(a.xMin - b.xMin) < EPS &&
+    Math.abs(a.xMax - b.xMax) < EPS &&
+    Math.abs(a.yMin - b.yMin) < EPS &&
+    Math.abs(a.yMax - b.yMax) < EPS;
+}
 
 export function UnitCircleCanvas() {
   // ── Dual canvas setup ──────────────────────────────────────────────────────
@@ -56,16 +92,22 @@ export function UnitCircleCanvas() {
   const showLabels        = useUnitCircleStore((s) => s.showLabels);
   const showQuadrantHints = useUnitCircleStore((s) => s.showQuadrantHints);
 
+  // Unit-circle math must use equal x/y pixel scale. When the canvas is wide,
+  // expand the visible x-range instead of stretching the circle into an ellipse.
+  useEffect(() => {
+    const vp = equalScaleViewport(viewport, canvasSize.width, canvasSize.height);
+    if (!nearlySameViewport(viewport, vp)) {
+      editorRef.current?.setViewport(vp);
+    }
+  }, [viewport, canvasSize, editorRef]);
+
   // ── Static layer: axes + circle outline + special-angle dots ──────────────
   useEffect(() => {
     const canvas = staticRef.current;
     const ctx    = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    const vp = new Viewport(
-      viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-      canvasSize.width, canvasSize.height,
-    );
+    const vp = equalScaleViewport(viewport, canvasSize.width, canvasSize.height);
 
     hiDpiClear(ctx, canvas);
     renderAxis(ctx, vp, { showGrid: false });
@@ -79,10 +121,7 @@ export function UnitCircleCanvas() {
       const ctx    = canvas?.getContext('2d');
       if (!canvas || !ctx) return;
 
-      const vp = new Viewport(
-        viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-        canvasSize.width, canvasSize.height,
-      );
+      const vp = equalScaleViewport(viewport, canvasSize.width, canvasSize.height);
 
       hiDpiClear(ctx, canvas);
 

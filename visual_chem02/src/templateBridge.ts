@@ -1,10 +1,12 @@
 import { useMoleculeStore, type MoleculeStoreSnapshot } from '@/store/moleculeStore';
 import { useUIStore, type UISnapshot } from '@/store/uiStore';
+import { getChem02AiContext } from '@/runtime/aiContext';
+import { applyChem02Operations, type ApplyOperationsResult } from '@/runtime/aiOperations';
 
 const TEMPLATE_KEY = 'chem02';
 const RUNTIME_KEY = 'visual-chem02';
 const BRIDGE_VERSION = '1.0.0';
-const SNAPSHOT_SCHEMA_VERSION = 1;
+const SNAPSHOT_SCHEMA_VERSION = 2;
 
 interface TemplateSnapshotEnvelope {
   templateKey: string;
@@ -35,6 +37,8 @@ interface TemplateBridge {
   getSnapshot(): VisualChem02SnapshotDocument;
   loadSnapshot(snapshot: unknown): SnapshotValidationResult;
   validateSnapshot(snapshot: unknown): SnapshotValidationResult;
+  getAiContext(): ReturnType<typeof getChem02AiContext>;
+  applyOperations(operations: unknown): ApplyOperationsResult;
 }
 
 declare global {
@@ -159,6 +163,8 @@ function createBridge(): TemplateBridge {
     getSnapshot: getVisualChem02Snapshot,
     loadSnapshot: loadVisualChem02Snapshot,
     validateSnapshot: validateVisualChem02Snapshot,
+    getAiContext: getChem02AiContext,
+    applyOperations: applyChem02Operations,
   };
 }
 
@@ -225,6 +231,24 @@ export function registerTemplateBridge(): void {
             requestId: data.requestId,
             success: true,
             payload: bridge.validateSnapshot(data.payload),
+          };
+          break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.applyOperations(data.payload),
           };
           break;
         default:

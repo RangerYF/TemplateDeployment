@@ -5,6 +5,7 @@ import { UpdateFunctionParamCommand } from '@/editor/commands/UpdateFunctionPara
 import type { PiecewiseSegment } from '@/types';
 import { COLORS } from '@/styles/colors';
 import { pillHover, focusRing, dangerHover, btnHover } from '@/styles/interactionStyles';
+import { createId } from '@/lib/id';
 
 // ─── Overlap detection ───────────────────────────────────────────────────────
 
@@ -56,7 +57,7 @@ function parseBound(s: string): number | null {
 
 function makeDefaultSegment(): PiecewiseSegment {
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     exprStr: 'x',
     domain: { xMin: 0, xMax: 1, xMinInclusive: true, xMaxInclusive: false },
   };

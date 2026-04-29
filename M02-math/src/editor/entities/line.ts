@@ -1,5 +1,6 @@
 import type { LineEntity, LineParams, FunctionParam, BaseEntityMeta } from '@/types';
 import { ENTITY_COLORS } from '@/types';
+import { createId } from '@/lib/id';
 
 export function createLine(
   params?:   Partial<LineParams>,
@@ -9,7 +10,7 @@ export function createLine(
     k: 1, b: 0, vertical: false, x: 0,
   };
   return {
-    id:      crypto.randomUUID(),
+    id:      createId(),
     type:    'line',
     visible: true,
     color:   ENTITY_COLORS[0],

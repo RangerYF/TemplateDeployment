@@ -94,8 +94,8 @@ export function OpticalPanel() {
     <div style={{ padding: '12px 14px', borderTop: `1px solid ${COLORS.border}` }}>
 
       {/* Header + toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ fontSize: '11px', fontWeight: 700, color: COLORS.textPrimary, letterSpacing: '0.3px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary, letterSpacing: '0.3px' }}>
           光学性质
         </span>
         <button

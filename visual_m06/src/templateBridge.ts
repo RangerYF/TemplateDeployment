@@ -4,11 +4,13 @@ import type { DemoSnapshot } from './editor/demo/demoTypes';
 import { useHistoryStore, useUIStore, useVectorStore } from './editor/store';
 import type { UISnapshot } from './editor/store/uiStore';
 import type { VectorSnapshot } from './editor/store/vectorStore';
+import { buildM06AiContext, type M06AiContext } from './runtime/aiContext';
+import { applyM06AiOperations, type M06BridgeOperationResult } from './runtime/aiOperations';
 
 const TEMPLATE_KEY = 'm06';
 const RUNTIME_KEY = 'visual-m06';
 const BRIDGE_VERSION = '1.0.0';
-const SNAPSHOT_SCHEMA_VERSION = 1;
+const SNAPSHOT_SCHEMA_VERSION = 2;
 
 interface TemplateSnapshotEnvelope {
   templateKey: string;
@@ -41,6 +43,8 @@ interface TemplateBridge {
   getSnapshot(): VisualM06SnapshotDocument;
   loadSnapshot(snapshot: unknown): SnapshotValidationResult;
   validateSnapshot(snapshot: unknown): SnapshotValidationResult;
+  getAiContext(): M06AiContext;
+  applyOperations(operations: unknown): M06BridgeOperationResult;
 }
 
 declare global {
@@ -185,6 +189,8 @@ function createBridge(): TemplateBridge {
     getSnapshot: getVisualM06Snapshot,
     loadSnapshot: loadVisualM06Snapshot,
     validateSnapshot: validateVisualM06Snapshot,
+    getAiContext: buildM06AiContext,
+    applyOperations: applyM06AiOperations,
   };
 }
 
@@ -252,6 +258,24 @@ export function registerTemplateBridge(): void {
             requestId: data.requestId,
             success: true,
             payload: bridge.validateSnapshot(data.payload),
+          };
+          break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.applyOperations(data.payload),
           };
           break;
         default:

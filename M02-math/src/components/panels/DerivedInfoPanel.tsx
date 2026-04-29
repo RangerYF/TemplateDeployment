@@ -34,9 +34,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div style={{ marginBottom: '10px' }}>
       <p style={{
-        fontSize: '12px', fontWeight: 700,
-        color: COLORS.textPrimary, textTransform: 'uppercase', letterSpacing: '0.6px',
-        marginBottom: '4px',
+        fontSize: '11px', fontWeight: 600,
+        color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: '0.6px',
+        marginBottom: '6px',
       }}>
         {title}
       </p>
@@ -80,12 +80,12 @@ export function DerivedInfoPanel() {
 
       {/* ── Section heading ──────────────────────────────────────────── */}
       <p style={{
-        fontSize: '15px', fontWeight: 700, color: COLORS.textPrimary,
-        marginBottom: '4px',
+        fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary,
+        marginBottom: '10px',
       }}>
         派生要素
       </p>
-      <p style={{ fontSize: '14px', color: COLORS.textPrimary, marginBottom: '12px', fontFamily: 'monospace', fontWeight: 600 }}>
+      <p style={{ fontSize: '12px', color: COLORS.textSecondary, marginBottom: '12px', fontFamily: 'monospace', fontWeight: 600 }}>
         {entity.type === 'ellipse' && (() => {
           const { a, b, cx, cy } = entity.params;
           const a2 = (a * a).toFixed(2).replace(/\.?0+$/, '');
@@ -266,7 +266,7 @@ function CircleLineCard({ entity }: { entity: { type: 'circle'; params: { cx: nu
 
         return (
           <div key={line.id} style={{ marginBottom: 10 }}>
-            <p style={{ fontSize: '12px', fontWeight: 700, color: COLORS.textPrimary, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 4 }}>
+            <p style={{ fontSize: '11px', fontWeight: 600, color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 6 }}>
               圆与直线 {line.label ?? ''}
             </p>
             <Row label="d (圆心到直线)" value={d.toFixed(4)} color={color} />

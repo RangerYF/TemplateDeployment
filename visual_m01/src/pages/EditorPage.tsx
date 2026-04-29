@@ -6,8 +6,10 @@ import { initEditor, resetEditor, initEditorWithSnapshot } from '@/editor/init';
 import { setupShortcuts, teardownShortcuts } from '@/editor/shortcuts';
 import { useEntityStore } from '@/editor/store/entityStore';
 import { COLORS } from '@/styles/tokens';
-import type { GeometryType } from '@/types/geometry';
+import { type GeometryType } from '@/types/geometry';
 import { loadSceneData } from '@/data/projects';
+import { buildM01AiContext } from '@/runtime/aiContext';
+import { applyAiOperations } from '@/runtime/aiOperations';
 import {
   getDefaultSnapshotEnvelope,
   TEMPLATE_BRIDGE_NAMESPACE,
@@ -75,6 +77,9 @@ export function EditorPage() {
         const snapshot = useEntityStore.getState().getSnapshot();
         return buildSnapshotEnvelope(snapshot);
       },
+      getAiContext() {
+        return buildM01AiContext();
+      },
       loadSnapshot(snapshot: unknown) {
         const validation = validateSnapshotPayload(snapshot);
         if (!validation.ok) {
@@ -90,11 +95,14 @@ export function EditorPage() {
       validateSnapshot(snapshot: unknown) {
         return validateSnapshotPayload(snapshot);
       },
+      applyOperations(operations: unknown) {
+        return applyAiOperations(operations);
+      },
     };
 
     window[TEMPLATE_BRIDGE_GLOBAL_KEY] = bridge;
 
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       const data = event.data as
         | {
             namespace?: string;
@@ -132,6 +140,11 @@ export function EditorPage() {
           return;
         }
 
+        if (data.type === 'getAiContext') {
+          respond(true, bridge.getAiContext());
+          return;
+        }
+
         if (data.type === 'loadSnapshot') {
           bridge.loadSnapshot(data.payload);
           respond(true, { loaded: true });
@@ -140,6 +153,15 @@ export function EditorPage() {
 
         if (data.type === 'validateSnapshot') {
           const result = bridge.validateSnapshot(data.payload);
+          if (!result.ok) {
+            respond(false, result, result.errors.join('；'));
+            return;
+          }
+          respond(true, result);
+        }
+
+        if (data.type === 'applyOperations') {
+          const result = await bridge.applyOperations(data.payload);
           if (!result.ok) {
             respond(false, result, result.errors.join('；'));
             return;

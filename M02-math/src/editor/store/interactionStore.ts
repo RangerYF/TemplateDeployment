@@ -86,6 +86,13 @@ interface InteractionState {
   togglePinnedIntersection: (pt: { mathX: number; mathY: number; fnId1: string; fnId2: string }) => void;
 
   clearPinnedPoints: () => void;
+  getSnapshot: () => M02InteractionSnapshot;
+  loadSnapshot: (snapshot?: Partial<M02InteractionSnapshot>) => void;
+}
+
+export interface M02InteractionSnapshot {
+  pinnedPoints: PinnedPoint[];
+  pinnedIntersections: PinnedIntersection[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -165,5 +172,27 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
     _pinCounter   = 0;
     _xsectCounter = 0;
     set({ pinnedPoints: [], pinnedIntersections: [] });
+  },
+
+  getSnapshot() {
+    return {
+      pinnedPoints: structuredClone(get().pinnedPoints),
+      pinnedIntersections: structuredClone(get().pinnedIntersections),
+    };
+  },
+
+  loadSnapshot(snapshot) {
+    const pinnedPoints = snapshot?.pinnedPoints ? structuredClone(snapshot.pinnedPoints) : [];
+    const pinnedIntersections = snapshot?.pinnedIntersections
+      ? structuredClone(snapshot.pinnedIntersections)
+      : [];
+    _pinCounter = pinnedPoints.length;
+    _xsectCounter = pinnedIntersections.length;
+    set({
+      hoveredPoint: null,
+      hoveredIntersection: null,
+      pinnedPoints,
+      pinnedIntersections,
+    });
   },
 }));

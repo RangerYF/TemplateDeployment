@@ -120,7 +120,7 @@ export function UniversalSlider({
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '36px 1fr 64px',
+      gridTemplateColumns: '36px minmax(0, 1fr) 64px',
       alignItems: 'center',
       gap: '6px',
       marginBottom: '8px',
@@ -154,11 +154,12 @@ export function UniversalSlider({
           onBlur={commitEdit}
           onKeyDown={handleKeyDown}
           style={{
-            width: '100%', textAlign: 'right',
+            width: '100%', boxSizing: 'border-box', textAlign: 'right',
             fontSize: '13px', fontFamily: 'monospace', fontWeight: 600,
             color: COLORS.textPrimary, background: COLORS.surfaceAlt,
             border: `1px solid ${accentColor}`,
             borderRadius: 8, padding: '1px 4px',
+            minWidth: 0,
             outline: 'none',
             transition: 'border-color 0.15s, box-shadow 0.15s',
           }}

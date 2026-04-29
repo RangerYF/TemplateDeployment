@@ -1,13 +1,14 @@
 import type { HyperbolaEntity, HyperbolaParams, BaseEntityMeta } from '@/types';
 import { ENTITY_COLORS } from '@/types';
 import { computeHyperbolaDerived } from '@/engine/conicAnalysis';
+import { createId } from '@/lib/id';
 
 export function createHyperbola(
   params:    HyperbolaParams,
   overrides?: Partial<BaseEntityMeta>,
 ): HyperbolaEntity {
   return {
-    id:      crypto.randomUUID(),
+    id:      createId(),
     type:    'hyperbola',
     visible: true,
     color:   ENTITY_COLORS[0],

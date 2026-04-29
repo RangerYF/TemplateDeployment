@@ -1,4 +1,5 @@
 import type { GeometryType } from '@/types/geometry';
+import type { Entity } from '@/editor/entities/types';
 
 /** 作品元数据（用于 AI 推荐匹配） */
 export interface ProjectMeta {
@@ -34,7 +35,7 @@ export interface ProjectMeta {
 
 /** scene_data 快照结构（与 EntityStore.getSnapshot 一致） */
 export interface SceneSnapshot {
-  entities: Record<string, unknown>;
+  entities: Record<string, Entity>;
   nextId: number;
   activeGeometryId: string | null;
 }

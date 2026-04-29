@@ -42,6 +42,7 @@ export function renderMovablePoints(
   vp: Viewport,
   points: MovablePointEntity[],
   trajectories: Record<string, TrajectoryPoint[]>,
+  activeEntityId?: string | null,
 ): void {
   for (const point of points) {
     if (!point.visible) continue;
@@ -75,28 +76,65 @@ export function renderMovablePoints(
     ctx.stroke();
     ctx.restore();
 
-    // Coordinate label — large, crisp, high-contrast
+    renderPointName(ctx, cx, cy, point.label ?? 'P', point.color);
+
+    // Selection ring when active
+    if (point.id === activeEntityId) {
+      ctx.save();
+      ctx.strokeStyle = '#32D583';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10, 0, 6.2832);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    if (point.id !== activeEntityId) continue;
+
+    // Coordinate label for the active point only.
     const label = `(${point.params.mathX.toFixed(2)}, ${point.params.mathY.toFixed(2)})`;
     ctx.save();
-    ctx.font = '700 13px -apple-system,"Helvetica Neue",Arial,sans-serif';
-    ctx.textBaseline = 'middle';
+    ctx.font = '600 12px -apple-system,"Helvetica Neue",Arial,sans-serif';
+    ctx.textBaseline = 'top';
     const tw = ctx.measureText(label).width;
-    const lx = cx + 14;
-    const ly = cy - 16;
-    const pw = tw + 14;
-    const ph = 22;
+    const rawX = cx + 10;
+    const rawY = cy + 10;
+    const lx = clamp(rawX, 8, vp.width - tw - 8);
+    const ly = clamp(rawY, 8, vp.height - 20);
 
-    // Dark pill background with stronger opacity
-    ctx.fillStyle = 'rgba(20,20,30,0.90)';
-    ctx.beginPath();
-    ctx.roundRect(lx - 7, ly - ph / 2, pw, ph, 8);
-    ctx.fill();
-
-    // White text
-    ctx.fillStyle = '#FFFFFF';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillStyle = '#111827';
+    ctx.strokeText(label, lx, ly);
     ctx.fillText(label, lx, ly);
     ctx.restore();
   }
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function renderPointName(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  label: string,
+  color: string,
+): void {
+  ctx.save();
+  ctx.font = '700 12px -apple-system,"Helvetica Neue",Arial,sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 3;
+  const text = label.length > 8 ? label.slice(0, 8) : label;
+  const lx = cx + 9;
+  const ly = cy - 7;
+  ctx.strokeText(text, lx, ly);
+  ctx.fillText(text, lx, ly);
+  ctx.restore();
 }
 
 // ─── Axis projection lines ───────────────────────────────────────────────────
@@ -247,23 +285,29 @@ export function renderSnapPreview(
   ctx.arc(cx, cy, 3.5, 0, 6.2832);
   ctx.fill();
 
-  // Coordinate label — clear and readable
+  // Coordinate label — light card style
   const label = `(${mx.toFixed(2)}, ${my.toFixed(2)})`;
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = 1;
   ctx.font = '600 12px -apple-system,"Helvetica Neue",Arial,sans-serif';
   ctx.textBaseline = 'middle';
   const tw = ctx.measureText(label).width;
-  const lx = cx + 18;
-  const ly = cy - 18;
+  const lx = Math.round(cx + 18);
+  const ly = Math.round(cy - 18);
   const pw = tw + 12;
   const ph = 20;
 
-  ctx.fillStyle = 'rgba(20,20,30,0.80)';
+  ctx.shadowColor = 'rgba(0,0,0,0.12)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
   ctx.beginPath();
   ctx.roundRect(lx - 6, ly - ph / 2, pw, ph, 6);
   ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
-  ctx.fillStyle = '#FFF';
+  ctx.fillStyle = '#1A1A2E';
   ctx.fillText(label, lx, ly);
 
   ctx.restore();

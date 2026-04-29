@@ -1,5 +1,6 @@
 import type { ImplicitCurveEntity, ImplicitCurveParams, FunctionParam, BaseEntityMeta } from '@/types';
 import { ENTITY_COLORS } from '@/types';
+import { createId } from '@/lib/id';
 
 export function createImplicitCurve(
   exprStr: string,
@@ -7,7 +8,7 @@ export function createImplicitCurve(
   overrides?: Partial<BaseEntityMeta>,
 ): ImplicitCurveEntity {
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     type: 'implicit-curve',
     visible: true,
     color: ENTITY_COLORS[0],

@@ -223,12 +223,12 @@ export function EccentricityPanel() {
     <div style={{ padding: '12px 14px', borderTop: `1px solid ${COLORS.border}` }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: '11px', fontWeight: 700, color: COLORS.textPrimary, letterSpacing: '0.3px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary, letterSpacing: '0.3px' }}>
           离心率演变
         </span>
         <span style={{
-          fontSize: '10px', fontWeight: 600,
+          fontSize: '11px', fontWeight: 600,
           color: isCircle ? COLORS.textDisabled : entity.color,
           fontFamily: 'monospace',
         }}>

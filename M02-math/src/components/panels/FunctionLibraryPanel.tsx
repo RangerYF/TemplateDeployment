@@ -11,6 +11,7 @@ import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
 import { FUNCTION_TEMPLATES } from '@/engine/functionTemplates';
 import { FUNCTION_COLORS, DEFAULT_TRANSFORM, type FunctionEntry } from '@/types';
 import { COLORS } from '@/styles/colors';
+import { createId } from '@/lib/id';
 
 const MAX_FUNCTIONS = 8;
 const LABELS = ['f(x)', 'g(x)', 'h(x)', 'p(x)', 'q(x)', 'r(x)', 's(x)', 't(x)'];
@@ -40,7 +41,7 @@ export function FunctionLibraryPanel() {
     }
 
     const entry: FunctionEntry = {
-      id:          crypto.randomUUID(),
+      id:          createId(),
       label,
       mode:        'standard',
       exprStr,

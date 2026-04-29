@@ -21,3 +21,4 @@ dist/
 # vite
 .vite/
 .vercel
+.codex
