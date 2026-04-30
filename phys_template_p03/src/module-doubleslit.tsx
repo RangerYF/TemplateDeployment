@@ -22,6 +22,15 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
+function getCanvasSize(canvas: HTMLCanvasElement): { width: number; height: number } | null {
+  const parent = canvas.parentElement;
+  if (!parent) return null;
+  const width = Math.floor(parent.clientWidth);
+  const height = Math.floor(parent.clientHeight);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
 function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
   const SceneLinearSetup = (window as any).SceneLinearSetup;
   const { slitSpacing, screenDistance, wavelength, slitWidth, whiteLight, showColor, showIntensity } = settings;
@@ -87,8 +96,21 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
   }, [slitSpacing, screenDistance, wavelength, slitWidth, whiteLight, sourceIntensityScale, color, d, L, lam, a]);
 
   React.useEffect(() => {
-    drawPattern();
-    drawPlot();
+    const redraw = (): void => {
+      drawPattern();
+      drawPlot();
+    };
+    redraw();
+    const frame = window.requestAnimationFrame(redraw);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(redraw);
+    const patternParent = canvasRef.current?.parentElement;
+    const plotParent = plotRef.current?.parentElement;
+    if (patternParent) observer?.observe(patternParent);
+    if (plotParent) observer?.observe(plotParent);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
   }, [slitSpacing, screenDistance, wavelength, slitWidth, whiteLight, showColor, showIntensity, sourceX, slitX, screenX]);
 
   React.useEffect(() => {
@@ -141,17 +163,19 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
     setDragTarget(kind);
   };
 
-  function drawPattern(): void {
+  function drawPattern(): boolean {
     const cv = canvasRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
@@ -205,19 +229,22 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
       }
     }
     ctx.putImageData(img, 0, 0);
+    return true;
   }
 
-  function drawPlot(): void {
+  function drawPlot(): boolean {
     const cv = plotRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     const bg = getComputedStyle(document.documentElement).getPropertyValue('--panel').trim();
     ctx.fillStyle = bg;
@@ -270,6 +297,7 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
     ctx.fillText('y →', W - m - 26, H - m - 6);
     ctx.fillText(`Δy = ${(fringeSpacing * 1000).toFixed(2)} mm`, W / 2 + 8, m + 14);
     if (whiteLight) ctx.fillText('450 / 550 / 650 nm', W - m - 92, m + 12);
+    return true;
   }
 
   return (

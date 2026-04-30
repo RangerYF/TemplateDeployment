@@ -29,6 +29,15 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
+function getCanvasSize(canvas: HTMLCanvasElement): { width: number; height: number } | null {
+  const parent = canvas.parentElement;
+  if (!parent) return null;
+  const width = Math.floor(parent.clientWidth);
+  const height = Math.floor(parent.clientHeight);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
 function fmt(v: number, digits = 3): string {
   return Number.isFinite(v) ? v.toFixed(digits) : '—';
 }
@@ -84,7 +93,23 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
   const isSlit = aperture === 'slit';
   const screenSpan = DIFFRACTION_VIEW_SPAN[aperture];
 
-  React.useEffect(() => { drawPattern(); drawPlot(); }, [aperture, slitWidth, diameter, wavelength, screenDistance, settings.compareMode, settings.showColor, settings.showIntensity, sourceX, apertureX, screenX]);
+  React.useEffect(() => {
+    const redraw = (): void => {
+      drawPattern();
+      drawPlot();
+    };
+    redraw();
+    const frame = window.requestAnimationFrame(redraw);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(redraw);
+    const patternParent = patternRef.current?.parentElement;
+    const plotParent = plotRef.current?.parentElement;
+    if (patternParent) observer?.observe(patternParent);
+    if (plotParent) observer?.observe(plotParent);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
+  }, [aperture, slitWidth, diameter, wavelength, screenDistance, settings.compareMode, settings.showColor, settings.showIntensity, sourceX, apertureX, screenX]);
 
   React.useEffect(() => {
     if (!dragTarget || !dragRef.current) return;
@@ -157,17 +182,19 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
     return baseI;
   }
 
-  function drawPattern(): void {
+  function drawPattern(): boolean {
     const cv = patternRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
@@ -228,7 +255,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
         ctx.fillText('艾里斑', W / 2 - 20, 18);
       }
     }
-    return;
+    return true;
   }
 
     const wlc = (window as any).wavelengthToColor as (n: number) => string;
@@ -266,19 +293,22 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.font = '11px JetBrains Mono, monospace';
     for (let bi = 0; bi < 3; bi++) ctx.fillText(`${COMPARE_WLS[bi]} nm`, 8, bi * bandH + 14);
+    return true;
   }
 
-  function drawPlot(): void {
+  function drawPlot(): boolean {
     const cv = plotRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     const bg = getComputedStyle(document.documentElement).getPropertyValue('--panel').trim();
     ctx.fillStyle = bg;
@@ -358,6 +388,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
     }
     ctx.fillStyle = ink3;
     ctx.fillText(isSlit ? 'I(y)' : 'I(r)', m + 4, m + 12);
+    return true;
   }
 
   return (

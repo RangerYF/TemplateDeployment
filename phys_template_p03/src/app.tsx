@@ -9,6 +9,7 @@ type ThemeName = 'light' | 'dark' | 'blueprint';
 const W = window as any;
 const MODULES: ModuleDef[] = W.P03_MODULES;
 const DEFAULTS = W.P03_DEFAULTS;
+const { useState, useEffect } = React;
 
 function loadState<T>(key: string, def: T): T {
   try {
@@ -21,24 +22,65 @@ function saveState(key: string, state: unknown): void {
   try { localStorage.setItem('p03-' + key, JSON.stringify(state)); } catch (e) {}
 }
 
-const { useState, useEffect } = React;
+function getInitialActiveModule(): ModuleId {
+  const saved = localStorage.getItem('p03-active') as ModuleId | null;
+  return MODULES.some((module) => module.id === saved) ? saved as ModuleId : 'refraction';
+}
+
+let latestBridgeState = {
+  active: getInitialActiveModule(),
+  theme: (W.__TWEAKS.theme || 'light') as ThemeName,
+  rayThick: W.__TWEAKS.rayThick || 2,
+  refr: loadState('refraction', DEFAULTS.refraction),
+  lens: loadState('lens', DEFAULTS.lens),
+  dbl: loadState('doubleslit', DEFAULTS.doubleslit),
+  diff: loadState('diffraction', DEFAULTS.diffraction),
+  film: loadState('thinfilm', DEFAULTS.thinfilm),
+};
+
+let applyPayloadToMountedApp: ((payload: P03SnapshotPayload) => void) | null = null;
+
+function updateLatestBridgeState(payload: P03SnapshotPayload): void {
+  W.__TWEAKS = { ...(W.__TWEAKS || {}), theme: payload.presentation.theme, rayThick: payload.presentation.rayThick };
+  latestBridgeState = {
+    active: payload.activeModule,
+    theme: payload.presentation.theme,
+    rayThick: payload.presentation.rayThick,
+    refr: payload.modules.refraction,
+    lens: payload.modules.lens,
+    dbl: payload.modules.doubleslit,
+    diff: payload.modules.diffraction,
+    film: payload.modules.thinfilm,
+  };
+}
+
+installP03BridgeMessageListener();
+W.__EDUMIND_TEMPLATE_BRIDGE__ = createP03Bridge({
+  defaults: {
+    refraction: DEFAULTS.refraction,
+    lens: DEFAULTS.lens,
+    doubleslit: DEFAULTS.doubleslit,
+    diffraction: DEFAULTS.diffraction,
+    thinfilm: DEFAULTS.thinfilm,
+  },
+  getState: () => latestBridgeState,
+  setPayload: (payload: P03SnapshotPayload) => {
+    updateLatestBridgeState(payload);
+    applyPayloadToMountedApp?.(payload);
+  },
+});
 
 function App() {
-  const [active, setActive] = useState<ModuleId>(
-    () => {
-      const saved = localStorage.getItem('p03-active') as ModuleId | null;
-      return MODULES.some((module) => module.id === saved) ? saved as ModuleId : 'refraction';
-    }
-  );
+  const [active, setActive] = useState<ModuleId>(() => latestBridgeState.active);
   const [tweaksOpen, setTweaksOpen] = useState<boolean>(false);
-  const [theme, setTheme] = useState<ThemeName>((window as any).__TWEAKS.theme || 'light');
-  const [rayThick, setRayThick] = useState<number>((window as any).__TWEAKS.rayThick || 2);
+  const [theme, setTheme] = useState<ThemeName>(() => latestBridgeState.theme);
+  const [rayThick, setRayThick] = useState<number>(() => latestBridgeState.rayThick);
 
-  const [refr, setRefr] = useState<any>(() => loadState('refraction', DEFAULTS.refraction));
-  const [lens, setLens] = useState<any>(() => loadState('lens', DEFAULTS.lens));
-  const [dbl, setDbl]   = useState<any>(() => loadState('doubleslit', DEFAULTS.doubleslit));
-  const [diff, setDiff] = useState<any>(() => loadState('diffraction', DEFAULTS.diffraction));
-  const [film, setFilm] = useState<any>(() => loadState('thinfilm', DEFAULTS.thinfilm));
+  const [refr, setRefr] = useState<any>(() => latestBridgeState.refr);
+  const [lens, setLens] = useState<any>(() => latestBridgeState.lens);
+  const [dbl, setDbl]   = useState<any>(() => latestBridgeState.dbl);
+  const [diff, setDiff] = useState<any>(() => latestBridgeState.diff);
+  const [film, setFilm] = useState<any>(() => latestBridgeState.film);
 
   useEffect(() => (window as any).applyTheme(theme), [theme]);
   useEffect(() => localStorage.setItem('p03-active', active), [active]);
@@ -48,29 +90,21 @@ function App() {
   useEffect(() => saveState('diffraction', diff), [diff]);
   useEffect(() => saveState('thinfilm', film), [film]);
 
-  useEffect(() => installP03BridgeMessageListener(), []);
+  useEffect(() => {
+    latestBridgeState = {
+      active,
+      theme,
+      rayThick,
+      refr,
+      lens,
+      dbl,
+      diff,
+      film,
+    };
+  }, [active, theme, rayThick, refr, lens, dbl, diff, film]);
 
   useEffect(() => {
-    W.__EDUMIND_TEMPLATE_BRIDGE__ = createP03Bridge({
-      defaults: {
-        refraction: DEFAULTS.refraction,
-        lens: DEFAULTS.lens,
-        doubleslit: DEFAULTS.doubleslit,
-        diffraction: DEFAULTS.diffraction,
-        thinfilm: DEFAULTS.thinfilm,
-      },
-      getState: () => ({
-        active,
-        theme,
-        rayThick,
-        refr,
-        lens,
-        dbl,
-        diff,
-        film,
-      }),
-      setPayload: (payload: P03SnapshotPayload) => {
-        W.__TWEAKS = { ...(W.__TWEAKS || {}), theme: payload.presentation.theme, rayThick: payload.presentation.rayThick };
+    applyPayloadToMountedApp = (payload: P03SnapshotPayload) => {
         setActive(payload.activeModule);
         setTheme(payload.presentation.theme);
         setRayThick(payload.presentation.rayThick);
@@ -80,9 +114,11 @@ function App() {
         setDiff(payload.modules.diffraction);
         setFilm(payload.modules.thinfilm);
         setTweaksOpen(false);
-      },
-    });
-  }, [active, theme, rayThick, refr, lens, dbl, diff, film]);
+    };
+    return () => {
+      applyPayloadToMountedApp = null;
+    };
+  }, []);
 
   useEffect(() => {
     function handler(e: MessageEvent): void {

@@ -31,6 +31,15 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
+function getCanvasSize(canvas: HTMLCanvasElement): { width: number; height: number } | null {
+  const parent = canvas.parentElement;
+  if (!parent) return null;
+  const width = Math.floor(parent.clientWidth);
+  const height = Math.floor(parent.clientHeight);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
 function soapIntensityAtThickness(t_m: number, wl_m: number, n: number): number {
   const phi = 2 * Math.PI * (2 * n * t_m) / wl_m + Math.PI;
   return Math.pow(Math.cos(phi / 2), 2);
@@ -96,8 +105,21 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
   }, [dragNewtonSample, isNewton]);
 
   React.useEffect(() => {
-    drawPattern();
-    drawPlot();
+    const redraw = (): void => {
+      drawPattern();
+      drawPlot();
+    };
+    redraw();
+    const frame = window.requestAnimationFrame(redraw);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(redraw);
+    const patternParent = patternRef.current?.parentElement;
+    const plotParent = plotRef.current?.parentElement;
+    if (patternParent) observer?.observe(patternParent);
+    if (plotParent) observer?.observe(plotParent);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
   }, [filmType, wavelength, thickness, filmN, lensR, wedgeAngle, settings.showIntensity, newtonSampleRatio]);
 
   function ringsIntensityAtR(r_m: number): number {
@@ -110,17 +132,19 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     return soapIntensityAtThickness(t, lam, filmN);
   }
 
-  function drawPattern(): void {
+  function drawPattern(): boolean {
     const cv = patternRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
@@ -167,7 +191,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
       ctx.arc(W / 2 + sampleRPx, H / 2, 5.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillText(`采样 r = ${fmt(newtonSampleR * 1000)} mm`, W / 2 + sampleRPx + 10, H / 2 - 10);
-      return;
+      return true;
     }
 
     if (filmType === 'wedge') {
@@ -188,7 +212,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
       ctx.font = '12px JetBrains Mono, monospace';
       ctx.fillText('等厚干涉条纹', 12, 18);
-      return;
+      return true;
     }
 
     for (let py = 0; py < H; py++) {
@@ -217,19 +241,22 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     ctx.fillStyle = 'rgba(255,255,255,0.88)';
     ctx.font = '12px JetBrains Mono, monospace';
     ctx.fillText('白光下不同波长在不同厚度位置增强', 12, 18);
+    return true;
   }
 
-  function drawPlot(): void {
+  function drawPlot(): boolean {
     const cv = plotRef.current as HTMLCanvasElement | null;
-    if (!cv) return;
-    const parent = cv.parentElement as HTMLElement;
-    const W = parent.clientWidth, H = parent.clientHeight;
+    if (!cv) return false;
+    const size = getCanvasSize(cv);
+    if (!size) return false;
+    const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr;
     cv.height = H * dpr;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
-    const ctx = cv.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
+    if (!ctx) return false;
     ctx.scale(dpr, dpr);
     const bg = getComputedStyle(document.documentElement).getPropertyValue('--panel').trim();
     const ink3 = getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim();
@@ -349,6 +376,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     ctx.fillStyle = ink3;
     ctx.font = '11px JetBrains Mono, monospace';
     ctx.fillText(detail, m + 4, H - m + 14);
+    return true;
   }
 
   return (
