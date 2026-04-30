@@ -1,13 +1,13 @@
 {
   "id": "P02-EM003-cyclotron-motion",
   "version": "1.0",
-  "name": "带电粒子·磁场中圆周运动",
-  "description": "带电粒子以初速度进入匀强磁场，受洛伦兹力做匀速圆周运动。理论半径 R=mv/(qB)",
-  "category": "P-02",
-  "supportedViewports": ["force", "motion", "field"],
-  "defaultViewport": "force",
+  "name": "洛伦兹力圆周运动",
+  "description": "设置磁场方向、粒子速度与荷质比，观察带电粒子在匀强磁场中的圆周轨迹、半径和周期。",
+  "category": "P-08",
+  "supportedViewports": ["motion", "force", "field"],
+  "defaultViewport": "motion",
   "displayConfig": {
-    "scale": 100,
+    "scale": 60,
     "origin": { "x": 400, "y": 300 }
   },
   "entities": [
@@ -15,24 +15,26 @@
       "ref": "bfield-1",
       "type": "uniform-bfield",
       "properties": {
-        "magnitude": 2.0,
+        "magnitude": 0.5,
         "direction": "into",
-        "width": 8,
-        "height": 6
+        "width": 12,
+        "height": 10
       },
-      "transform": { "position": { "x": -4, "y": -3 }, "rotation": 0 },
-      "label": "匀强磁场"
+      "transform": { "position": { "x": -6, "y": -5 }, "rotation": 0 },
+      "label": "匀强磁场区域"
     },
     {
       "ref": "particle-1",
       "type": "point-charge",
       "properties": {
-        "charge": 1,
-        "mass": 1,
+        "charge": 0.5,
+        "mass": 0.5,
         "initialVelocity": { "x": 2, "y": 0 },
+        "initialSpeed": 2,
+        "initialDirectionDeg": 0,
         "radius": 0.12
       },
-      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "transform": { "position": { "x": -2, "y": -3 }, "rotation": 0 },
       "label": "带电粒子"
     }
   ],
@@ -47,58 +49,75 @@
   "paramGroups": [
     {
       "key": "particle-params",
-      "label": "粒子属性",
+      "label": "粒子参数",
       "params": [
         {
           "key": "charge",
-          "label": "电荷量",
+          "label": "电荷量 q",
           "type": "slider",
-          "min": 0.1,
-          "max": 5,
-          "step": 0.1,
-          "default": 1,
+          "min": -1,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.5,
+          "precision": 2,
           "unit": "C",
           "targetEntityId": "particle-1",
           "targetProperty": "charge"
         },
         {
           "key": "mass",
-          "label": "质量",
+          "label": "质量 m",
           "type": "slider",
           "min": 0.1,
-          "max": 5,
-          "step": 0.1,
-          "default": 1,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.5,
+          "precision": 2,
           "unit": "kg",
           "targetEntityId": "particle-1",
           "targetProperty": "mass"
         },
         {
           "key": "v0",
-          "label": "初速度",
+          "label": "初速度大小 v0",
           "type": "slider",
-          "min": 0.5,
-          "max": 5,
+          "min": 0,
+          "max": 6,
           "step": 0.1,
           "default": 2,
+          "precision": 1,
           "unit": "m/s",
           "targetEntityId": "particle-1",
-          "targetProperty": "initialVelocity.x"
+          "targetProperty": "initialSpeed"
+        },
+        {
+          "key": "theta",
+          "label": "初速度方向 θ",
+          "type": "slider",
+          "min": 0,
+          "max": 360,
+          "step": 1,
+          "default": 0,
+          "precision": 0,
+          "unit": "°",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialDirectionDeg"
         }
       ]
     },
     {
       "key": "bfield-params",
-      "label": "磁场属性",
+      "label": "磁场参数",
       "params": [
         {
           "key": "B",
-          "label": "磁感应强度",
+          "label": "磁感应强度 B",
           "type": "slider",
-          "min": 0.5,
+          "min": 0.01,
           "max": 5,
-          "step": 0.1,
-          "default": 2,
+          "step": 0.01,
+          "default": 0.5,
+          "precision": 2,
           "unit": "T",
           "targetEntityId": "bfield-1",
           "targetProperty": "magnitude"
@@ -108,8 +127,8 @@
           "label": "磁场方向",
           "type": "select",
           "options": [
-            { "value": "into", "label": "垂直纸面向内 \u00d7" },
-            { "value": "out", "label": "垂直纸面向外 \u00b7" }
+            { "value": "into", "label": "垂直纸面向里 ×" },
+            { "value": "out", "label": "垂直纸面向外 ·" }
           ],
           "default": "into",
           "targetEntityId": "bfield-1",
@@ -119,13 +138,14 @@
     }
   ],
   "paramValues": {
-    "charge": 1,
-    "mass": 1,
+    "charge": 0.5,
+    "mass": 0.5,
     "v0": 2,
-    "B": 2,
+    "theta": 0,
+    "B": 0.5,
     "direction": "into"
   },
   "solveMode": "numerical",
-  "duration": 10,
+  "duration": 12,
   "solverQualifier": { "interaction": "magnetic" }
 }

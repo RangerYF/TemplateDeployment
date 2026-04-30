@@ -1,0 +1,163 @@
+{
+  "id": "P04-CIR-EXP005-ohmmeter",
+  "version": "1.0",
+  "name": "欧姆表原理",
+  "description": "演示串联式欧姆表的调零、测量与中值电阻：当Rx=0时调R0使表头满偏，理想调零后R中等于表内总电阻",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 85,
+    "origin": { "x": 360, "y": 240 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 1.5,
+        "internalResistance": 200,
+        "width": 0.8,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -3.5, "y": -0.25 }, "rotation": 0 },
+      "label": "电池ε"
+    },
+    {
+      "ref": "switch-1",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": -1.8, "y": 1.85 }, "rotation": 0 },
+      "label": "开关"
+    },
+    {
+      "ref": "galv-1",
+      "type": "galvanometer",
+      "properties": {
+        "sensitivity": 20,
+        "internalResistance": 1000,
+        "radius": 0.4,
+        "reading": 0,
+        "overRange": false,
+        "range": 0.0001
+      },
+      "transform": { "position": { "x": 0.5, "y": 2.0 }, "rotation": 0 },
+      "label": "表头G"
+    },
+    {
+      "ref": "rheostat-adj",
+      "type": "slide-rheostat",
+      "properties": {
+        "maxResistance": 30000,
+        "sliderRatio": 0.46,
+        "width": 1.0,
+        "height": 0.5,
+        "voltage": 0,
+        "current": 0,
+        "connectionMode": "variable",
+        "ports": [
+          { "id": "A", "label": "固定端A", "side": "left" },
+          { "id": "B", "label": "固定端B", "side": "right" },
+          { "id": "W", "label": "滑片端", "side": "top" }
+        ]
+      },
+      "transform": { "position": { "x": 0.2, "y": -1.5 }, "rotation": 0 },
+      "label": "调零电阻R₀"
+    },
+    {
+      "ref": "rx-box",
+      "type": "resistance-box",
+      "properties": {
+        "resistance": 0,
+        "width": 1.2,
+        "height": 0.5,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": -0.5, "y": -3.5 }, "rotation": 0 },
+      "label": "待测电阻Rx"
+    }
+  ],
+  "relations": [
+    { "type": "connection", "sourceRef": "source-1", "targetRef": "switch-1", "properties": {} },
+    { "type": "connection", "sourceRef": "switch-1", "targetRef": "galv-1", "properties": {} },
+    {
+      "type": "connection",
+      "sourceRef": "galv-1",
+      "targetRef": "rheostat-adj",
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "A"
+      }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "rheostat-adj",
+      "targetRef": "rx-box",
+      "properties": {
+        "sourcePort": "W",
+        "targetPort": "left",
+        "topology": "ohm-terminal"
+      }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "rx-box",
+      "targetRef": "source-1",
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "bottom",
+        "topology": "ohm-terminal"
+      }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "battery-params",
+      "label": "内置电池",
+      "params": [
+        { "key": "emf", "label": "电动势", "type": "slider", "min": 1, "max": 9, "step": 0.5, "default": 1.5, "unit": "V", "targetEntityId": "source-1", "targetProperty": "emf" },
+        { "key": "r", "label": "内阻", "type": "slider", "min": 0, "max": 1000, "step": 10, "default": 200, "unit": "Ω", "targetEntityId": "source-1", "targetProperty": "internalResistance" }
+      ]
+    },
+    {
+      "key": "galv-params",
+      "label": "表头G",
+      "params": [
+        { "key": "Ig", "label": "满偏电流", "type": "slider", "min": 0.00005, "max": 0.001, "step": 0.00001, "default": 0.0001, "unit": "A", "precision": 5, "targetEntityId": "galv-1", "targetProperty": "range" },
+        { "key": "Rg", "label": "内阻", "type": "slider", "min": 100, "max": 5000, "step": 10, "default": 1000, "unit": "Ω", "targetEntityId": "galv-1", "targetProperty": "internalResistance" }
+      ]
+    },
+    {
+      "key": "adj-params",
+      "label": "调零电阻R₀",
+      "params": [
+        { "key": "adjRatio", "label": "调零旋钮", "type": "slider", "min": 0.01, "max": 1, "step": 0.001, "default": 0.46, "unit": "", "targetEntityId": "rheostat-adj", "targetProperty": "sliderRatio" }
+      ]
+    },
+    {
+      "key": "rx-params",
+      "label": "待测电阻",
+      "params": [
+        { "key": "Rx", "label": "Rx", "type": "slider", "min": 0, "max": 99999, "step": 1, "default": 0, "unit": "Ω", "targetEntityId": "rx-box", "targetProperty": "resistance" }
+      ]
+    },
+    {
+      "key": "switch-params",
+      "label": "开关",
+      "params": [
+        { "key": "switchClosed", "label": "开关状态", "type": "toggle", "default": true, "labelOn": "闭合", "labelOff": "断开", "targetEntityId": "switch-1", "targetProperty": "closed" }
+      ]
+    }
+  ],
+  "paramValues": {
+    "emf": 1.5, "r": 200, "Ig": 0.0001, "Rg": 1000, "adjRatio": 0.46, "Rx": 0, "switchClosed": true
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "ohmmeter" }
+}

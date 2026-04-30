@@ -1,0 +1,87 @@
+{
+  "id": "P02-EMF021-wire-bfield",
+  "version": "1.0",
+  "name": "长直导线磁场",
+  "description": "观察长直通电导线周围的同心圆磁感线，适合讲解安培定则与 B = μ0I / (2πr)。",
+  "category": "P-08",
+  "supportedViewports": ["field"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "wire-1",
+      "type": "current-wire",
+      "properties": {
+        "current": 5,
+        "length": 4,
+        "wireDirection": { "x": 0, "y": 1 },
+        "currentDirectionMode": "up",
+        "wireShape": "straight",
+        "width": 0.1,
+        "height": 4
+      },
+      "transform": { "position": { "x": -0.05, "y": -2 }, "rotation": 0 },
+      "label": "载流直导线"
+    }
+  ],
+  "relations": [],
+  "paramGroups": [
+    {
+      "key": "wire-view",
+      "label": "教学视图",
+      "params": [
+        {
+          "key": "wireViewMode",
+          "label": "展示样式",
+          "type": "select",
+          "options": [
+            { "value": "isometric", "label": "立体图" },
+            { "value": "top", "label": "俯视图" },
+            { "value": "front", "label": "正视图" }
+          ],
+          "default": "isometric"
+        }
+      ]
+    },
+    {
+      "key": "wire-params",
+      "label": "导线属性",
+      "params": [
+        {
+          "key": "current",
+          "label": "电流",
+          "type": "slider",
+          "min": 0.5,
+          "max": 20,
+          "step": 0.5,
+          "default": 5,
+          "unit": "A",
+          "targetEntityId": "wire-1",
+          "targetProperty": "current"
+        },
+        {
+          "key": "currentDirectionMode",
+          "label": "电流方向",
+          "type": "select",
+          "options": [
+            { "value": "up", "label": "向上" },
+            { "value": "down", "label": "向下" }
+          ],
+          "default": "up",
+          "targetEntityId": "wire-1",
+          "targetProperty": "currentDirectionMode"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "wireViewMode": "isometric",
+    "current": 5,
+    "currentDirectionMode": "up"
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

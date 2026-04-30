@@ -3,76 +3,57 @@ import { worldToScreen } from '@/renderer/coordinate';
 import { drawArrow } from '@/renderer/primitives/arrow';
 import { drawTextLabel } from '@/renderer/primitives/text-label';
 import type { ViewportRenderer } from '@/core/registries/renderer-registry';
-import type { Entity, EntityId, Force, Selection, Vec2 } from '@/core/types';
+import type { Entity, Vec2 } from '@/core/types';
 import { FORCE_COLORS } from '@/core/visual-constants';
-import type { PlacementBox } from '@/renderer/placement';
-import { segmentToBox, measureText, placeLabel } from '@/renderer/placement';
 
 const MIN_LENGTH = 30;
 const MAX_LENGTH = 180;
 const EDGE_GAP = 0.02;
 const LABEL_FONT_SIZE = 12;
+const LABEL_PAD = 6; // 标签与障碍物的最小间距 px
 
-// ─── 力箭头屏幕坐标缓存（每帧渲染时更新，供 hitTest 读取） ───
+// ─── AABB 工具 ───
 
-export interface CachedForceArrow {
-  entityId: EntityId;
-  forceIndex: number;
-  screenFrom: Vec2;
-  screenTo: Vec2;
-  force: Force;
+interface Box {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
 }
 
-let cachedForceArrows: CachedForceArrow[] = [];
-
-/** 查询某个屏幕坐标点是否命中力箭头 */
-export function getForceArrowAtPoint(screenPoint: Vec2): Selection | null {
-  const HIT_THRESHOLD = 8; // px
-
-  for (const arrow of cachedForceArrows) {
-    if (pointToSegmentDistance(screenPoint, arrow.screenFrom, arrow.screenTo) <= HIT_THRESHOLD) {
-      return {
-        type: 'force-arrow',
-        id: `${arrow.entityId}/${arrow.forceIndex}`,
-        data: {
-          entityId: arrow.entityId,
-          forceIndex: arrow.forceIndex,
-          force: arrow.force,
-        },
-      };
-    }
-  }
-  return null;
-}
-
-/** 获取力箭头终点屏幕坐标 */
-export function getForceArrowTip(entityId: EntityId, forceIndex: number): Vec2 | null {
-  const arrow = cachedForceArrows.find(
-    (a) => a.entityId === entityId && a.forceIndex === forceIndex,
+function boxesOverlap(a: Box, b: Box): boolean {
+  return !(
+    a.left + a.width + LABEL_PAD <= b.left ||
+    b.left + b.width + LABEL_PAD <= a.left ||
+    a.top + a.height + LABEL_PAD <= b.top ||
+    b.top + b.height + LABEL_PAD <= a.top
   );
-  return arrow ? arrow.screenTo : null;
 }
 
-/** 获取缓存的所有力箭头 */
-export function getCachedForceArrows(): readonly CachedForceArrow[] {
-  return cachedForceArrows;
+/** 两个 box 的重叠面积（用于评分，越大越差） */
+function overlapArea(a: Box, b: Box): number {
+  const xOverlap = Math.max(0,
+    Math.min(a.left + a.width + LABEL_PAD, b.left + b.width + LABEL_PAD) -
+    Math.max(a.left - LABEL_PAD, b.left - LABEL_PAD));
+  const yOverlap = Math.max(0,
+    Math.min(a.top + a.height + LABEL_PAD, b.top + b.height + LABEL_PAD) -
+    Math.max(a.top - LABEL_PAD, b.top - LABEL_PAD));
+  return xOverlap * yOverlap;
 }
 
-/** 点到线段距离 */
-function pointToSegmentDistance(p: Vec2, a: Vec2, b: Vec2): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const lenSq = dx * dx + dy * dy;
-  if (lenSq < 1e-6) return Math.hypot(p.x - a.x, p.y - a.y);
-
-  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq;
-  t = Math.max(0, Math.min(1, t));
-  const projX = a.x + t * dx;
-  const projY = a.y + t * dy;
-  return Math.hypot(p.x - projX, p.y - projY);
+function arrowToBox(from: Vec2, to: Vec2, lineWidth: number): Box {
+  const pad = lineWidth / 2 + 4;
+  const left = Math.min(from.x, to.x) - pad;
+  const top = Math.min(from.y, to.y) - pad;
+  return {
+    left,
+    top,
+    width: Math.abs(to.x - from.x) + pad * 2,
+    height: Math.abs(to.y - from.y) + pad * 2,
+  };
 }
 
-// ─── 标签候选位置 ───
+// ─── 标签候选位置系统 ───
 
 interface LabelCandidate {
   x: number;
@@ -80,8 +61,24 @@ interface LabelCandidate {
   align: CanvasTextAlign;
 }
 
+interface PlacedLabel {
+  text: string;
+  x: number;
+  y: number;
+  align: CanvasTextAlign;
+  color: string;
+  fontSize: number;
+  box: Box;
+}
+
+/** 测量标签文本的像素宽度 */
+function measureLabel(text: string, fontSize: number, canvasCtx: CanvasRenderingContext2D): number {
+  canvasCtx.font = `${fontSize}px 'Inter', sans-serif`;
+  return canvasCtx.measureText(text).width;
+}
+
 /** 根据位置和对齐方式计算标签 AABB */
-export function labelBoxFromAlign(x: number, y: number, align: CanvasTextAlign, textWidth: number, fontSize: number): PlacementBox {
+function labelBox(x: number, y: number, align: CanvasTextAlign, textWidth: number, fontSize: number): Box {
   let left: number;
   if (align === 'left') left = x;
   else if (align === 'right') left = x - textWidth;
@@ -93,7 +90,7 @@ export function labelBoxFromAlign(x: number, y: number, align: CanvasTextAlign, 
  * 为一个箭头的标签生成候选位置（箭头中点和终点各 4 个方向）
  * 返回按偏好排序的候选列表
  */
-export function generateCandidates(
+function generateCandidates(
   screenFrom: Vec2,
   screenTo: Vec2,
   direction: Vec2,
@@ -132,16 +129,79 @@ export function generateCandidates(
   return candidates;
 }
 
+/**
+ * 贪心最优放置：为每个标签从候选位置中选择重叠最小的。
+ * obstacles = 其他箭头的 box（排除自身箭头）。
+ */
+function placeLabels(
+  items: Array<{
+    text: string;
+    color: string;
+    fontSize: number;
+    candidates: LabelCandidate[];
+    arrowIndex: number;
+  }>,
+  arrowBoxes: Box[],
+  canvasCtx: CanvasRenderingContext2D,
+): PlacedLabel[] {
+  const placed: PlacedLabel[] = [];
 
-// ─── 物理工具（导出供交互 handler 使用） ───
+  for (const item of items) {
+    const textW = measureLabel(item.text, item.fontSize, canvasCtx);
+    let bestScore = Infinity;
+    let bestCandidate = item.candidates[0]!;
 
-export function forceToLength(magnitude: number): number {
+    for (const cand of item.candidates) {
+      const box = labelBox(cand.x, cand.y, cand.align, textW, item.fontSize);
+      let score = 0;
+
+      // 与已放置标签的重叠
+      for (const p of placed) {
+        if (boxesOverlap(box, p.box)) {
+          score += overlapArea(box, p.box);
+        }
+      }
+
+      // 与其他箭头的重叠（跳过自己的箭头）
+      for (let k = 0; k < arrowBoxes.length; k++) {
+        if (k === item.arrowIndex) continue;
+        const aBox = arrowBoxes[k]!;
+        if (boxesOverlap(box, aBox)) {
+          score += overlapArea(box, aBox);
+        }
+      }
+
+      if (score < bestScore) {
+        bestScore = score;
+        bestCandidate = cand;
+        if (score === 0) break; // 完美位置，无需继续
+      }
+    }
+
+    const finalBox = labelBox(bestCandidate.x, bestCandidate.y, bestCandidate.align, textW, item.fontSize);
+    placed.push({
+      text: item.text,
+      x: bestCandidate.x,
+      y: bestCandidate.y,
+      align: bestCandidate.align,
+      color: item.color,
+      fontSize: item.fontSize,
+      box: finalBox,
+    });
+  }
+
+  return placed;
+}
+
+// ─── 物理工具 ───
+
+function forceToLength(magnitude: number): number {
   if (magnitude <= 0) return 0;
   const len = MIN_LENGTH + (MAX_LENGTH - MIN_LENGTH) * Math.log(1 + magnitude) / Math.log(1 + 100);
   return Math.max(MIN_LENGTH, Math.min(MAX_LENGTH, len));
 }
 
-export function getEdgeStart(center: Vec2, direction: Vec2, entity: Entity): Vec2 {
+function getEdgeStart(center: Vec2, direction: Vec2, entity: Entity): Vec2 {
   const dx = direction.x;
   const dy = direction.y;
   if (Math.abs(dx) < 1e-9 && Math.abs(dy) < 1e-9) return center;
@@ -188,6 +248,13 @@ function isNearlyCollinear(a: Vec2, b: Vec2): boolean {
   return a.x * b.x + a.y * b.y > 0.87;
 }
 
+function formatForceArrowLabel(force: import('@/core/types').Force): string {
+  if (force.label.includes('=') || force.label.includes('≈')) {
+    return force.label;
+  }
+  return `${force.label}=${Number(force.magnitude.toFixed(1))}N`;
+}
+
 // ─── 主渲染器 ───
 
 const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
@@ -195,9 +262,6 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
 
   const { analyses } = data.data;
   const { coordinateTransform } = ctx;
-
-  // 每帧清空力箭头缓存
-  const newCachedArrows: CachedForceArrow[] = [];
 
   for (const analysis of analyses) {
     const entity = entities.get(analysis.entityId);
@@ -231,128 +295,131 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
     }> = [];
 
     // ── 独立力 ──
-    // 记录已渲染力的方向，用于力-力共线检测
-    const renderedDirs: Vec2[] = [];
-    const COLLINEAR_OFFSET = 10; // 共线力垂直偏移 px
-
-    // 计算关联连接件（绳/杆/弹簧）方向，用于统一防重叠
-    const connectorDirs: Vec2[] = [];
-    for (const e of entities.values()) {
-      if (e.type !== 'rope' && e.type !== 'rod' && e.type !== 'spring') continue;
-      const aId = (e.properties.entityAId as string) || (e.properties.pivotEntityId as string);
-      const bId = (e.properties.entityBId as string) || (e.properties.blockEntityId as string);
-      if (aId !== entity.id && bId !== entity.id) continue;
-      const otherId = aId === entity.id ? bId : aId;
-      const other = entities.get(otherId);
-      if (!other) continue;
-      const otherH = (other.properties.height as number) ?? 0;
-      const otherRot = other.transform.rotation ?? 0;
-      const otherCenter = {
-        x: other.transform.position.x + (-Math.sin(otherRot)) * (otherH / 2),
-        y: other.transform.position.y + Math.cos(otherRot) * (otherH / 2),
-      };
-      const dx = otherCenter.x - center.x;
-      const dy = otherCenter.y - center.y;
-      const len = Math.hypot(dx, dy);
-      if (len > 1e-9) {
-        connectorDirs.push({ x: dx / len, y: dy / len });
-      }
-    }
-    let connSlot = 0; // 连接件共线偏移轨道计数
-
-    for (let i = 0; i < analysis.forces.length; i++) {
-      const force = analysis.forces[i]!;
-      const arrowLen = forceToLength(force.magnitude);
+    for (const force of analysis.forces) {
+      const arrowLen = forceToLength(force.displayMagnitude ?? force.magnitude);
       const edgeStart = getEdgeStart(center, force.direction, entity);
-      let screenFrom = worldToScreen(edgeStart, coordinateTransform);
-      let screenTo = {
+      const screenFrom = worldToScreen(edgeStart, coordinateTransform);
+      const screenTo = {
         x: screenFrom.x + force.direction.x * arrowLen,
         y: screenFrom.y - force.direction.y * arrowLen,
       };
-
-      // 独立力共线偏移：与已渲染的力方向共线（含反向）时，垂直偏移
-      const dot = renderedDirs.reduce((found, d) => {
-        const dp = Math.abs(d.x * force.direction.x + d.y * force.direction.y);
-        return dp > found ? dp : found;
-      }, 0);
-      if (dot > 0.87) {
-        const sdx = screenTo.x - screenFrom.x;
-        const sdy = screenTo.y - screenFrom.y;
-        const slen = Math.hypot(sdx, sdy);
-        if (slen > 1) {
-          const perpX = -sdy / slen * COLLINEAR_OFFSET;
-          const perpY = sdx / slen * COLLINEAR_OFFSET;
-          screenFrom = { x: screenFrom.x + perpX, y: screenFrom.y + perpY };
-          screenTo = { x: screenTo.x + perpX, y: screenTo.y + perpY };
-        }
-      }
-      renderedDirs.push(force.direction);
-
-      // 统一连接件共线偏移：任何力与连接件（绳/杆/弹簧）共线时，
-      // 分配递增轨道避免力之间重合
-      if (connectorDirs.length > 0) {
-        const connDot = connectorDirs.reduce((found, d) => {
-          const dp = Math.abs(d.x * force.direction.x + d.y * force.direction.y);
-          return dp > found ? dp : found;
-        }, 0);
-        if (connDot > 0.87) {
-          connSlot++;
-          const offset = connSlot * COLLINEAR_OFFSET;
-          const sdx = screenTo.x - screenFrom.x;
-          const sdy = screenTo.y - screenFrom.y;
-          const slen = Math.hypot(sdx, sdy);
-          if (slen > 1) {
-            const perpX = -sdy / slen * offset;
-            const perpY = sdx / slen * offset;
-            screenFrom = { x: screenFrom.x + perpX, y: screenFrom.y + perpY };
-            screenTo = { x: screenTo.x + perpX, y: screenTo.y + perpY };
-          }
-        }
-      }
-
-      // 缓存力箭头屏幕坐标
-      newCachedArrows.push({
-        entityId: analysis.entityId,
-        forceIndex: i,
-        screenFrom,
-        screenTo,
-        force,
-      });
 
       const color = FORCE_COLORS[force.type] ?? '#666';
       const arrowIdx = arrows.length;
       arrows.push({ from: screenFrom, to: screenTo, color, lineWidth: 2.5, dashed: false });
 
-      const labelText = `${force.label}=${Number(force.magnitude.toFixed(1))}N`;
-      let labelCandidates = generateCandidates(screenFrom, screenTo, force.direction);
-
-      // 张力/弹簧力标签额外偏移，确保在远离绳/杆/弹簧的一侧
-      if (force.type === 'tension' || force.type === 'spring') {
-        const sdx = screenTo.x - screenFrom.x;
-        const sdy = screenTo.y - screenFrom.y;
-        const slen = Math.hypot(sdx, sdy);
-        if (slen > 1) {
-          const LABEL_EXTRA = 6; // px
-          const px = -sdy / slen * LABEL_EXTRA;
-          const py = sdx / slen * LABEL_EXTRA;
-          labelCandidates = labelCandidates.map((c) => ({
-            ...c,
-            x: c.x + px,
-            y: c.y + py,
-          }));
-        }
-      }
-
+      const labelText = formatForceArrowLabel(force);
       labelItems.push({
         text: labelText,
         color,
         fontSize: LABEL_FONT_SIZE,
-        candidates: labelCandidates,
+        candidates: generateCandidates(screenFrom, screenTo, force.direction),
         arrowIndex: arrowIdx,
       });
     }
 
-    // 阶段3：分解渲染已移至 force-interaction-handler.renderOverlay()
+    // ── 正交分解渲染 ──
+    // 分量箭头从物体中心出发（跟其他力一样，从边缘开始画），用虚线
+    // 从原力（G）终点向两个分力所在直线画垂直引导虚线
+    if (analysis.decomposition) {
+      const { axis1, axis2, components } = analysis.decomposition;
+      const DECOMP_FONT_SIZE = 11;
+
+      for (const comp of components) {
+        const forceColor = FORCE_COLORS[comp.force.type] ?? '#666';
+        const forceArrowLen = forceToLength(comp.force.displayMagnitude ?? comp.force.magnitude);
+
+        // 比例缩放
+        const scale = forceArrowLen / comp.force.magnitude;
+
+        // 分量物理方向（带符号）
+        const dir1 = {
+          x: comp.component1 > 0 ? axis1.x : -axis1.x,
+          y: comp.component1 > 0 ? axis1.y : -axis1.y,
+        };
+        const dir2 = {
+          x: comp.component2 > 0 ? axis2.x : -axis2.x,
+          y: comp.component2 > 0 ? axis2.y : -axis2.y,
+        };
+        const mag1 = Math.abs(comp.component1) * scale;
+        const mag2 = Math.abs(comp.component2) * scale;
+
+        // 分量箭头从物体边缘出发，与近共线的独立力/合力做垂直偏移避免重叠
+        const DECOMP_PERP_OFFSET = 10;
+        // 检测目标：所有独立力 + 合力（如果合力有效）
+        const rDir = analysis.resultant.direction;
+        const rMag2 = analysis.resultant.magnitude;
+        const allDirs = analysis.forces.map((f) => f.direction);
+        if (rMag2 > 0.01) allDirs.push(rDir);
+
+        const edge1 = getEdgeStart(center, dir1, entity);
+        let screen1From = worldToScreen(edge1, coordinateTransform);
+        const collinear1 = allDirs.some((d) =>
+          Math.abs(d.x * dir1.x + d.y * dir1.y) > 0.87,
+        );
+        if (collinear1) {
+          screen1From = {
+            x: screen1From.x + dir1.y * DECOMP_PERP_OFFSET,
+            y: screen1From.y + dir1.x * DECOMP_PERP_OFFSET,
+          };
+        }
+        const screen1To = {
+          x: screen1From.x + dir1.x * mag1,
+          y: screen1From.y - dir1.y * mag1,
+        };
+
+        const edge2 = getEdgeStart(center, dir2, entity);
+        let screen2From = worldToScreen(edge2, coordinateTransform);
+        const collinear2 = allDirs.some((d) =>
+          Math.abs(d.x * dir2.x + d.y * dir2.y) > 0.87,
+        );
+        if (collinear2) {
+          screen2From = {
+            x: screen2From.x + dir2.y * DECOMP_PERP_OFFSET,
+            y: screen2From.y + dir2.x * DECOMP_PERP_OFFSET,
+          };
+        }
+        const screen2To = {
+          x: screen2From.x + dir2.x * mag2,
+          y: screen2From.y - dir2.y * mag2,
+        };
+
+        // G 的终点（屏幕坐标）
+        const edgeG = getEdgeStart(center, comp.force.direction, entity);
+        const screenGFrom = worldToScreen(edgeG, coordinateTransform);
+        const forceTip = {
+          x: screenGFrom.x + comp.force.direction.x * forceArrowLen,
+          y: screenGFrom.y - comp.force.direction.y * forceArrowLen,
+        };
+
+        // 分量箭头纳入统一 arrows 数组（参与碰撞检测和统一绘制）
+        arrows.push({ from: screen1From, to: screen1To, color: forceColor, lineWidth: 1.8, dashed: true, arrowHeadSize: 7 });
+        arrows.push({ from: screen2From, to: screen2To, color: forceColor, lineWidth: 1.8, dashed: true, arrowHeadSize: 7 });
+        // 引导虚线（无箭头，低透明度）
+        arrows.push({ from: screen1To, to: forceTip, color: forceColor, lineWidth: 1, dashed: true, arrowHeadSize: 0, alpha: 0.35 });
+        arrows.push({ from: forceTip, to: screen2To, color: forceColor, lineWidth: 1, dashed: true, arrowHeadSize: 0, alpha: 0.35 });
+
+        // 分量1标注（mgsinθ — 沿斜面分量）
+        const comp1LabelText = `mgsinθ=${Number(Math.abs(comp.component1).toFixed(1))}N`;
+        labelItems.push({
+          text: comp1LabelText,
+          color: forceColor,
+          fontSize: DECOMP_FONT_SIZE,
+          candidates: generateCandidates(screen1From, screen1To, dir1),
+          arrowIndex: arrows.length - 4, // 分量1箭头
+        });
+
+        // 分量2标注（mgcosθ — 垂直斜面分量）
+        const comp2LabelText = `mgcosθ=${Number(Math.abs(comp.component2).toFixed(1))}N`;
+        labelItems.push({
+          text: comp2LabelText,
+          color: forceColor,
+          fontSize: DECOMP_FONT_SIZE,
+          candidates: generateCandidates(screen2From, screen2To, dir2),
+          arrowIndex: arrows.length - 3, // 分量2箭头
+        });
+      }
+    }
 
     // ── 合力 ──
     const resultantColor = FORCE_COLORS.resultant!;
@@ -367,15 +434,12 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
       );
 
     if (rMag > 0.01 && !resultantRedundant) {
-      const arrowLen = forceToLength(rMag);
+      const arrowLen = forceToLength(analysis.resultant.displayMagnitude ?? rMag);
 
       const PERP_OFFSET = 14;
-      const nearCollinearForce = analysis.forces.some((f) => isNearlyCollinear(f.direction, rDir));
-      const nearCollinearConn = connectorDirs.some((d) => Math.abs(d.x * rDir.x + d.y * rDir.y) > 0.87);
-      const nearCollinear = nearCollinearForce || nearCollinearConn;
-      // 合力偏移到负方向轨道（与独立力的正方向轨道分开）
-      const perpX = nearCollinear ? -rDir.y * PERP_OFFSET : 0;
-      const perpY = nearCollinear ? -rDir.x * PERP_OFFSET : 0;
+      const nearCollinear = analysis.forces.some((f) => isNearlyCollinear(f.direction, rDir));
+      const perpX = nearCollinear ? rDir.y * PERP_OFFSET : 0;
+      const perpY = nearCollinear ? rDir.x * PERP_OFFSET : 0;
 
       const resultantEdge = getEdgeStart(center, rDir, entity);
       const screenFrom = worldToScreen(resultantEdge, coordinateTransform);
@@ -388,7 +452,7 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
       const rArrowIdx = arrows.length;
       arrows.push({ from: offsetFrom, to: offsetTo, color: resultantColor, lineWidth: 2, dashed: true });
 
-      const labelText = `${analysis.resultant.label}=${Number(rMag.toFixed(1))}N`;
+      const labelText = formatForceArrowLabel(analysis.resultant);
       labelItems.push({
         text: labelText,
         color: resultantColor,
@@ -399,28 +463,16 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
     }
     // 合力为零时不在画布上显示标签（InfoPanel 已显示"合力为零，受力平衡"）
 
-    // ── 标签布局（局部防重叠，不依赖全局障碍物池） ──
-    const occupied: PlacementBox[] = [];
-    // 先把箭头注册为已占用区域
-    for (const arrow of arrows) {
-      occupied.push(segmentToBox(arrow.from, arrow.to, arrow.lineWidth));
-    }
+    // ── 最优放置 ──
+    const arrowBoxes = arrows.map((a) => arrowToBox(a.from, a.to, a.lineWidth));
+    const placedLabels = placeLabels(labelItems, arrowBoxes, ctx.ctx);
 
-    for (const item of labelItems) {
-      const textW = measureText(item.text, item.fontSize, ctx.ctx);
-      const textH = item.fontSize;
-      const placementCands = item.candidates.map((c, idx) => {
-        const box = labelBoxFromAlign(c.x, c.y, c.align, textW, textH);
-        return { left: box.left, top: box.top, preference: idx };
-      });
-      const result = placeLabel(placementCands, textW, textH, occupied);
-      drawTextLabel(ctx.ctx, item.text, {
-        x: result.left + textW / 2,
-        y: result.top + textH / 2,
-      }, {
-        color: item.color,
-        fontSize: item.fontSize,
-        align: 'center',
+    // ── 绘制：先标签后箭头（箭头在上层） ──
+    for (const label of placedLabels) {
+      drawTextLabel(ctx.ctx, label.text, { x: label.x, y: label.y }, {
+        color: label.color,
+        fontSize: label.fontSize,
+        align: label.align,
       });
     }
 
@@ -440,9 +492,6 @@ const forceViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
       }
     }
   }
-
-  // 更新全局缓存
-  cachedForceArrows = newCachedArrows;
 };
 
 export function registerForceViewport(): void {

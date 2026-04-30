@@ -2,19 +2,22 @@
 
 ## 📌 版本目标
 
-高中物理教师能从预设库加载受力分析典型场景（~14 个统一场景），在同一场景内通过选择约束条件（光滑/粗糙、有无外力、运动状态等）实时观察受力变化，并在受力/运动/能量三种视角下观察完整物理过程。
+高中物理教师能从预设库加载 13 类受力分析典型场景（~23 个预设），通过参数调整复现物理题，并在受力/运动/能量三种视角下观察完整物理过程。
 
 ## 🔄 开发流程总览
 
 ```
-阶段1~5：基础体系建设（已完成）
-  → 阶段6：场景统一化整改（预设合并 + 参数联动 + 条件驱动求解）  ← 新插入
-    → 阶段7：连接体 + 弹簧体系（按统一场景模式设计）
-      → 阶段8：圆周运动体系（按统一场景模式设计）
-        → 阶段9：能量视角 + 特殊模型补全（传送带/半球/滑轮/浮力）
+阶段1：水平面场景补全（已有实体复用）
+  → 阶段2：斜面体系（新实体 slope）
+    → 阶段3：正交分解系统（交互 + 动画 + 通用分解逻辑）
+      → 阶段4：运动视角（motion viewport，增强已有动态场景）
+        → 阶段5：悬挂体系（新实体 rope/pivot/rod）
+          → 阶段6：连接体 + 弹簧体系（新实体 spring）
+            → 阶段7：圆周运动体系（复杂物理，复用已有实体）
+              → 阶段8：能量视角 + 特殊模型收尾（pulley/buoyancy）
 ```
 
-**设计模式转变（阶段6起）**：从"每种条件组合=独立预设"改为"每类模型=1个统一场景+条件选择参数"，对齐需求文档"选模型→选条件→自动受力"的交互设想。
+每个阶段产出可独立运行的预设，后续阶段复用前序阶段的实体和渲染器。
 
 ## 📋 串行执行阶段
 
@@ -94,119 +97,231 @@
 
 ---
 
-### 第3阶段：交互系统 + 正交分解 + 布局重设计 ✅ 已完成（2026-03-19）
+### 第3阶段：实体选择交互 + 正交分解系统 ⏱️ 5~6 天
 
-**目标**：建立画布交互体系（实体/力箭头选中、hover、浮动面板），实现正交分解交互，重设计布局系统。
+**目标**：先建立实体选择交互基础（hover、点击选中、力箭头交互），再基于此实现正交分解功能（选择目标力、分解动画、通用分解逻辑）。
 
-**详细设计文档**：
-- `.tasks/active/P01/stage-3-interaction-architecture.md` — 架构方案
-- `.tasks/active/P01/stage-3-interaction-design.md` — 交互设计
-- `.tasks/active/P01/stage-3.1-placement-system-redesign.md` — 布局系统重设计
+**需求来源**：
+- 产品讨论记录 v2：「Phase 1 中的实体应该能点击选中。正确的交互方式是：画面上看到什么、点什么、改什么」
+- PRD 验收标准：「正交分解动画流畅，分量箭头和数值实时更新」
+- 产品方案：「点击"正交分解"按钮 → 分解动画播放，虚线箭头+直角标记，动画时长0.8s」
 
-#### 3A：实体选择交互
+**⚠️ 公共代码协商提醒**：
+本阶段涉及大量公共代码修改（`src/shell/`、`src/renderer/`、`src/store/`、`src/core/`），
+根据 CLAUDE.md F2 目录归属声明，需要与开发者 B 协商后再动工。
+建议：由开发者 A 主导实现，开发者 B review 公共层改动。
 
-**实际完成内容**：
-1. ✅ 统一选中模型 — `Selection { type, id, data }` 替换 `selectedEntityId`，支持实体/力箭头/未来扩展类型
-2. ✅ CanvasContainer 鼠标事件 — onClick / onMouseMove / onMouseLeave，通过 hitTest 分发
-3. ✅ screenToWorld 反向坐标转换
-4. ✅ 实体 hover 高亮 — shadowBlur 发光效果
-5. ✅ 实体选中高亮 — shadowBlur 强发光，通过 `EntityRegistration.drawOutline` 注册轮廓路径
-6. ✅ 选中实体弹出浮动参数面板（EntityPopover）— 替代原计划的"左侧面板滚动联动"
+**⚠️ 交互设计待确认**：
+下方的交互设计为初稿，阶段3正式启动时需要与用户再次确认交互方案，可能需要优化调整。
+不要直接按当前方案执行，先做交互评审。
 
-**与原计划的偏差**：
-- ~~左侧 ParamPanel 选中联动~~ → 改为浮动 EntityPopover（Phase 1 更轻量）
-- store 用 `Selection` 而非 `hoveredEntityId`（更通用）
+#### 3A：实体选择交互基础（前置子阶段）
 
-#### 3B：力箭头交互 + 正交分解
+**现状**：
+- ✅ store 已有 `selectedEntityId` 和 `selectEntity()`
+- ✅ render-loop 已有 `drawSelectionHighlight()`
+- ✅ 每个实体注册时已提供 `hitTest` 函数
+- ❌ CanvasContainer 没有绑定鼠标事件
+- ❌ 没有屏幕坐标 → 物理坐标的反向转换
+- ❌ 没有 hover 效果
+- ❌ 选中实体后没有联动属性面板
 
-**实际完成内容**：
-1. ✅ ViewportInteractionHandler 注册机制 — 域代码注册交互处理器，公共层分发事件
-2. ✅ 力箭头 hitTest — 线段 ± 8px 矩形碰撞，**始终可交互**（不需要先选中实体）
-3. ✅ 力箭头 hover 发光 — shadowBlur + 加粗
-4. ✅ ForcePopover 浮动面板 — 显示力名称/数值/方向 + 正交分解勾选
-5. ✅ 分解动画 — 0.8s ease-out 渐入，0.3s ease-in 渐出
-6. ✅ 分量箭头 — 从实体边缘出发，虚线样式，与共线力自动垂直偏移
-7. ✅ 引导虚线 + 直角标记 — 从原力终点向分量轴投影
-8. ✅ 分量标签 — 淡入动画，局部防重叠
-9. ✅ 分解判定 — 力与坐标轴夹角 < 5° 视为"沿轴"，不显示分解选项
-10. ✅ 参数变化时分量实时更新（无需重播动画）
+**交互流程**：
 
-**与原计划的偏差**：
-- ~~需先选中实体才能交互力箭头~~ → 力箭头始终可直接点击
-- ~~hover tooltip 文字~~ → 仅发光效果，无文字气泡
-- ~~坐标系切换~~ → 设计决策不做，统一用求解器默认坐标系
-- ~~重构求解器分解数据（自动投影）~~ → 保留求解器手动输出 components
-- ~~浮动组件放 shell/components/~~ → 放在 `domains/mechanics/components/`（域内管理）
+```
+画布交互：
+  鼠标移动 → hitTest 检测 → 命中实体 → cursor 变手型 + hover 高亮
+  鼠标点击 → hitTest 检测 → 命中实体 → 选中（蓝色边框高亮）
+  点击空白区域 → 取消选中
 
-#### 3.1：布局系统重设计
+选中实体后：
+  左侧参数面板自动滚动到该实体的参数组
+  或者在实体附近弹出浮动属性面板（轻量版）
 
-**实际完成内容**：
-1. ✅ 删除全局 PlacementContext 障碍物系统 — 出发点就错了，Popover 不需要全局避让
-2. ✅ 力标签改用局部 `placeLabel()` + `occupied[]` 数组防重叠
-3. ✅ Popover 改用 `pickPopoverPosition()` — 4 方向试探，不出界即选
-4. ✅ FloatingUIDescriptor 追加 `anchorHalfSize` + `preferredDirection`（域计算，公共层消费）
-5. ✅ DraggablePopover 改为 `data-drag-handle` 标题行拖拽，删除顶部灰色指示条
+选中物块后 → 可以进一步点击力箭头（见 3B）
+```
 
-**涉及文件范围（实际）**：
-
-公共代码：
-- `src/core/types.ts` — 追加 Selection 接口、RenderContext 追加 selection/hoveredTarget、删除 placementContext
-- `src/core/registries/renderer-registry.ts` — 追加 ViewportInteractionHandler + FloatingUIDescriptor + FloatingComponent 注册
-- `src/core/registries/entity-registry.ts` — 追加可选 drawOutline
-- `src/core/registries/index.ts` — 导出更新
-- `src/core/physics/geometry.ts` — 追加几何工具函数
-- `src/store/simulation-store.ts` — selection + hoveredTarget + select()/setHovered()
-- `src/shell/App.tsx` — createRenderLoop 参数更新
-- `src/shell/canvas/CanvasContainer.tsx` — hitTest 分发 + Popover 渲染
-- `src/shell/canvas/DraggablePopover.tsx` — 新增
-- `src/renderer/render-loop.ts` — drawOutline 高亮 + 交互 overlay 钩子
-- `src/renderer/placement.ts` — 重写（placeLabel + pickPopoverPosition）
-
-力学域：
-- `src/domains/mechanics/interactions/force-interaction-handler.ts` — 新增
-- `src/domains/mechanics/interactions/force-interaction-state.ts` — 新增
-- `src/domains/mechanics/components/ForcePopover.tsx` — 新增
-- `src/domains/mechanics/components/EntityPopover.tsx` — 新增
-- `src/domains/mechanics/viewports/force-viewport.ts` — 力箭头缓存 + 标签局部防重叠
-- `src/domains/mechanics/entities/block.ts` — 追加 drawOutline
-- `src/domains/mechanics/entities/slope.ts` — 追加 drawOutline
-- `src/domains/mechanics/entities/surface.ts` — 追加 drawOutline
-- `src/domains/mechanics/solvers/block-on-slope.ts` — 分解标签
-- `src/domains/mechanics/solvers/block-with-applied-force.ts` — 分解标签
-- `src/domains/mechanics/index.ts` — 追加注册
+**涉及文件（⚠️ 全部为公共代码）**：
+- `src/shell/canvas/CanvasContainer.tsx` — 添加 onClick / onMouseMove 事件
+- `src/renderer/coordinate.ts` — 新增 `screenToWorld()` 反向转换函数
+- `src/renderer/render-loop.ts` — hover 高亮绘制
+- `src/store/simulation-store.ts` — 新增 `hoveredEntityId`
+- `src/shell/panels/ParamPanel.tsx` — 选中实体时高亮/滚动到对应参数组
 
 **验收标准**：
-- [x] `pnpm lint && pnpm tsc --noEmit` 通过
-- [x] 鼠标 hover 实体有发光高亮，点击可选中
-- [x] 力箭头可直接点击（不需要先选中实体），hover 有发光效果
-- [x] 点击力箭头弹出 ForcePopover，显示力信息 + 分解选项
-- [x] 勾选正交分解后，0.8s 分解动画流畅播放（分量箭头+引导线+直角标记+标签）
-- [x] 不沿坐标轴的力显示分解选项，沿轴的力不显示
-- [x] 取消分解时 0.3s 反向消失
-- [x] 参数调整后分量数值实时更新（无动画）
-- [x] 分量箭头从物体边缘出发，与独立力视觉一致
-- [x] 点击空白区域取消选中
-- [x] Popover 可通过标题行拖拽
-- [x] Popover 方向跟随力方向（向下的力 → Popover 出现在下方）
-
-**未实现（设计决策暂不做）**：
-- 坐标系切换（统一用求解器默认坐标系）
-- 重构求解器分解数据为自动投影（保留手动 components）
-- 左侧 ParamPanel 选中联动滚动
-- 力箭头 hover tooltip 文字气泡
-
-**本阶段产出**：
-- 统一选中模型（Selection）— 全产品受益
-- ViewportInteractionHandler 注册机制 — 电磁域可复用
-- 实体 drawOutline 注册 — 未来新实体自动适配选中高亮
-- FloatingUIDescriptor + 浮动组件注册 — 通用浮动 UI 机制
-- 力箭头交互 + ForcePopover + 正交分解动画
-- 布局系统简化（删除 PlacementContext，标签局部防重叠，Popover 简单方向选择）
-- 公共代码变更日志机制（`docs/public-api-changelog.md` + CLAUDE.md J7 规则）
+- [ ] 鼠标 hover 到实体上，cursor 变手型，实体轻微高亮
+- [ ] 点击实体，蓝色选中框出现，左侧面板联动
+- [ ] 点击空白区域取消选中
+- [ ] hitTest 能正确区分重叠实体（取最近的）
 
 ---
 
-### 第4阶段：运动视角 ✅ 已完成（2026-03-19）
+#### 3B：力箭头交互 + 正交分解
+
+**基于 3A 的实体选择，进一步实现力的交互和正交分解**。
+
+**核心交互流程**：
+
+```
+                  ┌─────────────────────────────────┐
+                  │           画布场景               │
+                  │                                  │
+                  │      ╱│                          │
+                  │     ╱ │   ← 斜面                │
+                  │    ╱  │                          │
+                  │   ╱ ■ │   ← 物块（可点击选中）  │
+                  │  ╱____|                          │
+                  │                                  │
+                  │  选中物块后，力箭头变为可交互：   │
+                  │  hover 到 G 箭头 → 高亮 + tooltip │
+                  │  点击 G 箭头 → 弹出浮动菜单      │
+                  │                                  │
+                  └─────────────────────────────────┘
+
+点击力箭头后弹出的浮动菜单：
+  ┌───────────────────┐
+  │ G = 19.6 N        │  ← 力的信息
+  │ 方向：竖直向下     │
+  │───────────────────│
+  │ ☐ 正交分解        │  ← 勾选后播放分解动画
+  │                   │
+  │ 坐标系：          │
+  │ ○ 沿斜面/垂直斜面 │  ← 当斜面场景时显示
+  │ ○ 水平/竖直       │
+  └───────────────────┘
+```
+
+**完整操作链路**：
+
+```
+  ① 点击画布中的物块
+     ↓
+  物块选中高亮，力箭头进入可交互状态
+     ↓
+  ② hover 某个力箭头
+     ↓
+  该力箭头加粗 + tooltip 显示力的名称和大小
+     ↓
+  ③ 点击该力箭头
+     ↓
+  弹出浮动菜单（力信息 + 分解选项）
+     ↓
+  ④ 勾选「正交分解」
+     ↓
+  播放 0.8s 分解动画：
+  - 两个分量箭头从零长度渐变到目标长度（从实体边缘出发，虚线样式）
+  - 从原力终点向分量终点画引导虚线渐入
+  - 分量标签淡入（mgsinθ=9.8N, mgcosθ=17.0N）
+     ↓
+  ⑤ 调整参数（如改变角度、质量）
+     ↓
+  分量数值实时更新，无需重播动画
+     ↓
+  ⑥ 取消勾选 / 点击空白 / 选中其他实体
+     ↓
+  0.3s 反向动画消失
+```
+
+**力箭头 hitTest 设计**：
+- 选中实体后，该实体的力箭头参与 hitTest
+- 力箭头的碰撞区域 = 箭头线段 ± 8px 的矩形
+- 优先级：力箭头 > 实体（因为力箭头在实体上方）
+- 未选中实体时，力箭头不响应鼠标（避免误操作）
+
+**浮动菜单设计**：
+- 出现在被点击的力箭头终点附近
+- 跟随力箭头位置（参数变化时实时更新位置）
+- 点击菜单外部关闭
+- 同一时间只显示一个浮动菜单
+
+**分解判定逻辑**（自动判断是否显示分解选项）：
+- 给定坐标系 (axis1, axis2)，计算力方向与两轴的夹角
+- 力与某轴夹角 < 5° → 视为"沿该轴"，浮动菜单中不显示分解选项
+- 两个轴都不沿 → 浮动菜单中显示分解选项
+- 示例：斜面坐标系下，G 可分解（与两轴都不平行），N 不可分解（沿法线轴）
+
+**动画系统**：
+- per-force 动画状态：`{ progress: 0~1, direction: 'in' | 'out' }`
+- requestAnimationFrame 驱动
+- 渐入：0.8s ease-out，渐出：0.3s ease-in
+- 分量箭头长度 = 目标长度 × progress
+- 引导虚线透明度 = 0.35 × progress
+- 标签透明度 = progress
+- 参数变化时分量实时跟随（不触发动画）
+
+**坐标系**：
+- 求解器提供默认坐标系 + 可选坐标系列表
+- 斜面场景默认「沿斜面/垂直斜面」，可切换「水平/竖直」
+- 水平面外力场景默认「水平/竖直」
+- 切换坐标系 → 分量重新计算 + 重播动画
+
+**主要任务**：
+
+1. **力箭头 hitTest**
+   - 选中实体后，力箭头注册到 hitTest 系统
+   - 碰撞区域为线段 ± 8px 矩形
+   - hover 时高亮 + tooltip
+
+2. **浮动菜单组件**
+   - React 组件，绝对定位在力箭头终点附近
+   - 显示力信息 + 分解选项
+   - 坐标系切换（当有多个可选坐标系时）
+
+3. **通用分解计算**
+   - 渲染器根据坐标系自动对力做投影
+   - 求解器只输出坐标系定义 `{ axis1, axis2, alternativeAxes? }`
+   - 分量值 = 力在坐标轴上的投影，渲染器自动计算
+
+4. **重构求解器分解数据**
+   - 当前：求解器手动指定 `components: [{ force, component1, component2 }]`
+   - 目标：求解器只输出 `decomposition: { axis1, axis2 }`
+   - 渲染器自动计算所有力的分量
+
+5. **分解动画系统**
+   - 动画状态管理 + requestAnimationFrame 驱动
+   - 渐入/渐出动画
+
+6. **force-viewport 渲染重构**
+   - 分量箭头从物体边缘出发，虚线样式
+   - 引导虚线 + 直角标记
+   - 分量标签参与统一防重叠系统
+   - 清理阶段2遗留的临时分解代码
+
+**涉及文件范围**：
+- ⚠️ `src/shell/canvas/CanvasContainer.tsx` — 鼠标事件绑定（公共）
+- ⚠️ `src/renderer/coordinate.ts` — screenToWorld 反向转换（公共）
+- ⚠️ `src/renderer/render-loop.ts` — hover 高亮（公共）
+- ⚠️ `src/store/simulation-store.ts` — hoveredEntityId、力交互状态（公共）
+- ⚠️ `src/core/types.ts` — 调整 OrthogonalDecomposition 接口（公共）
+- ⚠️ `src/shell/panels/ParamPanel.tsx` — 选中联动（公共）
+- ⚠️ `src/shell/components/` — 新增浮动菜单组件（公共）
+- `src/domains/mechanics/viewports/force-viewport.ts` — 分解渲染重构 + 动画（力学域）
+- `src/domains/mechanics/solvers/*.ts` — 简化分解数据输出（力学域）
+- `src/domains/mechanics/presets/` — 相关预设配置（力学域）
+
+**验收标准**：
+- [ ] `pnpm lint && pnpm tsc --noEmit` 通过
+- [ ] 鼠标 hover 实体有高亮反馈，点击可选中
+- [ ] 选中物块后，hover 力箭头有视觉反馈
+- [ ] 点击力箭头弹出浮动菜单，显示力信息
+- [ ] 勾选正交分解后，0.8s 分解动画流畅播放
+- [ ] 不沿坐标轴的力显示分解选项，沿轴的力不显示
+- [ ] 取消分解时 0.3s 反向消失
+- [ ] 参数调整后分量数值实时更新（无动画）
+- [ ] 切换坐标系后分量正确重算 + 重播动画
+- [ ] 分量箭头从物体边缘出发，与其他力视觉一致
+- [ ] 手算验证：m=2kg, θ=30° 时 mgsinθ=9.8N, mgcosθ=17.0N
+
+**本阶段产出**：
+- 实体选择交互系统（hover + 选中 + 联动面板）— 全产品受益
+- 力箭头交互能力（hover + 点击 + 浮动菜单）
+- 通用正交分解系统（选择力 → 动画 → 分量显示）
+- 分解动画引擎
+- 坐标系切换能力
+
+---
+
+### 第4阶段：运动视角 ⏱️ 3 天
 
 **目标**：实现 motion viewport，让所有动态场景（摩擦减速、加速运动、斜面下滑/上冲）支持运动轨迹和 v-t / s-t 图显示。
 
@@ -239,281 +354,173 @@
 
 ---
 
-### 第5阶段：悬挂体系 ✅ 已完成（2026-03-19）
+### 第5阶段：悬挂体系 ⏱️ 4 天
 
-**目标**：新增 rope、pivot、rod 三种实体，实现 4 个悬挂场景预设（单绳、对称双绳、不对称双绳、绳+杆）。
+**目标**：新增 rope、pivot、rod 三种实体，实现 3 个悬挂场景预设（单绳、双绳、绳+杆）。
 
-**实际完成内容**：
-1. ✅ 注册 `pivot` 实体类型 — 固定悬挂点，实心圆点 + 三角固定标记 + 斜线墙壁
-2. ✅ 注册 `rope` 实体类型 — 轻绳，直线段渲染，从 pivot 到物块边缘
-3. ✅ 注册 `rod` 实体类型 — 轻杆，双平行线 + 两端封口 + 空心铰接圆点（教材风格）
-4. ✅ 单绳悬挂求解器 — G + T 二力平衡
-5. ✅ 双绳悬挂求解器 — 拉密定理，三力平衡
-6. ✅ 绳+杆混合悬挂求解器 — 绳只拉、杆可拉可压
-7. ✅ 4 个预设 JSON + 角度参数绑定到绳/杆实体（点击可调）
-
-**涉及文件范围**：
-
-公共代码：
-- `src/core/types.ts` — RenderContext 追加 `entities` 字段
-- `src/renderer/render-loop.ts` — 构建 renderCtx 时传入 entities
-- `src/core/engine/preset-loader.ts` — 步骤②b：实体 properties 中 ref 自动替换为 entityId
-
-力学域：
-- `src/domains/mechanics/entities/` — 新增 `pivot.ts`、`rope.ts`、`rod.ts`
-- `src/domains/mechanics/renderers/` — 新增 `pivot-renderer.ts`、`rope-renderer.ts`、`rod-renderer.ts`、`connector-utils.ts`
-- `src/domains/mechanics/solvers/` — 新增 3 个悬挂求解器
-- `src/domains/mechanics/presets/` — 新增 4 个预设 JSON
-- `src/domains/mechanics/viewports/force-viewport.ts` — 张力箭头垂直偏移（避开绳/杆）+ 标签偏移
-- `src/domains/mechanics/components/EntityPopover.tsx` — 无参数时显示"无可调参数"
-- `src/domains/mechanics/index.ts` — 追加全部注册
-
-**验收标准**：
-- [x] `pnpm lint && pnpm tsc --noEmit` 通过
-- [x] pivot 渲染为实心圆点 + 三角固定标记
-- [x] rope 渲染为直线段，从 pivot 到物块边缘
-- [x] rod 渲染为双平行线 + 铰接圆点，与 rope 视觉区分明显
-- [x] 单绳悬挂：T = mg，合力=0
-- [x] 双绳对称/不对称：角度调整后实时更新，拉密定理验证通过
-- [x] 绳+杆：杆力方向正确
-- [x] 张力箭头与绳/杆平行但不重合（垂直偏移 10px）
-- [x] 点击绳/杆弹出浮动菜单可调角度
-- [x] 已有 8 个预设无回归
-- [x] 公共代码变更日志已更新
-
-**本阶段产出**：
-- `pivot`、`rope`、`rod` 三种实体 + 渲染器（后续连接体、滑轮场景复用）
-- `getConnectorAttachPoint()` 工具函数 — 绳/杆端点与力箭头起点精确对齐
-- 悬挂 4 个预设就绪（总预设 12 个）
-- `connection` 关系类型的求解逻辑范例
-- preset-loader 增强：实体 properties 中的 ref 自动替换
-- 张力箭头偏移机制（force-viewport 增强）
-
----
-
-### 第6阶段：场景统一化整改 ⏱️ 3~4 天
-
-**目标**：将同类预设合并为"统一场景+条件选择"模式，对齐需求文档"选模型→设条件→自动受力"的交互设想。
-
-**背景**：审查发现当前"每种条件组合=独立预设"的模式与需求文档存在根本偏差。需求期望老师在同一场景内通过切换条件（光滑/粗糙、静止/运动、有无外力）来观察力的变化，而非切换预设。现有架构已具备实现条件的基础设施（`select` 参数、`toggle` 参数、求解器多分支），只需重组预设和求解器。
-
-**子任务链路**：ParamSchema 扩展 `visibleWhen` → 水平面 4 预设合并为 1 → 斜面 4 预设合并为 1 → 悬挂预设优化（合并对称/不对称） → 旧预设清理 + 注册更新 → 全量回归验证
+**子任务链路**：pivot 实体 → rope 实体 + 渲染器 → rod 实体 + 渲染器 → 单绳求解器 + 预设 → 双绳求解器 + 预设 → 绳+杆求解器 + 预设 → 验证
 
 **主要任务**：
-1. **ParamSchema 扩展 `visibleWhen`**（公共代码）— 支持参数联动显隐，如选"光滑"时自动隐藏 μ 滑块，选"无外力"时隐藏 F/θ 参数。ParamPanel 组件适配条件渲染
-2. **水平面统一场景** — 合并 4 个预设为 1 个「水平面受力」预设 + 1 个统一求解器，条件参数：接触面（光滑/粗糙 toggle）、有无外力（toggle）、初速度（slider，0=静止）。求解器根据条件组合自动推导力集合（含"先减后加速"等原本缺失的场景）
-3. **斜面统一场景** — 合并 4 个预设为 1 个「斜面受力」预设，条件参数：接触面（toggle）、初速度（slider，0=从静止开始）、有无沿斜面外力（toggle + F slider）。求解器已基本统一（`block-on-slope.ts` 内有 4 条分支），微调即可
-4. **悬挂预设优化** — 保持单绳/双绳/绳杆 3 种不同拓扑为独立预设（实体组成不同，不适合合并），但将对称/不对称双绳合并为 1 个预设（仅 α/β 默认值不同）
-5. **清理旧预设和求解器** — 删除被合并的旧预设 JSON 和不再需要的旧求解器文件，更新 `index.ts` 注册
+1. 注册 `pivot` 实体类型 — 固定悬挂点，category 为 `constraint`，渲染为实心圆点 + 三角固定标记
+2. 注册 `rope` 实体类型 — 轻绳（不可伸长），category 为 `connector`，properties 含 length；渲染为直线段
+3. 注册 `rod` 实体类型 — 轻杆（可承压/拉），category 为 `connector`，properties 含 length；渲染为粗直线段
+4. 实现单绳悬挂求解器 — G + T 二力平衡
+5. 实现双绳悬挂求解器 — G + T₁ + T₂ 三力平衡，通过角度解方程
+6. 实现绳+杆混合悬挂求解器 — 绳提供拉力、杆提供压力或拉力
+7. 编写 4 个预设 JSON（单绳、对称双绳、不对称双绳、绳+杆）
 
 **涉及文件范围**：
-
-公共代码（需与开发者 B 协商）：
-- `src/core/types.ts` — `ParamSchema` 追加可选 `visibleWhen` 字段
-- `src/shell/canvas/ParamPanel.tsx`（或对应组件）— 适配 `visibleWhen` 条件渲染
-
-力学域：
-- `src/domains/mechanics/solvers/` — 合并水平面 4 个求解器为 1 个统一求解器；斜面求解器微调（追加外力分支）
-- `src/domains/mechanics/presets/` — 删除旧预设，新建统一预设 JSON
-- `src/domains/mechanics/index.ts` — 更新注册（减少求解器和预设数量）
+- `src/domains/mechanics/entities/` — 新增 `pivot.ts`、`rope.ts`、`rod.ts`
+- `src/domains/mechanics/renderers/` — 新增 `pivot-renderer.ts`、`rope-renderer.ts`、`rod-renderer.ts`
+- `src/domains/mechanics/solvers/` — 新增 3 个悬挂求解器
+- `src/domains/mechanics/presets/` — 新增 4 个预设 JSON
+- `src/domains/mechanics/index.ts` — 追加注册
 
 **验收标准**：
 ✅ `pnpm lint && pnpm tsc --noEmit` 通过
-✅ 水平面统一场景：切换"光滑↔粗糙"，摩擦力箭头自动出现/消失
-✅ 水平面统一场景：同时设置初速度和反向外力，实现"先减后加速"
-✅ 水平面统一场景：选"无外力"后，F/θ 参数自动隐藏
-✅ 斜面统一场景：切换"有无外力"，沿斜面外力箭头自动出现/消失
-✅ 斜面统一场景：μ 调至临界值 tanθ 时，从"静止"自动过渡到"匀速下滑"
-✅ 双绳悬挂：单预设内调整 α/β 可覆盖对称和不对称情况
-✅ 所有运动场景的 motion 视角仍正常（图表、箭头无回归）
-✅ 手算验证：与整改前相同参数组合的结果完全一致
-
-**预设变化**：
-| 整改前 | 整改后 |
-|--------|--------|
-| horizontal-block（静止无外力） | → 合并为 1 个「水平面受力」 |
-| horizontal-with-force（有外力） | → |
-| friction-deceleration（减速） | → |
-| friction-acceleration（加速） | → |
-| slope-static（静止） | → 合并为 1 个「斜面受力」 |
-| slope-sliding-down（下滑） | → |
-| slope-sliding-up（上冲） | → |
-| slope-smooth（光滑） | → |
-| single-rope-suspension | → 保留 |
-| double-rope-symmetric | → 合并为 1 个「双绳悬挂」 |
-| double-rope-asymmetric | → |
-| rope-rod-suspension | → 保留 |
-| **12 个预设** | **→ 5 个预设** |
+✅ 绳/杆从悬挂点到物块的线段正确渲染，长度与参数一致
+✅ 单绳悬挂：T = mg，张力箭头沿绳向上
+✅ 双绳悬挂：调整角度后 T₁、T₂ 实时更新，三力平衡（合力为零）
+✅ 手算验证：m=1kg, θ₁=30°, θ₂=60° 时 T₁、T₂ 与拉密定理一致
+✅ 绳+杆场景：杆力方向正确（可能为压力，即方向反转）
 
 **本阶段产出**：
-- 统一场景模式确立 — 后续所有新场景按此模式设计
-- `visibleWhen` 参数联动显隐能力 — 通用基础设施
-- 预设数量精简（12→5），但覆盖场景反而更多（自动支持"先减后加速"、"斜面+外力"等原本缺失的条件组合）
-- 用户体验对齐需求文档：同一场景内切换条件，无需换预设
-
-**注意**：具体实现细节将在执行本阶段时另建子任务文档详细规划
+- `pivot`、`rope`、`rod` 三种实体 + 渲染器（后续连接体、滑轮场景复用）
+- 悬挂 4 个预设就绪
+- `connection` 关系类型的求解逻辑范例
 
 ---
 
-### 第7阶段：连接体 + 弹簧体系 ⏱️ 3~4 天
+### 第6阶段：连接体 + 弹簧体系 ⏱️ 3~4 天
 
-**目标**：新增 spring 实体，按统一场景模式实现连接体和弹簧场景。
+**目标**：新增 spring 实体，实现 3 个连接体预设 + 2 个弹簧预设。
 
-**前置依赖**：阶段6（统一场景模式 + `visibleWhen`）
-
-**子任务链路**：spring 实体 + 渲染器 → 水平连接体统一求解器 + 预设 → 斜面悬挂连接体求解器 + 预设 → 弹簧统一求解器 + 预设 → 验证
+**子任务链路**：spring 实体 + 渲染器 → 连接体·水平求解器 + 预设 → 连接体·斜面+悬挂求解器 + 预设 → 弹簧连接求解器 + 预设 → 弹簧平衡/拉伸预设 → 验证
 
 **主要任务**：
-1. 注册 `spring` 实体类型 — category 为 `connector`，properties 含 stiffness（k）和 naturalLength；渲染为锯齿波形
-2. 实现「水平连接体」统一场景 — 绳连两物体，条件参数：接触面（光滑/粗糙）、有无外力、显示模式（整体法/隔离法 select）。1 个统一求解器处理所有条件组合
-3. 实现「斜面-悬挂连接体」统一场景 — 斜面物体经绳/定滑轮连悬挂物体，条件参数：斜面光滑/粗糙。复用阶段2 slope + 阶段5 rope/pulley
-4. 实现「弹簧模型」统一场景 — 条件参数：方向（竖直悬挂/水平 select）、连接方式（弹簧连物体/弹簧连墙壁 select）。F=kx 弹性力，支持拉伸和压缩
+1. 注册 `spring` 实体类型 — category 为 `connector`，properties 含 stiffness（劲度系数 k）和 naturalLength（原长）；渲染为锯齿波形
+2. 实现连接体·水平求解器 — 绳连两物体在水平面上受力拉动，支持整体法和隔离法切换显示
+3. 实现连接体·斜面+悬挂求解器 — 斜面上物体经绳连定滑轮连另一物体（使用阶段2的 slope 和阶段5的 rope）
+4. 实现弹簧连接求解器 — F = kx 弹性力，支持拉伸和压缩
+5. 编写 5 个预设 JSON
 
 **涉及文件范围**：
 - `src/domains/mechanics/entities/spring.ts` — 新增实体
 - `src/domains/mechanics/renderers/spring-renderer.ts` — 新增渲染器
-- `src/domains/mechanics/solvers/` — 新增 3 个统一求解器
-- `src/domains/mechanics/presets/` — 新增 3 个统一场景预设 JSON
+- `src/domains/mechanics/solvers/` — 新增 3~4 个求解器
+- `src/domains/mechanics/presets/` — 新增 5 个预设 JSON
 - `src/domains/mechanics/index.ts` — 追加注册
 
 **验收标准**：
 ✅ `pnpm lint && pnpm tsc --noEmit` 通过
 ✅ 弹簧渲染为锯齿形，拉伸/压缩时视觉长度变化
-✅ 水平连接体：切换光滑/粗糙，摩擦力自动出现/消失；整体法/隔离法切换显示
-✅ 斜面-悬挂连接体：两物体加速度大小相等，绳张力耦合正确
-✅ 弹簧模型：切换竖直/水平，弹簧和物块布局自动变化
-✅ 手算验证：m₁=2kg, m₂=3kg, F=10N, μ=0.2 时连接体 a 和 T 正确
+✅ 连接体·水平：两物体加速度一致，绳张力 = m₂ × a
+✅ 连接体·斜面+悬挂：斜面物体和悬挂物体通过绳力耦合，加速度正确
+✅ 弹簧场景：F = kx，调整 k 或位移后弹力实时更新
+✅ 手算验证：m₁=2kg, m₂=3kg, F=10N, μ=0.2 时连接体加速度和绳张力正确
 
 **本阶段产出**：
 - `spring` 实体 + 渲染器
-- 3 个统一场景预设（水平连接体、斜面-悬挂连接体、弹簧模型）
-- 多物体耦合求解逻辑
-
-**注意**：具体实现细节将在执行本阶段时另建子任务文档详细规划
+- 连接体 3 个 + 弹簧 2 个预设就绪
+- 多物体耦合求解逻辑（为圆周运动中的绳连圆周做准备）
 
 ---
 
-### 第8阶段：圆周运动体系 ⏱️ 3~4 天
+### 第7阶段：圆周运动体系 ⏱️ 4~5 天
 
-**目标**：按统一场景模式实现圆周运动场景，含水平圆周和竖直圆周，支持临界条件分析。
+**目标**：实现 4 个圆周运动预设，含水平圆周和竖直圆周（绳/杆），支持临界条件分析。
 
-**前置依赖**：阶段7（连接体中绳连逻辑可复用）
-
-**子任务链路**：圆周轨迹辅助渲染 → 水平圆周统一求解器 + 预设 → 竖直圆周统一求解器 + 预设 → 验证
+**子任务链路**：圆周轨迹渲染（辅助虚线圆）→ 水平圆周·摩擦求解器 + 预设 → 水平圆周·绳连求解器 + 预设 → 竖直圆周·绳求解器 + 预设 → 竖直圆周·杆求解器 + 预设 → 验证
 
 **主要任务**：
 1. 实现圆周轨迹辅助渲染 — 在 force viewport 中绘制参考圆（虚线圆弧），标注半径和圆心
-2. 实现「水平圆周」统一场景 — 条件参数：向心力来源（摩擦力/绳拉力 select），质量、半径、角速度 slider。求解器统一处理临界条件（摩擦：ω_max；绳：断裂）
-3. 实现「竖直圆周」统一场景 — 条件参数：连接方式（绳连/杆连 select），质量、半径、速度、观察位置（最高/最低/任意角度 slider）。求解器统一处理绳的最高点临界 v=√(gr) 和杆的推拉判定
-4. 支持拖动角度观察不同位置的受力（角度参数 slider）
+2. 实现水平圆周·摩擦提供向心力求解器 — 物块在转台上做匀速圆周运动，临界条件 f_max = μmg = mω²r
+3. 实现水平圆周·绳连求解器 — 绳拉物块做水平圆周运动，T = mω²r
+4. 实现竖直圆周·绳求解器 — 最高点最低点受力分析，最高点临界条件 mg = mv²/r
+5. 实现竖直圆周·杆求解器 — 与绳的区别：最高点杆力可为零或推力，无最小速度限制
+6. 编写 4 个预设 JSON，支持拖动角度观察不同位置的受力
 
 **涉及文件范围**：
-- `src/domains/mechanics/solvers/` — 新增 2 个统一求解器
-- `src/domains/mechanics/presets/` — 新增 2 个统一场景预设 JSON
+- `src/domains/mechanics/solvers/` — 新增 4 个圆周运动求解器
+- `src/domains/mechanics/presets/` — 新增 4 个预设 JSON
 - `src/domains/mechanics/viewports/force-viewport.ts` — 增强圆周辅助线渲染
 - `src/domains/mechanics/index.ts` — 追加注册
 
 **验收标准**：
 ✅ `pnpm lint && pnpm tsc --noEmit` 通过
 ✅ 圆周轨迹辅助线正确绘制，半径标注正确
-✅ 水平圆周：切换摩擦/绳连，向心力来源和临界条件自动变化
 ✅ 水平圆周·摩擦：调整 ω 超过临界值时，提示"滑出"
-✅ 竖直圆周：切换绳/杆，最高点受力分析结论不同
-✅ 竖直圆周·绳：最高点 v < √(gr) 时绳松弛
+✅ 竖直圆周·绳：最高点 v < √(gr) 时绳松弛（力消失）
 ✅ 竖直圆周·杆：最高点 v=0 时杆提供推力 = mg
 ✅ 手算验证：m=0.5kg, r=1m, v_顶=3m/s 时绳张力 = mv²/r - mg = 0.6N
 
 **本阶段产出**：
-- 2 个统一场景预设（水平圆周、竖直圆周）
+- 圆周运动 4 个预设就绪
 - 圆周辅助线渲染能力
-- 临界条件检测与提示逻辑
-
-**注意**：具体实现细节将在执行本阶段时另建子任务文档详细规划
+- 临界条件检测逻辑
 
 ---
 
-### 第9阶段：能量视角 + 特殊模型补全 ⏱️ 4~5 天
+### 第8阶段：能量视角 + 特殊模型收尾 ⏱️ 4 天
 
-**目标**：实现 energy viewport，补全传送带、半球、滑轮、浮力等需求文档中要求但未覆盖的模型，P01 模块交付。
+**目标**：实现 energy viewport，补全滑轮和浮力特殊模型，P01 模块全部预设交付。
 
-**前置依赖**：阶段6~8 所有场景就绪
-
-**子任务链路**：已有求解器补充 energyStates → energy-viewport 实现 → 动态预设追加 energy 视角 → 传送带实体 + 求解器 + 预设 → 半球求解器 + 预设 → 滑轮实体 + 求解器 + 预设 → 浮力求解器 + 预设 → 全量验证
+**子任务链路**：已有求解器补充 energyStates 输出 → energy-viewport 实现 → 动态预设追加 energy 视角 → pulley 实体 + 渲染器 + 求解器 + 预设 → 浮力求解器 + 预设 → 全量验证
 
 **主要任务**：
 1. 为已有动态求解器补充 `energyStates` 输出 — Ek、Ep_gravity、Ep_elastic、总机械能
 2. 实现 energy-viewport 渲染器 — 画布侧边绘制能量条形图（动能/重力势能/弹性势能/总能），随时间动态变化
 3. 将已有动态预设的 `supportedViewports` 追加 `"energy"`
-4. **实现「传送带」统一场景**（FM-054，高考高频）— 新增 conveyor-belt 实体 + 渲染器，条件参数：传送带速度 v_belt、物体初速度 v₀、μ。求解器自动判断摩擦力方向（v₀ < v_belt 向前加速 / v₀ > v_belt 向后减速 / v₀ = v_belt 无摩擦）
-5. **实现「半球模型」场景**（FM-053）— 新增 hemisphere 实体 + 渲染器，物体在半球面顶部，N=mgcosθ，支持调整角度观察受力变化和滑落临界条件
-6. **实现「滑轮」统一场景**（FM-062）— 新增 pulley 实体 + 渲染器，条件参数：类型（定滑轮/动滑轮 select），定滑轮 a=(m₁-m₂)g/(m₁+m₂)，动滑轮 F=G/2
-7. **实现「浮力」场景**（FM-061）— 浮力 F_buoy=ρ液gV排，条件参数：物体密度、液体密度，自动判断沉浮状态
+4. 注册 `pulley` 实体类型 + 渲染器 — 定滑轮，绘制为圆 + 轴心，category 为 `connector`
+5. 实现定滑轮求解器 — 两端悬挂物体，加速度 a = (m₁-m₂)g/(m₁+m₂)
+6. 实现浮力求解器 — 浮力 F_buoy = ρ_液gV_排，与重力平衡或不平衡
+7. 编写 2 个特殊模型预设 JSON（定滑轮、浮力）
 
 **涉及文件范围**：
 - `src/domains/mechanics/viewports/energy-viewport.ts` — 新增视角渲染器
-- `src/domains/mechanics/entities/` — 新增 conveyor-belt、hemisphere、pulley 实体
-- `src/domains/mechanics/renderers/` — 新增对应渲染器
-- `src/domains/mechanics/solvers/` — 修改已有求解器（energyStates）+ 新增 4 个求解器
-- `src/domains/mechanics/presets/` — 修改已有预设 + 新增 4 个统一场景预设 JSON
+- `src/domains/mechanics/entities/pulley.ts` — 新增实体
+- `src/domains/mechanics/renderers/pulley-renderer.ts` — 新增渲染器
+- `src/domains/mechanics/solvers/` — 修改已有求解器 + 新增 2 个求解器
+- `src/domains/mechanics/presets/` — 修改已有预设 + 新增 2 个预设 JSON
 - `src/domains/mechanics/index.ts` — 追加注册
 
 **验收标准**：
 ✅ `pnpm lint && pnpm tsc --noEmit` 通过
 ✅ 能量视角：条形图高度与物理量成正比，总能守恒（摩擦场景总能递减）
-✅ 传送带：v₀ < v_belt 时摩擦力向前，v₀ > v_belt 时摩擦力向后，切换自动变化
-✅ 半球模型：角度增大时 N 减小，滑落临界条件正确
-✅ 定滑轮：两端物体加速度大小相等方向相反
-✅ 动滑轮：省力一半，F=G/2
-✅ 浮力场景：ρ物 < ρ液 时漂浮，ρ物 > ρ液 时沉底
+✅ 斜面下滑场景：Ep 减小 + Ek 增大，能量守恒可视化
+✅ 定滑轮：两端物体加速度大小相等方向相反，绳张力相等
+✅ 浮力场景：调整液体密度后浮力实时更新
 ✅ 手算验证：定滑轮 m₁=3kg, m₂=1kg 时 a=4.9m/s², T=14.7N
 
 **本阶段产出**：
 - `energy` 视角渲染器
-- 传送带、半球、滑轮、浮力 4 个新场景
-- P01 模块全部预设交付完成
+- `pulley` 实体 + 渲染器
+- P01 模块全部 ~23 个预设交付完成
 - 三种视角（force / motion / energy）全面可用
-
-**注意**：具体实现细节将在执行本阶段时另建子任务文档详细规划
+- 正交分解系统完整可用（通用分解 + 动画）
 
 ---
 
 ## 🎯 当前焦点
 
-**第6阶段：场景统一化整改**（待启动）
+**第3阶段：实体选择交互 + 正交分解系统**（待启动，需与开发者 B 协商公共代码）
 
 **已完成**：
 - [x] 第1阶段：水平面场景补全（4 个预设全部就绪）
 - [x] 第2阶段：斜面体系（slope 实体/渲染器/求解器 + 4 预设 + 物块旋转 + 力方向修正 + 角度标记修复 + 分量偏移防重叠）
-- [x] 第3阶段：实体选择交互 + 正交分解系统（统一选中模型 + 力箭头交互 + 分解动画 + Popover）
-- [x] 第3.1阶段：布局系统重设计（删除全局 PlacementContext + 简化 Popover 定位 + 实体 drawOutline 注册 + 发光高亮）
-- [x] 第4阶段：运动视角（motion viewport + v-t/a-t/x-t 图表 + ViewportBar 视角切换）
-- [x] 第5阶段：悬挂体系（pivot/rope/rod 实体 + 4 预设 + 张力偏移 + preset-loader ref 替换）
 
 ## ✅ 阶段检查点
 
-| 阶段 | 检查项                                                                      |
-| ---- | --------------------------------------------------------------------------- |
-| 1 ✅ | 4 个水平面预设全部可加载 + 力箭头正确 + 手算验证通过                        |
-| 2 ✅ | 斜面渲染正确 + 4 个斜面预设 + 物块旋转对齐 + 力方向手算验证                 |
-| 3 ✅ | 实体选择交互 + 力箭头浮动菜单 + 正交分解动画(0.8s) + 布局系统简化          |
-| 4 ✅ | 运动视角切换正常 + v-t/a-t/x-t 图表 + 速度/加速度箭头                      |
-| 5 ✅ | 4 种悬挂场景力平衡正确 + 绳/杆教材风格渲染 + 角度可调                      |
-| 6    | 预设合并 12→5 + visibleWhen 联动 + 条件切换无需换预设 + 全量回归            |
-| 7    | 连接体统一场景 + 弹簧渲染变形 + 整体法/隔离法切换 + 3 个预设               |
-| 8    | 圆周运动统一场景 + 临界条件提示 + 绳/杆切换 + 2 个预设                     |
-| 9    | 能量条形图 + 传送带 + 半球 + 滑轮 + 浮力 + 全量验证                        |
-
-## 📊 预设数量规划
-
-| 阶段 | 场景预设 | 累计 |
-|------|---------|------|
-| 阶段1~5（已完成） | 12 个（整改前） | 12 |
-| 阶段6（统一化整改） | 12→5（合并） | 5 |
-| 阶段7（连接体+弹簧） | +3（水平连接体、斜面悬挂连接体、弹簧） | 8 |
-| 阶段8（圆周运动） | +2（水平圆周、竖直圆周） | 10 |
-| 阶段9（能量+特殊模型） | +4（传送带、半球、滑轮、浮力） | 14 |
-
-> 虽然预设数量从原计划的 ~23 降至 ~14，但每个统一场景覆盖的条件组合远多于原来的单一预设，**实际覆盖的物理场景数量反而增加**。
+| 阶段 | 检查项                                                                 |
+| ---- | ---------------------------------------------------------------------- |
+| 1 ✅ | 4 个水平面预设全部可加载 + 力箭头正确 + 手算验证通过                   |
+| 2 ✅ | 斜面渲染正确 + 4 个斜面预设 + 物块旋转对齐 + 力方向手算验证            |
+| 3    | 实体选择交互 + 力箭头浮动菜单 + 正交分解动画(0.8s) + 多场景验证       |
+| 4    | 运动视角切换正常 + v-t/s-t 图表显示 + 轨迹渲染                        |
+| 5    | 3 种悬挂场景力平衡正确 + 绳/杆渲染正确                                |
+| 6    | 连接体加速度一致 + 弹簧渲染变形 + 5 个预设                            |
+| 7    | 圆周运动临界条件正确 + 辅助圆绘制 + 4 个预设                          |
+| 8    | 能量条形图正确 + 滑轮/浮力预设 + 全量 ~23 预设通过                     |
 
 ## 🚫 暂时不考虑
 
@@ -526,11 +533,6 @@
 - 国际化 / 多语言
 - 移动端适配优化
 - 预设导入/导出功能
-- 凹槽模型 FM-055（Phase 2）
-- 杠杆模型 FM-063（Phase 2，初中内容）
-- 导出图片功能（Phase 2）
-- 多物体对比模式（Phase 2）
-- 时间轴高级控制——单步/倒放/调速（Phase 2）
 
 ## 📝 开发笔记
 
@@ -564,9 +566,3 @@
   - 斜面斜边从 bottomRight 到 topCorner，方向 (-cosθ, sinθ)
   - `slopeBlockPos(slopePos, slopeLength, d, cosA, sinA)` 统一计算物块在斜面上的位置
   - `d` = 从斜面底端（bottomRight）沿斜边向上的距离
-- **场景统一化设计原则**（阶段6决策）：
-  - 同一物理模型的条件变体合并为 1 个预设，用 `select`/`toggle` 参数切换条件
-  - 求解器根据 `paramValues` 动态决定力的集合（哪些力出现/消失/方向改变）
-  - `ParamSchema.visibleWhen` 实现参数联动显隐（如"光滑"时隐藏 μ）
-  - 不同拓扑结构的场景（如单绳 vs 双绳）仍为独立预设（实体组成不同）
-  - 统一场景的 qualifier 简化为 1 个，不再按条件变体注册多个 qualifier

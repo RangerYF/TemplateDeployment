@@ -1,0 +1,81 @@
+{
+  "id": "P02-EMF023-solenoid-bfield",
+  "version": "1.0",
+  "name": "螺线管磁场",
+  "description": "观察螺线管内部近似匀强、外部回路闭合的磁感线分布，适合讲解 B ≈ μ0nI。",
+  "category": "P-08",
+  "supportedViewports": ["field"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "solenoid-1",
+      "type": "solenoid",
+      "properties": {
+        "current": 2,
+        "currentDirectionMode": "rightward",
+        "turns": 500,
+        "length": 3,
+        "width": 3,
+        "height": 1.2
+      },
+      "transform": { "position": { "x": -1.5, "y": -0.6 }, "rotation": 0 },
+      "label": "螺线管"
+    }
+  ],
+  "relations": [],
+  "paramGroups": [
+    {
+      "key": "solenoid-params",
+      "label": "螺线管属性",
+      "params": [
+        {
+          "key": "current",
+          "label": "电流",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.5,
+          "default": 2,
+          "unit": "A",
+          "targetEntityId": "solenoid-1",
+          "targetProperty": "current"
+        },
+        {
+          "key": "currentDirectionMode",
+          "label": "电流方向",
+          "type": "select",
+          "options": [
+            { "value": "rightward", "label": "上侧向右" },
+            { "value": "leftward", "label": "上侧向左" }
+          ],
+          "default": "rightward",
+          "targetEntityId": "solenoid-1",
+          "targetProperty": "currentDirectionMode"
+        },
+        {
+          "key": "turns",
+          "label": "匝数",
+          "type": "slider",
+          "min": 50,
+          "max": 2000,
+          "step": 50,
+          "default": 500,
+          "unit": "匝",
+          "targetEntityId": "solenoid-1",
+          "targetProperty": "turns"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "current": 2,
+    "currentDirectionMode": "rightward",
+    "turns": 500
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

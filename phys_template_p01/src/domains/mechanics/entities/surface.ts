@@ -1,6 +1,5 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
 import { pointOnLine } from '@/core/physics/geometry';
-import { worldToScreen } from '@/renderer/coordinate';
 import type { Entity } from '@/core/types';
 
 export function registerSurfaceEntity(): void {
@@ -33,17 +32,6 @@ export function registerSurfaceEntity(): void {
         };
       }
       return null;
-    },
-
-    drawOutline: (entity, ctx, ct) => {
-      const length = (entity.properties.length as number) ?? 6;
-      const pos = entity.transform.position;
-      const sFrom = worldToScreen(pos, ct);
-      const sTo = worldToScreen({ x: pos.x + length, y: pos.y }, ct);
-
-      ctx.beginPath();
-      ctx.moveTo(sFrom.x, sFrom.y);
-      ctx.lineTo(sTo.x, sTo.y);
     },
 
     createEntity: (overrides) => {

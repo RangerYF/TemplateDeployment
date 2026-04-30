@@ -5,22 +5,22 @@ import type {
   PhysicsResult,
   Rect,
   RenderContext,
-  Selection,
   ViewportData,
   ViewportState,
   ViewportType,
 } from '@/core/types';
 import {
-  entityRegistry,
   rendererRegistry,
   type RenderLayer,
 } from '@/core/registries';
-import { worldToScreen } from '@/renderer/coordinate';
+import { isSourcePointCharge } from '@/domains/em/logic/point-charge-role';
+import { worldToScreen, worldLengthToScreen } from './coordinate';
 
 /**
  * 渲染循环管理器
  *
  * 按 RenderLayer 枚举顺序绘制实体，处理选中高亮和叠加层透明度。
+ * 阶段5只提供骨架，具体渲染器由域注册后生效。
  */
 
 const LAYER_ORDER: RenderLayer[] = [
@@ -37,28 +37,33 @@ export interface RenderLoopOptions {
   getEntities: () => Map<EntityId, Entity>;
   getResult: () => PhysicsResult | null;
   getViewport: () => ViewportState;
-  getSelection: () => Selection | null;
-  getHoveredTarget: () => Selection | null;
+  getSelectedEntityId: () => EntityId | null;
   getCoordinateTransform: () => CoordinateTransform;
-  /** 获取历史结果（运动视角图表需要） */
-  getResultHistory?: () => PhysicsResult[];
   /** 每帧渲染前回调（用于驱动 simulator.step） */
   onFrame?: (dt: number) => void;
-}
-
-/** 从 Selection 中提取 entityId */
-function selectionToEntityId(selection: Selection | null): EntityId | null {
-  if (!selection) return null;
-  if (selection.type === 'entity') {
-    return (selection.data as { entityId: EntityId }).entityId;
-  }
-  const data = selection.data as { entityId?: EntityId };
-  return data?.entityId ?? null;
+  /** 获取连线关系列表（builder 模式用） */
+  getRelations?: () => import('@/core/types').Relation[];
+  /** 自定义连线渲染（builder 模式用） */
+  onRenderWires?: (
+    ctx: CanvasRenderingContext2D,
+    entities: Map<EntityId, Entity>,
+    relations: import('@/core/types').Relation[],
+    transform: CoordinateTransform,
+  ) => void;
 }
 
 export function createRenderLoop(options: RenderLoopOptions) {
   let rafId: number | null = null;
   let lastTime = 0;
+  const reportedErrors = new Set<string>();
+
+  function reportRenderError(scope: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    const key = `${scope}:${message}`;
+    if (reportedErrors.has(key)) return;
+    reportedErrors.add(key);
+    console.error(`[RenderLoop] ${scope} 渲染失败:`, error);
+  }
 
   function render(timestamp: number): void {
     const dt = lastTime === 0 ? 0 : (timestamp - lastTime) / 1000;
@@ -76,10 +81,9 @@ export function createRenderLoop(options: RenderLoopOptions) {
     const entities = options.getEntities();
     const result = options.getResult();
     const viewport = options.getViewport();
-    const selection = options.getSelection();
-    const hoveredTarget = options.getHoveredTarget();
-    const selectedEntityId = selectionToEntityId(selection);
+    const selectedEntityId = options.getSelectedEntityId();
     const coordinateTransform = options.getCoordinateTransform();
+    const relations = options.getRelations?.();
 
     const renderCtx: RenderContext = {
       ctx,
@@ -87,10 +91,8 @@ export function createRenderLoop(options: RenderLoopOptions) {
       coordinateTransform,
       viewport,
       selectedEntityId,
-      selection,
-      hoveredTarget,
+      relations,
       dt,
-      entities,
     };
 
     // 清空画布
@@ -122,25 +124,18 @@ export function createRenderLoop(options: RenderLoopOptions) {
       for (const reg of layerRenderers) {
         for (const entity of entities.values()) {
           if (entity.type === reg.entityType) {
-            ctx.save();
-            reg.renderer(entity, result, renderCtx);
-            ctx.restore();
-
-            // 实体 hover 高亮
-            if (
-              hoveredTarget?.type === 'entity' &&
-              (hoveredTarget.data as { entityId: string }).entityId === entity.id &&
-              selectedEntityId !== entity.id
-            ) {
-              drawEntityHoverHighlight(ctx, entity, coordinateTransform);
+            try {
+              ctx.save();
+              reg.renderer(entity, result, renderCtx);
+            } catch (error) {
+              reportRenderError(`entity:${reg.entityType}`, error);
+            } finally {
+              ctx.restore();
             }
 
-            // 实体选中高亮（仅 selection.type === 'entity' 时绘制）
-            if (
-              selection?.type === 'entity' &&
-              (selection.data as { entityId: string }).entityId === entity.id
-            ) {
-              drawEntitySelectionHighlight(ctx, entity, coordinateTransform);
+            // 选中高亮
+            if (entity.id === selectedEntityId) {
+              drawSelectionHighlight(ctx, entity, coordinateTransform);
             }
           }
         }
@@ -149,36 +144,54 @@ export function createRenderLoop(options: RenderLoopOptions) {
 
     // 主视角渲染
     const primaryRenderer = rendererRegistry.getViewportRenderer(viewport.primary);
-    if (primaryRenderer && result) {
-      const resultHistory = options.getResultHistory?.();
-      const viewportData = extractViewportData(viewport.primary, result, resultHistory, entities);
+    if (primaryRenderer) {
+      // field/circuit 视角不依赖 result，允许 result 为 null
+      const viewportData = result
+        ? extractViewportData(viewport.primary, result, entities)
+        : extractViewportDataWithoutResult(viewport.primary, entities);
       if (viewportData) {
-        ctx.save();
-        ctx.globalAlpha = 1;
-        primaryRenderer(viewportData, entities, renderCtx);
-        ctx.restore();
+        try {
+          ctx.save();
+          ctx.globalAlpha = 1;
+          primaryRenderer(viewportData, entities, renderCtx);
+        } catch (error) {
+          reportRenderError(`viewport:${viewport.primary}`, error);
+        } finally {
+          ctx.restore();
+        }
       }
-    }
-
-    // 交互 overlay（在主视角渲染之后调用）
-    const interactionHandler = rendererRegistry.getViewportInteraction(viewport.primary);
-    if (interactionHandler) {
-      ctx.save();
-      interactionHandler.renderOverlay(renderCtx);
-      ctx.restore();
     }
 
     // 叠加视角渲染（globalAlpha = 0.3）
     for (const overlayType of viewport.overlays) {
       const overlayRenderer = rendererRegistry.getViewportRenderer(overlayType as ViewportType);
-      if (overlayRenderer && result) {
-        const viewportData = extractViewportData(overlayType as ViewportType, result, undefined, entities);
+      if (overlayRenderer) {
+        const viewportData = result
+          ? extractViewportData(overlayType as ViewportType, result, entities)
+          : extractViewportDataWithoutResult(overlayType as ViewportType, entities);
         if (viewportData) {
-          ctx.save();
-          ctx.globalAlpha = 0.3;
-          overlayRenderer(viewportData, entities, renderCtx);
-          ctx.restore();
+          try {
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            overlayRenderer(viewportData, entities, renderCtx);
+          } catch (error) {
+            reportRenderError(`overlay:${overlayType}`, error);
+          } finally {
+            ctx.restore();
+          }
         }
+      }
+    }
+
+    // 连线渲染（builder 模式）
+    if (options.onRenderWires && relations) {
+      try {
+        ctx.save();
+        options.onRenderWires(ctx, entities, relations, coordinateTransform);
+      } catch (error) {
+        reportRenderError('builder-wires', error);
+      } finally {
+        ctx.restore();
       }
     }
 
@@ -216,12 +229,28 @@ export function createRenderLoop(options: RenderLoopOptions) {
 }
 
 /**
+ * 无 PhysicsResult 时提取视角数据（仅 field/circuit 等不依赖求解结果的视角）
+ */
+function extractViewportDataWithoutResult(
+  type: ViewportType,
+  entities?: Map<EntityId, Entity>,
+): ViewportData | null {
+  switch (type) {
+    case 'field':
+      return extractFieldViewportData(entities);
+    case 'circuit':
+      return extractCircuitViewportData(entities);
+    default:
+      return null;
+  }
+}
+
+/**
  * 从 PhysicsResult（及 scene entities）中提取指定视角类型所需的数据
  */
 function extractViewportData(
   type: ViewportType,
   result: PhysicsResult,
-  resultHistory?: PhysicsResult[],
   entities?: Map<EntityId, Entity>,
 ): ViewportData | null {
   switch (type) {
@@ -235,16 +264,7 @@ function extractViewportData(
         type: 'motion',
         data: {
           motionStates: Array.from(result.motionStates.values()),
-          currentTime: result.time,
-          history: resultHistory?.map((r) => ({
-            time: r.time,
-            states: Array.from(r.motionStates.values()).map((m) => ({
-              entityId: m.entityId,
-              position: { ...m.position },
-              velocity: { ...m.velocity },
-              acceleration: { ...m.acceleration },
-            })),
-          })),
+          analyses: Array.from(result.forceAnalyses.values()),
         },
       };
     case 'energy':
@@ -344,7 +364,15 @@ function extractFieldViewportData(
     });
   }
 
-  if (fieldEntities.length === 0) return null;
+  // 即使没有匀强场实体，场景中有 point-charge 时仍需返回数据
+  // （field-viewport 内部检测 point-charge 并绘制电场线/等势线）
+  if (fieldEntities.length === 0) {
+    let hasPointCharge = false;
+    for (const entity of entities.values()) {
+      if (isSourcePointCharge(entity)) { hasPointCharge = true; break; }
+    }
+    if (!hasPointCharge) return null;
+  }
 
   return {
     type: 'field',
@@ -353,66 +381,44 @@ function extractFieldViewportData(
 }
 
 /**
- * 实体 hover 高亮 — 发光描边
+ * 选中实体的高亮描边（根据实体几何形状适配）
  */
-function drawEntityHoverHighlight(
+function drawSelectionHighlight(
   ctx: CanvasRenderingContext2D,
   entity: Entity,
   coordinateTransform: CoordinateTransform,
 ): void {
-  drawEntityBorder(ctx, entity, coordinateTransform, {
-    strokeStyle: 'rgba(59, 130, 246, 0.5)',
-    lineWidth: 2,
-    lineDash: [],
-    shadowColor: 'rgba(59, 130, 246, 0.6)',
-    shadowBlur: 6,
-  });
-}
-
-/**
- * 实体选中高亮 — 强发光描边
- */
-function drawEntitySelectionHighlight(
-  ctx: CanvasRenderingContext2D,
-  entity: Entity,
-  coordinateTransform: CoordinateTransform,
-): void {
-  drawEntityBorder(ctx, entity, coordinateTransform, {
-    strokeStyle: 'rgba(59, 130, 246, 0.8)',
-    lineWidth: 2.5,
-    lineDash: [],
-    shadowColor: 'rgba(59, 130, 246, 0.8)',
-    shadowBlur: 10,
-  });
-}
-
-/**
- * 绘制实体边框（通过实体注册的 drawOutline 绘制轮廓路径，统一描边）
- */
-function drawEntityBorder(
-  ctx: CanvasRenderingContext2D,
-  entity: Entity,
-  coordinateTransform: CoordinateTransform,
-  style: { strokeStyle: string; lineWidth: number; lineDash: number[]; shadowColor?: string; shadowBlur?: number },
-): void {
-  const reg = entityRegistry.get(entity.type);
+  const { position } = entity.transform;
+  const radius = entity.properties.radius as number | undefined;
+  const width = entity.properties.width as number | undefined;
+  const height = entity.properties.height as number | undefined;
 
   ctx.save();
-  ctx.strokeStyle = style.strokeStyle;
-  ctx.lineWidth = style.lineWidth;
-  ctx.setLineDash(style.lineDash);
-  if (style.shadowColor) ctx.shadowColor = style.shadowColor;
-  if (style.shadowBlur) ctx.shadowBlur = style.shadowBlur;
+  ctx.strokeStyle = '#00C06B';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
 
-  if (reg?.drawOutline) {
-    reg.drawOutline(entity, ctx, coordinateTransform);
-    ctx.stroke();
-  } else {
-    // fallback：圆环
-    const pos = entity.transform.position;
-    const screen = worldToScreen(pos, coordinateTransform);
+  if (radius != null) {
+    // 圆形实体（仪表类）：position 是圆心
+    const center = worldToScreen(position, coordinateTransform);
+    const screenR = worldLengthToScreen(radius, coordinateTransform) + 6;
     ctx.beginPath();
-    ctx.arc(screen.x, screen.y, 20, 0, Math.PI * 2);
+    ctx.arc(center.x, center.y, screenR, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (width != null && height != null) {
+    // 矩形实体：position 是左下角
+    const topLeft = worldToScreen(
+      { x: position.x - 0.05, y: position.y + height + 0.05 },
+      coordinateTransform,
+    );
+    const w = worldLengthToScreen(width + 0.1, coordinateTransform);
+    const h = worldLengthToScreen(height + 0.1, coordinateTransform);
+    ctx.strokeRect(topLeft.x, topLeft.y, w, h);
+  } else {
+    // 兜底
+    const center = worldToScreen(position, coordinateTransform);
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, 25, 0, Math.PI * 2);
     ctx.stroke();
   }
 

@@ -117,7 +117,7 @@ export const elements = ([
 
     oxidationStates: "+1, -1",
 
-    chemicalProperties: "氢气是最轻的气体，可燃但不助燃。与氧气混合点燃会爆炸（爆炸极限 4%-75%），纯净氢气安静燃烧产生淡蓝色火焰。氢气具有还原性，高温下可还原氧化铜等金属氧化物。",
+    chemicalProperties: "氢气是最轻的气体，可燃但不助燃。与空气混合点燃时爆炸极限约为 4%-75%；若与纯氧混合，爆炸范围会更宽。纯净氢气安静燃烧产生淡蓝色火焰。氢气具有还原性，高温下可还原氧化铜等金属氧化物。",
 
     history: "1766 年英国化学家卡文迪许首次制备纯净氢气，称之为可燃空气。1783 年拉瓦锡将其命名为 Hydrogen（希腊语产生水的元素）。",
 
@@ -743,7 +743,7 @@ export const elements = ([
 
     oxidationStates: "+3",
 
-    chemicalProperties: "铝是两性金属——既能与酸反应（Al + 3HCl → AlCl₃ + 3/2 H₂↑），又能与强碱反应（2Al + 2NaOH + 6H₂O → 2Na[Al(OH)₄] + 3H₂↑）。Al₂O₃ 和 Al(OH)₃ 都是两性化合物。铝在空气中表面形成致密氧化膜（Al₂O₃），阻止进一步氧化。铝热反应（Al + Fe₂O₃ → Al₂O₃ + Fe）可产生极高温度。",
+    chemicalProperties: "铝是两性金属——既能与酸反应（Al + 3HCl → AlCl₃ + 3/2 H₂↑），又能与强碱反应生成四羟基合铝酸钠（2Al + 2NaOH + 6H₂O → 2Na[Al(OH)₄] + 3H₂↑）。Al₂O₃ 和 Al(OH)₃ 都是两性化合物。铝在空气中表面形成致密氧化膜（Al₂O₃），阻止进一步氧化。铝热反应（Al + Fe₂O₃ → Al₂O₃ + Fe）可产生极高温度。",
 
     history: "1825 年丹麦物理学家奥斯特首次制备出铝。19 世纪铝曾比黄金还贵——拿破仑三世宴客时用铝制餐具招待贵宾，其他人只能用金银餐具。",
 
@@ -2622,7 +2622,7 @@ export const elements = ([
     electronegativity: 2.05,
     electronConfiguration: "[Kr] 4d¹⁰ 5s² 5p³",
     oxidationStates: "+3, +5",
-    chemicalProperties: "锑质脆，有金属光泽，是典型的类金属。Sb₂O₃ 与卤素阻燃剂协效使用，是重要的阻燃助剂。锑不溶于稀盐酸，与浓 HNO₃ 反应生成 Sb₂O₅。",
+    chemicalProperties: "锑质脆，有金属光泽，常作为交界元素（半金属）来讨论。Sb₂O₃ 与卤素阻燃剂协效使用，是重要的阻燃助剂。锑不溶于稀盐酸，与浓 HNO₃ 反应生成 Sb₂O₅。",
     history: "古埃及人已用辉锑矿（Sb₂S₃）磨粉作眼影，元素符号 Sb 来自拉丁语 stibium。16 世纪巴西利乌斯·瓦伦蒂努斯对其有详细记载。",
     applications: "阻燃剂（Sb₂O₃ 与卤素协效）、铅蓄电池合金（提高极板硬度）、半导体材料、焊料合金。",
     funFact: "古埃及人用辉锑矿磨成的黑色粉末作眼影，现代研究发现此粉末在潮湿环境中会生成抗菌化合物，这可能是古埃及人眼部感染率较低的原因之一。",
@@ -2646,7 +2646,7 @@ export const elements = ([
     electronegativity: 2.1,
     electronConfiguration: "[Kr] 4d¹⁰ 5s² 5p⁴",
     oxidationStates: "-2, +4, +6",
-    chemicalProperties: "碲是典型的类金属，具有半导体性质，导电性随温度升高而增强。碲化镉（CdTe）是重要的薄膜太阳能电池材料。碲化铋（Bi₂Te₃）是室温附近最佳热电材料。",
+    chemicalProperties: "碲常作为交界元素（半金属）来讨论，具有半导体性质，导电性随温度升高而增强。碲化镉（CdTe）是重要的薄膜太阳能电池材料。碲化铋（Bi₂Te₃）是室温附近最佳热电材料。",
     history: "1782 年穆勒·冯·赖兴施泰因在特兰西瓦尼亚矿石中发现，1798 年克拉普罗特命名，tellurium 来自拉丁语 tellus（地球）。",
     applications: "碲化镉（CdTe）薄膜太阳能电池、碲化铋热电器件（半导体制冷/温差发电）、碲化镉汞红外探测器。",
     funFact: "碲是地壳中极为稀少的稳定元素之一，丰度比铂还低。随着碲化镉薄膜太阳能电池的兴起，碲已成为战略性稀缺资源。",
@@ -4316,7 +4316,7 @@ export const elements = ([
     electronegativity: null,
     electronConfiguration: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵",
     oxidationStates: "-1, +1",
-    chemicalProperties: "位于卤素族最底部，相对论效应预测其化学性质与传统卤素差异较大，可能表现出类金属特征。",
+    chemicalProperties: "位于卤素族最底部，相对论效应预测其化学性质与传统卤素差异较大，可能表现出一定交界元素特征。",
     history: "2010 年俄美联合团队合成，2016 年 IUPAC 以田纳西州（Tennessee）命名，因该州有橡树岭国家实验室和范德比尔特大学参与研究。",
     applications: "基础核物理研究。",
     funFact: "鿬是迄今合成的第二重元素（仅次于奥加涅相），也是卤素族中最重的成员。合成鿬需要在橡树岭国家实验室特别制备的锫-249 靶，这一准备过程本身就耗费了多年时间和数百万美元。",

@@ -56,4 +56,32 @@ describe('balance', () => {
   it('离子：MnO4- + Fe2+ + H+ = Mn2+ + Fe3+ + H2O → [1, 5, 8, 1, 5, 4]', () => {
     expect(coeffsFor('MnO4- + Fe2+ + H+ = Mn2+ + Fe3+ + H2O')).toEqual([1, 5, 8, 1, 5, 4]);
   });
+
+  it('离子：MnO42- + H+ = MnO4- + MnO2 + H2O → [3, 4, 2, 1, 2]', () => {
+    expect(coeffsFor('MnO42- + H+ = MnO4- + MnO2 + H2O')).toEqual([3, 4, 2, 1, 2]);
+  });
+
+  it('支持较复杂的银氨体系：C6H12O6 + 2Ag(NH3)2OH = C6H12O7 + 2Ag + 4NH3 + H2O', () => {
+    expect(coeffsFor('C6H12O6 + Ag(NH3)2OH = C6H12O7 + Ag + NH3 + H2O')).toEqual([1, 2, 1, 2, 4, 1]);
+  });
+
+  it('多组解方程式返回 multiple_solutions，而不是给出任意一组结果', () => {
+    const parsed = parseEquation('Fe + O2 = FeO + Fe2O3');
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const result = balance(parsed.equation);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.kind).toBe('multiple_solutions');
+  });
+
+  it('锰酸钾与双氧水的写法在当前形式下应提示 multiple_solutions', () => {
+    const parsed = parseEquation('MnO4- + H+ + H2O2 = O2 + H2O + Mn2+');
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const result = balance(parsed.equation);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.kind).toBe('multiple_solutions');
+  });
 });

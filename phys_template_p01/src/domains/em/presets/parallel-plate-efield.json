@@ -1,0 +1,136 @@
+{
+  "id": "P02-EMF003-parallel-plate-efield",
+  "version": "1.0",
+  "name": "平行板电容器",
+  "description": "演示平行板在恒压 / 定电荷两种模型下的板间电场、极板电荷与边缘效应，适合比较 U、Q、εr、间距和板宽的影响。",
+  "category": "P-08",
+  "supportedViewports": ["field"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "efield-1",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 50,
+        "direction": { "x": 0, "y": -1 },
+        "width": 5,
+        "height": 2,
+        "showPlates": true,
+        "capacitorModel": "constant-voltage",
+        "voltage": 100,
+        "plateCharge": 2.21e-9,
+        "dielectric": 1
+      },
+      "transform": { "position": { "x": -2.5, "y": -1 }, "rotation": 0 },
+      "label": "平行板电容器"
+    }
+  ],
+  "relations": [],
+  "paramGroups": [
+    {
+      "key": "voltage-params",
+      "label": "电压与电场",
+      "params": [
+        {
+          "key": "capacitorModel",
+          "label": "电容器模型",
+          "type": "select",
+          "options": [
+            { "value": "constant-voltage", "label": "恒压" },
+            { "value": "constant-charge", "label": "定电荷" }
+          ],
+          "default": "constant-voltage",
+          "targetEntityId": "efield-1",
+          "targetProperty": "capacitorModel"
+        },
+        {
+          "key": "voltage",
+          "label": "极板电压 U",
+          "type": "slider",
+          "visibleWhen": [
+            { "key": "capacitorModel", "equals": "constant-voltage" }
+          ],
+          "min": 10,
+          "max": 300,
+          "step": 10,
+          "default": 100,
+          "unit": "V",
+          "targetEntityId": "efield-1",
+          "targetProperty": "voltage"
+        },
+        {
+          "key": "plateCharge",
+          "label": "极板电荷 Q",
+          "type": "slider",
+          "visibleWhen": [
+            { "key": "capacitorModel", "equals": "constant-charge" }
+          ],
+          "min": 0,
+          "max": 2e-8,
+          "step": 1e-10,
+          "default": 2.21e-9,
+          "unit": "C",
+          "precision": 3,
+          "targetEntityId": "efield-1",
+          "targetProperty": "plateCharge"
+        },
+        {
+          "key": "plateDistance",
+          "label": "极板间距 d",
+          "type": "slider",
+          "min": 0.5,
+          "max": 4,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "height"
+        }
+      ]
+    },
+    {
+      "key": "material-params",
+      "label": "介质与几何",
+      "params": [
+        {
+          "key": "dielectric",
+          "label": "相对介电常数 εr",
+          "type": "slider",
+          "min": 1,
+          "max": 5,
+          "step": 0.5,
+          "default": 1,
+          "unit": "",
+          "targetEntityId": "efield-1",
+          "targetProperty": "dielectric"
+        },
+        {
+          "key": "plateWidth",
+          "label": "极板宽度 W",
+          "type": "slider",
+          "min": 2,
+          "max": 10,
+          "step": 0.5,
+          "default": 5,
+          "unit": "m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "width"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "capacitorModel": "constant-voltage",
+    "voltage": 100,
+    "plateCharge": 2.21e-9,
+    "plateDistance": 2,
+    "dielectric": 1,
+    "plateWidth": 5
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

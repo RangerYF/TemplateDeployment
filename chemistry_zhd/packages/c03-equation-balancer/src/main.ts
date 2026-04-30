@@ -1,6 +1,7 @@
 import { parseEquation } from './parser';
 import { balance } from './balancer';
 import type { ParsedEquation } from './parser/types';
+import { escapeHtml as escHtml, formatEquation, formatFormulaForDisplay } from './formatting';
 
 const TEMPLATE_KEY = 'c03';
 const RUNTIME_KEY = 'chemistry-zhd-c03-equation-balancer';
@@ -23,6 +24,12 @@ interface SnapshotEnvelope {
 interface SnapshotValidationResult {
   ok: boolean;
   errors: string[];
+}
+
+interface ApplyOperationsResult {
+  ok: boolean;
+  applied: string[];
+  warnings: string[];
 }
 
 interface C03SnapshotPayload {
@@ -53,51 +60,100 @@ declare global {
       getSnapshot: () => C03SnapshotDocument;
       loadSnapshot: (snapshot: unknown) => void;
       validateSnapshot: (snapshot: unknown) => SnapshotValidationResult;
+      getAiContext: () => ReturnType<typeof getAiContext>;
+      applyOperations: (operations: unknown) => ApplyOperationsResult;
     };
   }
 }
 
-const TO_SUB: Record<string, string> = {
-  '0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',
-};
-const TO_SUP: Record<string, string> = {
-  '1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻',
-};
+type ReviewTone = 'pass' | 'warn';
 
-/** 转义 HTML 特殊字符（防止用户输入注入 DOM，含属性值中的双引号） */
-function escHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+interface ReviewItem {
+  tone: ReviewTone;
+  label: string;
+  detail: string;
 }
 
-/**
- * 将化学式转为显示字符串：
- * - 公式体内数字 → Unicode 下标（H₂O）
- * - 末尾电荷后缀 [1-9]?[+-] → Unicode 上标（Fe²⁺ / OH⁻ / SO₄²⁻）
- */
-function formatFormulaForDisplay(formula: string): string {
-  // 先剥离末尾状态符号，再处理电荷和下标
-  const stateM = /(\(s\)|\(g\)|\(l\)|\(aq\)|↑|↓)$/.exec(formula);
-  let state = '';
-  if (stateM) { state = stateM[0]; formula = formula.slice(0, -stateM[0].length); }
+interface EquationReview {
+  summary: string;
+  allowHistory: boolean;
+  items: ReviewItem[];
+}
 
-  const chargeMatch = /([1-9]?)([+-])$/.exec(formula);
-  let body = formula;
-  let sup = '';
-  if (chargeMatch) {
-    body = formula.slice(0, formula.length - chargeMatch[0].length);
-    sup = (chargeMatch[1] ? (TO_SUP[chargeMatch[1]] ?? chargeMatch[1]) : '') + TO_SUP[chargeMatch[2]];
+const COMMON_HIGH_SCHOOL_SPECIES = new Set([
+  'H2', 'O2', 'H2O', 'N2', 'Cl2', 'Br2', 'I2', 'HCl', 'H2SO4', 'HNO3', 'NH3', 'CO2', 'CO', 'CH4',
+  'NaOH', 'KOH', 'Ca(OH)2', 'Al(OH)3', 'Al(OH)4-', 'Na(Al(OH)4)', 'Na2CO3', 'NaHCO3', 'CaCO3', 'CuO',
+  'Fe2O3', 'KMnO4', 'K2Cr2O7', 'MnO2', 'Na2O2', 'C6H12O6', 'C6H12O7', 'Ag', 'AgCl', 'AgNO3',
+  'Ag(NH3)2+', 'Ag(NH3)2OH', 'Cu(OH)2', 'Cu2+', 'Cu+', 'Fe2+', 'Fe3+', 'MnO4-', 'Mn2+', 'H+', 'OH-',
+  'e-', 'SO42-', 'SO32-', 'CO32-', 'HCO3-', 'NO3-', 'NH4+', 'Cl-', 'Br-', 'I-', 'Na+', 'K+', 'Ca2+',
+  'Mg2+', 'Al3+', 'Ba2+', 'SO2', 'SO3', 'H2S', 'PCl5', 'PCl3', 'NO', 'NO2', 'N2O4', 'HI'
+]);
+
+function normalizeSpeciesKey(formula: string): string {
+  let normalized = formula
+    .trim()
+    .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, (c) => String(c.codePointAt(0)! - 0x2080))
+    .replace(/[［【\[{（]/g, '(')
+    .replace(/[］】\]}）]/g, ')')
+    .replace(/[•]/g, '·')
+    .replace(/(\(s\)|\(g\)|\(l\)|\(aq\)|↑|↓)$/i, '')
+    .replace(/\s+/g, '');
+  normalized = normalized.replace(/^\((.+)\)([1-9]?[+-])$/, '$1$2');
+  return normalized;
+}
+
+function buildEquationReview(eq: ParsedEquation): EquationReview {
+  const allMols = [...eq.reactants, ...eq.products];
+  const speciesKeys = allMols.map((mol) => normalizeSpeciesKey(mol.rawFormula));
+  const uncovered = [...new Set(speciesKeys.filter((key) => !COMMON_HIGH_SCHOOL_SPECIES.has(key)))];
+  const hasMediumSensitiveSpecies = speciesKeys.some((key) => ['H+', 'OH-', 'H2O', 'e-', 'MnO4-', 'Ag(NH3)2OH', 'Ag(NH3)2+'].includes(key));
+  const hasComplexNotation = speciesKeys.some((key) => /[()·]/.test(key) || key.length >= 10);
+
+  const items: ReviewItem[] = [
+    {
+      tone: 'pass',
+      label: '守恒检查',
+      detail: `本次结果已经通过${eq.equationType === 'ionic' ? '元素与电荷' : '元素'}守恒校验，可用于课堂上的配平核对。`,
+    },
+    uncovered.length === 0
+      ? {
+          tone: 'pass',
+          label: '物质库覆盖',
+          detail: '所有物种都落在当前内置的高中常见物质库内，这类结果会写入历史记录。',
+        }
+      : {
+          tone: 'warn',
+          label: '物质库覆盖',
+          detail: `以下物种未完全落在当前高中常用物质库：${uncovered.join('、')}。结果仅作守恒参考，本次不写入历史记录。`,
+        },
+    hasMediumSensitiveSpecies
+      ? {
+          tone: 'warn',
+          label: '条件与介质',
+          detail: '当前方程式涉及离子、电子或特定介质物种。请再结合酸碱环境、氧化还原方向和教材条件复核。',
+        }
+      : {
+          tone: 'pass',
+          label: '条件与介质',
+          detail: '页面已经完成守恒配平，但“反应是否发生、产物是否唯一”仍需结合实验条件判断。',
+        },
+  ];
+
+  if (hasComplexNotation) {
+    items.push({
+      tone: 'warn',
+      label: '复杂结构提醒',
+      detail: '当前方程式包含配位写法、嵌套括号或水合物。工具已完成计量解析，但复杂体系更适合再做一次人工检查。',
+    });
   }
-  return escHtml(body).replace(/\d/g, (d) => TO_SUB[d]) + sup + escHtml(state);
-}
 
-/** 使用原始化学式字符串拼接配平后的方程式，系数用 <span class="coeff"> 高亮，系数为 1 时省略 */
-function formatEquation(eq: ParsedEquation, coeffs: number[]): string {
-  const n = eq.reactants.length;
-  const fmt = (mol: { rawFormula: string }, coeff: number) =>
-    `<span class="coeff">${coeff}</span>` + formatFormulaForDisplay(mol.rawFormula);
-  const left  = eq.reactants.map((m, i) => fmt(m, coeffs[i])).join(' + ');
-  const right = eq.products.map((m, i)  => fmt(m, coeffs[n + i])).join(' + ');
-  return `${left} = ${right}`;
+  return {
+    allowHistory: uncovered.length === 0,
+    summary: uncovered.length === 0
+      ? '已通过守恒与物质库检查，结果可直接用于课堂核对，也会写入历史记录。'
+      : '已给出守恒配平结果，但因超出当前常用物质库覆盖范围，本次只展示结果，不写入历史记录。',
+    items,
+  };
 }
 
 // ── CSS — 对齐 C04 设计规范 ────────────────────────────────────
@@ -110,27 +166,49 @@ const css = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
-  background:#FFFFFF;color:#1A202C;min-height:100vh
+  background:#F7FAFC;color:#1A202C;min-height:100vh
 }
-#app{max-width:760px;margin:0 auto;padding:32px 24px 64px}
+#app{max-width:920px;margin:0 auto;padding:32px 24px 64px}
 
 /* ── Header ── */
-.c03-header{margin-bottom:24px}
+.c03-header{margin-bottom:18px}
 .c03-chip{
   display:inline-block;background:#E8F8F0;color:#00A85A;
-  padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;margin-bottom:10px
+  padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:10px
 }
-.c03-title{font-size:26px;font-weight:800;color:#1A202C;margin-bottom:6px}
-.c03-subtitle{font-size:13px;color:#718096}
+.c03-title{font-size:30px;font-weight:800;color:#1A202C;margin-bottom:6px;letter-spacing:-0.02em}
+.c03-subtitle{font-size:14px;color:#4A5568;line-height:1.65}
+
+/* ── 快速说明 ── */
+.c03-quickstart{
+  display:grid;gap:12px;margin-bottom:16px;padding:18px 20px;
+  border:1px solid #D7E3EF;border-radius:14px;background:linear-gradient(180deg,#FFFFFF 0%,#F8FCFA 100%);
+  box-shadow:0 10px 28px rgba(15,23,42,.05)
+}
+.c03-quick-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.c03-quick-header strong{display:block;font-size:16px;color:#1A202C}
+.c03-quick-header p{font-size:13px;color:#4A5568;line-height:1.65}
+.c03-quick-badge{
+  display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;
+  background:#E8F8F0;color:#007A42;font-size:11px;font-weight:800;white-space:nowrap
+}
+.c03-quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.c03-quick-item{
+  padding:14px;border-radius:12px;background:#FFFFFF;border:1px solid #E2E8F0
+}
+.c03-quick-item strong{display:block;font-size:14px;color:#1A202C;margin-bottom:6px}
+.c03-quick-item p{font-size:13px;line-height:1.6;color:#4A5568}
 
 /* ── 卡片基础（共用）── */
-.input-card,.result-card,.conservation-card,.steps-card{
-  background:#FAFAFA;border:1px solid #E2E8F0;border-radius:12px;
-  padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)
+.input-card,.result-card,.review-card,.conservation-card,.steps-card{
+  background:#FFFFFF;border:1px solid #D7E3EF;border-radius:14px;
+  padding:22px;box-shadow:0 8px 24px rgba(15,23,42,.05)
 }
 .input-card{margin-bottom:16px}
 .result-card{margin-bottom:16px;display:none}
 .result-card.visible{display:block;animation:fade-in .18s ease}
+.review-card{margin-bottom:16px;display:none}
+.review-card.visible{display:block;animation:fade-in .18s ease}
 .conservation-card{margin-bottom:16px;display:none}
 .conservation-card.visible{display:block;animation:fade-in .18s ease}
 .steps-card{display:none}
@@ -140,19 +218,19 @@ body{
 /* ── Input ── */
 .input-row{display:flex;gap:8px;align-items:center}
 .eq-input{
-  flex:1;font-size:15px;padding:8px 12px;
-  border:1px solid #E2E8F0;border-radius:8px;
+  flex:1;font-size:16px;padding:10px 14px;
+  border:1px solid #CBD5E0;border-radius:10px;
   outline:none;background:#FFFFFF;color:#1A202C;transition:border-color .12s
 }
-.eq-input:focus{border-color:#00A85A}
+.eq-input:focus{border-color:#00A85A;box-shadow:0 0 0 3px rgba(0,168,90,.12)}
 .balance-btn{
-  padding:8px 20px;background:#00A85A;color:#FFFFFF;
-  font-size:13px;font-weight:600;border:1px solid #00A85A;
+  padding:10px 22px;background:#00A85A;color:#FFFFFF;
+  font-size:14px;font-weight:700;border:1px solid #00A85A;
   border-radius:20px;cursor:pointer;transition:background .12s,border-color .12s;white-space:nowrap
 }
 .balance-btn:hover{background:#007A42;border-color:#007A42}
-.input-hint{margin-top:8px;font-size:12px;color:#718096}
-.input-hint strong{color:#4A5568}
+.input-hint{margin-top:10px;font-size:13px;color:#4A5568;line-height:1.65}
+.input-hint strong{color:#1A202C}
 
 /* ── Section label（与 C04 detail-section h3 一致）── */
 .section-title,.result-label{
@@ -161,24 +239,61 @@ body{
 }
 
 /* ── 配平结果 ── */
-.result-eq{font-size:24px;font-weight:800;color:#1A202C;line-height:1.35;word-break:break-all}
-.coeff{color:#00A85A;font-weight:900}
+.result-eq{font-size:28px;font-weight:800;color:#1A202C;line-height:1.55;word-break:break-all}
+.equation-term{display:inline-flex;align-items:baseline;white-space:nowrap}
+.coeff{color:#00A85A;font-weight:900;margin-right:.04em}
+.formula-token{display:inline-block;line-height:1}
+.formula-token sub,
+.formula-token sup{
+  font-size:.56em;
+  line-height:0;
+  position:relative;
+  font-weight:800;
+}
+.formula-token sub{bottom:-.24em}
+.formula-token sup{top:-.52em}
+.formula-state{
+  font-size:.58em;
+  color:#4A5568;
+  margin-left:.08em;
+  vertical-align:baseline;
+}
 .eq-type-chip{
   display:inline-block;background:#E8F8F0;color:#007A42;
-  padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;
   margin-bottom:8px;letter-spacing:.02em
 }
-.result-error{font-size:14px;color:#C53030;font-weight:600}
+.result-error{font-size:15px;color:#C53030;font-weight:700}
+.result-note{margin-top:10px;font-size:13px;color:#4A5568;line-height:1.7}
+
+/* ── 结果复核 ── */
+.review-summary{
+  margin-bottom:14px;padding:12px 14px;border-radius:10px;
+  background:#F0FAF5;border:1px solid #CDEFD9;font-size:14px;color:#1A202C;line-height:1.7
+}
+.review-list{display:grid;gap:10px}
+.review-item{
+  padding:12px 14px;border-radius:12px;border:1px solid #D7E3EF;background:#FCFDFE
+}
+.review-item--warn{background:#FFF9F1;border-color:#F3D5A4}
+.review-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.review-item-label{font-size:14px;font-weight:800;color:#1A202C}
+.review-item-tag{
+  display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;
+  font-size:11px;font-weight:800;background:#E8F8F0;color:#007A42
+}
+.review-item-tag.warn{background:#FFF1F0;color:#C53030}
+.review-item p{font-size:13px;line-height:1.7;color:#4A5568}
 
 /* ── 守恒表 ── */
-.cons-table{width:100%;border-collapse:collapse;font-size:13px}
+.cons-table{width:100%;border-collapse:collapse;font-size:14px}
 .cons-table th{
-  text-align:center;padding:8px 12px;
+  text-align:center;padding:10px 12px;
   background:#F7FAFC;color:#007A42;
-  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
   border-bottom:1.5px solid #CBD5E0
 }
-.cons-table td{text-align:center;padding:8px 12px;border-bottom:1px solid #EDF2F7;color:#2D3748}
+.cons-table td{text-align:center;padding:10px 12px;border-bottom:1px solid #EDF2F7;color:#2D3748}
 .cons-table td:first-child{font-weight:700;color:#1A202C}
 .cons-table tr:last-child td{border-bottom:none}
 .check-ok{color:#00A85A;font-size:15px;font-weight:700}
@@ -188,7 +303,7 @@ body{
 .step-item{
   background:#FFFFFF;border:1px solid #E2E8F0;
   border-left:3px solid #00A85A;border-radius:0 8px 8px 0;
-  padding:12px 16px;color:#2D3748;line-height:1.7
+  padding:14px 16px;color:#2D3748;line-height:1.7
 }
 .step-item+.step-item{margin-top:8px}
 .step-item.step-hidden{display:none}
@@ -201,8 +316,8 @@ body{
   font-size:11px;font-weight:700;padding:2px 8px;
   border-radius:6px;letter-spacing:.04em;white-space:nowrap
 }
-.step-title{font-weight:700;color:#1A202C;font-size:14px}
-.step-body{margin-top:8px;font-size:13px;color:#2D3748;line-height:1.7}
+.step-title{font-weight:800;color:#1A202C;font-size:15px}
+.step-body{margin-top:8px;font-size:13px;color:#2D3748;line-height:1.75}
 .step-body p{margin-bottom:6px}
 .step-body p:last-child{margin-bottom:0}
 .step-body table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
@@ -218,6 +333,8 @@ body{
   border-radius:8px;font-weight:800;font-size:18px;color:#007A42;margin-top:8px
 }
 .step-body .coeff{color:#00A85A;font-weight:900}
+.step-body .formula-token sub,
+.step-body .formula-token sup{font-size:.62em}
 .step-dim{font-size:12px;color:#718096;margin-top:4px}
 
 /* ── 下一步按钮（与 C04 color-btn 一致）── */
@@ -281,21 +398,23 @@ body{
 .qb-add-group:hover{border-color:#00A85A;color:#00A85A}
 
 /* ── 实时预览行 ── */
-.preview-line{min-height:16px;font-size:12px;color:#00A85A;margin-top:6px;padding-left:2px;line-height:1.5;word-break:break-all}
+.preview-line{min-height:18px;font-size:13px;color:#007A42;margin-top:8px;padding-left:2px;line-height:1.8;word-break:break-all}
+.preview-line .formula-token sub,
+.preview-line .formula-token sup{font-size:.64em}
 .preview-line:empty{display:none}
 
 /* ── 错误高亮 ── */
 .error-token{background:#FED7D7;color:#C53030;border-radius:3px;padding:0 3px;font-weight:700}
 .error-context{
   background:#FFF5F5;border:1px solid #FED7D7;border-radius:6px;
-  padding:6px 10px;margin-top:6px;font-size:13px;font-family:monospace;
+  padding:8px 10px;margin-top:8px;font-size:13px;font-family:monospace;
   color:#742A2A;word-break:break-all;line-height:1.6
 }
 
 /* ── 历史记录 ── */
 .hist-card{
-  background:#FAFAFA;border:1px solid #E2E8F0;border-radius:12px;
-  padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)
+  background:#FFFFFF;border:1px solid #D7E3EF;border-radius:14px;
+  padding:16px 20px;margin-bottom:16px;box-shadow:0 8px 24px rgba(15,23,42,.05)
 }
 .hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .hist-item{
@@ -309,7 +428,8 @@ body{
 /* ── 移动端适配 ── */
 @media(max-width:600px){
   #app{padding:16px 12px 40px}
-  .c03-title{font-size:20px}
+  .c03-title{font-size:24px}
+  .c03-quick-grid{grid-template-columns:minmax(0,1fr)}
   .result-eq{font-size:18px}
   .input-row{flex-wrap:wrap;gap:6px}
   .eq-input{min-width:0}
@@ -332,7 +452,31 @@ app.innerHTML = `
 <div class="c03-header">
   <div class="c03-chip">化学模块 / C-03</div>
   <div class="c03-title">化学方程式配平器</div>
-  <div class="c03-subtitle">输入化学方程式，自动配平并校验原子守恒</div>
+  <div class="c03-subtitle">先给出最小整数系数，再做守恒检查与课堂复核。页面重点改为“配平 + 检查”，不把代数结果直接等同于反应一定成立。</div>
+</div>
+
+<div class="c03-quickstart">
+  <div class="c03-quick-header">
+    <div>
+      <strong>功能说明与建议用法</strong>
+      <p>适合课堂上的“先输入，再核对，再追问条件”。支持括号、离子、电荷、配位写法与部分水合物，但复杂氧化还原仍建议结合介质和电子转移方法复核。</p>
+    </div>
+    <span class="c03-quick-badge">先检查，再记忆</span>
+  </div>
+  <div class="c03-quick-grid">
+    <div class="c03-quick-item">
+      <strong>1. 输入方程式</strong>
+      <p>支持 =、→、⇌，也支持 Unicode 下标、离子电荷和 [Ag(NH3)2]+ 一类配位写法。</p>
+    </div>
+    <div class="c03-quick-item">
+      <strong>2. 看复核结果</strong>
+      <p>页面会先判断守恒是否通过、物质是否落在常见物质库、是否需要额外检查介质条件。</p>
+    </div>
+    <div class="c03-quick-item">
+      <strong>3. 再展开步骤</strong>
+      <p>下方步骤区保留“识别物质 → 统计原子 → 给系数 → 守恒验证 → 课堂复核”的顺序，适合带学生逐步检查。</p>
+    </div>
+  </div>
 </div>
 
 <div class="input-card">
@@ -352,6 +496,11 @@ app.innerHTML = `
 <div class="result-card" id="result-card">
   <div class="result-label">配平结果</div>
   <div id="result-content"></div>
+</div>
+
+<div class="review-card" id="review-card">
+  <div class="section-title">课堂复核</div>
+  <div id="review-content"></div>
 </div>
 
 <div class="conservation-card" id="conservation-card">
@@ -376,6 +525,8 @@ const input = document.getElementById('eq-input') as HTMLInputElement;
 const btn   = document.getElementById('balance-btn') as HTMLButtonElement;
 const resultCard  = document.getElementById('result-card')!;
 const resultContent = document.getElementById('result-content')!;
+const reviewCard = document.getElementById('review-card')!;
+const reviewContent = document.getElementById('review-content')!;
 const consCard  = document.getElementById('conservation-card')!;
 const consTbody = document.getElementById('cons-tbody')!;
 const stepsCard     = document.getElementById('steps-card')!;
@@ -613,11 +764,42 @@ function addToHist(raw: string, balanced: string) {
 
 renderHist();
 
+const EQUATION_PRESETS: Record<string, { input: string; label: string; topic: string }> = {
+  combustion: { input: 'CH4 + O2 = CO2 + H2O', label: '甲烷燃烧', topic: '燃烧反应' },
+  synthesis: { input: 'H2 + O2 = H2O', label: '氢气燃烧生成水', topic: '化合反应' },
+  decomposition: { input: 'KClO3 = KCl + O2', label: '氯酸钾分解', topic: '分解反应' },
+  replacement: { input: 'Fe + CuSO4 = FeSO4 + Cu', label: '铁置换铜', topic: '置换反应' },
+  neutralization: { input: 'HCl + NaOH = NaCl + H2O', label: '酸碱中和', topic: '复分解反应' },
+  redox: { input: 'KMnO4 + HCl = KCl + MnCl2 + Cl2 + H2O', label: '高锰酸钾氧化盐酸', topic: '氧化还原反应' },
+  ionic: { input: 'Fe3+ + OH- = Fe(OH)3', label: '铁离子与氢氧根生成沉淀', topic: '离子方程式' },
+  carbonate: { input: 'CaCO3 + HCl = CaCl2 + CO2 + H2O', label: '碳酸钙与盐酸', topic: '气体生成反应' },
+};
+
+function renderReview(review: EquationReview): void {
+  reviewContent.innerHTML = `
+    <div class="review-summary">${escHtml(review.summary)}</div>
+    <div class="review-list">
+      ${review.items.map((item) => `
+        <div class="review-item${item.tone === 'warn' ? ' review-item--warn' : ''}">
+          <div class="review-item-head">
+            <span class="review-item-label">${escHtml(item.label)}</span>
+            <span class="review-item-tag${item.tone === 'warn' ? ' warn' : ''}">${item.tone === 'warn' ? '需复核' : '通过'}</span>
+          </div>
+          <p>${escHtml(item.detail)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  reviewCard.classList.add('visible');
+}
+
 function clearRenderedState() {
   resultContent.innerHTML = '';
+  reviewContent.innerHTML = '';
   consTbody.innerHTML = '';
   stepsList.innerHTML = '';
   resultCard.classList.remove('visible');
+  reviewCard.classList.remove('visible');
   consCard.classList.remove('visible');
   stepsCard.classList.remove('visible');
   nextStepRow.style.display = 'none';
@@ -829,7 +1011,7 @@ function updatePreview() {
 // ── 教学步骤数据 ───────────────────────────────────────────────
 interface StepData { title: string; bodyHtml: string }
 
-function buildSteps(eq: ParsedEquation, coeffs: number[]): StepData[] {
+function buildSteps(eq: ParsedEquation, coeffs: number[], review: EquationReview): StepData[] {
   const allMols = [...eq.reactants, ...eq.products];
   const n = eq.reactants.length;
   const elemSet = new Set<string>();
@@ -942,11 +1124,27 @@ function buildSteps(eq: ParsedEquation, coeffs: number[]): StepData[] {
     </table>
     <p style="color:#22C55E;font-weight:600;margin-top:10px">✓ 所有元素原子数${isIonic ? '及电荷' : ''}已完全相等，方程式配平完成。</p>`;
 
+  const s5 = `
+    <table>
+      <thead><tr><th>检查项目</th><th>状态</th><th>课堂提示</th></tr></thead>
+      <tbody>
+        ${review.items.map((item) => `
+          <tr>
+            <td><strong>${escHtml(item.label)}</strong></td>
+            <td style="color:${item.tone === 'warn' ? '#C53030' : '#007A42'}">${item.tone === 'warn' ? '需复核' : '通过'}</td>
+            <td>${escHtml(item.detail)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <p class="step-dim" style="margin-top:8px">${escHtml(review.summary)}</p>`;
+
   return [
     { title: '识别反应物和生成物', bodyHtml: s1 },
     { title: '统计各元素原子数',   bodyHtml: s2 },
-    { title: '确定配平系数',       bodyHtml: s3 },
-    { title: '验证原子守恒',       bodyHtml: s4 },
+    { title: '确定最小整数系数',   bodyHtml: s3 },
+    { title: `验证${isIonic ? '元素与电荷' : '元素'}守恒`, bodyHtml: s4 },
+    { title: '课堂复核',           bodyHtml: s5 },
   ];
 }
 
@@ -977,9 +1175,10 @@ function run(options: RunOptions = {}) {
 
   const { coefficients } = result;
   const balancedHtml = formatEquation(eq, coefficients);
+  const review = buildEquationReview(eq);
 
   // 历史记录
-  if (recordHistory) {
+  if (recordHistory && review.allowHistory) {
     addToHist(raw, balancedHtml);
   }
 
@@ -988,8 +1187,12 @@ function run(options: RunOptions = {}) {
     ? '<div class="eq-type-chip">离子方程式</div>' : '';
   const noteHtml = result.note
     ? `<div class="step-dim" style="margin-top:4px">⚠ ${escHtml(result.note)}</div>` : '';
-  resultContent.innerHTML = `${typeChip}<div class="result-eq">${balancedHtml}</div>${noteHtml}`;
+  const historyNote = recordHistory && !review.allowHistory
+    ? '<div class="result-note">本次结果未写入历史记录：方程式超出了当前高中常用物质库的完整覆盖范围，请先人工复核后再作为课堂答案使用。</div>'
+    : '';
+  resultContent.innerHTML = `${typeChip}<div class="result-eq">${balancedHtml}</div>${noteHtml}${historyNote}`;
   resultCard.classList.add('visible');
+  renderReview(review);
 
   // 守恒表
   const elemSet = new Set<string>();
@@ -1024,7 +1227,7 @@ function run(options: RunOptions = {}) {
   consCard.classList.add('visible');
 
   // 步骤卡片（逐步展开）
-  const steps = buildSteps(eq, coefficients);
+  const steps = buildSteps(eq, coefficients, review);
   stepRevealCount = 1;
   stepsList.innerHTML = steps.map((s, i) => `
     <div class="step-item${i > 0 ? ' step-hidden' : ''}" id="step-${i}">
@@ -1044,6 +1247,9 @@ function run(options: RunOptions = {}) {
 
 function showError(msg: string, rawInput?: string) {
   let html = `<div class="result-error">错误：${escHtml(msg)}</div>`;
+  if (msg.includes('多组配平解')) {
+    html += '<div class="result-note">这类情况通常不是“再试一次”就能解决，而是要先检查反应条件、反应物是否写全，或是否把多个独立反应写在了一起。</div>';
+  }
   if (rawInput) {
     // 从错误信息中提取被提及的 token（如 "未知元素符号: Xx" → "Xx"）
     const mentioned = /[：:]\s*"?([^"\n]+?)"?\s*$/.exec(msg)?.[1]?.trim();
@@ -1058,6 +1264,8 @@ function showError(msg: string, rawInput?: string) {
   }
   resultContent.innerHTML = html;
   resultCard.classList.add('visible');
+  reviewCard.classList.remove('visible');
+  reviewContent.innerHTML = '';
   consCard.classList.remove('visible');
   stepsCard.classList.remove('visible');
   nextStepRow.style.display = 'none';
@@ -1120,11 +1328,188 @@ function loadSnapshot(snapshot: unknown): void {
   }
 }
 
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function analyzeEquation(rawInput: string) {
+  if (!rawInput.trim()) {
+    return { status: 'empty' as const };
+  }
+
+  const parsed = parseEquation(rawInput);
+  if (!parsed.ok) {
+    return {
+      status: 'parse-error' as const,
+      error: parsed.error,
+    };
+  }
+
+  const balanced = balance(parsed.equation);
+  if (!balanced.ok) {
+    return {
+      status: 'balance-error' as const,
+      equation: parsed.equation,
+      error: balanced,
+    };
+  }
+
+  return {
+    status: 'success' as const,
+    equation: parsed.equation,
+    coefficients: balanced.coefficients,
+    note: balanced.note,
+    balancedText: formatEquation(parsed.equation, balanced.coefficients).replace(/<[^>]+>/g, ''),
+  };
+}
+
+function getAiContext() {
+  const rawInput = input.value.trim();
+  const analysis = analyzeEquation(rawInput);
+  return {
+    templateKey: TEMPLATE_KEY,
+    editor: {
+      rawInput,
+      runState: getEffectiveRunState(rawInput),
+    },
+    ui: {
+      revealedStepCount: stepRevealCount,
+      totalStepCount: stepsList.querySelectorAll('.step-item').length,
+    },
+    analysis,
+    history: histLoad(),
+    presets: Object.entries(EQUATION_PRESETS).map(([presetId, preset]) => ({
+      presetId,
+      ...preset,
+    })),
+    controls: {
+      supportedOperations: [
+        'setEquation',
+        'balanceEquation',
+        'revealSteps',
+        'loadEquationPreset',
+        'clearHistory',
+      ],
+      acceptsUnicodeSubscripts: true,
+      supportedArrows: ['=', '→', '⇌'],
+      supportsIonicChargeBalance: true,
+    },
+  };
+}
+
+function setEquationValue(rawInput: string, shouldRun: boolean): void {
+  input.value = rawInput;
+  updatePreview();
+  if (shouldRun) {
+    run();
+    return;
+  }
+  currentRunState = 'idle';
+  currentResultSourceInput = null;
+  clearRenderedState();
+}
+
+function revealSteps(count: number | undefined): void {
+  if (getEffectiveRunState(input.value.trim()) !== 'success') {
+    run();
+  }
+  const total = stepsList.querySelectorAll('.step-item').length;
+  if (total === 0) return;
+  restoreRevealedSteps(count === undefined ? total : count);
+}
+
+function applyOneOperation(op: Record<string, unknown>, applied: string[], warnings: string[]): void {
+  const type = asString(op.type);
+  if (!type) {
+    warnings.push('operation 缺少 type。');
+    return;
+  }
+
+  switch (type) {
+    case 'setEquation': {
+      const rawInput = asString(op.rawInput) ?? asString(op.equation) ?? asString(op.input);
+      if (!rawInput) {
+        warnings.push('setEquation 需要 rawInput/equation。');
+        return;
+      }
+      const shouldRun = op.run === true || op.balance === true;
+      setEquationValue(rawInput, shouldRun);
+      applied.push(type);
+      return;
+    }
+
+    case 'balanceEquation': {
+      const rawInput = asString(op.rawInput) ?? asString(op.equation) ?? asString(op.input);
+      if (rawInput) setEquationValue(rawInput, false);
+      run();
+      applied.push(type);
+      return;
+    }
+
+    case 'revealSteps': {
+      const count = asNumber(op.count) ?? asNumber(op.revealedStepCount);
+      revealSteps(count);
+      applied.push(type);
+      return;
+    }
+
+    case 'loadEquationPreset': {
+      const presetId = asString(op.presetId) ?? asString(op.id);
+      if (!presetId || !EQUATION_PRESETS[presetId]) {
+        warnings.push(`未知方程式预设：${presetId ?? '空'}`);
+        return;
+      }
+      setEquationValue(EQUATION_PRESETS[presetId].input, true);
+      applied.push(type);
+      return;
+    }
+
+    case 'clearHistory': {
+      histSave([]);
+      renderHist();
+      applied.push(type);
+      return;
+    }
+
+    default:
+      warnings.push(`不支持的 operation：${type}`);
+  }
+}
+
+function applyOperations(inputValue: unknown): ApplyOperationsResult {
+  const operations = Array.isArray(inputValue)
+    ? inputValue
+    : isRecord(inputValue) && Array.isArray(inputValue.operations)
+      ? inputValue.operations
+      : null;
+  const applied: string[] = [];
+  const warnings: string[] = [];
+  if (!operations) {
+    return { ok: false, applied, warnings: ['operations 必须是数组。'] };
+  }
+
+  for (const op of operations) {
+    if (!isRecord(op)) {
+      warnings.push('operation 必须是对象。');
+      continue;
+    }
+    applyOneOperation(op, applied, warnings);
+  }
+
+  return { ok: warnings.length === 0, applied, warnings };
+}
+
 window[TEMPLATE_BRIDGE_GLOBAL_KEY] = {
   getDefaultSnapshot,
   getSnapshot,
   loadSnapshot,
   validateSnapshot,
+  getAiContext,
+  applyOperations,
 };
 
 function handleBridgeMessage(event: MessageEvent) {
@@ -1181,6 +1566,24 @@ function handleBridgeMessage(event: MessageEvent) {
           requestId: data.requestId,
           success: true,
           payload: validateSnapshot(data.payload),
+        };
+        break;
+      case 'getAiContext':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: getAiContext(),
+        };
+        break;
+      case 'applyOperations':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: applyOperations(data.payload),
         };
         break;
       default:

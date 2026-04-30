@@ -5,7 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:electric-feedback": "vite --mode electric-feedback --host 0.0.0.0 --port 5173 --strictPort",
+    "dev:builder-feedback": "vite --mode builder-feedback --host 0.0.0.0 --port 5173 --strictPort",
+    "dev:builder-free-feedback": "vite --mode builder-free-feedback --host 0.0.0.0 --port 5173 --strictPort",
+    "dev:p08-standalone": "vite --mode p08-standalone --host 0.0.0.0 --port 5173 --strictPort",
     "build": "tsc --noEmit && vite build",
+    "build:electric-feedback": "tsc --noEmit && vite build --mode electric-feedback",
+    "build:builder-feedback": "tsc --noEmit && vite build --mode builder-feedback",
+    "build:builder-free-feedback": "tsc --noEmit && vite build --mode builder-free-feedback",
+    "build:p08-standalone": "tsc --noEmit && vite build --mode p08-standalone",
+    "build:vercel": "case \"$VITE_APP_SCOPE\" in builder-feedback) pnpm build:builder-feedback ;; builder-free-feedback) pnpm build:builder-free-feedback ;; p08-standalone) pnpm build:p08-standalone ;; *) pnpm build:electric-feedback ;; esac",
     "lint": "eslint src/ --ext .ts,.tsx",
     "preview": "vite preview",
     "prepare": "husky"

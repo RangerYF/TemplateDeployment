@@ -1,0 +1,80 @@
+{
+  "id": "P04-CIR-EXP008-meter-conversion-voltmeter",
+  "version": "1.0",
+  "name": "电压表改装",
+  "description": "用灵敏电流计串联分压电阻改装成大量程电压表，适合在 builder 中比较理论电阻、实际电阻和示数误差。",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 82,
+    "origin": { "x": 430, "y": 315 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 6,
+        "internalResistance": 1,
+        "width": 0.9,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -4.8, "y": -0.25 }, "rotation": 0 },
+      "label": "待测支路"
+    },
+    {
+      "ref": "divider-r",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 4880,
+        "width": 1.2,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0,
+        "faultType": "none"
+      },
+      "transform": { "position": { "x": -2.0, "y": 0.05 }, "rotation": 0 },
+      "label": "分压电阻 Rv"
+    },
+    {
+      "ref": "galv-1",
+      "type": "galvanometer",
+      "properties": {
+        "sensitivity": 20,
+        "internalResistance": 120,
+        "radius": 0.4,
+        "reading": 0,
+        "overRange": false,
+        "range": 3000
+      },
+      "transform": { "position": { "x": 0.6, "y": 0 }, "rotation": 0 },
+      "label": "表头G"
+    },
+    {
+      "ref": "voltmeter-1",
+      "type": "voltmeter",
+      "properties": {
+        "range": 15,
+        "internalResistance": 5000,
+        "radius": 0.36,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": 3.2, "y": 0 }, "rotation": 0 },
+      "label": "改装后电压表"
+    }
+  ],
+  "relations": [
+    { "type": "connection", "sourceRef": "source-1", "targetRef": "divider-r", "properties": {} },
+    { "type": "connection", "sourceRef": "divider-r", "targetRef": "galv-1", "properties": {} },
+    { "type": "connection", "sourceRef": "galv-1", "targetRef": "voltmeter-1", "properties": {} },
+    { "type": "connection", "sourceRef": "voltmeter-1", "targetRef": "source-1", "properties": {} }
+  ],
+  "paramGroups": [],
+  "paramValues": {
+    "conversionOperatingInput": 9
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

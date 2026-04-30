@@ -43,26 +43,37 @@ const slideRheostatRenderer: EntityRenderer = (entity, _result, ctx) => {
   c.lineWidth = 2;
   c.strokeRect(screenTopLeft.x, screenTopLeft.y, screenW, screenH);
 
-  // 2. 滑片位置（斜线 + 箭头）
+  // 2. 滑片位置（竖线 + 大三角箭头，可拖拽）
   const sliderX = screenTopLeft.x + screenW * ratio;
-  const arrowTop = screenTopLeft.y - 8;
-  const arrowBottom = screenTopLeft.y + 4;
+  const arrowTip = screenTopLeft.y + screenH + 2;   // 箭头尖端指向电阻体底边
+  const arrowBase = screenTopLeft.y + screenH + 18;  // 箭头底部
+  const arrowHalf = 8;                                // 箭头半宽
 
+  // 竖线：从箭头底延伸到电阻体上方
   c.strokeStyle = SLIDER_COLOR;
-  c.lineWidth = 2;
+  c.lineWidth = 2.5;
   c.beginPath();
-  c.moveTo(sliderX, arrowBottom);
-  c.lineTo(sliderX, arrowTop);
+  c.moveTo(sliderX, screenTopLeft.y - 6);
+  c.lineTo(sliderX, arrowBase);
   c.stroke();
 
-  // 箭头尖端
+  // 大三角箭头（朝上指向电阻体）
   c.fillStyle = SLIDER_COLOR;
   c.beginPath();
-  c.moveTo(sliderX, arrowBottom);
-  c.lineTo(sliderX - 4, arrowTop + 4);
-  c.lineTo(sliderX + 4, arrowTop + 4);
+  c.moveTo(sliderX, arrowTip);
+  c.lineTo(sliderX - arrowHalf, arrowBase);
+  c.lineTo(sliderX + arrowHalf, arrowBase);
   c.closePath();
   c.fill();
+
+  // 滑片手柄圆点（视觉提示可拖拽）
+  c.beginPath();
+  c.arc(sliderX, arrowBase + 6, 5, 0, Math.PI * 2);
+  c.fillStyle = SLIDER_COLOR;
+  c.fill();
+  c.strokeStyle = '#FFF';
+  c.lineWidth = 1.5;
+  c.stroke();
 
   // 3. 中心标注
   const centerX = screenTopLeft.x + screenW / 2;
@@ -75,7 +86,55 @@ const slideRheostatRenderer: EntityRenderer = (entity, _result, ctx) => {
   c.textBaseline = 'middle';
   c.fillText(`R=${R_eff.toFixed(1)}Ω`, centerX, centerY);
 
-  // 4. 底部标注
+  // 4. 故障叠加绘制
+  const faultType = (entity.properties.faultType as string) ?? 'none';
+  if (faultType === 'open') {
+    c.strokeStyle = '#E74C3C';
+    c.lineWidth = 3;
+    const margin = Math.min(screenW, screenH) * 0.25;
+    c.beginPath();
+    c.moveTo(centerX - margin, centerY - margin);
+    c.lineTo(centerX + margin, centerY + margin);
+    c.moveTo(centerX + margin, centerY - margin);
+    c.lineTo(centerX - margin, centerY + margin);
+    c.stroke();
+    drawTextLabel(
+      c,
+      '断路',
+      { x: centerX, y: screenTopLeft.y - 14 },
+      { color: '#E74C3C', fontSize: 11, align: 'center', backgroundColor: 'rgba(231,76,60,0.1)', padding: 2 },
+    );
+  } else if (faultType === 'short') {
+    c.strokeStyle = '#E74C3C';
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(screenTopLeft.x, centerY);
+    c.lineTo(screenTopLeft.x + screenW, centerY);
+    c.stroke();
+    drawTextLabel(
+      c,
+      '短路',
+      { x: centerX, y: screenTopLeft.y - 14 },
+      { color: '#E74C3C', fontSize: 11, align: 'center', backgroundColor: 'rgba(231,76,60,0.1)', padding: 2 },
+    );
+  }
+
+  // 5. 连接模式标记（变阻器模式：高亮 A-W 段）
+  const connMode = (entity.properties.connectionMode as string) ?? 'variable';
+  if (connMode === 'variable') {
+    // 高亮左端到滑片位置（A-W 有效段）
+    c.fillStyle = 'rgba(211, 84, 0, 0.15)';
+    c.fillRect(screenTopLeft.x, screenTopLeft.y, screenW * ratio, screenH);
+    // 端口标注：A 在左，W 在滑片位置
+    c.fillStyle = '#999';
+    c.font = '9px Inter, sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'top';
+    c.fillText('A', screenTopLeft.x + 6, screenTopLeft.y - 12);
+    c.fillText('W', sliderX, screenTopLeft.y + screenH + 28);
+  }
+
+  // 6. 底部标注
   drawTextLabel(
     c,
     `最大${maxR}Ω  滑片${(ratio * 100).toFixed(0)}%`,

@@ -90,6 +90,29 @@ describe('parseEquation', () => {
     expect(r.equation.reactants[1].atoms).toEqual({ S: 1, O: 4 });
   });
 
+  it('解析 Al(OH)4- 时保留 4 为原子团下标，电荷为 -1', () => {
+    const r = parseEquation('Al(OH)4- + H+ = Al3+ + H2O');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.equation.reactants[0].charge).toBe(-1);
+    expect(r.equation.reactants[0].atoms).toEqual({ Al: 1, O: 4, H: 4 });
+  });
+
+  it('支持方括号与嵌套括号的配位写法', () => {
+    const r = parseEquation('[Ag(NH3)2]+ + Cl- = AgCl + 2NH3');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.equation.reactants[0].charge).toBe(1);
+    expect(r.equation.reactants[0].atoms).toEqual({ Ag: 1, N: 2, H: 6 });
+  });
+
+  it('支持水合物写法 CuSO4·5H2O', () => {
+    const r = parseEquation('CuSO4·5H2O = CuSO4 + 5H2O');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.equation.reactants[0].atoms).toEqual({ Cu: 1, S: 1, O: 9, H: 10 });
+  });
+
   it('支持未带前置系数的电子 e- 作为独立项', () => {
     const r = parseEquation('Fe3+ + e- = Fe2+');
     expect(r.ok).toBe(true);

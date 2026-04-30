@@ -1,0 +1,300 @@
+{
+  "id": "P02-EMF037-translation-circle",
+  "version": "1.0",
+  "name": "平移圆模型",
+  "description": "粒子源一次发射多粒子，以相同速度、相同荷质比从不同入射点进入同一磁场，形成等半径的平移圆轨迹族。",
+  "category": "P-08",
+  "supportedViewports": [
+    "motion",
+    "force",
+    "field"
+  ],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 68,
+    "origin": {
+      "x": 205,
+      "y": 360
+    }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 1.0,
+        "direction": "into",
+        "width": 10.6,
+        "height": 10.4
+      },
+      "transform": {
+        "position": {
+          "x": -0.8,
+          "y": -5.2
+        },
+        "rotation": 0
+      },
+      "label": "匀强磁场"
+    },
+    {
+      "ref": "emitter-1",
+      "type": "particle-emitter",
+      "properties": {
+        "pattern": "translation-circle",
+        "particleCount": 6,
+        "launchAngleDeg": 0,
+        "baseSpeed": 2.0,
+        "entrySpacing": 1.2,
+        "charge": 0.1,
+        "mass": 0.1,
+        "particleRadius": 0.11,
+        "showParticleLabels": false,
+        "radius": 0.24
+      },
+      "transform": {
+        "position": {
+          "x": 0.2,
+          "y": 0
+        },
+        "rotation": 0
+      },
+      "label": "粒子源"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-2",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-3",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-4",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-5",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-6",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-7",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    },
+    {
+      "ref": "particle-8",
+      "type": "point-charge",
+      "properties": {
+        "pointChargeRole": "particle",
+        "particleActive": false,
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "radius": 0.11
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+    }
+  ],
+  "relations": [
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-1", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-2", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-3", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-4", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-5", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-6", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-7", "properties": {} },
+    { "type": "emits", "sourceRef": "emitter-1", "targetRef": "particle-8", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-1", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-2", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-3", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-4", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-5", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-6", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-7", "properties": {} },
+    { "type": "field-effect", "sourceRef": "bfield-1", "targetRef": "particle-8", "properties": {} }
+  ],
+  "paramGroups": [
+    {
+      "key": "emitter-params",
+      "label": "粒子源参数",
+      "params": [
+        {
+          "key": "particleCount",
+          "label": "粒子数",
+          "type": "slider",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "default": 6,
+          "unit": "个",
+          "targetEntityId": "emitter-1",
+          "targetProperty": "particleCount"
+        },
+        {
+          "key": "baseSpeed",
+          "label": "共同速度 v",
+          "type": "slider",
+          "min": 0.8,
+          "max": 4,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m/s",
+          "targetEntityId": "emitter-1",
+          "targetProperty": "baseSpeed"
+        },
+        {
+          "key": "entrySpacing",
+          "label": "入射点间距",
+          "type": "slider",
+          "min": 0.6,
+          "max": 1.8,
+          "step": 0.1,
+          "default": 1.2,
+          "unit": "m",
+          "targetEntityId": "emitter-1",
+          "targetProperty": "entrySpacing"
+        },
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": 0.02,
+          "max": 0.4,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "C",
+          "precision": 2,
+          "targetEntityId": "emitter-1",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.02,
+          "max": 0.4,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "kg",
+          "precision": 2,
+          "targetEntityId": "emitter-1",
+          "targetProperty": "mass"
+        }
+      ]
+    },
+    {
+      "key": "bfield-params",
+      "label": "磁场参数",
+      "params": [
+        {
+          "key": "B",
+          "label": "磁感应强度 B",
+          "type": "slider",
+          "min": 0.4,
+          "max": 2.5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "direction",
+          "label": "磁场方向",
+          "type": "select",
+          "options": [
+            { "value": "into", "label": "垂直纸面向内 ×" },
+            { "value": "out", "label": "垂直纸面向外 ·" }
+          ],
+          "default": "into",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "direction"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "particleCount": 6,
+    "baseSpeed": 2,
+    "entrySpacing": 1.2,
+    "charge": 0.1,
+    "mass": 0.1,
+    "B": 1,
+    "direction": "into"
+  },
+  "solveMode": "numerical",
+  "duration": 9,
+  "solverQualifier": {
+    "interaction": "magnetic"
+  }
+}

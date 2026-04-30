@@ -1,0 +1,108 @@
+name: deploy-mainland-server
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_scope:
+        description: Build target used by pnpm build:vercel
+        required: false
+        default: electric-feedback
+        type: choice
+        options:
+          - electric-feedback
+          - builder-feedback
+          - builder-free-feedback
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mainland-server-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_ROOT: ${{ secrets.DEPLOY_ROOT }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Resolve runtime values
+        shell: bash
+        env:
+          INPUT_SCOPE: ${{ github.event.inputs.app_scope }}
+        run: |
+          echo "VITE_APP_SCOPE=${INPUT_SCOPE:-electric-feedback}" >> "$GITHUB_ENV"
+          echo "DEPLOY_PORT=${DEPLOY_PORT:-22}" >> "$GITHUB_ENV"
+          echo "DEPLOY_ROOT=${DEPLOY_ROOT:-/var/www/phys-template}" >> "$GITHUB_ENV"
+
+      - name: Validate deploy secrets
+        shell: bash
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_SSH_KEY"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static bundle
+        run: pnpm build:vercel
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ env.VITE_APP_SCOPE }}-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          if [ -n "$DEPLOY_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          fi
+
+      - name: Pack release bundle
+        shell: bash
+        run: |
+          release_id="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          release_file="release-${release_id}.tar.gz"
+          echo "RELEASE_ID=$release_id" >> "$GITHUB_ENV"
+          echo "RELEASE_FILE=$release_file" >> "$GITHUB_ENV"
+          tar -czf "$release_file" -C dist .
+
+      - name: Upload release bundle
+        run: |
+          scp -P "$DEPLOY_PORT" "$RELEASE_FILE" "$DEPLOY_USER@$DEPLOY_HOST:/tmp/$RELEASE_FILE"
+
+      - name: Activate release on server
+        shell: bash
+        run: |
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "APP_ROOT='$DEPLOY_ROOT' RELEASE_ID='$RELEASE_ID' RELEASE_FILE='/tmp/$RELEASE_FILE' bash -s" \
+            < ops/deploy/mainland/install_release.sh

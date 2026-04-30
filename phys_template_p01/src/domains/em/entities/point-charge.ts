@@ -1,6 +1,7 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
 import { pointInCircle } from '@/core/physics/geometry';
 import type { Entity, InputParamSchema, SliderParamSchema } from '@/core/types';
+import { isInactiveDynamicPointCharge } from '../logic/point-charge-role';
 
 export function registerPointChargeEntity(): void {
   entityRegistry.register({
@@ -13,6 +14,7 @@ export function registerPointChargeEntity(): void {
       mass: 1, // kg
       initialVelocity: { x: 0, y: 0 }, // m/s
       radius: 0.15, // m（显示半径）
+      particleActive: true,
     },
 
     paramSchemas: [
@@ -39,6 +41,8 @@ export function registerPointChargeEntity(): void {
     ],
 
     hitTest: (entity, point) => {
+      if (isInactiveDynamicPointCharge(entity)) return null;
+
       const { position } = entity.transform;
       const radius = (entity.properties.radius as number) ?? 0.15;
 
@@ -65,6 +69,7 @@ export function registerPointChargeEntity(): void {
           mass: 1,
           initialVelocity: { x: 0, y: 0 },
           radius: 0.15,
+          particleActive: true,
           ...overrides?.properties,
         },
         label: overrides?.label ?? '点电荷',

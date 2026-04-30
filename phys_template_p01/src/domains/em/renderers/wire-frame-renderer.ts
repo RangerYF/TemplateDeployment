@@ -44,7 +44,8 @@ const wireFrameRenderer: EntityRenderer = (entity, _result, ctx) => {
 
   // 2. 电流流动箭头（有电流时）
   if (hasCurrent) {
-    const clockwise = current > 0;
+    // 与 P13/圆形电流场景统一：正电流表示逆时针，负电流表示顺时针。
+    const clockwise = current < 0;
     drawCurrentArrows(c, screenTopLeft.x, screenTopLeft.y, screenW, screenH, clockwise);
   }
 

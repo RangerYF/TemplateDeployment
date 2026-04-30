@@ -45,6 +45,47 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
   const sourceDistanceM = Math.max(0.2, (slitX - sourceX) / 110);
   const sourceIntensityScale = clamp(Math.pow(1.55 / sourceDistanceM, 2), 0.28, 1.65);
 
+  const screenFringeRects = React.useMemo(() => {
+    const N = 55;
+    const svgTop = 20, svgBot = 130;
+    const svgH = svgBot - svgTop;
+    const screenSpan = 0.04;
+    const rects: Array<{ y: number; h: number; fillR: number; fillG: number; fillB: number }> = [];
+    const wlc = (window as any).wavelengthToColor as (n: number) => string;
+
+    for (let i = 0; i < N; i++) {
+      const svgY = svgTop + (i / N) * svgH;
+      const h = svgH / N + 0.5;
+      const physY = ((i / N) - 0.5) * screenSpan;
+      const sinTheta = physY / L;
+
+      if (whiteLight) {
+        const wls = [420, 470, 530, 580, 650];
+        let rr = 0, gg = 0, bb = 0;
+        for (const wl of wls) {
+          const ll = wl * 1e-9;
+          const bH = Math.PI * a * sinTheta / ll;
+          const dH = Math.PI * d * sinTheta / ll;
+          const env = Math.abs(bH) < 1e-6 ? 1 : Math.pow(Math.sin(bH) / bH, 2);
+          const Iv = Math.pow(Math.max(0, Math.min(1, sourceIntensityScale * env * Math.pow(Math.cos(dH), 2))), 0.72);
+          const cm = wlc(wl).match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+          if (cm) { rr += +cm[1] * Iv; gg += +cm[2] * Iv; bb += +cm[3] * Iv; }
+        }
+        rects.push({ y: svgY, h, fillR: Math.min(255, rr / wls.length * 1.8), fillG: Math.min(255, gg / wls.length * 1.8), fillB: Math.min(255, bb / wls.length * 1.8) });
+      } else {
+        const bH = Math.PI * a * sinTheta / lam;
+        const dH = Math.PI * d * sinTheta / lam;
+        const env = Math.abs(bH) < 1e-6 ? 1 : Math.pow(Math.sin(bH) / bH, 2);
+        const Iv = Math.pow(Math.max(0, Math.min(1, sourceIntensityScale * env * Math.pow(Math.cos(dH), 2))), 0.7);
+        const cm = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (cm) {
+          rects.push({ y: svgY, h, fillR: +cm[1] * Iv, fillG: +cm[2] * Iv, fillB: +cm[3] * Iv });
+        }
+      }
+    }
+    return rects;
+  }, [slitSpacing, screenDistance, wavelength, slitWidth, whiteLight, sourceIntensityScale, color, d, L, lam, a]);
+
   React.useEffect(() => {
     drawPattern();
     drawPlot();
@@ -255,6 +296,14 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
                 <line x1={slitX} y1={58} x2={slitX} y2={68} stroke="var(--panel)" strokeWidth="2.8" />
                 <line x1={slitX} y1={82} x2={slitX} y2={92} stroke="var(--panel)" strokeWidth="2.8" />
               </>
+            )}
+            renderScreenOverlay={() => (
+              <g>
+                {screenFringeRects.map((r, i) => (
+                  <rect key={i} x={screenX - 2} y={r.y} width={22} height={r.h}
+                    fill={`rgb(${Math.round(r.fillR)},${Math.round(r.fillG)},${Math.round(r.fillB)})`} opacity={0.92} rx={1} />
+                ))}
+              </g>
             )}
           />
         </div>

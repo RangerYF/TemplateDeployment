@@ -1,0 +1,63 @@
+{
+  "id": "P01-FM001-horizontal-block",
+  "version": "1.0",
+  "name": "水平面·物块受力",
+  "description": "物块静止在水平面上，分析重力和支持力的平衡",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 400, "y": 400 }
+  },
+  "entities": [
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 2, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "物块"
+    },
+    {
+      "ref": "surface-1",
+      "type": "surface",
+      "properties": { "length": 6, "friction": 0 },
+      "transform": { "position": { "x": -3, "y": 0 }, "rotation": 0 },
+      "label": "水平面"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contact",
+      "sourceRef": "block-A",
+      "targetRef": "surface-1",
+      "properties": { "friction": 0 }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "block-params",
+      "label": "物体属性",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.1,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "mass": 2
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "surface": "horizontal", "motion": "static" }
+}

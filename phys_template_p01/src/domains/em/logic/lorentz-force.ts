@@ -1,107 +1,133 @@
 import type { Entity, Force, Vec2 } from '@/core/types';
+import { pointInCircle, pointInRect, pointInSemicircle, type SemicircleHalf } from '@/core/physics/geometry';
 import type { MagneticFieldDirection } from '../types';
 
 /**
- * 洛伦兹力计算（2D 简化）
- *
- * 物理公式：F = q(v × B)
- *
- * 2D 简化：磁场 B 只有 z 分量（垂直纸面），速度 v 在 xy 平面内。
- * 叉积结果：
- *   F_x = q * v_y * B_z
- *   F_y = -q * v_x * B_z
- *
- * 其中 B_z > 0 表示向外（out），B_z < 0 表示向内（into）。
+ * 2D 简化：
+ * - 粒子速度始终在画布平面内
+ * - 磁场只有 z 分量，方向为垂直纸面向里/向外
+ * - 洛伦兹力 F = q(v × B)，始终与当前速度垂直
  */
 
-/**
- * 获取磁场 z 分量的符号值
- * 'into' → B_z < 0（垂直纸面向内）
- * 'out'  → B_z > 0（垂直纸面向外）
- */
-function getBzSigned(magnitude: number, direction: MagneticFieldDirection): number {
+export interface MagneticFieldSample {
+  inField: boolean;
+  signedBz: number;
+  magnitude: number;
+  direction: MagneticFieldDirection | null;
+}
+
+export interface LorentzForceResult {
+  force: Force;
+  fx: number;
+  fy: number;
+  field: MagneticFieldSample;
+}
+
+export function getSignedBz(magnitude: number, direction: MagneticFieldDirection): number {
   return direction === 'out' ? magnitude : -magnitude;
 }
 
-/**
- * 判断点是否在磁场区域内
- */
-function isInFieldRegion(
+export function isPointInsideBField(
   point: Vec2,
   fieldPosition: Vec2,
   fieldWidth: number,
   fieldHeight: number,
+  boundaryShape?: string,
+  boundaryRadius?: number,
+  boundaryHalf?: SemicircleHalf,
 ): boolean {
-  return (
-    point.x >= fieldPosition.x &&
-    point.x <= fieldPosition.x + fieldWidth &&
-    point.y >= fieldPosition.y &&
-    point.y <= fieldPosition.y + fieldHeight
-  );
+  const center = {
+    x: fieldPosition.x + fieldWidth / 2,
+    y: fieldPosition.y + fieldHeight / 2,
+  };
+
+  if (boundaryShape === 'circle' && boundaryRadius != null) {
+    return pointInCircle(point, center, boundaryRadius);
+  }
+
+  if (boundaryShape === 'semicircle' && boundaryRadius != null) {
+    return pointInSemicircle(point, center, boundaryRadius, boundaryHalf);
+  }
+
+  return pointInRect(point, {
+    x: fieldPosition.x,
+    y: fieldPosition.y,
+    width: fieldWidth,
+    height: fieldHeight,
+  });
 }
 
-export interface LorentzForceResult {
-  /** 洛伦兹力 */
-  force: Force;
-  /** 力的分量（用于加速度计算） */
-  fx: number;
-  fy: number;
+export function sampleMagneticFieldAtPoint(
+  particlePosition: Vec2,
+  fieldEntities: Entity[],
+): MagneticFieldSample {
+  let signedBz = 0;
+  let inField = false;
+
+  for (const field of fieldEntities) {
+    const fieldPosition = field.transform.position;
+    const width = (field.properties.width as number) ?? 0;
+    const height = (field.properties.height as number) ?? 0;
+    const magnitude = Math.max((field.properties.magnitude as number) ?? 0, 0);
+    const direction = (field.properties.direction as MagneticFieldDirection) ?? 'into';
+    const boundaryShape = field.properties.boundaryShape as string | undefined;
+    const boundaryRadius = field.properties.boundaryRadius as number | undefined;
+    const boundaryHalf = field.properties.boundaryHalf as SemicircleHalf | undefined;
+
+    if (
+      !isPointInsideBField(
+        particlePosition,
+        fieldPosition,
+        width,
+        height,
+        boundaryShape,
+        boundaryRadius,
+        boundaryHalf,
+      )
+    ) {
+      continue;
+    }
+
+    inField = true;
+    signedBz += getSignedBz(magnitude, direction);
+  }
+
+  const magnitude = Math.abs(signedBz);
+  const direction = signedBz > 0 ? 'out' : signedBz < 0 ? 'into' : null;
+
+  return {
+    inField,
+    signedBz,
+    magnitude,
+    direction,
+  };
 }
 
-/**
- * 计算单个带电粒子在所有磁场中受到的洛伦兹力之和
- *
- * @param particlePosition - 粒子当前位置
- * @param velocity - 粒子当前速度
- * @param charge - 电荷量 (C)
- * @param fieldEntities - 场景中所有 uniform-bfield 实体
- * @returns 洛伦兹力结果，如果粒子不在任何磁场中返回 null
- */
 export function computeLorentzForce(
   particlePosition: Vec2,
   velocity: Vec2,
   charge: number,
   fieldEntities: Entity[],
 ): LorentzForceResult | null {
-  let totalFx = 0;
-  let totalFy = 0;
-  let inField = false;
+  const field = sampleMagneticFieldAtPoint(particlePosition, fieldEntities);
+  if (!field.inField) return null;
 
-  for (const field of fieldEntities) {
-    const fieldPos = field.transform.position;
-    const fieldW = (field.properties.width as number) ?? 0;
-    const fieldH = (field.properties.height as number) ?? 0;
-    const fieldMag = (field.properties.magnitude as number) ?? 0;
-    const fieldDir = (field.properties.direction as MagneticFieldDirection) ?? 'into';
-
-    if (!isInFieldRegion(particlePosition, fieldPos, fieldW, fieldH)) {
-      continue;
-    }
-
-    inField = true;
-    const bz = getBzSigned(fieldMag, fieldDir);
-
-    // F = q(v × B)  在 2D 中：
-    // F_x = q * v_y * B_z
-    // F_y = -q * v_x * B_z
-    totalFx += charge * velocity.y * bz;
-    totalFy += -charge * velocity.x * bz;
-  }
-
-  if (!inField) return null;
-
-  const magnitude = Math.hypot(totalFx, totalFy);
+  const fx = charge * velocity.y * field.signedBz;
+  const fy = -charge * velocity.x * field.signedBz;
+  const magnitude = Math.hypot(fx, fy);
 
   return {
     force: {
       type: 'lorentz',
-      label: magnitude > 0.01 ? `F=${magnitude.toFixed(2)}N` : 'F≈0',
+      label: 'FB',
       magnitude,
       direction: magnitude > 0
-        ? { x: totalFx / magnitude, y: totalFy / magnitude }
+        ? { x: fx / magnitude, y: fy / magnitude }
         : { x: 0, y: 0 },
+      displayMagnitude: magnitude * 100,
     },
-    fx: totalFx,
-    fy: totalFy,
+    fx,
+    fy,
+    field,
   };
 }

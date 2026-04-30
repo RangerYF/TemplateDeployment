@@ -1,0 +1,119 @@
+{
+  "id": "P01-FM011-slope-static",
+  "version": "1.0",
+  "name": "斜面·静止平衡",
+  "description": "物块静止在粗糙斜面上，分析重力、支持力和摩擦力的平衡",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 500, "y": 450 }
+  },
+  "entities": [
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 2, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "物块"
+    },
+    {
+      "ref": "slope-1",
+      "type": "slope",
+      "properties": { "angle": 30, "length": 3, "friction": 0.7 },
+      "transform": { "position": { "x": -1.5, "y": -1 }, "rotation": 0 },
+      "label": "斜面"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contact",
+      "sourceRef": "block-A",
+      "targetRef": "slope-1",
+      "properties": { "friction": 0.7 }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "block-params",
+      "label": "物体属性",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        }
+      ]
+    },
+    {
+      "key": "slope-params",
+      "label": "斜面属性",
+      "params": [
+        {
+          "key": "slopeAngle",
+          "label": "倾斜角",
+          "type": "slider",
+          "min": 5,
+          "max": 85,
+          "step": 1,
+          "default": 30,
+          "unit": "°",
+          "targetEntityId": "slope-1",
+          "targetProperty": "angle"
+        },
+        {
+          "key": "frictionToggle",
+          "label": "表面摩擦",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "粗糙",
+          "labelOff": "光滑"
+        },
+        {
+          "key": "friction",
+          "label": "摩擦因数",
+          "type": "slider",
+          "min": 0.05,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.7,
+          "unit": "",
+          "targetEntityId": "slope-1",
+          "targetProperty": "friction"
+        }
+      ]
+    },
+    {
+      "key": "display-params",
+      "label": "显示选项",
+      "params": [
+        {
+          "key": "showDecomposition",
+          "label": "重力分解",
+          "type": "toggle",
+          "default": false,
+          "labelOn": "显示",
+          "labelOff": "隐藏"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "mass": 2,
+    "slopeAngle": 30,
+    "frictionToggle": true,
+    "friction": 0.7,
+    "showDecomposition": false
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "surface": "inclined", "motion": "static" }
+}

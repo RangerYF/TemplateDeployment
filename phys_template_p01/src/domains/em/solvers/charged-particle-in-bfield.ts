@@ -1,106 +1,162 @@
 import { solverRegistry } from '@/core/registries/solver-registry';
 import type { SolverFunction } from '@/core/registries/solver-registry';
-import type { Force, ForceAnalysis, MotionState, PhysicsResult, Vec2 } from '@/core/types';
-import { computeLorentzForce } from '../logic/lorentz-force';
+import type { Force, ForceAnalysis, MotionState, PhysicsResult } from '@/core/types';
+import {
+  appendTrajectorySamples,
+  ensureTrajectorySeed,
+  integrateParticleState2D,
+  particleStatePosition,
+  particleStateVelocity,
+  resolvePointChargeState2D,
+} from '../logic/charged-particle-motion';
+import { isDetectorScreen, resolveDetectorScreenCollision } from '../logic/detector-screen';
+import { computeLorentzForce, sampleMagneticFieldAtPoint } from '../logic/lorentz-force';
+import { isDynamicPointCharge } from '../logic/point-charge-role';
+
+const MIN_MASS = 1e-6;
+const MAX_TRAJECTORY_POINTS = 2400;
+const TRAJECTORY_POINT_MIN_DISTANCE = 0.01;
+const MAX_SUBSTEP = 1 / 480;
 
 /**
  * 带电粒子在匀强磁场中运动求解器
  *
- * 物理场景：带电粒子以初速度进入匀强磁场，受洛伦兹力做匀速圆周运动。
- * 求解模式：数值积分（semi-implicit-euler）
- *
- * 理论验证：
- *   圆周半径 R = mv / (|q|B)
- *   周期 T = 2πm / (|q|B)
- *   角速度 ω = |q|B / m
+ * 使用二维状态量推进：
+ * - 状态 = { x, y, vx, vy }
+ * - 磁场内：a = (q / m) * (v × B)
+ * - 磁场外：a = 0，保持匀速直线运动
+ * - 轨迹只记录积分过程中真实采样到的位置点
  */
-
 const solver: SolverFunction = (scene, time, dt, prevResult) => {
-  const particles = Array.from(scene.entities.values()).filter(
-    (e) => e.type === 'point-charge',
-  );
-  const fields = Array.from(scene.entities.values()).filter(
-    (e) => e.type === 'uniform-bfield',
-  );
+  const particles = Array.from(scene.entities.values()).filter(isDynamicPointCharge);
+  const fields = Array.from(scene.entities.values()).filter((entity) => entity.type === 'uniform-bfield');
+  const screens = Array.from(scene.entities.values()).filter(isDetectorScreen);
 
   const forceAnalyses = new Map<string, ForceAnalysis>();
   const motionStates = new Map<string, MotionState>();
 
   for (const particle of particles) {
-    const charge = (particle.properties.charge as number) ?? 1;
-    const mass = (particle.properties.mass as number) ?? 1;
-    const initVel = (particle.properties.initialVelocity as Vec2) ?? { x: 0, y: 0 };
-
-    // 获取上一帧状态，若无则使用初始值
-    const prevMotion = prevResult?.motionStates.get(particle.id);
-    const pos: Vec2 = prevMotion
-      ? { ...prevMotion.position }
-      : { ...particle.transform.position };
-    const vel: Vec2 = prevMotion
-      ? { ...prevMotion.velocity }
-      : { ...initVel };
-    const prevTrajectory = prevMotion?.trajectory ?? [];
-
-    // 计算洛伦兹力
-    const lorentzResult = computeLorentzForce(pos, vel, charge, fields);
-
-    const forces: Force[] = [];
-    let ax = 0;
-    let ay = 0;
-
-    if (lorentzResult) {
-      forces.push(lorentzResult.force);
-      ax = lorentzResult.fx / mass;
-      ay = lorentzResult.fy / mass;
+    const particleProps = particle.properties as Record<string, unknown>;
+    if (!prevResult || time === 0) {
+      particleProps.stoppedOnScreen = false;
+      delete particleProps.screenHitEntityId;
+      delete particleProps.screenHitPoint;
     }
 
-    // 合力
-    const resultantMag = Math.hypot(ax * mass, ay * mass);
+    const charge = (particle.properties.charge as number) ?? 0;
+    const mass = Math.max((particle.properties.mass as number) ?? 1, MIN_MASS);
+    const previousMotion = prevResult?.motionStates.get(particle.id);
+    const state = resolvePointChargeState2D(particle, previousMotion);
+    const trajectory = previousMotion?.trajectory ? [...previousMotion.trajectory] : [];
+    ensureTrajectorySeed(trajectory, particleStatePosition(state));
+
+    if (particleProps.stoppedOnScreen === true) {
+      forceAnalyses.set(particle.id, {
+        entityId: particle.id,
+        forces: [],
+        resultant: {
+          type: 'resultant',
+          label: 'F合≈0',
+          magnitude: 0,
+          direction: { x: 0, y: 0 },
+          displayMagnitude: 0,
+        },
+      });
+      motionStates.set(particle.id, {
+        entityId: particle.id,
+        position: previousMotion?.position ?? particle.transform.position,
+        velocity: { x: 0, y: 0 },
+        acceleration: { x: 0, y: 0 },
+        trajectory,
+        entityPropsPatch: {
+          stoppedOnScreen: true,
+          screenHitEntityId: particleProps.screenHitEntityId,
+          screenHitPoint: particleProps.screenHitPoint,
+        },
+      });
+      continue;
+    }
+
+    const integration = integrateParticleState2D(state, {
+      dt,
+      maxSubstep: MAX_SUBSTEP,
+      accelerationAt: (currentState) => {
+        const field = sampleMagneticFieldAtPoint(
+          { x: currentState.x, y: currentState.y },
+          fields,
+        );
+
+        if (!field.inField) {
+          return { ax: 0, ay: 0 };
+        }
+
+        const chargeToMassRatio = charge / mass;
+        return {
+          ax: chargeToMassRatio * currentState.vy * field.signedBz,
+          ay: -chargeToMassRatio * currentState.vx * field.signedBz,
+        };
+      },
+    });
+
+    appendTrajectorySamples(trajectory, integration.sampledPositions, {
+      minDistance: TRAJECTORY_POINT_MIN_DISTANCE,
+      maxPoints: MAX_TRAJECTORY_POINTS,
+    });
+
+    let position = particleStatePosition(integration.state);
+    let velocity = particleStateVelocity(integration.state);
+    const screenCollision = resolveDetectorScreenCollision({
+      particle,
+      previousPosition: particleStatePosition(state),
+      nextPosition: position,
+      screens,
+    });
+    if (screenCollision) {
+      position = screenCollision.position;
+      velocity = { x: 0, y: 0 };
+      particleProps.stoppedOnScreen = true;
+      particleProps.screenHitEntityId = screenCollision.screen.id;
+      particleProps.screenHitPoint = screenCollision.position;
+      appendTrajectorySamples(trajectory, [position], {
+        minDistance: 0,
+        maxPoints: MAX_TRAJECTORY_POINTS,
+      });
+    }
+
+    const currentLorentz = screenCollision ? null : computeLorentzForce(position, velocity, charge, fields);
+    const ax = currentLorentz ? currentLorentz.fx / mass : 0;
+    const ay = currentLorentz ? currentLorentz.fy / mass : 0;
+    const currentForceMagnitude = currentLorentz?.force.magnitude ?? 0;
+
     const resultant: Force = {
       type: 'resultant',
-      label: resultantMag > 0.01 ? `F合=${resultantMag.toFixed(2)}N` : 'F合≈0',
-      magnitude: resultantMag,
-      direction: resultantMag > 0
-        ? { x: (ax * mass) / resultantMag, y: (ay * mass) / resultantMag }
+      label: currentForceMagnitude > 0.001 ? `F合=${currentForceMagnitude.toFixed(3)}N` : 'F合≈0',
+      magnitude: currentForceMagnitude,
+      direction: currentForceMagnitude > 0 && currentLorentz
+        ? currentLorentz.force.direction
         : { x: 0, y: 0 },
+      displayMagnitude: currentForceMagnitude * 100,
     };
 
     forceAnalyses.set(particle.id, {
       entityId: particle.id,
-      forces,
+      forces: currentLorentz ? [currentLorentz.force] : [],
       resultant,
     });
 
-    // Semi-implicit Euler 积分
-    // 先更新速度，再用新速度更新位置（比显式欧拉更稳定）
-    const newVx = vel.x + ax * dt;
-    const newVy = vel.y + ay * dt;
-    const newX = pos.x + newVx * dt;
-    const newY = pos.y + newVy * dt;
-
-    // 轨迹采样（每 5 帧记录一个点，控制内存）
-    const trajectory = [...prevTrajectory];
-    const sampleInterval = 5;
-    const frameIndex = Math.round(time / (dt || 1 / 60));
-    if (frameIndex % sampleInterval === 0 || prevTrajectory.length === 0) {
-      trajectory.push({ x: newX, y: newY });
-    }
-    // 限制轨迹长度
-    const maxTrajectoryPoints = 2000;
-    if (trajectory.length > maxTrajectoryPoints) {
-      trajectory.splice(0, trajectory.length - maxTrajectoryPoints);
-    }
-
-    const speed = Math.hypot(newVx, newVy);
     motionStates.set(particle.id, {
       entityId: particle.id,
-      position: { x: newX, y: newY },
-      velocity: { x: newVx, y: newVy },
+      position,
+      velocity,
       acceleration: { x: ax, y: ay },
-      angularVelocity: speed > 0 && mass > 0 && Math.abs(charge) > 0
-        ? (Math.abs(charge) * getMaxFieldMagnitude(fields)) / mass
-        : undefined,
       trajectory,
+      entityPropsPatch: screenCollision
+        ? {
+            stoppedOnScreen: true,
+            screenHitEntityId: screenCollision.screen.id,
+            screenHitPoint: screenCollision.position,
+          }
+        : undefined,
     });
   }
 
@@ -110,18 +166,6 @@ const solver: SolverFunction = (scene, time, dt, prevResult) => {
     motionStates,
   } satisfies PhysicsResult;
 };
-
-/** 获取场景中最大磁场强度（用于角速度标注） */
-function getMaxFieldMagnitude(
-  fields: Array<{ properties: Record<string, unknown> }>,
-): number {
-  let max = 0;
-  for (const f of fields) {
-    const mag = (f.properties.magnitude as number) ?? 0;
-    if (mag > max) max = mag;
-  }
-  return max;
-}
 
 export function registerChargedParticleInBFieldSolver(): void {
   solverRegistry.register({

@@ -21,28 +21,120 @@ function normalizeSubscripts(s: string): string {
   return s.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, (c) => String(c.codePointAt(0)! - 0x2080));
 }
 
-/** 解析括号展开后的分子片段，返回错误信息或 null（成功） */
-function parseFragment(fragment: string, multiplier: number, atoms: Record<string, number>): string | null {
-  const re = /([A-Z][a-z]?)|\(([^()]*)\)(\d*)|(\d+)/g;
-  let match: RegExpExecArray | null;
+/** 统一常见括号、全角符号与水合点写法 */
+function normalizeFormulaText(s: string): string {
+  return normalizeSubscripts(s)
+    .replace(/[［【\[{（]/g, '(')
+    .replace(/[］】\]}）]/g, ')')
+    .replace(/[＋]/g, '+')
+    .replace(/[＝]/g, '=')
+    .replace(/[•]/g, '·');
+}
 
-  while ((match = re.exec(fragment)) !== null) {
-    if (match[1]) {
-      const sym = match[1];
-      const numMatch = /^\d+/.exec(fragment.slice(re.lastIndex));
-      const count = numMatch ? parseInt(numMatch[0], 10) : 1;
-      if (numMatch) re.lastIndex += numMatch[0].length;
-      if (!KNOWN_ELEMENTS.has(sym)) return `未知元素符号: ${sym}`;
-      atoms[sym] = (atoms[sym] ?? 0) + count * multiplier;
-    } else if (match[2] !== undefined) {
-      const inner = match[2];
-      const cnt = match[3] ? parseInt(match[3], 10) : 1;
-      const err = parseFragment(inner, multiplier * cnt, atoms);
-      if (err) return err;
-    }
-    // match[4]: 独立数字，忽略
+function readNumber(text: string, startIndex: number): { value: number | null; nextIndex: number } {
+  let index = startIndex;
+  while (index < text.length && /\d/.test(text[index])) index += 1;
+  if (index === startIndex) return { value: null, nextIndex: startIndex };
+  return {
+    value: parseInt(text.slice(startIndex, index), 10),
+    nextIndex: index,
+  };
+}
+
+function mergeAtoms(target: Record<string, number>, source: Record<string, number>, multiplier = 1): void {
+  for (const [symbol, count] of Object.entries(source)) {
+    target[symbol] = (target[symbol] ?? 0) + count * multiplier;
   }
-  return null;
+}
+
+function parseGroup(
+  text: string,
+  startIndex = 0,
+  stopChar?: ')',
+): { ok: true; atoms: Record<string, number>; nextIndex: number } | { ok: false; message: string } {
+  const atoms: Record<string, number> = {};
+  let index = startIndex;
+
+  while (index < text.length) {
+    const char = text[index];
+
+    if (stopChar && char === stopChar) {
+      return { ok: true, atoms, nextIndex: index + 1 };
+    }
+
+    if (char === '(') {
+      const inner = parseGroup(text, index + 1, ')');
+      if (!inner.ok) return inner;
+      const multiplier = readNumber(text, inner.nextIndex);
+      mergeAtoms(atoms, inner.atoms, multiplier.value ?? 1);
+      index = multiplier.nextIndex;
+      continue;
+    }
+
+    if (char === ')') {
+      return { ok: false, message: '括号不匹配，请检查右括号位置' };
+    }
+
+    if (/[A-Z]/.test(char)) {
+      let symbol = char;
+      if (index + 1 < text.length && /[a-z]/.test(text[index + 1])) {
+        symbol += text[index + 1];
+        index += 1;
+      }
+      if (!KNOWN_ELEMENTS.has(symbol)) {
+        return { ok: false, message: `未知元素符号: ${symbol}` };
+      }
+      const count = readNumber(text, index + 1);
+      atoms[symbol] = (atoms[symbol] ?? 0) + (count.value ?? 1);
+      index = count.nextIndex;
+      continue;
+    }
+
+    if (/\d/.test(char)) {
+      return { ok: false, message: `数字位置不合法: "${text.slice(index)}"` };
+    }
+
+    return { ok: false, message: `无法识别字符: "${char}"` };
+  }
+
+  if (stopChar) {
+    return { ok: false, message: '括号不匹配，请补全右括号' };
+  }
+  return { ok: true, atoms, nextIndex: index };
+}
+
+function parseFormulaAtoms(formula: string): { ok: true; atoms: Record<string, number> } | { ok: false; message: string } {
+  const atoms: Record<string, number> = {};
+  const parts = formula.split(/[·.]/).map((part) => part.trim()).filter(Boolean);
+  if (!parts.length) return { ok: false, message: `无法解析分子式: "${formula}"` };
+
+  for (const part of parts) {
+    const leading = /^(\d+)/.exec(part);
+    const segmentMultiplier = leading ? parseInt(leading[1], 10) : 1;
+    const segment = leading ? part.slice(leading[1].length) : part;
+    if (!segment) {
+      return { ok: false, message: `无效的水合物片段: "${part}"` };
+    }
+    const parsed = parseGroup(segment);
+    if (!parsed.ok) return parsed;
+    if (parsed.nextIndex !== segment.length) {
+      return { ok: false, message: `无法完整解析分子式: "${segment}"` };
+    }
+    mergeAtoms(atoms, parsed.atoms, segmentMultiplier);
+  }
+
+  if (Object.keys(atoms).length === 0) {
+    return { ok: false, message: `无法解析分子式: "${formula}"` };
+  }
+  return { ok: true, atoms };
+}
+
+function shouldUseTrailingDigitAsCharge(formulaNoState: string, digitPart: string): boolean {
+  if (/\d\d[+-]$/.test(formulaNoState)) return true;
+  const upperCount = (formulaNoState.match(/[A-Z]/g) ?? []).length;
+  if (upperCount <= 1) return true;
+  const body = formulaNoState.slice(0, -digitPart.length - 1);
+  return body.startsWith('(') && body.endsWith(')');
 }
 
 /**
@@ -93,9 +185,7 @@ function parseMolecule(raw: string): { ok: true; mol: Molecule } | { ok: false; 
       charge = signPart === '+' ? 1 : -1;
       formulaForAtoms = formulaNoState.slice(0, formulaNoState.length - 1);
     } else {
-      const hasDoubleDigit = /\d\d[+-]$/.test(formulaNoState);
-      const upperCount = (formulaNoState.match(/[A-Z]/g) ?? []).length;
-      if (hasDoubleDigit || upperCount <= 1) {
+      if (shouldUseTrailingDigitAsCharge(formulaNoState, digitPart)) {
         // 末尾两数字 or 单元素 → digit 是电荷值
         const mag = parseInt(digitPart, 10);
         charge = signPart === '+' ? mag : -mag;
@@ -116,19 +206,15 @@ function parseMolecule(raw: string): { ok: true; mol: Molecule } | { ok: false; 
   if (!formulaForAtoms) return { ok: false, message: `无法识别 "${rawFormula}"` };
 
   // 5. 解析原子
-  const atoms: Record<string, number> = {};
-  const err = parseFragment(formulaForAtoms, 1, atoms);
-  if (err) return { ok: false, message: err };
-  if (Object.keys(atoms).length === 0) {
-    return { ok: false, message: `无法解析分子式: "${rawFormula}"` };
-  }
+  const parsedAtoms = parseFormulaAtoms(formulaForAtoms);
+  if (!parsedAtoms.ok) return parsedAtoms;
 
-  return { ok: true, mol: { coeff, rawFormula, atoms, charge } };
+  return { ok: true, mol: { coeff, rawFormula, atoms: parsedAtoms.atoms, charge } };
 }
 
 export function parseEquation(input: string): ParseResult {
   // 规范化 Unicode 下标
-  const normalized = normalizeSubscripts(input.trim());
+  const normalized = normalizeFormulaText(input.trim());
 
   // 分割左右两侧（支持 = / → / -> / ⇌）
   const arrowRe = /\s*(?:=|→|⇌|->)\s*/;

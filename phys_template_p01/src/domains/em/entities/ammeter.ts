@@ -1,6 +1,6 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
 import { pointInCircle } from '@/core/physics/geometry';
-import type { Entity, SliderParamSchema } from '@/core/types';
+import type { Entity, SliderParamSchema, SelectParamSchema } from '@/core/types';
 
 export function registerAmmeterEntity(): void {
   entityRegistry.register({
@@ -20,13 +20,13 @@ export function registerAmmeterEntity(): void {
       {
         key: 'range',
         label: '量程',
-        type: 'slider',
-        min: 0.6,
-        max: 3,
-        step: 2.4,
-        default: 0.6,
-        unit: 'A',
-      } satisfies SliderParamSchema,
+        type: 'select',
+        options: [
+          { value: '0.6', label: '0~0.6 A' },
+          { value: '3', label: '0~3 A' },
+        ],
+        default: '0.6',
+      } satisfies SelectParamSchema,
       {
         key: 'internalResistance',
         label: '内阻',

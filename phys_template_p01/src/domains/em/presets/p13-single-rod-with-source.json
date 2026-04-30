@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-012-single-rod-with-source",
+  "version": "1.0",
+  "name": "EMI-012 单棒 + 含电源",
+  "description": "在单棒基础上接入理想电源，采用固定极性约定展示电源对电流、安培力和终态速度 v终 的影响。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

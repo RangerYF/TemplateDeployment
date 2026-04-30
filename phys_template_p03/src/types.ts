@@ -6,9 +6,9 @@ type ModuleId = 'refraction' | 'lens' | 'doubleslit' | 'diffraction' | 'thinfilm
 
 interface Point { x: number; y: number; }
 
-type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber';
+type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber' | 'apparent' | 'snellwindow';
 type MaterialKey = 'air' | 'water' | 'glass' | 'crown' | 'flint' | 'diamond' | 'ice' | 'fiber';
-type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004';
+type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004' | 'opt-005' | 'opt-006';
 type HemisphereMode = 'center' | 'plane';
 
 interface Material { n: number; label: string; nLabel: string; }
@@ -36,6 +36,14 @@ interface RefractionSettings {
   fiberCoreN: number;
   fiberCladdingN: number;
   fiberBendRadiusCm: number;
+  apparentMode: 'depth' | 'height';
+  apparentObjectDepthCm: number;
+  apparentWaterN: number;
+  apparentRayAngleDeg: number;
+  snellSourceDepthCm: number;
+  snellWaterN: number;
+  snellIncidentAngleDeg: number;
+  snellViewMode: '3d' | '2d' | 'topview';
   showAngles: boolean;
   showNormals: boolean;
   showFormula: boolean;

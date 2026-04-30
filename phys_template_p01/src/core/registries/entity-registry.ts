@@ -39,17 +39,6 @@ export interface EntityRegistration {
   ) => HitTestResult | null;
 
   /**
-   * 绘制实体轮廓路径（选中/hover 高亮用）
-   * 只需调用 ctx.beginPath() + moveTo/lineTo 等构建路径，不需要 stroke/fill。
-   * 未提供时 fallback 为圆环。
-   */
-  drawOutline?: (
-    entity: Entity,
-    ctx: CanvasRenderingContext2D,
-    coordinateTransform: CoordinateTransform,
-  ) => void;
-
-  /**
    * 工厂函数：创建该类型的新实体实例（Phase 2 搭建器使用）
    * 自动生成 id，填入默认属性
    */

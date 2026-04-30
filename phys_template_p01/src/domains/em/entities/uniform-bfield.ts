@@ -1,5 +1,5 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
-import { pointInRect } from '@/core/physics/geometry';
+import { pointInCircle, pointInRect, pointInSemicircle, type SemicircleHalf } from '@/core/physics/geometry';
 import type { Entity, Rect, SelectParamSchema, SliderParamSchema } from '@/core/types';
 
 export function registerUniformBFieldEntity(): void {
@@ -42,6 +42,9 @@ export function registerUniformBFieldEntity(): void {
       const { position } = entity.transform;
       const width = (entity.properties.width as number) ?? 3;
       const height = (entity.properties.height as number) ?? 2;
+      const boundaryShape = entity.properties.boundaryShape as string | undefined;
+      const boundaryRadius = entity.properties.boundaryRadius as number | undefined;
+      const boundaryHalf = entity.properties.boundaryHalf as SemicircleHalf | undefined;
 
       // 场区域：position 为区域左下角（物理坐标系 Y 向上）
       const rect: Rect = {
@@ -50,10 +53,16 @@ export function registerUniformBFieldEntity(): void {
         width,
         height,
       };
+      const centerX = position.x + width / 2;
+      const centerY = position.y + height / 2;
 
-      if (pointInRect(point, rect)) {
-        const centerX = position.x + width / 2;
-        const centerY = position.y + height / 2;
+      const isHit = boundaryShape === 'circle' && boundaryRadius != null
+        ? pointInCircle(point, { x: centerX, y: centerY }, boundaryRadius)
+        : boundaryShape === 'semicircle' && boundaryRadius != null
+          ? pointInSemicircle(point, { x: centerX, y: centerY }, boundaryRadius, boundaryHalf)
+          : pointInRect(point, rect);
+
+      if (isHit) {
         return {
           entityId: entity.id,
           entityType: entity.type,

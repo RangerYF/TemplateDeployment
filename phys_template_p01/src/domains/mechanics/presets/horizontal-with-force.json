@@ -1,0 +1,123 @@
+{
+  "id": "P01-FM001-horizontal-with-force",
+  "version": "1.0",
+  "name": "水平面·施加外力",
+  "description": "物块在水平面上受斜向外力，分析受力与运动",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 300, "y": 400 }
+  },
+  "entities": [
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 2, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "物块"
+    },
+    {
+      "ref": "surface-1",
+      "type": "surface",
+      "properties": { "length": 8, "friction": 0.3 },
+      "transform": { "position": { "x": -2, "y": 0 }, "rotation": 0 },
+      "label": "水平面"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contact",
+      "sourceRef": "block-A",
+      "targetRef": "surface-1",
+      "properties": { "friction": 0.3 }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "force-params",
+      "label": "外力属性",
+      "params": [
+        {
+          "key": "appliedForce",
+          "label": "外力大小",
+          "type": "slider",
+          "min": 0,
+          "max": 50,
+          "step": 0.5,
+          "default": 10,
+          "unit": "N",
+          "targetEntityId": "block-A",
+          "targetProperty": "appliedForce"
+        },
+        {
+          "key": "forceAngle",
+          "label": "外力角度",
+          "type": "slider",
+          "min": -90,
+          "max": 90,
+          "step": 1,
+          "default": 30,
+          "unit": "°",
+          "targetEntityId": "block-A",
+          "targetProperty": "forceAngle"
+        }
+      ]
+    },
+    {
+      "key": "block-params",
+      "label": "物体属性",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        }
+      ]
+    },
+    {
+      "key": "surface-params",
+      "label": "表面属性",
+      "params": [
+        {
+          "key": "frictionToggle",
+          "label": "表面摩擦",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "粗糙",
+          "labelOff": "光滑"
+        },
+        {
+          "key": "friction",
+          "label": "摩擦因数",
+          "type": "slider",
+          "min": 0.05,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.3,
+          "unit": "",
+          "targetEntityId": "surface-1",
+          "targetProperty": "friction"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "mass": 2,
+    "appliedForce": 10,
+    "forceAngle": 30,
+    "frictionToggle": true,
+    "friction": 0.3
+  },
+  "solveMode": "analytical",
+  "duration": 5,
+  "solverQualifier": { "surface": "horizontal", "motion": "applied-force" }
+}

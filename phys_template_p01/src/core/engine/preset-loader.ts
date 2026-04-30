@@ -197,16 +197,6 @@ export function loadPreset(preset: PresetData): PresetLoadResult {
     refToIdMap.set(def.ref, entity.id);
   }
 
-  // ②b 替换实体 properties 中引用其他实体的 ref 为真实 entityId
-  // 连接件（rope/rod）的 pivotEntityId、blockEntityId 等字段需要此替换
-  for (const entity of entities.values()) {
-    for (const [key, value] of Object.entries(entity.properties)) {
-      if (typeof value === 'string' && refToIdMap.has(value)) {
-        (entity.properties as Record<string, unknown>)[key] = refToIdMap.get(value)!;
-      }
-    }
-  }
-
   // ③ 创建关系实例
   const relations: Relation[] = preset.relations.map((relDef) => ({
     id: generateRelationId(),

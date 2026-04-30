@@ -1,0 +1,73 @@
+{
+  "id": "P04-CIR-EXP008-bulb-circuit",
+  "version": "1.0",
+  "name": "灯泡电路（非线性电阻）",
+  "description": "演示灯泡的非线性伏安特性：冷态电阻小、热态电阻大，电阻随电流增大而增大。观察实际功率与额定功率的关系",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 120,
+    "origin": { "x": 300, "y": 350 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": { "emf": 6, "internalResistance": 1, "width": 0.8, "height": 0.5 },
+      "transform": { "position": { "x": -3, "y": 0 }, "rotation": 0 },
+      "label": "电源"
+    },
+    {
+      "ref": "switch-1",
+      "type": "switch",
+      "properties": { "closed": true, "width": 0.6, "height": 0.3 },
+      "transform": { "position": { "x": -1.5, "y": 0.1 }, "rotation": 0 },
+      "label": "开关"
+    },
+    {
+      "ref": "bulb-1",
+      "type": "bulb",
+      "properties": {
+        "ratedVoltage": 3.8,
+        "ratedPower": 0.3,
+        "coldResistance": 2,
+        "radius": 0.3,
+        "voltage": 0, "current": 0, "hotResistance": 2, "power": 0, "faultType": "none"
+      },
+      "transform": { "position": { "x": 0.5, "y": 0.25 }, "rotation": 0 },
+      "label": "小灯泡"
+    }
+  ],
+  "relations": [
+    { "type": "connection", "sourceRef": "source-1", "targetRef": "switch-1", "properties": {} },
+    { "type": "connection", "sourceRef": "switch-1", "targetRef": "bulb-1", "properties": {} }
+  ],
+  "paramGroups": [
+    {
+      "key": "source-params", "label": "电源",
+      "params": [
+        { "key": "emf", "label": "电动势", "type": "slider", "min": 1, "max": 12, "step": 0.1, "default": 6, "unit": "V", "targetEntityId": "source-1", "targetProperty": "emf" },
+        { "key": "r", "label": "内阻", "type": "slider", "min": 0, "max": 5, "step": 0.1, "default": 1, "unit": "Ω", "targetEntityId": "source-1", "targetProperty": "internalResistance" }
+      ]
+    },
+    {
+      "key": "bulb-params", "label": "灯泡参数",
+      "params": [
+        { "key": "Ur", "label": "额定电压", "type": "slider", "min": 1, "max": 12, "step": 0.1, "default": 3.8, "unit": "V", "targetEntityId": "bulb-1", "targetProperty": "ratedVoltage" },
+        { "key": "Pr", "label": "额定功率", "type": "slider", "min": 0.1, "max": 5, "step": 0.1, "default": 0.3, "unit": "W", "targetEntityId": "bulb-1", "targetProperty": "ratedPower" },
+        { "key": "Rc", "label": "冷态电阻", "type": "slider", "min": 0.5, "max": 20, "step": 0.1, "default": 2, "unit": "Ω", "targetEntityId": "bulb-1", "targetProperty": "coldResistance" }
+      ]
+    },
+    {
+      "key": "switch-params", "label": "开关",
+      "params": [
+        { "key": "switchClosed", "label": "开关状态", "type": "toggle", "default": true, "labelOn": "闭合", "labelOff": "断开", "targetEntityId": "switch-1", "targetProperty": "closed" }
+      ]
+    }
+  ],
+  "paramValues": { "emf": 6, "r": 1, "Ur": 3.8, "Pr": 0.3, "Rc": 2, "switchClosed": true },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "bulb-circuit" }
+}

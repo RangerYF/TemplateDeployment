@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-021-double-rod-basic",
+  "version": "1.0",
+  "name": "EMI-021 双棒基础（无摩擦）",
+  "description": "双棒闭合回路在匀强磁场中耦合运动，按 ε = BL(v1-v2)、i = ε/(R1+R2)、F1 = -F2 实时联动 v1/v2/i 图与终态共速分析。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

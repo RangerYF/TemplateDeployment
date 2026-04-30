@@ -1,17 +1,72 @@
 import { create } from 'zustand';
 import type {
   EntityId,
+  FieldLineDensity,
   InfoDensity,
   ParamValues,
   PhysicsResult,
-  Selection,
   SimulationState,
   SimulationStatus,
+  Vec2,
   ViewportState,
   ViewportType,
 } from '@/core/types';
 
 // ─── Store State ───
+
+export type SolenoidDisplayMode = 'textbook' | 'particles' | 'volume';
+export type SolenoidViewMode = 'front' | 'side' | 'section' | 'orbit';
+export type LoopCompassDisplayMode = 'needle' | 'out' | 'into';
+
+export interface LoopCompassProbe {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface LoopHoverSample {
+  x: number;
+  y: number;
+  z: number;
+  magnitude: number;
+  directionLabel: string;
+  screenX: number;
+  screenY: number;
+}
+
+export interface LoopTeachingState {
+  compasses: LoopCompassProbe[];
+  hoverSample: LoopHoverSample | null;
+}
+
+export interface SolenoidCompassProbe {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface SolenoidHoverSample {
+  x: number;
+  y: number;
+  z: number;
+  magnitude: number;
+  directionLabel: string;
+  screenX: number;
+  screenY: number;
+  region: 'inside' | 'outside';
+}
+
+export interface SolenoidTeachingState {
+  displayMode: SolenoidDisplayMode;
+  viewMode: SolenoidViewMode;
+  orbitYawDeg: number;
+  orbitPitchDeg: number;
+  orbitDistance: number;
+  compasses: SolenoidCompassProbe[];
+  hoverSample: SolenoidHoverSample | null;
+}
 
 export interface SimulationStoreState {
   /** 当前模拟状态 */
@@ -20,28 +75,38 @@ export interface SimulationStoreState {
   /** 当前参数值 */
   paramValues: ParamValues;
 
-  /** 统一选中目标（替代 selectedEntityId） */
-  selection: Selection | null;
-
-  /** hover 目标 */
-  hoveredTarget: Selection | null;
+  /** 当前选中实体 */
+  selectedEntityId: EntityId | null;
 
   /** 当前视角状态 */
   viewportState: ViewportState;
 
-  /** 当前预设支持的视角列表 */
-  supportedViewports: ViewportType[];
-}
+  /** 电场线显示开关 */
+  showFieldLines: boolean;
 
-/** 从 Selection 中提取 entityId（向后兼容） */
-function extractEntityId(selection: Selection | null): EntityId | null {
-  if (!selection) return null;
-  if (selection.type === 'entity') {
-    return (selection.data as { entityId: EntityId }).entityId;
-  }
-  // force-arrow 等域类型也可能携带 entityId
-  const data = selection.data as { entityId?: EntityId };
-  return data?.entityId ?? null;
+  /** 等势线显示开关 */
+  showEquipotentialLines: boolean;
+
+  /** 电势分布显示开关 */
+  showPotentialMap: boolean;
+
+  /** P-08 场线密度 */
+  fieldLineDensity: FieldLineDensity;
+
+  /** 轨迹显示开关 */
+  showTrajectory: boolean;
+
+  /** 电势差测量点 A */
+  potentialProbeA: Vec2 | null;
+
+  /** 电势差测量点 B */
+  potentialProbeB: Vec2 | null;
+
+  /** 螺线管教学工作台状态 */
+  solenoidTeaching: SolenoidTeachingState;
+
+  /** 圆形电流教学工作台状态 */
+  loopTeaching: LoopTeachingState;
 }
 
 // ─── Store Actions ───
@@ -50,17 +115,11 @@ export interface SimulationStoreActions {
   /** 更新参数值 */
   updateParam: (key: string, value: number | boolean | string) => void;
 
-  /** 统一选中 */
-  select: (target: Selection | null) => void;
+  /** 批量替换参数值 */
+  setParamValues: (values: ParamValues) => void;
 
-  /** 设置 hover 目标 */
-  setHovered: (target: Selection | null) => void;
-
-  /** 向后兼容：选中实体 */
+  /** 选中实体 */
   selectEntity: (id: EntityId | null) => void;
-
-  /** 向后兼容 getter：从 selection 派生 selectedEntityId */
-  readonly selectedEntityId: EntityId | null;
 
   /** 播放 */
   play: () => void;
@@ -89,12 +148,67 @@ export interface SimulationStoreActions {
   /** 设置模拟状态 */
   setStatus: (status: SimulationStatus) => void;
 
+  /** 切换电场线显示/隐藏 */
+  toggleFieldLines: () => void;
+
+  /** 切换等势线显示/隐藏 */
+  toggleEquipotentialLines: () => void;
+
+  /** 切换电势分布显示/隐藏 */
+  togglePotentialMap: () => void;
+
+  /** 设置 P-08 场线密度 */
+  setFieldLineDensity: (density: FieldLineDensity) => void;
+
+  /** 切换轨迹显示/隐藏 */
+  toggleTrajectory: () => void;
+
+  /** 放置两点电势差测量点 */
+  placePotentialProbe: (point: Vec2) => void;
+
+  /** 清空两点电势差测量点 */
+  clearPotentialProbes: () => void;
+
+  /** 设置螺线管显示模式 */
+  setSolenoidDisplayMode: (mode: SolenoidDisplayMode) => void;
+
+  /** 设置螺线管视角模式 */
+  setSolenoidViewMode: (mode: SolenoidViewMode) => void;
+
+  /** 设置螺线管 3D 相机 */
+  setSolenoidOrbitCamera: (
+    camera: Partial<Pick<SolenoidTeachingState, 'orbitYawDeg' | 'orbitPitchDeg' | 'orbitDistance'>>,
+  ) => void;
+
+  /** 添加磁针 */
+  addSolenoidCompass: (compass: Omit<SolenoidCompassProbe, 'id'> & { id?: string }) => void;
+
+  /** 移动磁针 */
+  moveSolenoidCompass: (id: string, position: Pick<SolenoidCompassProbe, 'x' | 'y' | 'z'>) => void;
+
+  /** 设置局部磁场 hover 采样 */
+  setSolenoidHoverSample: (sample: SolenoidHoverSample | null) => void;
+
+  /** 重置螺线管教学工作台 */
+  resetSolenoidTeaching: () => void;
+
+  /** 添加圆形电流磁针 */
+  addLoopCompass: (compass: Omit<LoopCompassProbe, 'id'> & { id?: string }) => void;
+
+  /** 移动圆形电流磁针 */
+  moveLoopCompass: (id: string, position: Pick<LoopCompassProbe, 'x' | 'y' | 'z'>) => void;
+
+  /** 设置圆形电流 hover 采样 */
+  setLoopHoverSample: (sample: LoopHoverSample | null) => void;
+
+  /** 重置圆形电流教学工作台 */
+  resetLoopTeaching: () => void;
+
   /** 加载预设后初始化 store（由 PresetLoader 调用） */
   initFromPreset: (init: {
     simulationState: SimulationState;
     paramValues: ParamValues;
     viewportState: ViewportState;
-    supportedViewports?: ViewportType[];
   }) => void;
 }
 
@@ -126,6 +240,42 @@ const initialSimulationState: SimulationState = {
   resultHistory: [],
 };
 
+function createDefaultSolenoidCompasses(): SolenoidCompassProbe[] {
+  return [
+    { id: 'solenoid-compass-1', x: -1.05, y: 0, z: 0 },
+    { id: 'solenoid-compass-2', x: 0, y: 0, z: 0 },
+    { id: 'solenoid-compass-3', x: 1.05, y: 0, z: 0 },
+    { id: 'solenoid-compass-4', x: 1.9, y: 0.88, z: 0.12 },
+    { id: 'solenoid-compass-5', x: -1.9, y: 0.88, z: -0.12 },
+    { id: 'solenoid-compass-6', x: 0, y: -1.38, z: 0 },
+  ];
+}
+
+function createInitialSolenoidTeachingState(): SolenoidTeachingState {
+  return {
+    displayMode: 'textbook',
+    viewMode: 'orbit',
+    orbitYawDeg: -18,
+    orbitPitchDeg: 14,
+    orbitDistance: 9.2,
+    compasses: createDefaultSolenoidCompasses(),
+    hoverSample: null,
+  };
+}
+
+function createDefaultLoopCompasses(): LoopCompassProbe[] {
+  return [
+    { id: 'loop-compass-center', x: 0, y: 0, z: 0 },
+  ];
+}
+
+function createInitialLoopTeachingState(): LoopTeachingState {
+  return {
+    compasses: createDefaultLoopCompasses(),
+    hoverSample: null,
+  };
+}
+
 // ─── Store 创建 ───
 
 export const useSimulationStore = create<
@@ -134,15 +284,17 @@ export const useSimulationStore = create<
   // ─── 初始状态 ───
   simulationState: initialSimulationState,
   paramValues: {},
-  selection: null,
-  hoveredTarget: null,
+  selectedEntityId: null,
   viewportState: initialViewportState,
-  supportedViewports: ['force'],
-
-  // 向后兼容 getter
-  get selectedEntityId(): EntityId | null {
-    return extractEntityId(this.selection);
-  },
+  showFieldLines: true,
+  showEquipotentialLines: true,
+  showPotentialMap: true,
+  fieldLineDensity: 'standard',
+  showTrajectory: true,
+  potentialProbeA: null,
+  potentialProbeB: null,
+  solenoidTeaching: createInitialSolenoidTeachingState(),
+  loopTeaching: createInitialLoopTeachingState(),
 
   // ─── Actions ───
 
@@ -161,16 +313,19 @@ export const useSimulationStore = create<
       };
     }),
 
-  select: (target) => set({ selection: target }),
+  setParamValues: (values) =>
+    set((state) => ({
+      paramValues: { ...values },
+      simulationState: {
+        ...state.simulationState,
+        scene: {
+          ...state.simulationState.scene,
+          paramValues: { ...values },
+        },
+      },
+    })),
 
-  setHovered: (target) => set({ hoveredTarget: target }),
-
-  selectEntity: (id) =>
-    set({
-      selection: id
-        ? { type: 'entity', id, data: { entityId: id } }
-        : null,
-    }),
+  selectEntity: (id) => set({ selectedEntityId: id }),
 
   play: () =>
     set((state) => ({
@@ -201,6 +356,147 @@ export const useSimulationStore = create<
         resultHistory: [],
       },
     })),
+
+  toggleFieldLines: () =>
+    set((state) => ({ showFieldLines: !state.showFieldLines })),
+
+  toggleEquipotentialLines: () =>
+    set((state) => ({ showEquipotentialLines: !state.showEquipotentialLines })),
+
+  togglePotentialMap: () =>
+    set((state) => ({ showPotentialMap: !state.showPotentialMap })),
+
+  setFieldLineDensity: (density) =>
+    set({ fieldLineDensity: density }),
+
+  toggleTrajectory: () =>
+    set((state) => ({ showTrajectory: !state.showTrajectory })),
+
+  placePotentialProbe: (point) =>
+    set((state) => {
+      if (!state.potentialProbeA) {
+        return { potentialProbeA: { ...point }, potentialProbeB: null };
+      }
+      if (!state.potentialProbeB) {
+        return { potentialProbeB: { ...point } };
+      }
+      return {
+        potentialProbeA: { ...point },
+        potentialProbeB: null,
+      };
+    }),
+
+  clearPotentialProbes: () =>
+    set({
+      potentialProbeA: null,
+      potentialProbeB: null,
+    }),
+
+  setSolenoidDisplayMode: (mode) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        displayMode: mode,
+      },
+    })),
+
+  setSolenoidViewMode: (mode) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        viewMode: mode,
+      },
+    })),
+
+  setSolenoidOrbitCamera: (camera) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        ...camera,
+      },
+    })),
+
+  addSolenoidCompass: (compass) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        compasses: [
+          ...state.solenoidTeaching.compasses,
+          {
+            id: compass.id ?? `solenoid-compass-${crypto.randomUUID().slice(0, 8)}`,
+            x: compass.x,
+            y: compass.y,
+            z: compass.z,
+          },
+        ],
+      },
+    })),
+
+  moveSolenoidCompass: (id, position) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        compasses: state.solenoidTeaching.compasses.map((compass) =>
+          compass.id === id
+            ? { ...compass, ...position }
+            : compass,
+        ),
+      },
+    })),
+
+  setSolenoidHoverSample: (sample) =>
+    set((state) => ({
+      solenoidTeaching: {
+        ...state.solenoidTeaching,
+        hoverSample: sample,
+      },
+    })),
+
+  resetSolenoidTeaching: () =>
+    set({
+      solenoidTeaching: createInitialSolenoidTeachingState(),
+    }),
+
+  addLoopCompass: (compass) =>
+    set((state) => ({
+      loopTeaching: {
+        ...state.loopTeaching,
+        compasses: [
+          ...state.loopTeaching.compasses,
+          {
+            id: compass.id ?? `loop-compass-${crypto.randomUUID().slice(0, 8)}`,
+            x: compass.x,
+            y: compass.y,
+            z: compass.z,
+          },
+        ],
+      },
+    })),
+
+  moveLoopCompass: (id, position) =>
+    set((state) => ({
+      loopTeaching: {
+        ...state.loopTeaching,
+        compasses: state.loopTeaching.compasses.map((compass) =>
+          compass.id === id
+            ? { ...compass, ...position }
+            : compass,
+        ),
+      },
+    })),
+
+  setLoopHoverSample: (sample) =>
+    set((state) => ({
+      loopTeaching: {
+        ...state.loopTeaching,
+        hoverSample: sample,
+      },
+    })),
+
+  resetLoopTeaching: () =>
+    set({
+      loopTeaching: createInitialLoopTeachingState(),
+    }),
 
   switchPrimaryViewport: (type) =>
     set({
@@ -289,8 +585,15 @@ export const useSimulationStore = create<
       simulationState: init.simulationState,
       paramValues: init.paramValues,
       viewportState: init.viewportState,
-      supportedViewports: init.supportedViewports ?? ['force'],
-      selection: null,
-      hoveredTarget: null,
+      selectedEntityId: null,
+      showFieldLines: true,
+      showEquipotentialLines: true,
+      showPotentialMap: true,
+      fieldLineDensity: 'standard',
+      showTrajectory: true,
+      potentialProbeA: null,
+      potentialProbeB: null,
+      solenoidTeaching: createInitialSolenoidTeachingState(),
+      loopTeaching: createInitialLoopTeachingState(),
     }),
 }));

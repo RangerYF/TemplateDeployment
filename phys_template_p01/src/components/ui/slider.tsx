@@ -29,7 +29,7 @@ export function Slider({
   return (
     <div
       className={cn(
-        "relative flex h-4 w-full touch-none select-none items-center",
+        "relative flex h-5 w-full touch-none select-none items-center",
         disabled && "pointer-events-none opacity-50",
         className
       )}
@@ -37,10 +37,11 @@ export function Slider({
     >
       {/* Track */}
       <div
-        className="relative h-1.5 w-full grow overflow-hidden"
+        className="relative h-2 w-full grow overflow-hidden"
         style={{
-          backgroundColor: COLORS.bgMuted,
+          backgroundColor: COLORS.white,
           borderRadius: RADIUS.full,
+          border: `1px solid ${COLORS.border}`,
         }}
       >
         {/* Fill：正负范围时从零点双向填充，否则从左边界填充 */}
@@ -83,13 +84,13 @@ export function Slider({
         value={value[0]}
         onChange={(e) => onValueChange?.([Number(e.target.value)])}
         disabled={disabled}
-        className="absolute h-4 w-full cursor-pointer opacity-0"
+        className="absolute h-2 w-full cursor-pointer opacity-0"
       />
       {/* Thumb (pointer-events: none — input underneath handles drag) */}
       <div
-        className="pointer-events-none absolute h-3.5 w-3.5 shadow-sm ring-offset-white transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none"
+        className="pointer-events-none absolute h-5 w-5 shadow-sm ring-offset-white transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none"
         style={{
-          left: `calc(${percentage}% - 7px)`,
+          left: `calc(${percentage}% - 10px)`,
           borderRadius: RADIUS.full,
           backgroundColor: COLORS.white,
           border: `2px solid ${COLORS.primary}`,

@@ -1,0 +1,138 @@
+{
+  "id": "P01-FM011-slope-sliding-up",
+  "version": "1.0",
+  "name": "斜面·冲上斜面",
+  "description": "物块以初速度沿斜面向上冲，先减速后可能反向下滑",
+  "category": "P-01",
+  "supportedViewports": ["force"],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 150,
+    "origin": { "x": 450, "y": 500 }
+  },
+  "entities": [
+    {
+      "ref": "block-A",
+      "type": "block",
+      "properties": { "mass": 2, "width": 0.5, "height": 0.5 },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "物块"
+    },
+    {
+      "ref": "slope-1",
+      "type": "slope",
+      "properties": { "angle": 30, "length": 5, "friction": 0.2 },
+      "transform": { "position": { "x": -2, "y": -1.5 }, "rotation": 0 },
+      "label": "斜面"
+    }
+  ],
+  "relations": [
+    {
+      "type": "contact",
+      "sourceRef": "block-A",
+      "targetRef": "slope-1",
+      "properties": { "friction": 0.2 }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "block-params",
+      "label": "物体属性",
+      "params": [
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "default": 2,
+          "unit": "kg",
+          "targetEntityId": "block-A",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "initialVelocity",
+          "label": "初速度",
+          "type": "slider",
+          "min": 0.5,
+          "max": 8,
+          "step": 0.1,
+          "default": 5,
+          "unit": "m/s",
+          "targetEntityId": "block-A",
+          "targetProperty": "initialVelocity"
+        }
+      ]
+    },
+    {
+      "key": "slope-params",
+      "label": "斜面属性",
+      "params": [
+        {
+          "key": "slopeAngle",
+          "label": "倾斜角",
+          "type": "slider",
+          "min": 5,
+          "max": 85,
+          "step": 1,
+          "default": 30,
+          "unit": "°",
+          "targetEntityId": "slope-1",
+          "targetProperty": "angle"
+        },
+        {
+          "key": "frictionToggle",
+          "label": "表面摩擦",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "粗糙",
+          "labelOff": "光滑"
+        },
+        {
+          "key": "friction",
+          "label": "摩擦因数",
+          "type": "slider",
+          "min": 0.05,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.2,
+          "unit": "",
+          "targetEntityId": "slope-1",
+          "targetProperty": "friction"
+        }
+      ]
+    },
+    {
+      "key": "display-params",
+      "label": "显示选项",
+      "params": [
+        {
+          "key": "showDecomposition",
+          "label": "重力分解",
+          "type": "toggle",
+          "default": false,
+          "labelOn": "显示",
+          "labelOff": "隐藏"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "mass": 2,
+    "initialVelocity": 5,
+    "slopeAngle": 30,
+    "frictionToggle": true,
+    "friction": 0.2,
+    "showDecomposition": false
+  },
+  "solveMode": "analytical",
+  "duration": 5,
+  "solverQualifier": { "surface": "inclined", "motion": "sliding-up" },
+  "eventActions": [
+    {
+      "eventType": "velocity-zero",
+      "action": { "type": "mark-state", "label": "最高点" }
+    }
+  ]
+}

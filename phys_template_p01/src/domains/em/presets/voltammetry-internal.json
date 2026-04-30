@@ -2,13 +2,18 @@
   "id": "P04-CIR-EXP001-voltammetry-internal",
   "version": "1.0",
   "name": "伏安法·内接法",
-  "description": "电流表内接法测电阻：电流表与被测电阻串联后，整体与电压表并联。R测 = R + rA（偏大）",
+  "description": "电流表内接法测电阻：电流表与被测电阻串联后，整体与电压表并联。电压表跨 A+Rx 两端，R测 = R + rA（偏大）",
   "category": "P-04",
-  "supportedViewports": ["circuit"],
+  "supportedViewports": [
+    "circuit"
+  ],
   "defaultViewport": "circuit",
   "displayConfig": {
     "scale": 120,
-    "origin": { "x": 300, "y": 350 }
+    "origin": {
+      "x": 300,
+      "y": 350
+    }
   },
   "entities": [
     {
@@ -20,7 +25,13 @@
         "width": 0.8,
         "height": 0.5
       },
-      "transform": { "position": { "x": -3, "y": 0 }, "rotation": 0 },
+      "transform": {
+        "position": {
+          "x": -3,
+          "y": 0
+        },
+        "rotation": 0
+      },
       "label": "电源"
     },
     {
@@ -31,7 +42,13 @@
         "width": 0.6,
         "height": 0.3
       },
-      "transform": { "position": { "x": -1.5, "y": 0.1 }, "rotation": 0 },
+      "transform": {
+        "position": {
+          "x": -1.5,
+          "y": 0.1
+        },
+        "rotation": 0
+      },
       "label": "开关"
     },
     {
@@ -44,7 +61,13 @@
         "reading": 0,
         "overRange": false
       },
-      "transform": { "position": { "x": 0, "y": 0.25 }, "rotation": 0 },
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0.25
+        },
+        "rotation": 0
+      },
       "label": "电流表"
     },
     {
@@ -57,7 +80,13 @@
         "voltage": 0,
         "current": 0
       },
-      "transform": { "position": { "x": 1, "y": 0.05 }, "rotation": 0 },
+      "transform": {
+        "position": {
+          "x": 1,
+          "y": 0.05
+        },
+        "rotation": 0
+      },
       "label": "被测电阻 Rx"
     },
     {
@@ -66,11 +95,17 @@
       "properties": {
         "range": 15,
         "internalResistance": 15000,
-        "radius": 0.35,
+        "radius": 0.3,
         "reading": 0,
         "overRange": false
       },
-      "transform": { "position": { "x": 1.4, "y": -1 }, "rotation": 0 },
+      "transform": {
+        "position": {
+          "x": 0.8,
+          "y": 1.5
+        },
+        "rotation": 0
+      },
       "label": "电压表"
     }
   ],
@@ -79,25 +114,59 @@
       "type": "connection",
       "sourceRef": "source-1",
       "targetRef": "switch-1",
-      "properties": {}
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "left"
+      }
     },
     {
       "type": "connection",
       "sourceRef": "switch-1",
       "targetRef": "ammeter-1",
-      "properties": {}
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "left"
+      }
     },
     {
       "type": "connection",
       "sourceRef": "ammeter-1",
       "targetRef": "resistor-x",
-      "properties": { "topology": "series" }
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "left",
+        "topology": "series"
+      }
     },
     {
       "type": "connection",
       "sourceRef": "resistor-x",
+      "targetRef": "source-1",
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "bottom",
+        "topology": "return"
+      }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-1",
       "targetRef": "voltmeter-1",
-      "properties": { "topology": "parallel" }
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "left",
+        "topology": "parallel"
+      }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "voltmeter-1",
+      "targetRef": "resistor-x",
+      "properties": {
+        "sourcePort": "right",
+        "targetPort": "right",
+        "topology": "parallel"
+      }
     }
   ],
   "paramGroups": [
@@ -156,12 +225,18 @@
         {
           "key": "ammeterRange",
           "label": "量程",
-          "type": "slider",
-          "min": 0.6,
-          "max": 3,
-          "step": 2.4,
-          "default": 0.6,
-          "unit": "A",
+          "type": "select",
+          "options": [
+            {
+              "value": "0.6",
+              "label": "0~0.6 A"
+            },
+            {
+              "value": "3",
+              "label": "0~3 A"
+            }
+          ],
+          "default": "0.6",
           "targetEntityId": "ammeter-1",
           "targetProperty": "range"
         },
@@ -186,12 +261,18 @@
         {
           "key": "voltmeterRange",
           "label": "量程",
-          "type": "slider",
-          "min": 3,
-          "max": 15,
-          "step": 12,
-          "default": 15,
-          "unit": "V",
+          "type": "select",
+          "options": [
+            {
+              "value": "3",
+              "label": "0~3 V"
+            },
+            {
+              "value": "15",
+              "label": "0~15 V"
+            }
+          ],
+          "default": "15",
           "targetEntityId": "voltmeter-1",
           "targetProperty": "range"
         },
@@ -230,13 +311,15 @@
     "emf": 6,
     "r": 1,
     "Rx": 10,
-    "ammeterRange": 0.6,
+    "ammeterRange": "0.6",
     "rA": 0.2,
-    "voltmeterRange": 15,
+    "voltmeterRange": "15",
     "rV": 15000,
     "switchClosed": true
   },
   "solveMode": "analytical",
   "duration": 0,
-  "solverQualifier": { "circuit": "voltammetry-internal" }
+  "solverQualifier": {
+    "circuit": "voltammetry-internal"
+  }
 }

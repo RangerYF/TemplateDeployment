@@ -1,0 +1,178 @@
+{
+  "id": "P02-EMF044-electrogravity-circular-motion",
+  "version": "1.0",
+  "name": "电场 + 重力场绳拴小球圆周运动",
+  "description": "把带电小球看作被细绳约束的课堂模型，比较完整圆周、临界过顶和松绳后斜抛三种结果，适合讲解 g_eff = g ± qE/m。",
+  "category": "P-08",
+  "supportedViewports": [
+    "motion",
+    "force",
+    "field"
+  ],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 80,
+    "origin": {
+      "x": 420,
+      "y": 340
+    }
+  },
+  "entities": [
+    {
+      "ref": "efield-1",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 20,
+        "direction": {
+          "x": 0,
+          "y": 1
+        },
+        "fieldDirectionMode": "upward",
+        "width": 10,
+        "height": 9,
+        "showPlates": false
+      },
+      "transform": {
+        "position": {
+          "x": -5,
+          "y": -4.5
+        },
+        "rotation": 0
+      },
+      "label": "竖直匀强电场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.12,
+        "mass": 1,
+        "initialVelocity": {
+          "x": 9,
+          "y": 0
+        },
+        "initialSpeed": 9,
+        "initialDirectionDeg": 0,
+        "radius": 0.12,
+        "trackRadius": 2,
+        "trackCenter": {
+          "x": 0,
+          "y": 0
+        },
+        "gravity": 9.8
+      },
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": -2
+        },
+        "rotation": 0
+      },
+      "label": "带电小球"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "orbit-params",
+      "label": "圆轨道参数",
+      "params": [
+        {
+          "key": "trackRadius",
+          "label": "圆轨道半径 R",
+          "type": "slider",
+          "min": 1,
+          "max": 3.5,
+          "step": 0.1,
+          "default": 2,
+          "precision": 1,
+          "unit": "m",
+          "targetEntityId": "particle-1",
+          "targetProperty": "trackRadius"
+        },
+        {
+          "key": "bottomSpeed",
+          "label": "底端初速度 v0",
+          "type": "slider",
+          "min": 4,
+          "max": 12,
+          "step": 0.1,
+          "default": 9,
+          "precision": 1,
+          "unit": "m/s",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialSpeed"
+        },
+        {
+          "key": "chargeToMass",
+          "label": "荷质比 q/m",
+          "type": "slider",
+          "min": 0.02,
+          "max": 0.2,
+          "step": 0.01,
+          "default": 0.12,
+          "precision": 2,
+          "unit": "C/kg",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge"
+        }
+      ]
+    },
+    {
+      "key": "field-params",
+      "label": "外加电场",
+      "params": [
+        {
+          "key": "E",
+          "label": "电场强度 E",
+          "type": "slider",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "default": 20,
+          "precision": 0,
+          "unit": "V/m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "fieldDirectionMode",
+          "label": "电场方向",
+          "type": "select",
+          "options": [
+            {
+              "value": "upward",
+              "label": "向上，抵消部分重力"
+            },
+            {
+              "value": "downward",
+              "label": "向下，与重力同向"
+            }
+          ],
+          "default": "upward",
+          "targetEntityId": "efield-1",
+          "targetProperty": "fieldDirectionMode"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "trackRadius": 2,
+    "bottomSpeed": 9,
+    "chargeToMass": 0.12,
+    "E": 20,
+    "fieldDirectionMode": "upward"
+  },
+  "solveMode": "numerical",
+  "duration": 12,
+  "solverQualifier": {
+    "interaction": "electrogravity-circular"
+  }
+}

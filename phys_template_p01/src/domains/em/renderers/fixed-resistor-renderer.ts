@@ -52,7 +52,42 @@ const fixedResistorRenderer: EntityRenderer = (entity, _result, ctx) => {
   c.textBaseline = 'middle';
   c.fillText(`R=${resistance}Ω`, centerX, centerY);
 
-  // 3. 底部标注电压/电流
+  // 3. 故障叠加绘制
+  const faultType = (entity.properties.faultType as string) ?? 'none';
+  if (faultType === 'open') {
+    // 断路：红色 ✕
+    c.strokeStyle = '#E74C3C';
+    c.lineWidth = 3;
+    const margin = Math.min(screenW, screenH) * 0.25;
+    c.beginPath();
+    c.moveTo(centerX - margin, centerY - margin);
+    c.lineTo(centerX + margin, centerY + margin);
+    c.moveTo(centerX + margin, centerY - margin);
+    c.lineTo(centerX - margin, centerY + margin);
+    c.stroke();
+    drawTextLabel(
+      c,
+      '断路',
+      { x: centerX, y: screenTopLeft.y - 8 },
+      { color: '#E74C3C', fontSize: 11, align: 'center', backgroundColor: 'rgba(231,76,60,0.1)', padding: 2 },
+    );
+  } else if (faultType === 'short') {
+    // 短路：红色导线桥接
+    c.strokeStyle = '#E74C3C';
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(screenTopLeft.x, centerY);
+    c.lineTo(screenTopLeft.x + screenW, centerY);
+    c.stroke();
+    drawTextLabel(
+      c,
+      '短路',
+      { x: centerX, y: screenTopLeft.y - 8 },
+      { color: '#E74C3C', fontSize: 11, align: 'center', backgroundColor: 'rgba(231,76,60,0.1)', padding: 2 },
+    );
+  }
+
+  // 4. 底部标注电压/电流
   if (Math.abs(current) > 1e-6) {
     const infoText = `U=${voltage.toFixed(2)}V  I=${current.toFixed(3)}A`;
     drawTextLabel(

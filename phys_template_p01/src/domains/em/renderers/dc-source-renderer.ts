@@ -25,6 +25,8 @@ const dcSourceRenderer: EntityRenderer = (entity, _result, ctx) => {
   const height = (entity.properties.height as number) ?? 0.5;
   const emf = (entity.properties.emf as number) ?? 6;
   const r = (entity.properties.internalResistance as number) ?? 1;
+  const circuitType = entity.properties.circuitType as string | undefined;
+  const useVerticalPolarity = circuitType === 'ohmmeter' || circuitType === 'multi-range-ohmmeter';
 
   // 中心点
   const centerScreen = worldToScreen(
@@ -49,34 +51,57 @@ const dcSourceRenderer: EntityRenderer = (entity, _result, ctx) => {
   );
   c.setLineDash([]);
 
-  // 2. 电池符号：中心位置绘制长短竖线
-  const lineH = screenH * 0.6;
-  const gap = screenW * 0.12;
-
-  // 长竖线（正极）
-  c.strokeStyle = POSITIVE_COLOR;
-  c.lineWidth = 3;
-  c.beginPath();
-  c.moveTo(centerScreen.x - gap, centerScreen.y - lineH / 2);
-  c.lineTo(centerScreen.x - gap, centerScreen.y + lineH / 2);
-  c.stroke();
-
-  // 短竖线（负极）
-  c.strokeStyle = NEGATIVE_COLOR;
-  c.lineWidth = 2;
-  const shortH = lineH * 0.5;
-  c.beginPath();
-  c.moveTo(centerScreen.x + gap, centerScreen.y - shortH / 2);
-  c.lineTo(centerScreen.x + gap, centerScreen.y + shortH / 2);
-  c.stroke();
-
-  // 正负极标记
   c.font = '11px Inter, sans-serif';
   c.textAlign = 'center';
-  c.fillStyle = POSITIVE_COLOR;
-  c.fillText('+', centerScreen.x - gap, centerScreen.y - lineH / 2 - 5);
-  c.fillStyle = NEGATIVE_COLOR;
-  c.fillText('−', centerScreen.x + gap, centerScreen.y - shortH / 2 - 5);
+
+  if (useVerticalPolarity) {
+    const lineGap = screenH * 0.16;
+    const longW = screenW * 0.56;
+    const shortW = screenW * 0.32;
+
+    c.strokeStyle = POSITIVE_COLOR;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(centerScreen.x - longW / 2, centerScreen.y - lineGap);
+    c.lineTo(centerScreen.x + longW / 2, centerScreen.y - lineGap);
+    c.stroke();
+
+    c.strokeStyle = NEGATIVE_COLOR;
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(centerScreen.x - shortW / 2, centerScreen.y + lineGap);
+    c.lineTo(centerScreen.x + shortW / 2, centerScreen.y + lineGap);
+    c.stroke();
+
+    c.fillStyle = POSITIVE_COLOR;
+    c.fillText('+', centerScreen.x, centerScreen.y - lineGap - 8);
+    c.fillStyle = NEGATIVE_COLOR;
+    c.fillText('−', centerScreen.x, centerScreen.y + lineGap + 14);
+  } else {
+    const lineH = screenH * 0.6;
+    const gap = screenW * 0.12;
+
+    // 普通电路统一按“右正左负”显示，和上方主回路电流方向保持一致。
+    c.strokeStyle = NEGATIVE_COLOR;
+    c.lineWidth = 2;
+    const shortH = lineH * 0.5;
+    c.beginPath();
+    c.moveTo(centerScreen.x - gap, centerScreen.y - shortH / 2);
+    c.lineTo(centerScreen.x - gap, centerScreen.y + shortH / 2);
+    c.stroke();
+
+    c.strokeStyle = POSITIVE_COLOR;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(centerScreen.x + gap, centerScreen.y - lineH / 2);
+    c.lineTo(centerScreen.x + gap, centerScreen.y + lineH / 2);
+    c.stroke();
+
+    c.fillStyle = NEGATIVE_COLOR;
+    c.fillText('−', centerScreen.x - gap, centerScreen.y - shortH / 2 - 5);
+    c.fillStyle = POSITIVE_COLOR;
+    c.fillText('+', centerScreen.x + gap, centerScreen.y - lineH / 2 - 5);
+  }
 
   // 3. 参数标注
   const labelY = centerScreen.y + screenH / 2 + 16;

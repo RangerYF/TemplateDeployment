@@ -1,0 +1,138 @@
+{
+  "id": "P02-EMF011-efield-acceleration",
+  "version": "1.0",
+  "name": "加速电场",
+  "description": "带电粒子在匀强电场中由静止被加速，适合讲解 qU = ΔEk 与 v = √(2qU/m) 的关系。",
+  "category": "P-08",
+  "supportedViewports": ["force", "motion", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 200, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "efield-1",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 80,
+        "direction": { "x": 1, "y": 0 },
+        "width": 6,
+        "height": 3,
+        "showPlates": true,
+        "voltage": 480
+      },
+      "transform": { "position": { "x": 0, "y": -1.5 }, "rotation": 0 },
+      "label": "加速电场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.005,
+        "mass": 0.005,
+        "initialVelocity": { "x": 0, "y": 0 },
+        "initialSpeed": 0,
+        "initialDirectionDeg": 0,
+        "radius": 0.12
+      },
+      "transform": { "position": { "x": 0.5, "y": 0 }, "rotation": 0 },
+      "label": "带电粒子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "particle-params",
+      "label": "粒子属性",
+      "params": [
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": -1,
+          "max": 1,
+          "step": 0.001,
+          "default": 0.005,
+          "unit": "C",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "mass",
+          "label": "质量 m",
+          "type": "slider",
+          "min": 0.001,
+          "max": 0.1,
+          "step": 0.001,
+          "default": 0.005,
+          "unit": "kg",
+          "precision": 3,
+          "targetEntityId": "particle-1",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "v0",
+          "label": "初速度大小 v0",
+          "type": "slider",
+          "min": 0,
+          "max": 10,
+          "step": 0.2,
+          "default": 0,
+          "unit": "m/s",
+          "precision": 1,
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialSpeed"
+        },
+        {
+          "key": "theta",
+          "label": "初始角度 θ",
+          "type": "slider",
+          "min": 0,
+          "max": 360,
+          "step": 1,
+          "default": 0,
+          "unit": "°",
+          "precision": 0,
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialDirectionDeg"
+        }
+      ]
+    },
+    {
+      "key": "efield-params",
+      "label": "加速场",
+      "params": [
+        {
+          "key": "voltage",
+          "label": "加速电压 U",
+          "type": "slider",
+          "min": 120,
+          "max": 1200,
+          "step": 20,
+          "default": 480,
+          "unit": "V",
+          "targetEntityId": "efield-1",
+          "targetProperty": "voltage"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "charge": 0.005,
+    "mass": 0.005,
+    "v0": 0,
+    "theta": 0,
+    "voltage": 480
+  },
+  "solveMode": "numerical",
+  "duration": 10,
+  "solverQualifier": { "interaction": "electric" }
+}

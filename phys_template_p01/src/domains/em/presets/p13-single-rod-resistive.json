@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-011-single-rod-resistive",
+  "version": "1.0",
+  "name": "EMI-011 单棒基础（纯电阻电路）",
+  "description": "单棒在匀强磁场中沿导轨滑动，实时联动 ε = BLv、i = ε / (R + R棒)、F安 = BIL、v-t 与 i-t 图，以及四步分析受力流程。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-013-single-rod-with-capacitor",
+  "version": "1.0",
+  "name": "EMI-013 单棒 + 含电容",
+  "description": "在单棒基础上接入理想电容，展示电容充电、电流衰减到 0 以及终态 U电容 = BLv终 的建立过程。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

@@ -1,0 +1,278 @@
+{
+  "id": "P04-CIR-EXP003-half-deflection-voltmeter",
+  "version": "1.0",
+  "name": "半偏法测电压表内阻",
+  "description": "调节滑动变阻器设定基准电压，断开短接开关并调R'使电压表示数减半，并自动对比理想值与真实误差",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 105,
+    "origin": { "x": 330, "y": 360 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 6,
+        "internalResistance": 0,
+        "width": 0.8,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -4, "y": 0 }, "rotation": 0 },
+      "label": "电源"
+    },
+    {
+      "ref": "switch-main",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": -2.5, "y": 1.15 }, "rotation": 0 },
+      "label": "开关S"
+    },
+    {
+      "ref": "rheostat-1",
+      "type": "slide-rheostat",
+      "properties": {
+        "maxResistance": 3000,
+        "sliderRatio": 0.5,
+        "width": 1.0,
+        "height": 0.5,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": -0.9, "y": 1.0 }, "rotation": 0 },
+      "label": "滑动变阻器R"
+    },
+    {
+      "ref": "res-half",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 3000,
+        "width": 1.0,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": 1.3, "y": 1.05 }, "rotation": 0 },
+      "label": "半偏电阻R'"
+    },
+    {
+      "ref": "switch-half",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": 1.25, "y": 2.2 }, "rotation": 0 },
+      "label": "短接开关S'"
+    },
+    {
+      "ref": "voltmeter-1",
+      "type": "voltmeter",
+      "properties": {
+        "range": 3,
+        "internalResistance": 3000,
+        "radius": 0.3,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": 3.8, "y": 1.2 }, "rotation": 0 },
+      "label": "电压表V"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "source-1",
+      "targetRef": "switch-main",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-main",
+      "targetRef": "rheostat-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "rheostat-1",
+      "targetRef": "res-half",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "res-half",
+      "targetRef": "voltmeter-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "rheostat-1",
+      "targetRef": "switch-half",
+      "properties": { "topology": "bypass-branch" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-half",
+      "targetRef": "voltmeter-1",
+      "properties": { "topology": "bypass-branch" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "source-params",
+      "label": "电源",
+      "params": [
+        {
+          "key": "emf",
+          "label": "电动势",
+          "type": "slider",
+          "min": 1,
+          "max": 12,
+          "step": 0.1,
+          "default": 6,
+          "unit": "V",
+          "targetEntityId": "source-1",
+          "targetProperty": "emf"
+        },
+        {
+          "key": "r",
+          "label": "内阻",
+          "type": "slider",
+          "min": 0,
+          "max": 1000,
+          "step": 10,
+          "default": 0,
+          "unit": "Ω",
+          "targetEntityId": "source-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "meter-params",
+      "label": "电压表V",
+      "params": [
+        {
+          "key": "meterRange",
+          "label": "量程",
+          "type": "select",
+          "options": [
+            { "value": "3", "label": "0~3 V" },
+            { "value": "15", "label": "0~15 V" }
+          ],
+          "default": "3",
+          "targetEntityId": "voltmeter-1",
+          "targetProperty": "range"
+        },
+        {
+          "key": "meterResistance",
+          "label": "内阻（真实值）",
+          "type": "slider",
+          "min": 1000,
+          "max": 12000,
+          "step": 100,
+          "default": 3000,
+          "unit": "Ω",
+          "targetEntityId": "voltmeter-1",
+          "targetProperty": "internalResistance"
+        }
+      ]
+    },
+    {
+      "key": "rheostat-params",
+      "label": "滑动变阻器R",
+      "params": [
+        {
+          "key": "maxR",
+          "label": "最大阻值",
+          "type": "slider",
+          "min": 500,
+          "max": 6000,
+          "step": 100,
+          "default": 3000,
+          "unit": "Ω",
+          "targetEntityId": "rheostat-1",
+          "targetProperty": "maxResistance"
+        },
+        {
+          "key": "sliderRatio",
+          "label": "滑片位置",
+          "type": "slider",
+          "min": 0,
+          "max": 1,
+          "step": 0.01,
+          "default": 0.5,
+          "unit": "",
+          "precision": 2,
+          "targetEntityId": "rheostat-1",
+          "targetProperty": "sliderRatio"
+        }
+      ]
+    },
+    {
+      "key": "half-params",
+      "label": "半偏电阻R'",
+      "params": [
+        {
+          "key": "Rhalf",
+          "label": "阻值",
+          "type": "slider",
+          "min": 0,
+          "max": 15000,
+          "step": 100,
+          "default": 3000,
+          "unit": "Ω",
+          "targetEntityId": "res-half",
+          "targetProperty": "resistance"
+        }
+      ]
+    },
+    {
+      "key": "switch-params",
+      "label": "开关控制",
+      "params": [
+        {
+          "key": "switchMain",
+          "label": "主开关S",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "闭合",
+          "labelOff": "断开",
+          "targetEntityId": "switch-main",
+          "targetProperty": "closed"
+        },
+        {
+          "key": "switchHalf",
+          "label": "短接开关S'",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "闭合（R'被短接）",
+          "labelOff": "断开（R'接入）",
+          "targetEntityId": "switch-half",
+          "targetProperty": "closed"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "emf": 6,
+    "r": 0,
+    "meterRange": "3",
+    "meterResistance": 3000,
+    "maxR": 3000,
+    "sliderRatio": 0.5,
+    "Rhalf": 3000,
+    "switchMain": true,
+    "switchHalf": true
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "half-deflection-voltmeter" }
+}

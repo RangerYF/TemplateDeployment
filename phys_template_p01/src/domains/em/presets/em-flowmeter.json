@@ -1,0 +1,185 @@
+{
+  "id": "P02-EMF043-em-flowmeter",
+  "version": "1.0",
+  "name": "电磁流量计",
+  "description": "导电流体在磁场中流动时产生感应电压，适合讲解 E = vB、U = BvL 与流速测量的对应关系。",
+  "category": "P-08",
+  "supportedViewports": [
+    "force",
+    "motion",
+    "field"
+  ],
+  "defaultViewport": "force",
+  "displayConfig": {
+    "scale": 100,
+    "origin": {
+      "x": 400,
+      "y": 300
+    }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 0.5,
+        "direction": "into",
+        "width": 5,
+        "height": 4
+      },
+      "transform": {
+        "position": {
+          "x": -2.5,
+          "y": -2
+        },
+        "rotation": 0
+      },
+      "label": "匀强磁场"
+    },
+    {
+      "ref": "efield-1",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 1,
+        "direction": {
+          "x": 0,
+          "y": -1
+        },
+        "width": 5,
+        "height": 4,
+        "showPlates": true
+      },
+      "transform": {
+        "position": {
+          "x": -2.5,
+          "y": -2
+        },
+        "rotation": 0
+      },
+      "label": "感应电场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": {
+          "x": 2,
+          "y": 0
+        },
+        "radius": 0.1
+      },
+      "transform": {
+        "position": {
+          "x": -2,
+          "y": 0
+        },
+        "rotation": 0
+      },
+      "label": "正电荷"
+    },
+    {
+      "ref": "particle-2",
+      "type": "point-charge",
+      "properties": {
+        "charge": -0.1,
+        "mass": 0.1,
+        "initialVelocity": {
+          "x": 2,
+          "y": 0
+        },
+        "radius": 0.1
+      },
+      "transform": {
+        "position": {
+          "x": -2,
+          "y": 0
+        },
+        "rotation": 0
+      },
+      "label": "负电荷"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    },
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    },
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "particle-2",
+      "properties": {}
+    },
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-1",
+      "targetRef": "particle-2",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "flow-params",
+      "label": "流体属性",
+      "params": [
+        {
+          "key": "v",
+          "label": "流速",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m/s",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialVelocity.x"
+        },
+        {
+          "key": "B",
+          "label": "磁感应强度",
+          "type": "slider",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.5,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "L",
+          "label": "管径 L",
+          "type": "slider",
+          "min": 1,
+          "max": 6,
+          "step": 0.1,
+          "default": 4,
+          "unit": "m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "height"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "v": 2,
+    "B": 0.5,
+    "L": 4,
+    "U": 4
+  },
+  "solveMode": "numerical",
+  "duration": 10,
+  "solverQualifier": {
+    "interaction": "combined"
+  }
+}

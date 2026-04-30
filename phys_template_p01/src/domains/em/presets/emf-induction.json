@@ -3,7 +3,7 @@
   "version": "1.0",
   "name": "矩形线框·穿过匀强磁场",
   "description": "矩形线框匀速穿过匀强磁场区域，观察感应电动势和感应电流的变化过程",
-  "category": "P-02",
+  "category": "P-13",
   "supportedViewports": ["circuit", "field", "force", "motion"],
   "defaultViewport": "circuit",
   "displayConfig": {

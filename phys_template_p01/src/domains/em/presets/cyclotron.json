@@ -1,0 +1,175 @@
+{
+  "id": "P02-EMF042-cyclotron",
+  "version": "1.0",
+  "name": "回旋加速器",
+  "description": "带电粒子在磁场中做圆周运动，并在交变电场中持续加速，适合讲解回旋周期与半径逐步增大。",
+  "category": "P-08",
+  "supportedViewports": [
+    "force",
+    "motion",
+    "field"
+  ],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 50,
+    "origin": {
+      "x": 480,
+      "y": 300
+    }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 1.8,
+        "direction": "into",
+        "width": 10,
+        "height": 10,
+        "boundaryShape": "circle",
+        "boundaryRadius": 5
+      },
+      "transform": {
+        "position": {
+          "x": -5,
+          "y": -5
+        },
+        "rotation": 0
+      },
+      "label": "圆形磁场"
+    },
+    {
+      "ref": "efield-gap",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 25,
+        "direction": {
+          "x": 0,
+          "y": -1
+        },
+        "width": 10,
+        "height": 0.2,
+        "showPlates": false,
+        "mode": "alternating"
+      },
+      "transform": {
+        "position": {
+          "x": -5,
+          "y": -0.1
+        },
+        "rotation": 0
+      },
+      "label": "交变电场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": {
+          "x": 0,
+          "y": -0.5
+        },
+        "radius": 0.12
+      },
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0.05
+        },
+        "rotation": 0
+      },
+      "label": "带电粒子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    },
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-gap",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "field-params",
+      "label": "场属性",
+      "params": [
+        {
+          "key": "B",
+          "label": "磁感应强度",
+          "type": "slider",
+          "min": 1,
+          "max": 3,
+          "step": 0.1,
+          "default": 1.8,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "E",
+          "label": "电场强度",
+          "type": "slider",
+          "min": 10,
+          "max": 150,
+          "step": 5,
+          "default": 25,
+          "unit": "V/m",
+          "targetEntityId": "efield-gap",
+          "targetProperty": "magnitude"
+        }
+      ]
+    },
+    {
+      "key": "particle-params",
+      "label": "粒子属性",
+      "params": [
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": 0.01,
+          "max": 0.5,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "C",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge",
+          "precision": 2
+        },
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.01,
+          "max": 0.5,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "kg",
+          "targetEntityId": "particle-1",
+          "targetProperty": "mass",
+          "precision": 2
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "B": 1.8,
+    "E": 25,
+    "charge": 0.1,
+    "mass": 0.1
+  },
+  "solveMode": "numerical",
+  "duration": 30,
+  "solverQualifier": {
+    "interaction": "combined"
+  }
+}

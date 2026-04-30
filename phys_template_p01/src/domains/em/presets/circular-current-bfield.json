@@ -1,0 +1,104 @@
+{
+  "id": "P02-EMF022-circular-current-bfield",
+  "version": "1.0",
+  "name": "圆形电流磁场",
+  "description": "观察圆形电流周围的偶极型磁感线，适合讲解线圈中心磁场与电流、半径的关系。",
+  "category": "P-08",
+  "supportedViewports": ["field"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "loop-1",
+      "type": "current-wire",
+      "properties": {
+        "current": 5,
+        "length": 0,
+        "wireDirection": { "x": 0, "y": 1 },
+        "currentDirectionMode": "counterclockwise",
+        "wireShape": "loop",
+        "loopRadius": 1,
+        "width": 2,
+        "height": 2
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "环形电流"
+    }
+  ],
+  "relations": [],
+  "paramGroups": [
+    {
+      "key": "loop-view",
+      "label": "教学视图",
+      "params": [
+        {
+          "key": "loopViewMode",
+          "label": "展示样式",
+          "type": "select",
+          "options": [
+            { "value": "isometric", "label": "3D视角" },
+            { "value": "top", "label": "俯视图" },
+            { "value": "front", "label": "侧视图" }
+          ],
+          "default": "isometric"
+        }
+      ]
+    },
+    {
+      "key": "loop-params",
+      "label": "线圈属性",
+      "params": [
+        {
+          "key": "current",
+          "label": "电流",
+          "type": "slider",
+          "min": 0.5,
+          "max": 20,
+          "step": 0.5,
+          "default": 5,
+          "unit": "A",
+          "targetEntityId": "loop-1",
+          "targetProperty": "current"
+        },
+        {
+          "key": "currentDirectionMode",
+          "label": "电流方向",
+          "type": "select",
+          "options": [
+            { "value": "counterclockwise", "label": "逆时针" },
+            { "value": "clockwise", "label": "顺时针" }
+          ],
+          "default": "counterclockwise",
+          "targetEntityId": "loop-1",
+          "targetProperty": "currentDirectionMode"
+        },
+        {
+          "key": "loopRadius",
+          "label": "线圈半径",
+          "type": "slider",
+          "min": 0.5,
+          "max": 3,
+          "step": 0.1,
+          "default": 1,
+          "unit": "m",
+          "targetEntityId": "loop-1",
+          "targetProperty": "loopRadius"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "loopViewMode": "isometric",
+    "current": 5,
+    "currentDirectionMode": "counterclockwise",
+    "loopRadius": 1,
+    "loopCameraYawDeg": -32,
+    "loopCameraPitchDeg": 18,
+    "loopShowAuxiliaryLabels": true
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

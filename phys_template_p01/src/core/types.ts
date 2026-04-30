@@ -87,6 +87,12 @@ export interface Relation<
 /** 参数控件类型 */
 export type ParamControlType = 'slider' | 'input' | 'toggle' | 'select';
 
+export interface ParamVisibilityRule {
+  key: string;
+  equals?: number | boolean | string;
+  notEquals?: number | boolean | string;
+}
+
 /** 参数 Schema 基础接口 */
 export interface ParamSchemaBase {
   key: string; // 参数的程序标识
@@ -94,8 +100,7 @@ export interface ParamSchemaBase {
   group?: string; // 所属分组名
   targetEntityId?: EntityId; // 该参数影响哪个实体
   targetProperty?: string; // 映射到实体 properties 中的字段名
-  /** 参数联动显隐：当指定的其他参数满足条件时才显示本参数（多 key 为 AND） */
-  visibleWhen?: Record<string, unknown>;
+  visibleWhen?: ParamVisibilityRule[]; // 满足全部规则时才显示
 }
 
 /** 滑块参数 */
@@ -107,6 +112,7 @@ export interface SliderParamSchema extends ParamSchemaBase {
   default: number;
   unit: string;
   precision?: number; // 显示小数位数
+  inputMax?: number; // 数字输入框允许的最大值（可大于 slider max，用于自定义输入）
 }
 
 /** 输入框参数 */
@@ -175,20 +181,17 @@ export interface Force {
   magnitude: number; // 大小（N）
   direction: Vec2; // 单位方向向量
   applicationPoint?: Vec2; // 力的作用点（物理坐标），默认实体中心
+  displayMagnitude?: number; // 用于箭头长度缩放的显示量级（不影响标签数值）
 }
 
 /** 正交分解结果 */
 export interface OrthogonalDecomposition {
   axis1: Vec2; // 第一个轴方向
   axis2: Vec2; // 第二个轴方向
-  axis1Label?: string; // 轴1标签，如 "沿斜面"
-  axis2Label?: string; // 轴2标签，如 "垂直斜面"
   components: Array<{
     force: Force; // 原始力
     component1: number; // 在 axis1 方向的分量大小（带符号）
     component2: number; // 在 axis2 方向的分量大小（带符号）
-    label1?: string; // 分量1物理标签，如 "mgsinθ"
-    label2?: string; // 分量2物理标签，如 "mgcosθ"
   }>;
 }
 
@@ -209,6 +212,7 @@ export interface MotionState {
   rotation?: number; // 实体朝向（弧度），覆盖 transform.rotation
   angularVelocity?: number; // rad/s
   trajectory?: Vec2[]; // 历史轨迹点
+  entityPropsPatch?: Record<string, unknown>; // 将运行时属性同步回实体，供 UI / seek / reset 使用
 }
 
 /** 单个实体的能量状态 */
@@ -295,6 +299,9 @@ export type ViewportType =
 /** 信息密度 */
 export type InfoDensity = 'compact' | 'standard' | 'detailed';
 
+/** P-08 场线密度 */
+export type FieldLineDensity = 'sparse' | 'standard' | 'dense';
+
 /** 视角层状态 */
 export interface ViewportState {
   primary: ViewportType; // 当前主视角
@@ -310,18 +317,7 @@ export interface ForceViewportData {
 /** 运动视角数据 */
 export interface MotionViewportData {
   motionStates: MotionState[];
-  /** 当前模拟时刻（秒） */
-  currentTime?: number;
-  /** 历史帧数据（用于轨迹和 v-t / x-t 图表） */
-  history?: Array<{
-    time: number;
-    states: Array<{
-      entityId: EntityId;
-      position: Vec2;
-      velocity: Vec2;
-      acceleration: Vec2;
-    }>;
-  }>;
+  analyses?: ForceAnalysis[];
 }
 
 /** 能量视角数据 */
@@ -381,16 +377,6 @@ export interface CoordinateTransform {
   origin: Vec2; // 物理坐标原点在画布上的像素位置
 }
 
-/** 统一选中目标 */
-export interface Selection {
-  /** 选中目标类型（'entity' | 域自定义类型如 'force-arrow'） */
-  type: string;
-  /** 唯一标识 */
-  id: string;
-  /** 类型特定数据（不透明，由域定义和解读） */
-  data: unknown;
-}
-
 /** 渲染上下文 */
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -398,11 +384,8 @@ export interface RenderContext {
   coordinateTransform: CoordinateTransform;
   viewport: ViewportState;
   selectedEntityId: EntityId | null;
-  selection: Selection | null;
-  hoveredTarget: Selection | null;
+  relations?: Relation[];
   dt: number; // 帧间隔
-  /** 场景中所有实体（连接件渲染器需要引用关联实体的位置） */
-  entities: Map<EntityId, Entity>;
 }
 
 /** 命中检测结果 */
@@ -494,12 +477,6 @@ export interface PresetData {
   solverQualifier?: Record<string, string>;
   /** 事件-动作映射（可选） */
   eventActions?: EventActionMapping[];
-  /** 预设分组标识（同 group 的预设在 Gallery 中合并为一个入口） */
-  group?: string;
-  /** 分组显示名称 */
-  groupLabel?: string;
-  /** 组内排序权重（数字越小越靠前） */
-  groupOrder?: number;
 }
 
 /** 预设校验结果 */

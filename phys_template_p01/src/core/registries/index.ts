@@ -25,10 +25,6 @@ export {
   type ViewportRenderer,
   type EntityRendererRegistration,
   type IRendererRegistry,
-  type ViewportInteractionHandler,
-  type InteractionContext,
-  type FloatingUIDescriptor,
-  type FloatingComponentProps,
 } from './renderer-registry';
 
 export {

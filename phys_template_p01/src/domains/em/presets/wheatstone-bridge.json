@@ -1,0 +1,255 @@
+{
+  "id": "P04-CIR-EXP006-wheatstone-bridge",
+  "version": "1.0",
+  "name": "惠斯通电桥测电阻",
+  "description": "调节电阻箱R4使灵敏电流计归零，满足平衡条件 R1/R2=R3/R4，从而精确测定未知电阻",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 420, "y": 340 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 6,
+        "internalResistance": 0.5,
+        "width": 0.8,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -4.5, "y": -0.25 }, "rotation": 0 },
+      "label": "电源"
+    },
+    {
+      "ref": "switch-1",
+      "type": "switch",
+      "properties": {
+        "closed": true,
+        "width": 0.6,
+        "height": 0.3
+      },
+      "transform": { "position": { "x": -3.2, "y": -0.15 }, "rotation": 0 },
+      "label": "开关"
+    },
+    {
+      "ref": "R1",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 100,
+        "width": 0.8,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": -1.4, "y": 1.0 }, "rotation": 0 },
+      "label": "R₁"
+    },
+    {
+      "ref": "R2",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 1000,
+        "width": 0.8,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": 1.0, "y": 1.0 }, "rotation": 0 },
+      "label": "R₂"
+    },
+    {
+      "ref": "R3",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 500,
+        "width": 0.8,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": -1.4, "y": -1.2 }, "rotation": 0 },
+      "label": "R₃（待测）"
+    },
+    {
+      "ref": "R4-box",
+      "type": "resistance-box",
+      "properties": {
+        "resistance": 5000,
+        "width": 1.0,
+        "height": 0.5,
+        "voltage": 0,
+        "current": 0
+      },
+      "transform": { "position": { "x": 0.8, "y": -1.25 }, "rotation": 0 },
+      "label": "R₄（电阻箱）"
+    },
+    {
+      "ref": "galv-1",
+      "type": "galvanometer",
+      "properties": {
+        "sensitivity": 20,
+        "internalResistance": 100,
+        "radius": 0.35,
+        "reading": 0,
+        "overRange": false,
+        "range": 500
+      },
+      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 },
+      "label": "灵敏电流计"
+    }
+  ],
+  "relations": [
+    {
+      "type": "connection",
+      "sourceRef": "source-1",
+      "targetRef": "switch-1",
+      "properties": {}
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-1",
+      "targetRef": "R1",
+      "properties": { "topology": "bridge-upper" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "R1",
+      "targetRef": "R2",
+      "properties": { "topology": "bridge-upper" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "switch-1",
+      "targetRef": "R3",
+      "properties": { "topology": "bridge-lower" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "R3",
+      "targetRef": "R4-box",
+      "properties": { "topology": "bridge-lower" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "R1",
+      "targetRef": "galv-1",
+      "properties": { "topology": "bridge-arm" }
+    },
+    {
+      "type": "connection",
+      "sourceRef": "galv-1",
+      "targetRef": "R3",
+      "properties": { "topology": "bridge-arm" }
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "source-params",
+      "label": "电源",
+      "params": [
+        {
+          "key": "emf",
+          "label": "电动势",
+          "type": "slider",
+          "min": 1,
+          "max": 12,
+          "step": 0.1,
+          "default": 6,
+          "unit": "V",
+          "targetEntityId": "source-1",
+          "targetProperty": "emf"
+        }
+      ]
+    },
+    {
+      "key": "bridge-params",
+      "label": "电桥臂电阻",
+      "params": [
+        {
+          "key": "R1",
+          "label": "R₁",
+          "type": "slider",
+          "min": 10,
+          "max": 10000,
+          "step": 1,
+          "default": 100,
+          "unit": "Ω",
+          "targetEntityId": "R1",
+          "targetProperty": "resistance"
+        },
+        {
+          "key": "R2",
+          "label": "R₂",
+          "type": "slider",
+          "min": 10,
+          "max": 10000,
+          "step": 1,
+          "default": 1000,
+          "unit": "Ω",
+          "targetEntityId": "R2",
+          "targetProperty": "resistance"
+        },
+        {
+          "key": "R3",
+          "label": "R₃（待测）",
+          "type": "slider",
+          "min": 10,
+          "max": 10000,
+          "step": 1,
+          "default": 500,
+          "unit": "Ω",
+          "targetEntityId": "R3",
+          "targetProperty": "resistance"
+        }
+      ]
+    },
+    {
+      "key": "r4-params",
+      "label": "电阻箱R₄",
+      "params": [
+        {
+          "key": "R4",
+          "label": "R₄",
+          "type": "slider",
+          "min": 0,
+          "max": 9999,
+          "step": 1,
+          "default": 5000,
+          "unit": "Ω",
+          "targetEntityId": "R4-box",
+          "targetProperty": "resistance"
+        }
+      ]
+    },
+    {
+      "key": "switch-params",
+      "label": "开关",
+      "params": [
+        {
+          "key": "switchClosed",
+          "label": "开关状态",
+          "type": "toggle",
+          "default": true,
+          "labelOn": "闭合",
+          "labelOff": "断开",
+          "targetEntityId": "switch-1",
+          "targetProperty": "closed"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "emf": 6,
+    "R1": 100,
+    "R2": 1000,
+    "R3": 500,
+    "R4": 5000,
+    "switchClosed": true
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "circuit": "wheatstone-bridge" }
+}

@@ -42,6 +42,7 @@ const coulombForceSolver: SolverFunction = (scene, time) => {
         label: `F${other.label ?? ''}`,
         magnitude: forceMag,
         direction: { x: dirX, y: dirY },
+        displayMagnitude: forceMag * 100,
       });
     }
 
@@ -62,6 +63,7 @@ const coulombForceSolver: SolverFunction = (scene, time) => {
         label: 'F合',
         magnitude: resultantMag,
         direction: resultantMag > 0 ? { x: rx / resultantMag, y: ry / resultantMag } : { x: 0, y: 0 },
+        displayMagnitude: resultantMag * 100,
       },
     });
 

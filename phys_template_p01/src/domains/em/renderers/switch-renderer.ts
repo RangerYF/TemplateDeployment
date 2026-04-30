@@ -55,12 +55,12 @@ const switchRenderer: EntityRenderer = (entity, _result, ctx) => {
     c.lineTo(rightX, y);
     c.stroke();
   } else {
-    // 断开：从左端翘起到右上方
+    // 断开：从左端翘起到右上方（控制在元件范围内）
     c.strokeStyle = SWITCH_COLOR;
     c.lineWidth = 2.5;
     c.beginPath();
     c.moveTo(leftX, y);
-    c.lineTo(rightX - 4, y - screenW * 0.4);
+    c.lineTo(leftX + screenW * 0.7, y - screenW * 0.25);
     c.stroke();
   }
 

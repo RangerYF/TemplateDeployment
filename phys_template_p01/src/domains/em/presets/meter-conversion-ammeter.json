@@ -1,0 +1,81 @@
+{
+  "id": "P04-CIR-EXP007-meter-conversion-ammeter",
+  "version": "1.0",
+  "name": "电流表改装",
+  "description": "用灵敏电流计并联分流电阻改装成大量程电流表，适合在 builder 中观察量程放大、偏差方向与过载风险。",
+  "category": "P-04",
+  "supportedViewports": ["circuit"],
+  "defaultViewport": "circuit",
+  "displayConfig": {
+    "scale": 78,
+    "origin": { "x": 430, "y": 315 }
+  },
+  "entities": [
+    {
+      "ref": "source-1",
+      "type": "dc-source",
+      "properties": {
+        "emf": 6,
+        "internalResistance": 1,
+        "width": 0.9,
+        "height": 0.5
+      },
+      "transform": { "position": { "x": -4.8, "y": -0.25 }, "rotation": 0 },
+      "label": "待测回路"
+    },
+    {
+      "ref": "galv-1",
+      "type": "galvanometer",
+      "properties": {
+        "sensitivity": 20,
+        "internalResistance": 120,
+        "radius": 0.4,
+        "reading": 0,
+        "overRange": false,
+        "range": 300
+      },
+      "transform": { "position": { "x": -0.4, "y": 1.5 }, "rotation": 0 },
+      "label": "表头G"
+    },
+    {
+      "ref": "shunt-r",
+      "type": "fixed-resistor",
+      "properties": {
+        "resistance": 0.06,
+        "width": 1.0,
+        "height": 0.4,
+        "voltage": 0,
+        "current": 0,
+        "faultType": "none"
+      },
+      "transform": { "position": { "x": -0.8, "y": -1.55 }, "rotation": 0 },
+      "label": "分流电阻 Rs"
+    },
+    {
+      "ref": "ammeter-1",
+      "type": "ammeter",
+      "properties": {
+        "range": 0.6,
+        "internalResistance": 0.06,
+        "radius": 0.36,
+        "reading": 0,
+        "overRange": false
+      },
+      "transform": { "position": { "x": 3.1, "y": 0 }, "rotation": 0 },
+      "label": "改装后电流表"
+    }
+  ],
+  "relations": [
+    { "type": "connection", "sourceRef": "source-1", "targetRef": "galv-1", "properties": {} },
+    { "type": "connection", "sourceRef": "source-1", "targetRef": "shunt-r", "properties": {} },
+    { "type": "connection", "sourceRef": "galv-1", "targetRef": "ammeter-1", "properties": {} },
+    { "type": "connection", "sourceRef": "shunt-r", "targetRef": "ammeter-1", "properties": {} },
+    { "type": "connection", "sourceRef": "ammeter-1", "targetRef": "source-1", "properties": {} }
+  ],
+  "paramGroups": [],
+  "paramValues": {
+    "conversionOperatingInput": 0.42
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

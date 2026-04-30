@@ -1395,3 +1395,16 @@ input[type="range"]:active::-webkit-slider-thumb { transform: scale(0.95); }
     max-width: calc(100% - 40px);
   }
 }
+
+/* ---------- Snell window 3D container ---------- */
+.snell-3d-container {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.snell-3d-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}

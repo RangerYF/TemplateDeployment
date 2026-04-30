@@ -1,0 +1,110 @@
+{
+  "id": "P02-EMF002-two-charges-field",
+  "version": "1.0",
+  "name": "双点电荷场",
+  "description": "对比等量异号、等量同号和不等量异号三类构型，观察合电场线、等势线、电势分布热力图和中点特征量变化。",
+  "category": "P-08",
+  "supportedViewports": ["field", "force"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 1600,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "charge-pos",
+      "type": "point-charge",
+      "properties": {
+        "charge": 1,
+        "radius": 0.008
+      },
+      "transform": { "position": { "x": -0.05, "y": 0 }, "rotation": 0 },
+      "label": "Q1"
+    },
+    {
+      "ref": "charge-neg",
+      "type": "point-charge",
+      "properties": {
+        "charge": -1,
+        "radius": 0.008
+      },
+      "transform": { "position": { "x": 0.05, "y": 0 }, "rotation": 0 },
+      "label": "Q2"
+    }
+  ],
+  "relations": [
+    {
+      "type": "coulomb",
+      "sourceRef": "charge-pos",
+      "targetRef": "charge-neg",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "charge-params",
+      "label": "双电荷参数",
+      "params": [
+        {
+          "key": "chargePreset",
+          "label": "预设配置",
+          "type": "select",
+          "options": [
+            { "value": "dipole", "label": "等量异号" },
+            { "value": "same-positive", "label": "等量同号（正）" },
+            { "value": "same-negative", "label": "等量同号（负）" },
+            { "value": "unequal-dipole", "label": "不等量异号" },
+            { "value": "custom", "label": "自定义" }
+          ],
+          "default": "dipole"
+        },
+        {
+          "key": "chargeQ1",
+          "label": "Q1",
+          "type": "slider",
+          "min": -10,
+          "max": 10,
+          "step": 0.1,
+          "default": 1,
+          "precision": 1,
+          "unit": "μC",
+          "targetEntityId": "charge-pos",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "chargeQ2",
+          "label": "Q2",
+          "type": "slider",
+          "min": -10,
+          "max": 10,
+          "step": 0.1,
+          "default": -1,
+          "precision": 1,
+          "unit": "μC",
+          "targetEntityId": "charge-neg",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "distanceCm",
+          "label": "间距 d",
+          "type": "slider",
+          "min": 2,
+          "max": 30,
+          "step": 1,
+          "default": 10,
+          "precision": 0,
+          "unit": "cm"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "chargePreset": "dipole",
+    "chargeQ1": 1,
+    "chargeQ2": -1,
+    "distanceCm": 10
+  },
+  "solveMode": "analytical",
+  "duration": 0,
+  "solverQualifier": { "interaction": "electrostatic" }
+}

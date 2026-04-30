@@ -1,6 +1,10 @@
 import { presetRegistry } from '@/core/registries/preset-registry';
 import { registerPointChargeEntity } from './entities/point-charge';
+import { registerParticleEmitterEntity } from './entities/particle-emitter';
 import { registerUniformBFieldEntity } from './entities/uniform-bfield';
+import { registerUniformEFieldEntity } from './entities/uniform-efield';
+import { registerCurrentWireEntity } from './entities/current-wire';
+import { registerSolenoidEntity } from './entities/solenoid';
 import { registerWireFrameEntity } from './entities/wire-frame';
 import { registerDCSourceEntity } from './entities/dc-source';
 import { registerFixedResistorEntity } from './entities/fixed-resistor';
@@ -8,14 +12,37 @@ import { registerSlideRheostatEntity } from './entities/slide-rheostat';
 import { registerSwitchEntity } from './entities/switch';
 import { registerAmmeterEntity } from './entities/ammeter';
 import { registerVoltmeterEntity } from './entities/voltmeter';
+import { registerResistanceBoxEntity } from './entities/resistance-box';
+import { registerGalvanometerEntity } from './entities/galvanometer';
+import { registerCapacitorEntity } from './entities/capacitor';
+import { registerBulbEntity } from './entities/bulb';
+import { registerMotorEntity } from './entities/motor';
+import { registerRangeSwitchEntity } from './entities/range-switch';
+import { registerDetectorScreenEntity } from './entities/detector-screen';
 import { registerCoulombForceSolver } from './solvers/coulomb-force';
 import { registerChargedParticleInBFieldSolver } from './solvers/charged-particle-in-bfield';
+import { registerChargedParticleInEFieldSolver } from './solvers/charged-particle-in-efield';
+import { registerChargedParticleInCombinedFieldSolver } from './solvers/charged-particle-in-combined-field';
+import { registerElectrogravityCircularMotionSolver } from './solvers/electrogravity-circular-motion';
 import { registerWireFrameInductionSolver } from './solvers/wire-frame-induction';
 import { registerVoltammetryInternalSolver } from './solvers/voltammetry-internal';
 import { registerVoltammetryExternalSolver } from './solvers/voltammetry-external';
 import { registerMeasureEmfRSolver } from './solvers/measure-emf-r';
+import { registerHalfDeflectionSolver } from './solvers/half-deflection';
+import { registerHalfDeflectionVoltmeterSolver } from './solvers/half-deflection-voltmeter';
+import { registerWheatsoneBridgeSolver } from './solvers/wheatstone-bridge';
+import { registerOhmmeterSolver } from './solvers/ohmmeter';
+import { registerVoltammetryCompareSolver } from './solvers/voltammetry-compare';
+import { registerBulbCircuitSolver } from './solvers/bulb-circuit';
+import { registerMotorCircuitSolver } from './solvers/motor-circuit';
+import { registerGeneralCircuitSolver } from './solvers/general-circuit';
+import { registerMultiRangeOhmmeterSolver } from './solvers/multi-range-ohmmeter';
 import { registerPointChargeRenderer } from './renderers/point-charge-renderer';
+import { registerParticleEmitterRenderer } from './renderers/particle-emitter-renderer';
 import { registerUniformBFieldRenderer } from './renderers/uniform-bfield-renderer';
+import { registerUniformEFieldRenderer } from './renderers/uniform-efield-renderer';
+import { registerCurrentWireRenderer } from './renderers/current-wire-renderer';
+import { registerSolenoidRenderer } from './renderers/solenoid-renderer';
 import { registerWireFrameRenderer } from './renderers/wire-frame-renderer';
 import { registerDCSourceRenderer } from './renderers/dc-source-renderer';
 import { registerFixedResistorRenderer } from './renderers/fixed-resistor-renderer';
@@ -23,22 +50,77 @@ import { registerSlideRheostatRenderer } from './renderers/slide-rheostat-render
 import { registerSwitchRenderer } from './renderers/switch-renderer';
 import { registerAmmeterRenderer } from './renderers/ammeter-renderer';
 import { registerVoltmeterRenderer } from './renderers/voltmeter-renderer';
+import { registerResistanceBoxRenderer } from './renderers/resistance-box-renderer';
+import { registerGalvanometerRenderer } from './renderers/galvanometer-renderer';
+import { registerCapacitorRenderer } from './renderers/capacitor-renderer';
+import { registerBulbRenderer } from './renderers/bulb-renderer';
+import { registerMotorRenderer } from './renderers/motor-renderer';
+import { registerRangeSwitchRenderer } from './renderers/range-switch-renderer';
+import { registerDetectorScreenRenderer } from './renderers/detector-screen-renderer';
 import { registerFieldViewport } from './viewports/field-viewport';
 import { registerMotionViewport } from './viewports/motion-viewport';
 import { registerCircuitViewport } from './viewports/circuit-viewport';
+// 已有预设
 import twoChargesPreset from './presets/two-charges-coulomb.json';
-import basicBFieldPreset from './presets/basic-bfield.json';
 import cyclotronMotionPreset from './presets/cyclotron-motion.json';
 import emfInductionPreset from './presets/emf-induction.json';
+import lenzMagnetCoilPreset from './presets/lenz-magnet-coil.json';
+import p13SingleRodResistivePreset from './presets/p13-single-rod-resistive.json';
+import p13SingleRodWithSourcePreset from './presets/p13-single-rod-with-source.json';
+import p13SingleRodWithCapacitorPreset from './presets/p13-single-rod-with-capacitor.json';
+import p13DoubleRodBasicPreset from './presets/p13-double-rod-basic.json';
 import voltammetryInternalPreset from './presets/voltammetry-internal.json';
 import voltammetryExternalPreset from './presets/voltammetry-external.json';
 import measureEmfRPreset from './presets/measure-emf-r.json';
+import measureEmfRDividerPreset from './presets/measure-emf-r-divider.json';
+import halfDeflectionPreset from './presets/half-deflection.json';
+import halfDeflectionVoltmeterPreset from './presets/half-deflection-voltmeter.json';
+import wheatstoneBridgePreset from './presets/wheatstone-bridge.json';
+import ohmmeterPreset from './presets/ohmmeter.json';
+import voltammetryComparePreset from './presets/voltammetry-compare.json';
+import bulbCircuitPreset from './presets/bulb-circuit.json';
+import motorCircuitPreset from './presets/motor-circuit.json';
+import multiRangeOhmmeterPreset from './presets/multi-range-ohmmeter.json';
+import meterConversionAmmeterPreset from './presets/meter-conversion-ammeter.json';
+import meterConversionVoltmeterPreset from './presets/meter-conversion-voltmeter.json';
+// P-08 新增预设 — 批次1：匀强电场
+import parallelPlateEFieldPreset from './presets/parallel-plate-efield.json';
+import efieldAccelerationPreset from './presets/efield-acceleration.json';
+import efieldDeflectionPreset from './presets/efield-deflection.json';
+import efieldTwoStagePreset from './presets/efield-two-stage.json';
+// P-08 新增预设 — 批次2：电场线可视化
+import pointChargeFieldPreset from './presets/point-charge-field.json';
+import twoChargesFieldPreset from './presets/two-charges-field.json';
+// P-08 新增预设 — 批次3：磁感线可视化
+import wireBFieldPreset from './presets/wire-bfield.json';
+import circularCurrentBFieldPreset from './presets/circular-current-bfield.json';
+import solenoidBFieldPreset from './presets/solenoid-bfield.json';
+import ampereForceWireBFieldPreset from './presets/ampere-force-wire-bfield.json';
+// P-08 新增预设 — 批次4：洛伦兹力边界场景
+import bfieldStraightBoundaryPreset from './presets/bfield-straight-boundary.json';
+import bfieldCircularBoundaryPreset from './presets/bfield-circular-boundary.json';
+import magneticFocusingPreset from './presets/magnetic-focusing.json';
+import bfieldDualBoundaryPreset from './presets/bfield-dual-boundary.json';
+import bfieldSemicirclePreset from './presets/bfield-semicircle.json';
+import magneticDivergencePreset from './presets/magnetic-divergence.json';
+import bfieldTranslationCirclePreset from './presets/bfield-translation-circle.json';
+import bfieldRotationCirclePreset from './presets/bfield-rotation-circle.json';
+import bfieldScalingCirclePreset from './presets/bfield-scaling-circle.json';
+// P-08 新增预设 — 批次5：复合场
+import velocitySelectorPreset from './presets/velocity-selector.json';
+import cyclotronPreset from './presets/cyclotron.json';
+import emFlowmeterPreset from './presets/em-flowmeter.json';
+import electrogravityCircularMotionPreset from './presets/electrogravity-circular-motion.json';
 import type { PresetData } from '@/core/types';
 
 export function registerEmDomain(): void {
-  // 实体
+  // ── 实体 ──
   registerPointChargeEntity();
+  registerParticleEmitterEntity();
   registerUniformBFieldEntity();
+  registerUniformEFieldEntity();
+  registerCurrentWireEntity();
+  registerSolenoidEntity();
   registerWireFrameEntity();
   registerDCSourceEntity();
   registerFixedResistorEntity();
@@ -46,16 +128,39 @@ export function registerEmDomain(): void {
   registerSwitchEntity();
   registerAmmeterEntity();
   registerVoltmeterEntity();
-  // 求解器
+  registerResistanceBoxEntity();
+  registerGalvanometerEntity();
+  registerCapacitorEntity();
+  registerBulbEntity();
+  registerMotorEntity();
+  registerRangeSwitchEntity();
+  registerDetectorScreenEntity();
+  // ── 求解器 ──
   registerCoulombForceSolver();
   registerChargedParticleInBFieldSolver();
+  registerChargedParticleInEFieldSolver();
+  registerChargedParticleInCombinedFieldSolver();
+  registerElectrogravityCircularMotionSolver();
   registerWireFrameInductionSolver();
   registerVoltammetryInternalSolver();
   registerVoltammetryExternalSolver();
   registerMeasureEmfRSolver();
-  // 渲染器
+  registerHalfDeflectionSolver();
+  registerHalfDeflectionVoltmeterSolver();
+  registerWheatsoneBridgeSolver();
+  registerOhmmeterSolver();
+  registerVoltammetryCompareSolver();
+  registerBulbCircuitSolver();
+  registerMotorCircuitSolver();
+  registerGeneralCircuitSolver();
+  registerMultiRangeOhmmeterSolver();
+  // ── 渲染器 ──
   registerPointChargeRenderer();
+  registerParticleEmitterRenderer();
   registerUniformBFieldRenderer();
+  registerUniformEFieldRenderer();
+  registerCurrentWireRenderer();
+  registerSolenoidRenderer();
   registerWireFrameRenderer();
   registerDCSourceRenderer();
   registerFixedResistorRenderer();
@@ -63,16 +168,66 @@ export function registerEmDomain(): void {
   registerSwitchRenderer();
   registerAmmeterRenderer();
   registerVoltmeterRenderer();
-  // 视角
+  registerResistanceBoxRenderer();
+  registerGalvanometerRenderer();
+  registerCapacitorRenderer();
+  registerBulbRenderer();
+  registerMotorRenderer();
+  registerRangeSwitchRenderer();
+  registerDetectorScreenRenderer();
+  // ── 视角 ──
   registerFieldViewport();
   registerMotionViewport();
   registerCircuitViewport();
-  // 预设
+  // ── 预设（已有） ──
   presetRegistry.register(twoChargesPreset as unknown as PresetData);
-  presetRegistry.register(basicBFieldPreset as unknown as PresetData);
   presetRegistry.register(cyclotronMotionPreset as unknown as PresetData);
   presetRegistry.register(emfInductionPreset as unknown as PresetData);
+  presetRegistry.register(lenzMagnetCoilPreset as unknown as PresetData);
+  presetRegistry.register(p13SingleRodResistivePreset as unknown as PresetData);
+  presetRegistry.register(p13SingleRodWithSourcePreset as unknown as PresetData);
+  presetRegistry.register(p13SingleRodWithCapacitorPreset as unknown as PresetData);
+  presetRegistry.register(p13DoubleRodBasicPreset as unknown as PresetData);
   presetRegistry.register(voltammetryInternalPreset as unknown as PresetData);
   presetRegistry.register(voltammetryExternalPreset as unknown as PresetData);
   presetRegistry.register(measureEmfRPreset as unknown as PresetData);
+  presetRegistry.register(measureEmfRDividerPreset as unknown as PresetData);
+  presetRegistry.register(halfDeflectionPreset as unknown as PresetData);
+  presetRegistry.register(halfDeflectionVoltmeterPreset as unknown as PresetData);
+  presetRegistry.register(wheatstoneBridgePreset as unknown as PresetData);
+  presetRegistry.register(ohmmeterPreset as unknown as PresetData);
+  presetRegistry.register(voltammetryComparePreset as unknown as PresetData);
+  presetRegistry.register(bulbCircuitPreset as unknown as PresetData);
+  presetRegistry.register(motorCircuitPreset as unknown as PresetData);
+  presetRegistry.register(multiRangeOhmmeterPreset as unknown as PresetData);
+  presetRegistry.register(meterConversionAmmeterPreset as unknown as PresetData);
+  presetRegistry.register(meterConversionVoltmeterPreset as unknown as PresetData);
+  // ── 预设（P-08 新增：静电场） ──
+  presetRegistry.register(parallelPlateEFieldPreset as unknown as PresetData);
+  presetRegistry.register(efieldAccelerationPreset as unknown as PresetData);
+  presetRegistry.register(efieldDeflectionPreset as unknown as PresetData);
+  presetRegistry.register(efieldTwoStagePreset as unknown as PresetData);
+  // ── 预设（P-08 新增：电场线） ──
+  presetRegistry.register(pointChargeFieldPreset as unknown as PresetData);
+  presetRegistry.register(twoChargesFieldPreset as unknown as PresetData);
+  // ── 预设（P-08 新增：磁感线） ──
+  presetRegistry.register(wireBFieldPreset as unknown as PresetData);
+  presetRegistry.register(circularCurrentBFieldPreset as unknown as PresetData);
+  presetRegistry.register(solenoidBFieldPreset as unknown as PresetData);
+  presetRegistry.register(ampereForceWireBFieldPreset as unknown as PresetData);
+  // ── 预设（P-08 新增：边界磁场） ──
+  presetRegistry.register(bfieldStraightBoundaryPreset as unknown as PresetData);
+  presetRegistry.register(bfieldCircularBoundaryPreset as unknown as PresetData);
+  presetRegistry.register(magneticFocusingPreset as unknown as PresetData);
+  presetRegistry.register(bfieldDualBoundaryPreset as unknown as PresetData);
+  presetRegistry.register(bfieldSemicirclePreset as unknown as PresetData);
+  presetRegistry.register(magneticDivergencePreset as unknown as PresetData);
+  presetRegistry.register(bfieldTranslationCirclePreset as unknown as PresetData);
+  presetRegistry.register(bfieldRotationCirclePreset as unknown as PresetData);
+  presetRegistry.register(bfieldScalingCirclePreset as unknown as PresetData);
+  // ── 预设（P-08 新增：复合场） ──
+  presetRegistry.register(velocitySelectorPreset as unknown as PresetData);
+  presetRegistry.register(cyclotronPreset as unknown as PresetData);
+  presetRegistry.register(emFlowmeterPreset as unknown as PresetData);
+  presetRegistry.register(electrogravityCircularMotionPreset as unknown as PresetData);
 }

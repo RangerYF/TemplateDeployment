@@ -1,0 +1,52 @@
+{
+  "id": "P02-EMF001-point-charge-field",
+  "version": "1.0",
+  "name": "单点电荷场",
+  "description": "观察单个点电荷的电场线、同心等势线与电势分布热力图，适合讲解 E = kQ/r²、V = kQ/r 以及电荷量变化对场分布的影响。",
+  "category": "P-08",
+  "supportedViewports": ["field"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 120,
+    "origin": { "x": 480, "y": 300 }
+  },
+  "entities": [
+    {
+      "ref": "charge-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 1,
+        "radius": 0.12
+      },
+      "transform": { "position": { "x": 0, "y": 0 }, "rotation": 0 },
+      "label": "Q"
+    }
+  ],
+  "relations": [],
+  "paramGroups": [
+    {
+      "key": "charge-params",
+      "label": "电荷属性",
+      "params": [
+        {
+          "key": "charge1",
+          "label": "电荷量",
+          "type": "slider",
+          "min": -10,
+          "max": 10,
+          "step": 0.1,
+          "default": 1,
+          "precision": 1,
+          "unit": "μC",
+          "targetEntityId": "charge-1",
+          "targetProperty": "charge"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "charge1": 1
+  },
+  "solveMode": "analytical",
+  "duration": 0
+}

@@ -3,6 +3,8 @@ import type { BufferStoreSnapshot } from './store/bufferStore';
 import type { ComparisonStoreSnapshot } from './store/comparisonStore';
 import type { TitrationStoreSnapshot } from './store/titrationStore';
 import type { UISnapshot } from './store/uiStore';
+import { getChem08AiContext } from './runtime/aiContext';
+import { applyChem08Operations, type ApplyOperationsResult } from './runtime/aiOperations';
 
 const TEMPLATE_KEY = 'chem08';
 const RUNTIME_KEY = 'visual-chem08';
@@ -40,6 +42,8 @@ interface TemplateBridge {
   getSnapshot(): VisualChem08SnapshotDocument;
   loadSnapshot(snapshot: unknown): SnapshotValidationResult;
   validateSnapshot(snapshot: unknown): SnapshotValidationResult;
+  getAiContext(): ReturnType<typeof getChem08AiContext>;
+  applyOperations(operations: unknown): ApplyOperationsResult;
 }
 
 declare global {
@@ -176,6 +180,8 @@ function createBridge(): TemplateBridge {
     getSnapshot: getVisualChem08Snapshot,
     loadSnapshot: loadVisualChem08Snapshot,
     validateSnapshot: validateVisualChem08Snapshot,
+    getAiContext: getChem08AiContext,
+    applyOperations: applyChem08Operations,
   };
 }
 
@@ -242,6 +248,24 @@ export function registerTemplateBridge(): void {
             requestId: data.requestId,
             success: true,
             payload: bridge.validateSnapshot(data.payload),
+          };
+          break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.applyOperations(data.payload),
           };
           break;
         default:

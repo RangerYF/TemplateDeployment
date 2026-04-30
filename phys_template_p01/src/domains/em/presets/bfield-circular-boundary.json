@@ -1,0 +1,193 @@
+{
+  "id": "P02-EMF032-bfield-circular-boundary",
+  "version": "1.0",
+  "name": "圆形边界磁场",
+  "description": "粒子从圆形磁场区域边缘入射，适合讲解轨迹圆与磁场区域圆的几何关系及出射点判断。",
+  "category": "P-08",
+  "supportedViewports": [
+    "force",
+    "motion",
+    "field"
+  ],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 80,
+    "origin": {
+      "x": 400,
+      "y": 350
+    }
+  },
+  "entities": [
+    {
+      "ref": "bfield-1",
+      "type": "uniform-bfield",
+      "properties": {
+        "magnitude": 1.0,
+        "direction": "into",
+        "width": 6,
+        "height": 6,
+        "boundaryShape": "circle",
+        "boundaryRadius": 3
+      },
+      "transform": {
+        "position": {
+          "x": -3,
+          "y": -3
+        },
+        "rotation": 0
+      },
+      "label": "圆形磁场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.1,
+        "mass": 0.1,
+        "initialVelocity": {
+          "x": 2,
+          "y": 0
+        },
+        "initialSpeed": 2,
+        "initialDirectionDeg": 0,
+        "radius": 0.12
+      },
+      "transform": {
+        "position": {
+          "x": -3,
+          "y": 0
+        },
+        "rotation": 0
+      },
+      "label": "带电粒子"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "bfield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "particle-params",
+      "label": "粒子属性",
+      "params": [
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": 0.01,
+          "max": 0.5,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "C",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge",
+          "precision": 2
+        },
+        {
+          "key": "mass",
+          "label": "质量",
+          "type": "slider",
+          "min": 0.01,
+          "max": 0.5,
+          "step": 0.01,
+          "default": 0.1,
+          "unit": "kg",
+          "targetEntityId": "particle-1",
+          "targetProperty": "mass",
+          "precision": 2
+        },
+        {
+          "key": "v0",
+          "label": "初速度大小 v0",
+          "type": "slider",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m/s",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialSpeed"
+        },
+        {
+          "key": "theta",
+          "label": "初速度方向 θ",
+          "type": "slider",
+          "min": 0,
+          "max": 360,
+          "step": 1,
+          "default": 0,
+          "unit": "°",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialDirectionDeg"
+        }
+      ]
+    },
+    {
+      "key": "bfield-params",
+      "label": "磁场属性",
+      "params": [
+        {
+          "key": "B",
+          "label": "磁感应强度",
+          "type": "slider",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "T",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "magnitude"
+        },
+        {
+          "key": "direction",
+          "label": "磁场方向",
+          "type": "select",
+          "options": [
+            {
+              "value": "into",
+              "label": "垂直纸面向内 ×"
+            },
+            {
+              "value": "out",
+              "label": "垂直纸面向外 ·"
+            }
+          ],
+          "default": "into",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "direction"
+        },
+        {
+          "key": "fieldRadius",
+          "label": "磁场区域半径",
+          "type": "slider",
+          "min": 1,
+          "max": 5,
+          "step": 0.5,
+          "default": 3,
+          "unit": "m",
+          "targetEntityId": "bfield-1",
+          "targetProperty": "boundaryRadius"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "charge": 0.1,
+    "mass": 0.1,
+    "v0": 2,
+    "theta": 0,
+    "B": 1,
+    "direction": "into",
+    "fieldRadius": 3
+  },
+  "solveMode": "numerical",
+  "duration": 10,
+  "solverQualifier": {
+    "interaction": "magnetic"
+  }
+}

@@ -1,6 +1,6 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
 import { pointInRect } from '@/core/physics/geometry';
-import type { Entity, Rect, SliderParamSchema } from '@/core/types';
+import type { Entity, Rect, SelectParamSchema, SliderParamSchema } from '@/core/types';
 
 export function registerSlideRheostatEntity(): void {
   entityRegistry.register({
@@ -9,24 +9,53 @@ export function registerSlideRheostatEntity(): void {
     label: '滑动变阻器',
 
     defaultProperties: {
-      maxResistance: 50, // Ω
+      maxResistance: 30, // Ω
       sliderRatio: 0.5, // 0~1
       width: 1.0, // m（渲染用）
       height: 0.5, // m（渲染用）
       voltage: 0, // V（求解器运行时更新）
       current: 0, // A（求解器运行时更新）
+      faultType: 'none', // 故障类型：'none' | 'open' | 'short'
+      connectionMode: 'variable', // 连接模式：'variable'(A+W) | 'divider'(A+W+B)
+      ports: [
+        { id: 'A', label: '固定端A', side: 'left' },
+        { id: 'B', label: '固定端B', side: 'right' },
+        { id: 'W', label: '滑片端', side: 'top' },
+      ],
     },
 
     paramSchemas: [
       {
+        key: 'faultType',
+        label: '故障',
+        type: 'select',
+        options: [
+          { value: 'none', label: '正常' },
+          { value: 'open', label: '断路' },
+          { value: 'short', label: '短路' },
+        ],
+        default: 'none',
+      } satisfies SelectParamSchema,
+      {
+        key: 'connectionMode',
+        label: '接法',
+        type: 'select',
+        options: [
+          { value: 'variable', label: '限流接法' },
+          { value: 'divider', label: '分压接法' },
+        ],
+        default: 'variable',
+      } satisfies SelectParamSchema,
+      {
         key: 'maxResistance',
         label: '最大阻值',
         type: 'slider',
-        min: 5,
-        max: 500,
+        min: 1,
+        max: 30,
         step: 1,
-        default: 50,
+        default: 30,
         unit: 'Ω',
+        inputMax: 9999,
       } satisfies SliderParamSchema,
       {
         key: 'sliderRatio',
@@ -73,12 +102,19 @@ export function registerSlideRheostatEntity(): void {
         category: 'object',
         transform: overrides?.transform ?? { position: { x: 0, y: 0 }, rotation: 0 },
         properties: {
-          maxResistance: 50,
+          maxResistance: 30,
           sliderRatio: 0.5,
           width: 1.0,
           height: 0.5,
           voltage: 0,
           current: 0,
+          faultType: 'none',
+          connectionMode: 'variable',
+          ports: [
+            { id: 'A', label: '固定端A', side: 'left' },
+            { id: 'B', label: '固定端B', side: 'right' },
+            { id: 'W', label: '滑片端', side: 'top' },
+          ],
           ...overrides?.properties,
         },
         label: overrides?.label ?? '滑动变阻器',

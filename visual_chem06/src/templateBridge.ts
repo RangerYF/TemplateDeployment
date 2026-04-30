@@ -1,4 +1,6 @@
 import { useElectrochemStore, type ElectrochemStoreSnapshot } from './store/electrochemStore';
+import { getChem06AiContext } from './runtime/aiContext';
+import { applyChem06Operations, type ApplyOperationsResult } from './runtime/aiOperations';
 
 const TEMPLATE_KEY = 'chem06';
 const RUNTIME_KEY = 'visual-chem06';
@@ -33,6 +35,8 @@ interface TemplateBridge {
   getSnapshot(): VisualChem06SnapshotDocument;
   loadSnapshot(snapshot: unknown): SnapshotValidationResult;
   validateSnapshot(snapshot: unknown): SnapshotValidationResult;
+  getAiContext(): ReturnType<typeof getChem06AiContext>;
+  applyOperations(operations: unknown): ApplyOperationsResult;
 }
 
 declare global {
@@ -78,8 +82,18 @@ function buildEnvelope(createdAt?: string): TemplateSnapshotEnvelope {
   };
 }
 
+function stabilizeSnapshot(snapshot: ElectrochemStoreSnapshot): ElectrochemStoreSnapshot {
+  return {
+    ...snapshot,
+    // Playback is volatile runtime state driven by requestAnimationFrame. Keeping
+    // it in bridge snapshots makes host AI consistency checks fail while playing.
+    playing: false,
+    progress: 0,
+  };
+}
+
 export function getVisualChem06Snapshot(): VisualChem06SnapshotDocument {
-  const electrochem = cloneSerializable(useElectrochemStore.getState().getSnapshot());
+  const electrochem = stabilizeSnapshot(cloneSerializable(useElectrochemStore.getState().getSnapshot()));
   currentSnapshotCreatedAt = currentSnapshotCreatedAt ?? getChinaIso();
 
   return {
@@ -151,6 +165,8 @@ function createBridge(): TemplateBridge {
     getSnapshot: getVisualChem06Snapshot,
     loadSnapshot: loadVisualChem06Snapshot,
     validateSnapshot: validateVisualChem06Snapshot,
+    getAiContext: getChem06AiContext,
+    applyOperations: applyChem06Operations,
   };
 }
 
@@ -217,6 +233,24 @@ export function registerTemplateBridge(): void {
             requestId: data.requestId,
             success: true,
             payload: bridge.validateSnapshot(data.payload),
+          };
+          break;
+        case 'getAiContext':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.getAiContext(),
+          };
+          break;
+        case 'applyOperations':
+          response = {
+            namespace: 'edumind.templateBridge',
+            type: 'response',
+            requestId: data.requestId,
+            success: true,
+            payload: bridge.applyOperations(data.payload),
           };
           break;
         default:

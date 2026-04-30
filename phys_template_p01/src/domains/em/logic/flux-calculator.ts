@@ -1,15 +1,18 @@
 import type { Entity, Vec2 } from '@/core/types';
-import type { MagneticFieldDirection } from '../types';
+import {
+  computeInducedCurrent,
+  computeInducedEmf,
+  computeRectOverlapArea,
+  computeRectangularLoopFlux,
+  extractUniformBFieldRegions,
+} from '../p13/core';
 
 /**
  * 磁通量计算器
  *
- * 物理公式：
- *   Φ = B · S_overlap
- *   ε = -dΦ/dt ≈ -(Φ_current - Φ_previous) / dt
- *   I = ε / R
- *
- * 其中 S_overlap 是线框与磁场区域的重叠面积。
+ * P-13 Phase 1 中继续保留这个兼容门面：
+ * - 旧求解器可沿用 computeFlux / computeInduction
+ * - 内部统一委托给新的 P-13 核心层，避免磁通量/电流/安培力逻辑继续散落
  */
 
 export interface FluxResult {
@@ -17,6 +20,8 @@ export interface FluxResult {
   flux: number;
   /** 重叠面积 (m²) */
   overlapArea: number;
+  /** 当前参与感应的净 Bz（带符号） */
+  activeSignedFluxDensity?: number;
 }
 
 export interface InductionResult {
@@ -47,9 +52,10 @@ export function computeOverlapArea(
   ax: number, ay: number, aw: number, ah: number,
   bx: number, by: number, bw: number, bh: number,
 ): number {
-  const overlapX = Math.max(0, Math.min(ax + aw, bx + bw) - Math.max(ax, bx));
-  const overlapY = Math.max(0, Math.min(ay + ah, by + bh) - Math.max(ay, by));
-  return overlapX * overlapY;
+  return computeRectOverlapArea(
+    { x: ax, y: ay, width: aw, height: ah },
+    { x: bx, y: by, width: bw, height: bh },
+  );
 }
 
 /**
@@ -67,32 +73,19 @@ export function computeFlux(
   frameHeight: number,
   fieldEntities: Entity[],
 ): FluxResult {
-  let totalFlux = 0;
-  let totalOverlap = 0;
-
-  for (const field of fieldEntities) {
-    const fieldPos = field.transform.position;
-    const fieldW = (field.properties.width as number) ?? 0;
-    const fieldH = (field.properties.height as number) ?? 0;
-    const fieldMag = (field.properties.magnitude as number) ?? 0;
-    const fieldDir = (field.properties.direction as MagneticFieldDirection) ?? 'into';
-
-    const overlap = computeOverlapArea(
-      framePos.x, framePos.y, frameWidth, frameHeight,
-      fieldPos.x, fieldPos.y, fieldW, fieldH,
-    );
-
-    if (overlap > 0) {
-      // B_z 符号：into 为负（向纸面内），out 为正
-      const bz = fieldDir === 'out' ? fieldMag : -fieldMag;
-      totalFlux += bz * overlap;
-      totalOverlap += overlap;
-    }
-  }
+  const fluxSample = computeRectangularLoopFlux(
+    {
+      position: framePos,
+      width: frameWidth,
+      height: frameHeight,
+    },
+    extractUniformBFieldRegions(fieldEntities),
+  );
 
   return {
-    flux: totalFlux,
-    overlapArea: totalOverlap,
+    flux: fluxSample.flux,
+    overlapArea: fluxSample.overlapArea,
+    activeSignedFluxDensity: fluxSample.activeSignedFluxDensity,
   };
 }
 
@@ -113,11 +106,15 @@ export function computeInduction(
   resistance: number,
   overlapArea: number,
 ): InductionResult {
-  // ε = -dΦ/dt
-  const emf = dt > 0 ? -(currentFlux - previousFlux) / dt : 0;
-
-  // I = ε / R
-  const current = resistance > 0 ? emf / resistance : 0;
+  const emf = computeInducedEmf({
+    previousFlux,
+    currentFlux,
+    dt,
+  });
+  const current = computeInducedCurrent({
+    emf,
+    resistance,
+  });
 
   return {
     emf,

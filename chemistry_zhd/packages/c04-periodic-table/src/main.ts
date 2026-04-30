@@ -21,6 +21,12 @@ interface SnapshotValidationResult {
   errors: string[];
 }
 
+interface ApplyOperationsResult {
+  ok: boolean;
+  applied: string[];
+  warnings: string[];
+}
+
 type OverlayType = 'none' | 'element-detail' | 'category-detail';
 
 interface C04SnapshotPayload {
@@ -59,6 +65,8 @@ declare global {
       getSnapshot: () => C04SnapshotDocument;
       loadSnapshot: (snapshot: unknown) => void;
       validateSnapshot: (snapshot: unknown) => SnapshotValidationResult;
+      getAiContext: () => ReturnType<typeof getAiContext>;
+      applyOperations: (operations: unknown) => ApplyOperationsResult;
     };
   }
 }
@@ -71,7 +79,7 @@ style.textContent = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #FFFFFF;
+    background: #F7FAFC;
     color: #1A202C;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
       'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -81,29 +89,30 @@ style.textContent = `
   .pt-grid {
     display: grid;
     grid-template-columns: repeat(18, 1fr);
-    gap: 3px;
+    gap: 4px;
     width: 100%;
     min-width: 720px;
   }
 
   .pt-cell {
     aspect-ratio: 1;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    padding: 3px 2px 2px;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    padding: 4px 3px 3px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
     position: relative;
     min-width: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
   }
 
   .pt-cell:hover {
-    transform: scale(1.2);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    transform: scale(1.08);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
     z-index: 10;
   }
 
@@ -118,61 +127,94 @@ style.textContent = `
   }
 
   .pt-num {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1;
-    opacity: 0.65;
+    opacity: 0.78;
     align-self: flex-start;
     padding-left: 1px;
+    font-weight: 700;
   }
 
   .pt-symbol {
-    font-size: clamp(13px, 1.6vw, 22px);
-    font-weight: 700;
+    font-size: clamp(15px, 1.8vw, 24px);
+    font-weight: 800;
     line-height: 1;
   }
 
   .pt-name {
-    font-size: clamp(8px, 0.85vw, 12px);
+    font-size: clamp(10px, 0.95vw, 13px);
     line-height: 1;
-    opacity: 0.8;
+    opacity: 0.92;
+    font-weight: 700;
   }
 
   /* ---- 颜色模式工具栏 ---- */
   .color-toolbar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .color-toolbar-label {
-    font-size: 12px;
-    color: #718096;
-    font-weight: 500;
+    font-size: 13px;
+    color: #2D3748;
+    font-weight: 700;
     margin-right: 2px;
   }
 
   .color-btn {
-    padding: 4px 14px;
+    padding: 6px 14px;
     border-radius: 20px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #CBD5E0;
     background: #FFFFFF;
-    color: #4A5568;
-    font-size: 12px;
-    font-weight: 500;
+    color: #2D3748;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.12s, color 0.12s, background 0.12s;
+    transition: border-color 0.12s, color 0.12s, background 0.12s, box-shadow 0.12s;
   }
 
   .color-btn:hover {
     border-color: #00A85A;
     color: #00A85A;
+    box-shadow: 0 4px 10px rgba(0, 168, 90, 0.12);
   }
 
   .color-btn--active {
     background: #00A85A;
     border-color: #00A85A;
     color: #FFFFFF;
+  }
+
+  .mode-guide {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mode-guide-card {
+    background: #FFFFFF;
+    border: 1px solid #D7E3EF;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  }
+
+  .mode-guide-card h3 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1A202C;
+    margin-bottom: 6px;
+  }
+
+  .mode-guide-card p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #2D3748;
+    margin: 0;
   }
 
   /* ---- 选中态 ---- */
@@ -414,23 +456,24 @@ style.textContent = `
     display: flex;
     flex-wrap: wrap;
     gap: 8px 16px;
-    margin-top: 16px;
+    margin-top: 18px;
   }
 
   .pt-legend-item {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 15px;
-    color: #4A5568;
+    font-size: 16px;
+    color: #2D3748;
+    font-weight: 700;
   }
 
   .pt-legend-dot {
     display: inline-block;
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
     border-radius: 3px;
-    border: 1px solid;
+    border: 1.5px solid;
     flex-shrink: 0;
   }
 
@@ -486,9 +529,9 @@ style.textContent = `
   }
 
   .cat-pop-summary {
-    font-size: 13px;
+    font-size: 14px;
     color: #2D3748;
-    line-height: 1.65;
+    line-height: 1.7;
     margin: 0 0 12px;
   }
 
@@ -511,10 +554,16 @@ style.textContent = `
   }
 
   .cat-pop-block-text {
-    font-size: 12.5px;
+    font-size: 13px;
     color: #2D3748;
-    line-height: 1.65;
+    line-height: 1.7;
     margin: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .mode-guide {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 `;
 document.head.appendChild(style);
@@ -532,28 +581,29 @@ header.innerHTML = `
     display: inline-block;
     background: #E8F8F0;
     color: #00A85A;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 6px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 10px;
   ">化学模块 / C-04</span>
-  <h1 style="font-size: 26px; font-weight: 800; color: #1A202C; margin-bottom: 6px;">
+  <h1 style="font-size: 30px; font-weight: 800; color: #1A202C; margin-bottom: 6px; letter-spacing: -0.02em;">
     元素周期表交互平台
   </h1>
-  <p style="font-size: 13px; color: #718096;">
-    点击元素查看详细信息 · 当前收录 ${elements.length} 个元素
+  <p style="font-size: 14px; color: #2D3748; line-height: 1.7;">
+    点击元素查看详细信息，点击图例可查看分类说明。页面把“元素分类”“常温状态”“电负性分档”分开呈现，避免把不同知识维度误当成同一套分类。
   </p>
 `;
 
 // 周期表卡片容器
 const card = document.createElement('div');
 card.style.cssText = `
-  background: #FAFAFA;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 20px;
+  background: #FFFFFF;
+  border: 1px solid #D7E3EF;
+  border-radius: 14px;
+  padding: 22px;
   overflow-x: auto;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
 `;
 
 // 外层页面
@@ -570,11 +620,29 @@ toolbar.innerHTML = `
   <span class="color-toolbar-label">配色模式：</span>
   <button class="color-btn color-btn--active" data-mode="category">元素分类</button>
   <button class="color-btn" data-mode="state">常温状态（25 °C）</button>
-  <button class="color-btn" data-mode="electronegativity">电负性</button>
+  <button class="color-btn" data-mode="electronegativity">电负性（拓展）</button>
+`;
+
+const modeGuide = document.createElement('div');
+modeGuide.className = 'mode-guide';
+modeGuide.innerHTML = `
+  <div class="mode-guide-card">
+    <h3>元素分类</h3>
+    <p>这是本页默认视图。碱金属、碱土金属和主族金属不是互斥关系；“交界元素”也不是与金属、非金属对立的另一大类，而是帮助识别边界性质的教学标签。</p>
+  </div>
+  <div class="mode-guide-card">
+    <h3>常温状态</h3>
+    <p>这是中学教材最常直接使用的观察维度。它适合先做宏观辨识，再回到元素分类和典型性质，课堂展示时通常比抽象数值更直观。</p>
+  </div>
+  <div class="mode-guide-card">
+    <h3>电负性（拓展）</h3>
+    <p>这里按 Pauling 电负性做了 5 档示意，只用于帮助比较趋势，不是高中教材的核心分类法。若用于课堂，请优先把它当作补充阅读而不是主线结论。</p>
+  </div>
 `;
 
 inner.appendChild(header);
 inner.appendChild(toolbar);
+inner.appendChild(modeGuide);
 inner.appendChild(card);
 page.appendChild(inner);
 app.appendChild(page);
@@ -675,6 +743,45 @@ function isValidOverlayType(value: unknown): value is OverlayType {
 
 function isValidCategory(value: unknown): value is ElementCategory {
   return typeof value === 'string' && value in CATEGORY_NAMES;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function normalizeText(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function findElementByInput(inputValue: Record<string, unknown>): ChemicalElement | null {
+  const atomicNumber = asNumber(inputValue.atomicNumber) ?? asNumber(inputValue.number) ?? asNumber(inputValue.z);
+  if (atomicNumber !== undefined) {
+    return elements.find((element) => element.atomicNumber === atomicNumber) ?? null;
+  }
+
+  const raw = asString(inputValue.symbol) ?? asString(inputValue.name) ?? asString(inputValue.element) ?? asString(inputValue.nameZh) ?? asString(inputValue.nameEn);
+  if (!raw) return null;
+  const normalized = normalizeText(raw);
+  return elements.find((element) =>
+    normalizeText(element.symbol) === normalized ||
+    normalizeText(element.nameZh) === normalized ||
+    normalizeText(element.nameEn) === normalized ||
+    String(element.atomicNumber) === normalized,
+  ) ?? null;
+}
+
+function findCategoryByInput(inputValue: Record<string, unknown>): ElementCategory | null {
+  const raw = asString(inputValue.category) ?? asString(inputValue.categoryId) ?? asString(inputValue.name);
+  if (!raw) return null;
+  if (isValidCategory(raw)) return raw;
+  const normalized = normalizeText(raw);
+  const entry = (Object.entries(CATEGORY_NAMES) as Array<[ElementCategory, string]>)
+    .find(([category, name]) => normalizeText(category) === normalized || normalizeText(name) === normalized);
+  return entry?.[0] ?? null;
 }
 
 function validateSnapshot(snapshot: unknown): SnapshotValidationResult {
@@ -887,6 +994,8 @@ function showDetail(el: ChemicalElement, cellEl: HTMLElement): void {
 
   const c = CATEGORY_COLORS[el.category];
   const catName = CATEGORY_NAMES[el.category];
+  const densityLabel = el.allotropeNote ? '密度（参考形态）' : '密度';
+  const phaseDataLabel = el.allotropeNote ? '熔点 / 沸点（参考形态）' : '熔点 / 沸点';
 
   const eduLinks = el.educationalLinks.length > 0
     ? `<div class="detail-section">
@@ -923,12 +1032,12 @@ function showDetail(el: ChemicalElement, cellEl: HTMLElement): void {
           <span class="detail-prop-value">${el.stateAtRoomTemp}</span>
         </div>
         <div class="detail-prop">
-          <span class="detail-prop-label">密度</span>
+          <span class="detail-prop-label">${densityLabel}</span>
           <span class="detail-prop-value">${el.density}</span>
         </div>
         ${el.atomicNumber < 93 ? `
         <div class="detail-prop">
-          <span class="detail-prop-label">熔点 / 沸点</span>
+          <span class="detail-prop-label">${phaseDataLabel}</span>
           <span class="detail-prop-value">${el.meltingPoint !== 0 ? el.meltingPoint + ' °C' : '—'} / ${el.boilingPoint !== 0 ? el.boilingPoint + ' °C' : '—'}</span>
         </div>` : ''}
         <div class="detail-prop">
@@ -1098,11 +1207,193 @@ function loadSnapshot(snapshot: unknown): void {
   };
 }
 
+const TEACHING_SCENARIOS: Record<string, Array<Record<string, unknown>>> = {
+  'alkali-metal-trend': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openCategoryDetail', category: 'alkali-metal' },
+  ],
+  'halogen-trend': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openCategoryDetail', category: 'halogen' },
+  ],
+  'noble-gas-stability': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openCategoryDetail', category: 'noble-gas' },
+  ],
+  'room-temperature-state': [
+    { type: 'setColorMode', colorMode: 'state' },
+  ],
+  'electronegativity-trend': [
+    { type: 'setColorMode', colorMode: 'electronegativity' },
+    { type: 'openElementDetail', symbol: 'F' },
+  ],
+  'sodium-water-reaction': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openElementDetail', symbol: 'Na' },
+  ],
+  'aluminum-amphoteric': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openElementDetail', symbol: 'Al' },
+  ],
+  'iron-copper-transition': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openElementDetail', symbol: 'Fe' },
+  ],
+  'carbon-allotropes': [
+    { type: 'setColorMode', colorMode: 'category' },
+    { type: 'openElementDetail', symbol: 'C' },
+  ],
+};
+
+function getAiContext() {
+  const selectedElement = runtimeState.selectedElementAtomicNumber === null
+    ? null
+    : elements.find((element) => element.atomicNumber === runtimeState.selectedElementAtomicNumber) ?? null;
+
+  return {
+    templateKey: TEMPLATE_KEY,
+    view: {
+      colorMode: runtimeState.colorMode,
+    },
+    selection: {
+      selectedElementAtomicNumber: runtimeState.selectedElementAtomicNumber,
+      selectedElement,
+    },
+    overlay: runtimeState.overlay,
+    libraries: {
+      colorModes: ['category', 'state', 'electronegativity'],
+      categories: Object.entries(CATEGORY_NAMES).map(([category, name]) => ({ category, name })),
+      elements: elements.map((element) => ({
+        atomicNumber: element.atomicNumber,
+        symbol: element.symbol,
+        nameZh: element.nameZh,
+        nameEn: element.nameEn,
+        category: element.category,
+        period: element.period,
+        group: element.group,
+        groupLabel: element.groupLabel,
+        stateAtRoomTemp: element.stateAtRoomTemp,
+        electronegativity: element.electronegativity,
+        oxidationStates: element.oxidationStates,
+      })),
+      teachingScenarioIds: Object.keys(TEACHING_SCENARIOS),
+    },
+  };
+}
+
+function applyOneOperation(op: Record<string, unknown>, applied: string[], warnings: string[]): void {
+  const type = asString(op.type);
+  if (!type) {
+    warnings.push('operation 缺少 type。');
+    return;
+  }
+
+  switch (type) {
+    case 'setColorMode': {
+      const mode = asString(op.colorMode) ?? asString(op.mode);
+      if (!isValidColorMode(mode)) {
+        warnings.push('setColorMode 需要 colorMode 为 category、state 或 electronegativity。');
+        return;
+      }
+      applyColorMode(mode);
+      applied.push(type);
+      return;
+    }
+
+    case 'selectElement': {
+      const element = findElementByInput(op);
+      if (!element) {
+        warnings.push('selectElement 无法识别元素。');
+        return;
+      }
+      closePopover();
+      closeCatPopover();
+      runtimeState.selectedElementAtomicNumber = element.atomicNumber;
+      periodicTableApi.setSelectedElementByAtomicNumber(element.atomicNumber);
+      applied.push(type);
+      return;
+    }
+
+    case 'openElementDetail': {
+      const element = findElementByInput(op);
+      if (!element) {
+        warnings.push('openElementDetail 无法识别元素。');
+        return;
+      }
+      periodicTableApi.activateElementByAtomicNumber(element.atomicNumber);
+      applied.push(type);
+      return;
+    }
+
+    case 'openCategoryDetail': {
+      const category = findCategoryByInput(op);
+      if (!category) {
+        warnings.push('openCategoryDetail 无法识别元素分类。');
+        return;
+      }
+      if (runtimeState.colorMode !== 'category') applyColorMode('category');
+      periodicTableApi.activateCategory(category);
+      applied.push(type);
+      return;
+    }
+
+    case 'clearSelection': {
+      closePopover();
+      closeCatPopover();
+      runtimeState.selectedElementAtomicNumber = null;
+      periodicTableApi.setSelectedElementByAtomicNumber(null);
+      applied.push(type);
+      return;
+    }
+
+    case 'loadTeachingScenario': {
+      const scenarioId = asString(op.scenarioId) ?? asString(op.presetId);
+      if (!scenarioId || !TEACHING_SCENARIOS[scenarioId]) {
+        warnings.push(`未知教学场景：${scenarioId ?? '空'}`);
+        return;
+      }
+      for (const item of TEACHING_SCENARIOS[scenarioId]) {
+        applyOneOperation(item, applied, warnings);
+      }
+      applied.push(type);
+      return;
+    }
+
+    default:
+      warnings.push(`不支持的 operation：${type}`);
+  }
+}
+
+function applyOperations(inputValue: unknown): ApplyOperationsResult {
+  const operations = Array.isArray(inputValue)
+    ? inputValue
+    : isRecord(inputValue) && Array.isArray(inputValue.operations)
+      ? inputValue.operations
+      : null;
+  const applied: string[] = [];
+  const warnings: string[] = [];
+  if (!operations) {
+    return { ok: false, applied, warnings: ['operations 必须是数组。'] };
+  }
+
+  for (const op of operations) {
+    if (!isRecord(op)) {
+      warnings.push('operation 必须是对象。');
+      continue;
+    }
+    applyOneOperation(op, applied, warnings);
+  }
+
+  return { ok: warnings.length === 0, applied, warnings };
+}
+
 window[TEMPLATE_BRIDGE_GLOBAL_KEY] = {
   getDefaultSnapshot,
   getSnapshot,
   loadSnapshot,
   validateSnapshot,
+  getAiContext,
+  applyOperations,
 };
 
 function handleBridgeMessage(event: MessageEvent) {
@@ -1159,6 +1450,24 @@ function handleBridgeMessage(event: MessageEvent) {
           requestId: data.requestId,
           success: true,
           payload: validateSnapshot(data.payload),
+        };
+        break;
+      case 'getAiContext':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: getAiContext(),
+        };
+        break;
+      case 'applyOperations':
+        response = {
+          namespace: 'edumind.templateBridge',
+          type: 'response',
+          requestId: data.requestId,
+          success: true,
+          payload: applyOperations(data.payload),
         };
         break;
       default:

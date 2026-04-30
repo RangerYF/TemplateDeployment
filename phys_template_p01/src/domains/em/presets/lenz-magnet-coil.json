@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-001-lenz-magnet-coil",
+  "version": "1.0",
+  "name": "EMI-001 磁棒-线圈楞次定律",
+  "description": "磁棒位于线圈右侧，切换 N/S 极与插入/拔出，逐步分析原磁通量、磁通量变化、感应电流、感应磁场和阻碍运动的安培力方向。",
+  "category": "P-13",
+  "supportedViewports": ["field", "circuit", "force"],
+  "defaultViewport": "field",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

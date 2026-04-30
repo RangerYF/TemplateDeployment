@@ -48,6 +48,11 @@
     .module-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
     .module-title h2 { margin: 0 0 6px; font-size: 26px; font-weight: 800; }
     .module-title p { margin: 0; font-size: 14px; color: var(--color-subtext); }
+    .module-quickstart { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .module-quick-card { background: var(--color-white); border: 1px solid #D7E3EF; border-radius: 12px; padding: 14px 16px; box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05); }
+    .module-quick-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+    .module-quick-card p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--color-subtext); }
+    .module-quick-card.teacher { background: #FFF9F1; border-color: #F2D6A8; }
     .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .tag, .level-tag, .state-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; background: var(--color-primary-light); color: var(--color-primary-dark); font-size: 11px; font-weight: 700; white-space: nowrap; }
     .tag.gray { background: #F7FAFC; color: var(--color-subtext); }
@@ -135,8 +140,8 @@
     .mini-canvas { height: 220px; }
     .kt-canvas { height: 280px; }
     .process-card { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    .process-headline { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
-    .process-text { min-height: 56px; padding: 10px 12px; border-radius: 8px; background: #F8FAFC; border: 1px solid var(--color-border); color: var(--color-text); font-size: 13px; }
+    .process-headline { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; }
+    .process-text { min-height: 56px; padding: 10px 12px; border-radius: 8px; background: #F8FAFC; border: 1px solid var(--color-border); color: var(--color-text); font-size: 14px; line-height: 1.7; }
     .step-flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
     .step-chip { border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 6px; text-align: center; background: var(--color-white); font-size: 12px; color: var(--color-subtext); font-weight: 700; transition: background var(--transition), border-color var(--transition), color var(--transition); }
     .step-chip.active { background: var(--color-primary-light); border-color: var(--color-primary); color: var(--color-primary-dark); }
@@ -153,6 +158,13 @@
     .c07-table-block { border-top: 1px solid #EDF2F7; padding-top: 10px; }
     .c07-table-block h4 { margin: 0 0 4px; font-size: 14px; font-weight: 800; }
     .c07-table-block p { margin: 0 0 8px; color: var(--color-subtext); font-size: 12px; }
+    .disclosure-card { border: 1px solid var(--color-border); border-radius: 10px; background: #FCFDFE; overflow: hidden; }
+    .disclosure-card summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; cursor: pointer; font-size: 14px; font-weight: 800; color: var(--color-text); list-style: none; }
+    .disclosure-card summary::-webkit-details-marker { display: none; }
+    .disclosure-card summary::after { content: "展开"; font-size: 12px; font-weight: 700; color: var(--color-subtext); }
+    .disclosure-card[open] summary::after { content: "收起"; color: var(--color-primary-dark); }
+    .disclosure-body { padding: 0 14px 14px; }
+    .teacher-note { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px; background: #FFF4E5; color: #9C5C13; font-size: 11px; font-weight: 800; }
     .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
     .data-table thead th { text-align: left; padding: 9px 10px; background: var(--color-primary-light); color: var(--color-primary-dark); font-size: 12px; font-weight: 800; border-bottom: 1px solid #CDEFD9; }
     .data-table tbody td { padding: 9px 10px; border-bottom: 1px solid #EDF2F7; color: var(--color-text); }
@@ -337,7 +349,7 @@
       .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 1160px) {
-      .control-grid-c07, .c09-grid, .section-grid, .section-grid.three, .calculator-grid, .c07-kt-result-grid, .dual-container, .isomer-grid, .c09-isomer-control-grid, .c09-isomer-summary, .c09-boundary-grid, .c09-map-toolbar, .c09-status-stack, .c09-detail-grid, .c07-live-meta, .c07-parameter-grid { grid-template-columns: minmax(0, 1fr); }
+      .control-grid-c07, .c09-grid, .section-grid, .section-grid.three, .calculator-grid, .c07-kt-result-grid, .dual-container, .isomer-grid, .c09-isomer-control-grid, .c09-isomer-summary, .c09-boundary-grid, .c09-map-toolbar, .c09-status-stack, .c09-detail-grid, .c07-live-meta, .c07-parameter-grid, .module-quickstart { grid-template-columns: minmax(0, 1fr); }
       .page-shell { min-width: 980px; width: max(980px, calc(100vw - 32px)); }
       .c07-control-panel { position: static; }
       .status-grid { grid-template-columns: minmax(0, 1fr); }
@@ -363,7 +375,7 @@
       <div class="module-header">
         <div class="module-title">
           <h2>C-07 化学反应速率与平衡模拟器</h2>
-          <p>预设工业反应 + 微观碰撞动画 + 宏观图表联动 + 等效平衡和 K-T 教学卡片</p>
+          <p>预设课堂案例 + 示意粒子图景 + 图表联动 + 等效平衡与热力学教学卡片</p>
           <div class="tag-row">
             <span class="tag">高中必修</span>
             <span class="tag blue">高中选修</span>
@@ -371,7 +383,22 @@
           </div>
         </div>
         <div class="source-box" style="max-width: 420px; margin-top: 0;">
-          教学说明：本页速率常数、平衡常数、吸光度和活化能参数均为课堂示意值，重点用于比较“条件改变后趋势如何变化”。
+          教学说明：本页速率常数、平衡常数、吸光度和活化能参数均为课堂示意值；粒子区只演示“有效碰撞概念”，不直接还原催化表面吸附、自由基链反应等真实机理细节。
+        </div>
+      </div>
+
+      <div class="module-quickstart">
+        <div class="module-quick-card">
+          <h3>先选案例</h3>
+          <p>先用“反应场景 + 案例预设”进入一个明确的课堂问题，再调温度、浓度倍率和体积，避免一上来就同时看太多变量。</p>
+        </div>
+        <div class="module-quick-card">
+          <h3>再看主图</h3>
+          <p>优先读实时结论和主图趋势。粒子区用于讲“碰撞频率 / 有效碰撞”，不是对真实反应机理的逐步还原。</p>
+        </div>
+        <div class="module-quick-card teacher">
+          <h3>教师扩展信息</h3>
+          <p>物种表、参数边界和热力学卡片更适合教师按需展开，不建议默认把全部细节同时展示给学生。</p>
         </div>
       </div>
 
@@ -409,7 +436,7 @@
             <section class="panel-card visual-zone">
               <div class="equation-banner"><div><div class="subtle-text">当前反应方程式</div><strong id="c07EquationText">模型载入中</strong></div><div id="c07DirectionBadge" class="tag gray">正在载入</div></div>
               <div class="canvas-frame"><canvas class="particle-canvas" id="c07ParticleCanvas"></canvas></div>
-              <div class="process-card"><div class="process-headline"><span>当前发生的化学过程</span><span id="c07CollisionTag" class="tag gray">待机</span></div><div class="process-text" id="c07ProcessText"></div><div class="step-flow" id="c07StepFlow"></div></div>
+              <div class="process-card"><div class="process-headline"><span>当前示意过程</span><span id="c07CollisionTag" class="tag gray">待机</span></div><div class="process-text" id="c07ProcessText"></div><div class="step-flow" id="c07StepFlow"></div></div>
               <div class="canvas-frame"><canvas class="energy-canvas" id="c07EnergyCanvas"></canvas></div>
             </section>
 
@@ -427,9 +454,13 @@
               </div>
               <div class="legend-list" id="c07ChartLegend"></div>
               <div class="c07-table-block">
-                <h4>物种与监测表</h4>
-                <p>用于对应图例颜色和监测对象，帮助把曲线、浓度和物种名称对上。</p>
-                <table class="data-table" id="c07SpeciesTable"><thead><tr><th>物种</th><th>浓度 / mol·L⁻¹</th><th>角色</th><th>监测</th></tr></thead><tbody></tbody></table>
+                <details class="disclosure-card">
+                  <summary>物种与监测表 <span class="teacher-note">教师按需展开</span></summary>
+                  <div class="disclosure-body">
+                    <p>用于对应图例颜色和监测对象，帮助把曲线、浓度和物种名称对上。</p>
+                    <table class="data-table" id="c07SpeciesTable"><thead><tr><th>物种</th><th>浓度 / mol·L⁻¹</th><th>角色</th><th>监测</th></tr></thead><tbody></tbody></table>
+                  </div>
+                </details>
               </div>
             </aside>
 
@@ -463,14 +494,14 @@
       </div>
       <div class="section-grid three">
         <section class="panel-card">
-          <div class="card-title-row"><h3>基元反应与决速步</h3><span class="tag blue">高中选修</span></div>
-          <p class="subtle-text">示例固定使用 NO 氧化的示意机理：最慢步骤决定总速率，但这并不表示所有反应都能直接套用同样的机理框架。</p>
+          <div class="card-title-row"><h3>机理示意卡片</h3><span class="tag blue">高中选修</span></div>
+          <p class="subtle-text">示例固定使用 NO 氧化的示意机理来讲“决速步”概念。它只服务课堂解释，不意味着本页其他反应都按同样机理进行。</p>
           <div class="mechanism-flow">
             <div class="mechanism-node"><div class="tag gray">快平衡</div><div class="formula-line">2NO ⇌ N₂O₂</div><div class="subtle-text">速率表达式：v₁ = k₁[NO]²，逆速率 v₋₁ = k₋₁[N₂O₂]</div></div>
             <div class="mechanism-arrow">→</div>
             <div class="mechanism-node slow"><div class="tag orange">决速步</div><div class="formula-line">N₂O₂ + O₂ → 2NO₂</div><div class="subtle-text">总速率受最慢步骤限制，近似得到 v ≈ k′[NO]²[O₂]</div></div>
           </div>
-          <div class="source-box">课堂说明：这里使用的是示意机理，用于解释“最慢步骤决定总速率”，帮助把微观碰撞与宏观速率联系起来，不作为任意反应的通用机理模板。</div>
+          <div class="source-box">课堂说明：这里使用的是示意机理，用于解释“最慢步骤决定总速率”，帮助把微观碰撞概念与宏观速率联系起来，不作为任意反应的真实机理模板。</div>
         </section>
 
         <section class="panel-card">
@@ -540,6 +571,7 @@
             <div class="panel-card" style="padding: 14px;">
               <ul class="list-note">
                 <li>速率常数、K、吸光度与能量峰均为教学示例值，便于比较，不代表工业精确数据。</li>
+                <li>粒子区和能量图只做概念示意，不直接展开表面吸附、自由基链反应等真实机理细节。</li>
                 <li>Van’t Hoff 与 ΔG° 模块采用课堂近似：默认所示温区内 ΔH 可近似看作恒定，并且 ΔG° 只对应标准态判断。</li>
                 <li>统一免责声明见页尾，这里只保留和本模块直接相关的使用边界。</li>
               </ul>
@@ -627,6 +659,21 @@
             <div class="tag-row"><span class="tag">[高中必修]</span><span class="tag blue">[高中选修]</span><span class="tag orange">[拓展]</span></div>
           </div>
           <div class="source-box" style="max-width: 440px; margin-top: 0;">当前版本聚焦高中常见节点、常见转化和内置同分异构体示例；超出预设范围时会给出明确提示，方便课堂把握边界。</div>
+        </div>
+
+        <div class="module-quickstart">
+          <div class="module-quick-card">
+            <h3>先选起点和终点</h3>
+            <p>先明确“从哪类物质出发，要到哪类物质结束”，再看系统给出的推荐路径。这样更符合课堂中的主线讲解顺序。</p>
+          </div>
+          <div class="module-quick-card">
+            <h3>再看路径与方程式</h3>
+            <p>路径图负责告诉学生“能怎么走”，右侧详情区负责告诉学生“每一步的条件和方程式是什么”。建议先讲一条主线，再讨论筛选造成的变化。</p>
+          </div>
+          <div class="module-quick-card teacher">
+            <h3>教师扩展信息</h3>
+            <p>支持范围、同分异构体边界和多路径比较更适合教师按需展开，不建议默认把所有扩展信息直接抛给学生。</p>
+          </div>
         </div>
 
         <div class="c09-grid">
@@ -772,33 +819,37 @@
         </div>
 
         <section class="panel-card">
-          <div class="card-title-row"><h3>支持范围与使用说明</h3><span class="panel-badge">当前版本</span></div>
-          <div class="c09-boundary-grid">
-            <div class="c09-boundary-card">
-              <h4>当前支持范围</h4>
-              <ul class="info-list">
-                <li>路径图覆盖高中常见官能团节点与内置转化路径，会优先展示最短推荐路径。</li>
-                <li>同分异构体示例使用内置数据：含苯环体系碳原子数 ≤ 15，不含苯环体系碳原子数 ≤ 8。</li>
-                <li>筛选项会同步影响路径搜索、路径图明暗状态和右侧详情反馈。</li>
-              </ul>
+          <details class="disclosure-card">
+            <summary>支持范围与使用说明 <span class="teacher-note">教师按需展开</span></summary>
+            <div class="disclosure-body">
+              <div class="c09-boundary-grid">
+                <div class="c09-boundary-card">
+                  <h4>当前支持范围</h4>
+                  <ul class="info-list">
+                    <li>路径图覆盖高中常见官能团节点与内置转化路径，会优先展示最短推荐路径。</li>
+                    <li>同分异构体示例使用内置数据：含苯环体系碳原子数 ≤ 15，不含苯环体系碳原子数 ≤ 8。</li>
+                    <li>筛选项会同步影响路径搜索、路径图明暗状态和右侧详情反馈。</li>
+                  </ul>
+                </div>
+                <div class="c09-boundary-card">
+                  <h4>建议使用方式</h4>
+                  <ul class="info-list">
+                    <li>先从一条主线示例路径出发，再通过筛选讨论“哪些转化属于必修、哪些进入选修”。</li>
+                    <li>讲同分异构体时，先比较“分子式相同”，再引导学生观察碳骨架、官能团和位置变化。</li>
+                    <li>点击路径图连线后，右侧详情区可配合逐步播放讲解每一步条件与方程式。</li>
+                  </ul>
+                </div>
+                <div class="c09-boundary-card">
+                  <h4>暂不覆盖内容</h4>
+                  <ul class="info-list">
+                    <li>典型有机合成路线设计辅助</li>
+                    <li>高分子合成预测或复杂推断题自动生成</li>
+                    <li>未收录路径和未收录分子式的自动扩展推断</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div class="c09-boundary-card">
-              <h4>建议使用方式</h4>
-              <ul class="info-list">
-                <li>先从一条主线示例路径出发，再通过筛选讨论“哪些转化属于必修、哪些进入选修”。</li>
-                <li>讲同分异构体时，先比较“分子式相同”，再引导学生观察碳骨架、官能团和位置变化。</li>
-                <li>点击路径图连线后，右侧详情区可配合逐步播放讲解每一步条件与方程式。</li>
-              </ul>
-            </div>
-            <div class="c09-boundary-card">
-              <h4>暂不覆盖内容</h4>
-              <ul class="info-list">
-                <li>典型有机合成路线设计辅助</li>
-                <li>高分子合成预测或复杂推断题自动生成</li>
-                <li>未收录路径和未收录分子式的自动扩展推断</li>
-              </ul>
-            </div>
-          </div>
+          </details>
         </section>
       </div>
     </section>
@@ -1440,7 +1491,7 @@
       }
 
       function createReactionSimulation(reaction, preset) {
-        const sim = { reactionId: reaction.id, time: 0, temperature: preset.temperature, concentrationScale: preset.concentrationScale, volume: preset.volume, catalyst: reaction.catalystSupported ? !!preset.catalyst : false, history: [], markers: [], lastHistoryTime: -1, microEvent: null, processText: "粒子随机热运动中，等待下一次碰撞。", collisionTag: "待机", stepIndex: -1, particles: [], particleCanvasSize: null, initialConcentrations: {}, concentrations: {}, latestSnapshot: null };
+        const sim = { reactionId: reaction.id, time: 0, temperature: preset.temperature, concentrationScale: preset.concentrationScale, volume: preset.volume, catalyst: reaction.catalystSupported ? !!preset.catalyst : false, history: [], markers: [], lastHistoryTime: -1, microEvent: null, processText: "粒子随机热运动中，等待下一次示意碰撞。", collisionTag: "待机", stepIndex: -1, particles: [], particleCanvasSize: null, initialConcentrations: {}, concentrations: {}, latestSnapshot: null };
         reaction.species.forEach((species) => {
           const baseValue = reaction.initialConcentrations[species.id];
           const scaledValue = species.role === "reactant" ? baseValue * preset.concentrationScale : baseValue;
@@ -1982,8 +2033,8 @@
         $("#c07ReactionIntro").innerHTML = `
           <div class="card-title-row" style="margin-bottom:8px;"><h4 style="font-size:15px;">${reaction.name}</h4><span class="tag gray">${reaction.category}</span></div>
           <div class="tag-row" style="margin-top:0;">${reaction.level.map((item) => `<span class="tag">${htmlEscape(item)}</span>`).join("")}<span class="tag blue">${preset.name}</span></div>
-          <p class="subtle-text" style="margin-top:10px;"><strong>工业背景：</strong>${reaction.industrialBackground}</p>
-          <p class="subtle-text"><strong>条件优化重点：</strong>${reaction.optimizationFocus}</p>
+          <p class="subtle-text" style="margin-top:10px;"><strong>教学背景：</strong>${reaction.industrialBackground}</p>
+          <p class="subtle-text"><strong>比较重点：</strong>${reaction.optimizationFocus}</p>
           <p class="subtle-text"><strong>速率与平衡的权衡：</strong>${reaction.tradeoff}</p>
           <div class="source-box">${reaction.sourceText.replace(/^数据来源占位：/, "教学说明：")}</div>`;
         $("#c07TempSlider").min = reaction.temperatureRange[0];
@@ -2023,13 +2074,13 @@
         $("#c07DirectionBadge").className = direction.className;
         const processFallback = Math.abs(snapshot.forwardRate - snapshot.reverseRate) < Math.max(snapshot.forwardRate, snapshot.reverseRate, 0.05) * 0.08 ? "当前正逆反应速率接近，体系正在接近平衡；图表中 v正 与 v逆 将逐步汇合。" : snapshot.Qc < snapshot.Kc ? "当前 Qc < Kc，正向有效碰撞更占优势；体系会继续向生成物方向建立新的平衡。" : "当前 Qc > Kc，逆向过程更占优势；体系会回调到平衡组成。";
         if (!sim.microEvent) { sim.processText = processFallback; sim.collisionTag = "热运动中"; sim.stepIndex = -1; }
-        $("#c07StatusSummary").textContent = `当前处于“${reaction.name} - ${preset.name}”场景。${liveModeText}；温度、浓度倍率、体积和催化剂会同时影响粒子区、状态卡和图表。催化剂会让曲线更快逼近平衡，但不会改变 K 和最终平衡位置。`;
+        $("#c07StatusSummary").textContent = `当前处于“${reaction.name} - ${preset.name}”场景。${liveModeText}；温度、浓度倍率、体积和催化剂会同时影响示意粒子区、状态卡和图表。催化剂会让曲线更快逼近平衡，但不会改变 K 和最终平衡位置。`;
         $("#c07StatusGrid").innerHTML = `
           <div class="status-card">
             <div class="label">当前模式</div>
             <strong>${liveModeText}</strong>
             <div class="subtle-text">动画时间：${formatNumber(sim.time, 2)} s；播放速度：${formatNumber(c07State.speed, 1)}x</div>
-            <div class="status-note">这张卡片告诉你“页面现在在看什么”，避免只看到控件变化却不知道主图模式。</div>
+            <div class="status-note">这张卡片告诉你“页面现在在看什么”，避免只看到控件变化却不知道当前主图模式。</div>
           </div>
           <div class="status-card">
             <div class="label">当前条件</div>
@@ -2134,6 +2185,34 @@
         };
       }
 
+      function getC07StableSnapshotPayload() {
+        const payload = getC07SnapshotPayload();
+        const reaction = reactionData[payload.editor.activeReactionId] || reactionData.haber;
+        const preset = reaction.presets.find((item) => item.id === payload.editor.activePresetId) || reaction.presets[0];
+        const stableSim = createReactionSimulation(reaction, preset);
+        stableSim.time = 0;
+        stableSim.temperature = payload.simulation.temperature;
+        stableSim.concentrationScale = payload.simulation.concentrationScale;
+        stableSim.volume = payload.simulation.volume;
+        stableSim.catalyst = reaction.catalystSupported ? !!payload.simulation.catalyst : false;
+        stableSim.initialConcentrations = cloneSerializable(payload.simulation.initialConcentrations);
+        stableSim.concentrations = cloneSerializable(stableSim.initialConcentrations);
+        stableSim.latestSnapshot = computeReactionSnapshot(reaction, stableSim);
+        stableSim.history = [];
+        pushReactionHistory(reaction, stableSim, true);
+        return {
+          ...payload,
+          simulation: {
+            ...payload.simulation,
+            time: 0,
+            concentrations: cloneSerializable(stableSim.concentrations),
+            markers: [],
+            latestSnapshot: cloneSerializable(stableSim.latestSnapshot),
+            historySummary: cloneSerializable(stableSim.history.slice(-1)),
+          },
+        };
+      }
+
       function syncC07Controls() {
         const reaction = reactionData[c07State.activeReactionId];
         const sim = c07State.simulation;
@@ -2207,7 +2286,7 @@
         $("#c07ChartLegend").innerHTML = merged.legend.map((item) => `<div class="legend-item"><span class="legend-dot" style="background:${item.color}"></span>${item.label}</div>`).join("");
         const primaryLabel = getChartTypeLabel(c07State.primaryChart);
         const secondaryLabel = c07State.secondaryChart !== "none" && c07State.secondaryChart !== c07State.primaryChart ? getChartTypeLabel(c07State.secondaryChart) : "";
-        $("#c07ChartSummary").innerHTML = `<strong>当前重点：${primaryLabel}${secondaryLabel ? ` + ${secondaryLabel}` : ""}</strong><p>先看主图趋势，再用图例和下方物种表确认是哪一条曲线、对应哪个物种或状态量；表格是辅助说明，不是主阅读入口。</p>`;
+        $("#c07ChartSummary").innerHTML = `<strong>当前重点：${primaryLabel}${secondaryLabel ? ` + ${secondaryLabel}` : ""}</strong><p>先看主图趋势，再用图例和按需展开的物种表确认是哪一条曲线、对应哪个物种或状态量；表格是辅助说明，不是主阅读入口。</p>`;
       }
 
       function drawOrderCanvas() {
@@ -2341,7 +2420,7 @@
           });
           ctx.fillStyle = event.effective ? "rgba(0, 168, 90, 0.94)" : "rgba(197, 48, 48, 0.94)";
           ctx.font = width < 540 ? "bold 12px sans-serif" : "bold 14px sans-serif";
-          ctx.fillText(event.effective ? "有效碰撞：跨越活化能峰值" : "无效碰撞：能量 / 取向不足", centerX, 34, Math.max(180, width - 64));
+          ctx.fillText(event.effective ? "示意有效碰撞：满足能量与取向条件" : "示意无效碰撞：能量 / 取向不足", centerX, 34, Math.max(220, width - 64));
           ctx.restore();
         } else {
           sim.processText = sim.processText || "粒子随机热运动中。";
@@ -2365,13 +2444,21 @@
         });
       }
 
+      function smoothStep(t) {
+        return t * t * (3 - 2 * t);
+      }
+
       function curveY(progress, baseY, peakY, endY) {
-        if (progress < 0.5) {
-          const t = progress / 0.5;
-          return lerp(baseY, peakY, t * t);
+        if (progress < 0.44) {
+          const t = progress / 0.44;
+          return lerp(baseY, peakY, smoothStep(t));
         }
-        const t = (progress - 0.5) / 0.5;
-        return lerp(peakY, endY, t * (2 - t));
+        if (progress < 0.58) {
+          const shoulder = Math.sin(((progress - 0.44) / 0.14) * Math.PI);
+          return peakY + shoulder * 5;
+        }
+        const t = (progress - 0.58) / 0.42;
+        return lerp(peakY, endY, smoothStep(t));
       }
 
       function drawC07EnergyCanvas() {
@@ -2432,7 +2519,7 @@
         ctx.fillText("反应坐标", width - 80, height - 10);
         ctx.fillStyle = "#1A202C";
         ctx.font = "bold 13px sans-serif";
-        ctx.fillText(sim.catalyst && reaction.catalystSupported ? "催化剂开启：活化能峰降低、达到平衡更快，但 ΔH、K 与平衡位置不变" : "未加催化剂：需跨越较高活化能峰", 20, 22);
+        ctx.fillText(sim.catalyst && reaction.catalystSupported ? "示意势能面：催化剂使活化能峰降低、达到平衡更快，但 ΔH、K 与平衡位置不变" : "示意势能面：未加催化剂时需跨越较高活化能峰", 20, 22);
       }
 
       function getComparisonScenario(caseId) {
@@ -3575,7 +3662,7 @@
       }
 
       function buildSnapshotPayload(templateKey) {
-        return templateKey === "c09" ? getC09SnapshotPayload() : getC07SnapshotPayload();
+        return templateKey === "c09" ? getC09SnapshotPayload() : getC07StableSnapshotPayload();
       }
 
       function getDefaultSnapshot() {
@@ -3728,7 +3815,7 @@
         sim.history = cloneSerializable(payload.simulation.historySummary);
         sim.lastHistoryTime = sim.history.length ? sim.history[sim.history.length - 1].t : sim.time;
         sim.microEvent = null;
-        sim.processText = "粒子随机热运动中，等待下一次碰撞。";
+        sim.processText = "粒子随机热运动中，等待下一次示意碰撞。";
         sim.collisionTag = "待机";
         sim.stepIndex = -1;
         sim.particleCanvasSize = null;
@@ -3778,11 +3865,504 @@
         loadC07SnapshotPayload(doc.payload);
       }
 
+      function normalizeAiOperations(input) {
+        if (Array.isArray(input)) return input;
+        if (isRecord(input) && Array.isArray(input.operations)) return input.operations;
+        return [];
+      }
+
+      function getOperationPayload(operation) {
+        return isRecord(operation.payload) ? operation.payload : operation;
+      }
+
+      function getStringField(payload, keys) {
+        for (const key of keys) {
+          if (typeof payload[key] === "string" && payload[key].trim()) return payload[key].trim();
+        }
+        return "";
+      }
+
+      function resolveC07Reaction(payload, warnings) {
+        const rawId = getStringField(payload, ["reactionId", "id"]);
+        if (rawId && reactionData[rawId]) return reactionData[rawId];
+        const query = getStringField(payload, ["name", "title", "equation", "formula"]);
+        if (!query) return reactionData[c07State.activeReactionId] || reactionData.haber;
+        const normalized = query.toLowerCase();
+        const matches = Object.values(reactionData).filter((reaction) => {
+          return reaction.id.toLowerCase() === normalized
+            || reaction.name.toLowerCase().includes(normalized)
+            || reaction.equation.toLowerCase().includes(normalized)
+            || reaction.category.toLowerCase().includes(normalized);
+        });
+        if (matches.length === 1) return matches[0];
+        warnings.push(matches.length ? `反应“${query}”匹配多个场景，请使用 reactionId。` : `未找到反应场景“${query}”。`);
+        return null;
+      }
+
+      function resolveC07Preset(reaction, payload) {
+        const rawId = getStringField(payload, ["presetId", "id"]);
+        if (rawId) {
+          const preset = reaction.presets.find((item) => item.id === rawId || item.name === rawId || item.name.includes(rawId));
+          if (preset) return preset;
+        }
+        if (reaction.id === c07State.activeReactionId) {
+          return reaction.presets.find((item) => item.id === c07State.activePresetId) || reaction.presets[0];
+        }
+        return reaction.presets[0];
+      }
+
+      function setC07Charts(primaryChart, secondaryChart, warnings) {
+        const chartIds = chartTypeOptions.map((item) => item.id);
+        if (typeof primaryChart === "string") {
+          if (chartIds.includes(primaryChart) && primaryChart !== "none") c07State.primaryChart = primaryChart;
+          else warnings.push(`主图类型 ${primaryChart} 不可用。`);
+        }
+        if (typeof secondaryChart === "string") {
+          if (chartIds.includes(secondaryChart)) c07State.secondaryChart = secondaryChart;
+          else warnings.push(`叠加图类型 ${secondaryChart} 不可用。`);
+        }
+        syncC07Controls();
+        syncC07ChartQuickButtons();
+        renderC07Charts();
+      }
+
+      function applyC07TeachingScenario(scenarioId, warnings) {
+        const scenarioMap = {
+          "haber-equilibrium": () => applyC07Preset("haber", "standard"),
+          "ammonia-high-pressure": () => applyC07Preset("haber", "high-pressure"),
+          "so2-catalyst": () => applyC07Preset("so2", "no-catalyst"),
+          "no2-color-rate": () => applyC07Preset("no2", "standard"),
+          "hi-temperature": () => applyC07Preset("hi", "heated"),
+          "n2o4-color-equilibrium": () => applyC07Preset("n2o4", "hot"),
+          "pcl5-pressure-temperature": () => applyC07Preset("pcl5", "compressed"),
+          "equivalent-equilibrium": () => { c07State.comparisonCase = "isoV"; c07State.comparisonProgress = 0; renderComparisonDemo(); },
+          "non-equivalent-equilibrium": () => { c07State.comparisonCase = "nonEq"; c07State.comparisonProgress = 0; renderComparisonDemo(); },
+          "rate-order-plot": () => setC07Charts("lgct", "ct", warnings),
+          "vant-hoff-kt": () => { c07State.ktXAxis = "invT"; c07State.ktYAxis = "lnK"; syncC07Controls(); drawKtCanvas(); },
+        };
+        const handler = scenarioMap[scenarioId];
+        if (!handler) {
+          warnings.push(`未知教学场景 ${scenarioId}。`);
+          return false;
+        }
+        handler();
+        return true;
+      }
+
+      function getC07AiContext() {
+        const reaction = reactionData[c07State.activeReactionId];
+        const sim = c07State.simulation || createReactionSimulation(reaction, reaction.presets[0]);
+        return {
+          templateKey: "c07",
+          current: {
+            activeReactionId: c07State.activeReactionId,
+            activePresetId: c07State.activePresetId,
+            playing: c07State.playing,
+            speed: c07State.speed,
+            primaryChart: c07State.primaryChart,
+            secondaryChart: c07State.secondaryChart,
+            comparisonCase: c07State.comparisonCase,
+            ktXAxis: c07State.ktXAxis,
+            ktYAxis: c07State.ktYAxis,
+            temperature: sim.temperature,
+            concentrationScale: sim.concentrationScale,
+            volume: sim.volume,
+            catalyst: !!sim.catalyst,
+          },
+          reactionLibrary: Object.values(reactionData).map((item) => ({
+            id: item.id,
+            name: item.name,
+            equation: item.equation,
+            category: item.category,
+            level: item.level,
+            reversible: item.reversible,
+            pressureRelevant: item.pressureRelevant,
+            catalystSupported: item.catalystSupported,
+            enthalpyType: item.enthalpyType,
+            presets: item.presets.map((preset) => ({
+              id: preset.id,
+              name: preset.name,
+              temperature: preset.temperature,
+              volume: preset.volume,
+              concentrationScale: preset.concentrationScale,
+              catalyst: !!preset.catalyst,
+            })),
+            species: item.species.map((species) => ({
+              id: species.id,
+              label: species.label,
+              role: species.role,
+              stoich: species.stoich,
+              displayName: species.displayName,
+            })),
+          })),
+          chartTypes: chartTypeOptions.map((item) => ({ id: item.id, label: item.label })),
+          comparisonCases: ["isoV", "isoP", "nonEq"],
+          ktAxes: { x: ["T", "invT"], y: ["K", "lnK"] },
+        };
+      }
+
+      function resolveC09Node(value, warnings, fieldName) {
+        if (typeof value !== "string" || !value.trim()) return null;
+        const query = value.trim().toLowerCase();
+        const matches = organicsPathData.nodes.filter((node) => {
+          return node.id.toLowerCase() === query
+            || node.label.toLowerCase() === query
+            || node.label.toLowerCase().includes(query)
+            || node.formulaHint.toLowerCase().includes(query);
+        });
+        if (matches.length === 1) return matches[0];
+        warnings.push(matches.length ? `${fieldName}“${value}”匹配多个有机物节点，请使用节点 id。` : `未找到${fieldName}“${value}”。`);
+        return null;
+      }
+
+      function setC09PathEndpoints(payload, warnings) {
+        const startRaw = payload.startNodeId || payload.startId || payload.start || payload.from || payload.startLabel;
+        const endRaw = payload.endNodeId || payload.endId || payload.end || payload.to || payload.endLabel;
+        const startNode = resolveC09Node(startRaw, warnings, "起点");
+        const endNode = resolveC09Node(endRaw, warnings, "终点");
+        if (!startNode || !endNode) return false;
+        c09State.startNodeId = startNode.id;
+        c09State.endNodeId = endNode.id;
+        syncC09Selectors();
+        updatePathResults();
+        return true;
+      }
+
+      function setC09LevelFilter(payload, warnings) {
+        let levels = Array.isArray(payload.levels) ? payload.levels : Array.isArray(payload.levelFilter) ? payload.levelFilter : null;
+        if (!levels) {
+          levels = [];
+          if (payload.required !== false && payload.includeRequired !== false) levels.push("[高中必修]");
+          if (payload.elective !== false && payload.includeElective !== false) levels.push("[高中选修]");
+        }
+        const validLevels = levels.filter((level) => level === "[高中必修]" || level === "[高中选修]");
+        if (!validLevels.length) {
+          warnings.push("学段筛选至少需要保留一个有效学段。");
+          return false;
+        }
+        c09State.levelFilter = new Set(validLevels);
+        updatePathResults();
+        return true;
+      }
+
+      function setC09ReactionTypeFilter(payload, warnings) {
+        const type = payload.reactionType || payload.typeValue || payload.filter || "全部";
+        const supported = ["全部", ...new Set(organicsPathData.edges.map((edge) => edge.reactionType))];
+        if (!supported.includes(type)) {
+          warnings.push(`反应类型“${type}”不在当前筛选列表中。`);
+          return false;
+        }
+        c09State.reactionTypeFilter = type;
+        updatePathResults();
+        return true;
+      }
+
+      function selectC09Path(payload, warnings) {
+        if (!c09State.foundPaths.length) {
+          warnings.push("当前还没有可选路径，请先设置起点和终点。");
+          return false;
+        }
+        const index = Number(payload.pathIndex ?? payload.index ?? 0);
+        if (!Number.isFinite(index) || index < 0 || index >= c09State.foundPaths.length) {
+          warnings.push(`路径序号 ${payload.pathIndex ?? payload.index} 不存在。`);
+          return false;
+        }
+        c09State.selectedPathIndex = index;
+        c09State.selectedEdgeId = "";
+        c09State.animationProgress = 0;
+        c09State.playing = false;
+        renderC09State();
+        renderC09Map();
+        return true;
+      }
+
+      function selectC09ReactionStep(payload, warnings) {
+        const path = getC09SelectedPath();
+        if (!path.length) {
+          warnings.push("当前没有推荐路径，无法选择反应步骤。");
+          return false;
+        }
+        let edge = null;
+        const edgeId = payload.edgeId || payload.id;
+        if (typeof edgeId === "string") edge = path.find((item) => item.id === edgeId) || null;
+        if (!edge && typeof payload.stepIndex === "number") edge = path[payload.stepIndex] || null;
+        if (!edge && typeof payload.reactionType === "string") edge = path.find((item) => item.reactionType === payload.reactionType) || null;
+        if (!edge) {
+          warnings.push("无法在当前路径中唯一定位反应步骤。");
+          return false;
+        }
+        c09State.playing = false;
+        c09State.selectedEdgeId = edge.id;
+        renderC09State();
+        renderC09Map();
+        return true;
+      }
+
+      function setC09IsomerQuery(payload, warnings) {
+        const formula = payload.formula || payload.formulaInput || payload.molecularFormula;
+        const ringHint = payload.ringHint || payload.hint || "auto";
+        const validHints = ["auto", "noRing", "benzene", "oxygen", "halogen", "nitrogen"];
+        if (typeof formula !== "string" || !formula.trim()) {
+          warnings.push("同分异构体查询需要 formula。");
+          return false;
+        }
+        if (!validHints.includes(ringHint)) {
+          warnings.push(`结构边界提示 ${ringHint} 不可用，已使用 auto。`);
+        }
+        $("#c09FormulaInput").value = normalizeFormula(formula);
+        $("#c09RingHintSelect").value = validHints.includes(ringHint) ? ringHint : "auto";
+        renderIsomerResults();
+        return true;
+      }
+
+      function applyC09TeachingScenario(scenarioId, warnings) {
+        const scenarioMap = {
+          "alkane-to-carboxylic": () => setC09PathEndpoints({ startNodeId: "alkane", endNodeId: "carboxylic" }, warnings),
+          "alkene-to-ester": () => setC09PathEndpoints({ startNodeId: "alkene", endNodeId: "ester" }, warnings),
+          "aromatic-to-phenol": () => setC09PathEndpoints({ startNodeId: "aromatic", endNodeId: "phenol" }, warnings),
+          "haloalkane-hydrolysis": () => { setC09PathEndpoints({ startNodeId: "haloalkane", endNodeId: "alcohol" }, warnings); selectC09ReactionStep({ reactionType: "水解" }, warnings); },
+          "alcohol-oxidation": () => setC09PathEndpoints({ startNodeId: "alcohol", endNodeId: "carboxylic" }, warnings),
+          "esterification": () => setC09PathEndpoints({ startNodeId: "carboxylic", endNodeId: "ester" }, warnings),
+          "isomer-alkane": () => setC09IsomerQuery({ formula: "C4H10", ringHint: "noRing" }, warnings),
+          "isomer-functional-group": () => setC09IsomerQuery({ formula: "C2H6O", ringHint: "oxygen" }, warnings),
+          "aromatic-position-isomer": () => setC09IsomerQuery({ formula: "C8H10", ringHint: "benzene" }, warnings),
+          "halogen-position-isomer": () => setC09IsomerQuery({ formula: "C3H7Cl", ringHint: "halogen" }, warnings),
+        };
+        const handler = scenarioMap[scenarioId];
+        if (!handler) {
+          warnings.push(`未知 C09 教学场景 ${scenarioId}。`);
+          return false;
+        }
+        handler();
+        return true;
+      }
+
+      function getC09AiContext() {
+        return {
+          templateKey: "c09",
+          current: {
+            startNodeId: c09State.startNodeId,
+            endNodeId: c09State.endNodeId,
+            levelFilter: Array.from(c09State.levelFilter),
+            reactionTypeFilter: c09State.reactionTypeFilter,
+            selectedPathIndex: c09State.selectedPathIndex,
+            selectedEdgeId: c09State.selectedEdgeId,
+            pathCount: c09State.foundPaths.length,
+            playing: c09State.playing,
+            speed: c09State.speed,
+            formulaInput: $("#c09FormulaInput") ? $("#c09FormulaInput").value : "C4H10",
+            ringHint: $("#c09RingHintSelect") ? $("#c09RingHintSelect").value : "auto",
+          },
+          organicNodes: organicsPathData.nodes.map((node) => ({ id: node.id, label: node.label, formulaHint: node.formulaHint, level: node.level })),
+          reactionEdges: organicsPathData.edges.map((edge) => ({
+            id: edge.id,
+            from: edge.from,
+            to: edge.to,
+            reactionType: edge.reactionType,
+            conditions: edge.conditions,
+            equation: edge.equation,
+            level: edge.level,
+            recommended: !!edge.recommended,
+          })),
+          supportedReactionTypes: ["全部", ...new Set(organicsPathData.edges.map((edge) => edge.reactionType))],
+          supportedFormulaList: getSupportedFormulaList(),
+          ringHints: ["auto", "noRing", "benzene", "oxygen", "halogen", "nitrogen"],
+          currentPaths: c09State.foundPaths.map((path, pathIndex) => ({
+            pathIndex,
+            steps: path.map((edge, stepIndex) => ({
+              stepIndex,
+              edgeId: edge.id,
+              from: edge.from,
+              to: edge.to,
+              reactionType: edge.reactionType,
+              conditions: edge.conditions,
+              equation: edge.equation,
+            })),
+          })),
+        };
+      }
+
+      function getAiContext() {
+        if (getCurrentTemplateKey() === "c07") return getC07AiContext();
+        return getC09AiContext();
+      }
+
+      function applyC07Operations(input) {
+        const operations = normalizeAiOperations(input);
+        const warnings = [];
+        const appliedOperations = [];
+        operations.forEach((operation) => {
+          if (!isRecord(operation) || typeof operation.type !== "string") {
+            warnings.push("存在非法 operation，已跳过。");
+            return;
+          }
+          const payload = getOperationPayload(operation);
+          const type = operation.type;
+          if (type === "selectReaction") {
+            const reaction = resolveC07Reaction(payload, warnings);
+            if (!reaction) return;
+            const preset = resolveC07Preset(reaction, payload);
+            applyC07Preset(reaction.id, preset.id);
+          } else if (type === "loadReactionPreset") {
+            const reaction = resolveC07Reaction(payload, warnings);
+            if (!reaction) return;
+            const preset = resolveC07Preset(reaction, payload);
+            applyC07Preset(reaction.id, preset.id);
+          } else if (type === "setReactionConditions") {
+            if (typeof payload.temperature === "number") applyTemperature(payload.temperature, false);
+            if (typeof payload.concentrationScale === "number") applyConcentrationScale(payload.concentrationScale, false);
+            if (typeof payload.volume === "number") applyVolume(payload.volume, false);
+            if (typeof payload.catalyst === "boolean") applyCatalyst(payload.catalyst, false);
+          } else if (type === "setCatalyst") {
+            if (typeof payload.catalyst === "boolean") applyCatalyst(payload.catalyst, false);
+            else warnings.push("setCatalyst 需要 catalyst 布尔值。");
+          } else if (type === "setPlayback") {
+            if (typeof payload.playing === "boolean") c07State.playing = payload.playing;
+            if (typeof payload.speed === "number") {
+              if ([0.5, 1, 2].includes(payload.speed)) c07State.speed = payload.speed;
+              else warnings.push("播放速度只支持 0.5、1、2。");
+            }
+            syncC07Controls();
+          } else if (type === "stepForward") {
+            c07State.playing = false;
+            stepC07(0.4);
+          } else if (type === "resetSimulation") {
+            c07State.playing = false;
+            applyC07Preset(c07State.activeReactionId, c07State.activePresetId);
+          } else if (type === "applyIntervention") {
+            const kind = payload.kind || payload.intervention;
+            if (kind === "addReactant") addSpecies("reactant");
+            else if (kind === "addProduct") addSpecies("product");
+            else if (kind === "tempBoost") applyTemperature(c07State.simulation.temperature + 30, false);
+            else if (kind === "compress") applyVolume(Math.max(0.65, c07State.simulation.volume - 0.12), false);
+            else warnings.push(`未知干预类型 ${kind || ""}。`);
+          } else if (type === "setChartOptions") {
+            setC07Charts(payload.primaryChart || payload.primary, payload.secondaryChart || payload.secondary, warnings);
+          } else if (type === "setComparisonCase") {
+            const comparisonCase = payload.comparisonCase || payload.caseId || payload.mode;
+            if (["isoV", "isoP", "nonEq"].includes(comparisonCase)) {
+              c07State.comparisonCase = comparisonCase;
+              c07State.comparisonProgress = 0;
+              syncC07Controls();
+              renderComparisonDemo();
+            } else {
+              warnings.push(`等效平衡比较类型 ${comparisonCase || ""} 不可用。`);
+            }
+          } else if (type === "setKtAxes") {
+            const xAxis = payload.xAxis || payload.ktXAxis;
+            const yAxis = payload.yAxis || payload.ktYAxis;
+            if (typeof xAxis === "string") {
+              if (["T", "invT"].includes(xAxis)) c07State.ktXAxis = xAxis;
+              else warnings.push(`K-T 横轴 ${xAxis} 不可用。`);
+            }
+            if (typeof yAxis === "string") {
+              if (["K", "lnK"].includes(yAxis)) c07State.ktYAxis = yAxis;
+              else warnings.push(`K-T 纵轴 ${yAxis} 不可用。`);
+            }
+            syncC07Controls();
+            drawKtCanvas();
+          } else if (type === "loadTeachingScenario") {
+            const scenarioId = payload.scenarioId || payload.presetId || payload.id;
+            if (!scenarioId) warnings.push("loadTeachingScenario 需要 scenarioId。");
+            else applyC07TeachingScenario(scenarioId, warnings);
+          } else {
+            warnings.push(`C07 不支持 operation: ${type}`);
+            return;
+          }
+          appliedOperations.push(type);
+        });
+        renderC07All();
+        return { appliedOperations, warnings, snapshot: getSnapshot() };
+      }
+
+      function applyC09Operations(input) {
+        const operations = normalizeAiOperations(input);
+        const warnings = [];
+        const appliedOperations = [];
+        operations.forEach((operation) => {
+          if (!isRecord(operation) || typeof operation.type !== "string") {
+            warnings.push("存在非法 operation，已跳过。");
+            return;
+          }
+          const payload = getOperationPayload(operation);
+          const type = operation.type;
+          let applied = true;
+          if (type === "setPathEndpoints") {
+            applied = setC09PathEndpoints(payload, warnings);
+          } else if (type === "setLevelFilter") {
+            applied = setC09LevelFilter(payload, warnings);
+          } else if (type === "setReactionTypeFilter") {
+            applied = setC09ReactionTypeFilter(payload, warnings);
+          } else if (type === "clearPathSelection") {
+            c09State.startNodeId = "";
+            c09State.endNodeId = "";
+            c09State.foundPaths = [];
+            c09State.selectedEdgeId = "";
+            c09State.selectedPathIndex = 0;
+            c09State.animationProgress = 0;
+            c09State.playing = false;
+            syncC09Selectors();
+            renderC09State();
+            renderC09Map();
+          } else if (type === "selectPath") {
+            applied = selectC09Path(payload, warnings);
+          } else if (type === "selectReactionStep") {
+            applied = selectC09ReactionStep(payload, warnings);
+          } else if (type === "setPathPlayback") {
+            if (typeof payload.playing === "boolean") c09State.playing = payload.playing && c09State.foundPaths.length > 0;
+            if (typeof payload.speed === "number") {
+              if ([0.5, 1, 2].includes(payload.speed)) c09State.speed = payload.speed;
+              else warnings.push("播放速度只支持 0.5、1、2。");
+            }
+            c09State.selectedEdgeId = c09State.playing ? "" : c09State.selectedEdgeId;
+            syncC09Controls();
+            renderC09State();
+            renderC09Map();
+          } else if (type === "stepPathForward") {
+            c09State.playing = false;
+            stepC09Animation(1);
+          } else if (type === "resetPath") {
+            c09State.playing = false;
+            c09State.selectedEdgeId = "";
+            c09State.selectedPathIndex = 0;
+            c09State.animationProgress = 0;
+            renderC09State();
+            renderC09Map();
+          } else if (type === "setMapHint") {
+            c09State.showMapHint = !!(payload.showMapHint ?? payload.visible ?? payload.enabled);
+            renderC09State();
+          } else if (type === "setIsomerQuery" || type === "loadFormulaPreset") {
+            applied = setC09IsomerQuery(payload, warnings);
+          } else if (type === "loadTeachingScenario") {
+            const scenarioId = payload.scenarioId || payload.presetId || payload.id;
+            if (!scenarioId) {
+              warnings.push("loadTeachingScenario 需要 scenarioId。");
+              applied = false;
+            } else {
+              applied = applyC09TeachingScenario(scenarioId, warnings);
+            }
+          } else {
+            warnings.push(`C09 不支持 operation: ${type}`);
+            applied = false;
+          }
+          if (applied) appliedOperations.push(type);
+        });
+        syncC09Controls();
+        return { appliedOperations, warnings, snapshot: getSnapshot() };
+      }
+
+      function applyOperations(input) {
+        if (getCurrentTemplateKey() === "c09") return applyC09Operations(input);
+        return applyC07Operations(input);
+      }
+
       window[TEMPLATE_BRIDGE_GLOBAL_KEY] = {
         getDefaultSnapshot,
         getSnapshot,
         loadSnapshot,
         validateSnapshot,
+        getAiContext,
+        applyOperations,
       };
 
       function handleBridgeMessage(event) {
@@ -3830,6 +4410,24 @@
                 requestId: data.requestId,
                 success: true,
                 payload: validateSnapshot(data.payload),
+              };
+              break;
+            case "getAiContext":
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: getAiContext(),
+              };
+              break;
+            case "applyOperations":
+              response = {
+                namespace: "edumind.templateBridge",
+                type: "response",
+                requestId: data.requestId,
+                success: true,
+                payload: applyOperations(data.payload),
               };
               break;
             default:

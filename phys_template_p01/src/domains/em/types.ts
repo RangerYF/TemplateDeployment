@@ -28,6 +28,14 @@ export interface UniformBFieldProps extends Record<string, unknown> {
   width: number;
   /** 场区域高度 (m) */
   height: number;
+  /** 边界形状：矩形(默认)、圆形或半圆 */
+  boundaryShape?: 'rect' | 'circle' | 'semicircle';
+  /** 圆/半圆边界半径 (m)，仅 boundaryShape='circle'|'semicircle' 时使用 */
+  boundaryRadius?: number;
+  /** 半圆朝向，仅 boundaryShape='semicircle' 时使用 */
+  boundaryHalf?: 'up' | 'down' | 'left' | 'right';
+  /** 自动圆形边界规则 */
+  autoBoundaryMode?: 'focusing-min-radius' | 'divergence-base-speed';
 }
 
 /** 匀强磁场实体类型别名 */
@@ -45,6 +53,10 @@ export interface PointChargeProps extends Record<string, unknown> {
   mass: number;
   /** 初速度 (m/s) */
   initialVelocity: Vec2;
+  /** 初速度大小（磁场模块用，可由方向重新计算分量） */
+  initialSpeed?: number;
+  /** 初速度方向，单位 °，0° 向右 */
+  initialDirectionDeg?: number;
   /** 显示半径 (m) */
   radius: number;
 }
@@ -57,15 +69,40 @@ export type PointChargeEntity = Entity<PointChargeProps>;
 // ═══════════════════════════════════════════════
 
 /** 匀强电场实体属性 */
+export type UniformEFieldCapacitorModel = 'constant-voltage' | 'constant-charge';
+
+/** 匀强电场实体属性 */
 export interface UniformEFieldProps extends Record<string, unknown> {
   /** 电场强度大小 (V/m) */
   magnitude: number;
   /** 电场方向（单位向量） */
   direction: Vec2;
-  /** 场区域宽度 (m) */
+  /** 场区域宽度 (m)，平行板模式下即极板宽度 W */
   width: number;
-  /** 场区域高度 (m) */
+  /** 场区域高度 (m)，平行板模式下即极板间距 d */
   height: number;
+  /** 是否显示极板 */
+  showPlates?: boolean;
+  /** 显示极板时，是否在粒子碰板后立即停止；默认 true */
+  stopOnPlateCollision?: boolean;
+  /** 是否显示极板外侧的边缘弯曲场线，默认 true */
+  showEdgeFieldLines?: boolean;
+  /** 两段式电场中的分段角色 */
+  stageRole?: 'acceleration' | 'deflection';
+  /** 当前场区到下一段的固定间距 */
+  stageGapAfter?: number;
+  /** 当前场区到接收屏的固定间距 */
+  screenGapAfter?: number;
+  /** 电场模式：静态（默认）或交变（回旋加速器） */
+  mode?: 'static' | 'alternating';
+  /** 平行板电容器模型 */
+  capacitorModel?: UniformEFieldCapacitorModel;
+  /** 极板电压 (V)，平行板模式使用，恒压模型下 E = U / d */
+  voltage?: number;
+  /** 极板带电量 Q (C)，定电荷模型使用 */
+  plateCharge?: number;
+  /** 相对介电常数 εr，默认 1（空气） */
+  dielectric?: number;
 }
 
 /** 匀强电场实体类型别名 */
@@ -160,6 +197,10 @@ export interface SlideRheostatProps extends Record<string, unknown> {
   voltage: number;
   /** 通过电流 (A)，求解器运行时更新 */
   current: number;
+  /** 连接模式：'variable'（A+W 变阻器）或 'divider'（A+W+B 分压器） */
+  connectionMode?: 'variable' | 'divider';
+  /** 端口定义（三端：A固定端、B固定端、W滑片端） */
+  ports?: ComponentPort[];
 }
 
 /** 滑动变阻器实体类型别名 */
@@ -211,3 +252,65 @@ export interface VoltmeterProps extends Record<string, unknown> {
 
 /** 电压表实体类型别名 */
 export type VoltmeterEntity = Entity<VoltmeterProps>;
+
+// ═══════════════════════════════════════════════
+// 端口模型（元件多端口连接）
+// ═══════════════════════════════════════════════
+
+/** 元件端口定义 */
+export interface ComponentPort {
+  /** 端口标识，如 'A', 'B', 'W' */
+  id: string;
+  /** 显示名称，如 '固定端A', '滑片端W' */
+  label: string;
+  /** 端口在元件上的方位 */
+  side: 'left' | 'right' | 'top' | 'bottom';
+}
+
+/** 带端口的实体属性基础接口 */
+export interface PortedEntityProps extends Record<string, unknown> {
+  ports?: ComponentPort[];
+}
+
+// ═══════════════════════════════════════════════
+// 载流导线实体属性（P-08 磁感线可视化）
+// ═══════════════════════════════════════════════
+
+/** 载流导线实体属性 */
+export interface CurrentWireProps extends Record<string, unknown> {
+  /** 电流强度 (A) */
+  current: number;
+  /** 导线长度 (m) */
+  length: number;
+  /** 导线方向（单位向量，沿导线） */
+  wireDirection: Vec2;
+  /** 导线形状：直线或圆环 */
+  wireShape?: 'straight' | 'loop';
+  /** 圆环半径 (m)，仅 wireShape='loop' 时使用 */
+  loopRadius?: number;
+  /** 宽度用于渲染/碰撞 */
+  width: number;
+  /** 高度用于渲染/碰撞 */
+  height: number;
+}
+
+/** 载流导线实体类型别名 */
+export type CurrentWireEntity = Entity<CurrentWireProps>;
+
+// ═══════════════════════════════════════════════
+// 螺线管实体属性（P-08 磁感线可视化）
+// ═══════════════════════════════════════════════
+
+/** 螺线管实体属性 */
+export interface SolenoidProps extends Record<string, unknown> {
+  /** 电流强度 (A) */
+  current: number;
+  /** 匝数 */
+  turns: number;
+  /** 螺线管长度 (m) */
+  length: number;
+  /** 宽度用于渲染 (m) */
+  width: number;
+  /** 高度用于渲染 (m) */
+  height: number;
+}

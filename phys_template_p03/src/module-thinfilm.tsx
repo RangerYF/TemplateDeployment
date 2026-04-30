@@ -414,53 +414,105 @@ function ThinFilmDiagram({
     return (
       <svg className="thinfilm-diagram" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet">
         <defs>
-          <linearGradient id="soap-film" x1="0%" x2="0%" y1="0%" y2="100%">
+          <linearGradient id="soap-film-h" x1="0%" x2="100%" y1="0%" y2="0%">
             <stop offset="0%" stopColor="rgba(255,255,255,0.78)" />
             <stop offset="100%" stopColor="rgba(110, 255, 215, 0.38)" />
           </linearGradient>
         </defs>
-        <line x1="56" y1="78" x2="248" y2="78" className="ray" stroke="rgba(255, 199, 62, 0.96)" strokeWidth="6" />
-        <text x="52" y="48" className="label-txt" style={{ fontSize: 20 }}>白光入射</text>
-        <path d="M 300 20 Q 250 130 300 240" className="thinfilm-boundary" style={{ strokeWidth: 5 }} />
-        <path d="M 420 10 Q 380 130 420 250" className="thinfilm-boundary" style={{ strokeWidth: 5 }} />
-        <rect x="300" y="18" width="120" height="224" fill="url(#soap-film)" opacity="0.86" />
-        <line x1="258" y1="78" x2="300" y2="78" className="ray" stroke="rgba(255, 199, 62, 0.94)" strokeWidth="5" />
-        <line x1="300" y1="78" x2="620" y2="34" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="5" />
-        <line x1="300" y1="78" x2="420" y2="78" className="ray" stroke="rgba(255, 199, 62, 0.50)" strokeWidth="3.4" />
-        <line x1="420" y1="78" x2="650" y2="126" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="5" />
-        <text x="632" y="40" className="label-txt dim" style={{ fontSize: 18 }}>表面反射光</text>
-        <text x="664" y="132" className="label-txt dim" style={{ fontSize: 18 }}>底面反射光</text>
-        <line x1="520" y1="28" x2="520" y2="232" className="thinfilm-guide" style={{ strokeWidth: 2.2 }} />
-        <polygon points="520,28 510,50 530,50" fill="rgba(80,80,80,0.72)" />
-        <polygon points="520,232 510,210 530,210" fill="rgba(80,80,80,0.72)" />
-        <text x="542" y="134" className="label-txt" style={{ fontSize: 18 }}>膜厚变化</text>
-        <text x="544" y="48" className="label-txt dim" style={{ fontSize: 16 }}>上薄</text>
-        <text x="544" y="228" className="label-txt dim" style={{ fontSize: 16 }}>下厚</text>
-        <text x="690" y="190" className="label-txt" style={{ fontSize: 18 }}>n = {filmN.toFixed(2)}</text>
-        <text x="690" y="218" className="label-txt" style={{ fontSize: 18 }}>t ≈ {Math.round(thickness)} nm</text>
+        {/* 薄膜结构 */}
+        <line x1="200" y1="110" x2="580" y2="110" className="thinfilm-boundary" style={{ strokeWidth: 5 }} />
+        <line x1="200" y1="180" x2="580" y2="180" className="thinfilm-boundary" style={{ strokeWidth: 5 }} />
+        <rect x="200" y="110" width="380" height="70" fill="url(#soap-film-h)" opacity="0.72" />
+        <text x="590" y="118" className="label-txt dim" style={{ fontSize: 15 }}>上表面</text>
+        <text x="590" y="188" className="label-txt dim" style={{ fontSize: 15 }}>下表面</text>
+
+        {/* 入射光：严格竖直 */}
+        <line x1="390" y1="22" x2="390" y2="110" className="ray" stroke="rgba(255,199,62,0.96)" strokeWidth="4" />
+        <polygon points="390,106 385,92 395,92" fill="rgba(255,199,62,0.96)" />
+
+        {/* 穿过薄膜 */}
+        <line x1="390" y1="110" x2="390" y2="180" className="ray" stroke="rgba(255,199,62,0.44)" strokeWidth="2.5" />
+
+        {/* 上表面反射：严格竖直偏左 */}
+        <line x1="390" y1="110" x2="370" y2="22" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="3.6" />
+        <polygon points="370,26 365,40 375,40" fill="rgba(255,120,120,0.88)" />
+
+        {/* 下表面反射：严格竖直偏右 */}
+        <line x1="390" y1="180" x2="410" y2="22" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="3.6" />
+        <polygon points="410,26 405,40 415,40" fill="rgba(100,220,255,0.88)" />
+
+        {/* 标签：分列两侧，避免重叠 */}
+        <text x="286" y="42" className="label-txt dim" style={{ fontSize: 15 }} fill="rgba(255,120,120,0.92)">上表面反射 ①</text>
+        <text x="422" y="42" className="label-txt" style={{ fontSize: 15 }}>入射光</text>
+        <text x="422" y="62" className="label-txt dim" style={{ fontSize: 15 }} fill="rgba(100,220,255,0.92)">下表面反射 ②</text>
+
+        {/* 膜厚标注 */}
+        <line x1="178" y1="110" x2="178" y2="180" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+        <polygon points="178,112 173,124 183,124" fill="rgba(80,80,80,0.6)" />
+        <polygon points="178,178 173,166 183,166" fill="rgba(80,80,80,0.6)" />
+        <text x="152" y="150" className="label-txt" style={{ fontSize: 16 }} textAnchor="end">t</text>
+
+        {/* 膜厚变化提示 */}
+        <line x1="240" y1="210" x2="540" y2="210" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+        <polygon points="240,210 254,205 254,215" fill="rgba(80,80,80,0.6)" />
+        <polygon points="540,210 526,205 526,215" fill="rgba(80,80,80,0.6)" />
+        <text x="390" y="236" className="label-txt dim" style={{ fontSize: 15 }} textAnchor="middle">膜厚沿水平方向变化</text>
+        <text x="240" y="236" className="label-txt dim" style={{ fontSize: 13 }} textAnchor="middle">薄</text>
+        <text x="540" y="236" className="label-txt dim" style={{ fontSize: 13 }} textAnchor="middle">厚</text>
+
+        {/* 右侧参数 */}
+        <text x="680" y="120" className="label-txt" style={{ fontSize: 16 }}>n = {filmN.toFixed(2)}</text>
+        <text x="680" y="146" className="label-txt" style={{ fontSize: 16 }}>t ≈ {Math.round(thickness)} nm</text>
+        <text x="680" y="174" className="label-txt dim" style={{ fontSize: 14 }}>垂直入射 (θ = 0)</text>
       </svg>
     );
   }
 
   if (filmType === 'wedge') {
+    const hitX = 440;
+    const topY = 168 - (hitX - 286) / (688 - 286) * (168 - 72);
+    const bottomY = 168;
     return (
       <svg className="thinfilm-diagram" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet">
-        <line x1="52" y1="74" x2="240" y2="74" className="ray" stroke="rgba(255, 199, 62, 0.96)" strokeWidth="6" />
-        <text x="42" y="44" className="label-txt" style={{ fontSize: 20 }}>单色光入射</text>
-        <line x1="286" y1="118" x2="688" y2="62" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
-        <line x1="286" y1="178" x2="688" y2="178" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
-        <polygon points="286,178 286,118 688,62 688,178" fill="rgba(170, 220, 205, 0.18)" />
-        <line x1="250" y1="74" x2="346" y2="120" className="ray" stroke="rgba(255, 199, 62, 0.94)" strokeWidth="5" />
-        <line x1="346" y1="120" x2="542" y2="34" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="4.6" />
-        <line x1="346" y1="120" x2="398" y2="176" className="ray" stroke="rgba(255, 199, 62, 0.50)" strokeWidth="3.6" />
-        <line x1="398" y1="176" x2="604" y2="138" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="4.6" />
-        <text x="552" y="38" className="label-txt dim" style={{ fontSize: 18 }}>表面反射光</text>
-        <text x="618" y="144" className="label-txt dim" style={{ fontSize: 18 }}>底面反射光</text>
-        <line x1="510" y1="176" x2="510" y2="96" className="thinfilm-guide" style={{ strokeWidth: 2.2 }} />
-        <text x="528" y="138" className="label-txt" style={{ fontSize: 18 }}>t(x)</text>
-        <path d="M 308 186 A 74 74 0 0 1 392 162" className="thinfilm-guide" style={{ strokeWidth: 2.2 }} />
-        <text x="330" y="224" className="label-txt" style={{ fontSize: 18 }}>α = {wedgeAngle.toFixed(1)}′</text>
-        <text x="650" y="210" className="label-txt dim" style={{ fontSize: 18 }}>从左到右膜厚增大</text>
+        {/* 楔形结构 */}
+        <line x1="286" y1="128" x2="688" y2="72" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
+        <line x1="286" y1="168" x2="688" y2="168" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
+        <polygon points="286,168 286,128 688,72 688,168" fill="rgba(170,220,205,0.18)" />
+
+        {/* 入射光：严格竖直 */}
+        <line x1={hitX} y1="18" x2={hitX} y2={topY} className="ray" stroke="rgba(255,199,62,0.96)" strokeWidth="4" />
+        <polygon points={`${hitX},${topY - 4} ${hitX - 5},${topY - 18} ${hitX + 5},${topY - 18}`} fill="rgba(255,199,62,0.96)" />
+
+        {/* 穿过楔形膜 */}
+        <line x1={hitX} y1={topY} x2={hitX} y2={bottomY} className="ray" stroke="rgba(255,199,62,0.44)" strokeWidth="2.5" />
+
+        {/* 上表面反射：偏左 */}
+        <line x1={hitX} y1={topY} x2={hitX - 22} y2="18" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="3.6" />
+        <polygon points={`${hitX - 22},22 ${hitX - 27},36 ${hitX - 17},36`} fill="rgba(255,120,120,0.88)" />
+
+        {/* 下表面反射：偏右 */}
+        <line x1={hitX} y1={bottomY} x2={hitX + 22} y2="18" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="3.6" />
+        <polygon points={`${hitX + 22},22 ${hitX + 17},36 ${hitX + 27},36`} fill="rgba(100,220,255,0.88)" />
+
+        {/* 标签：分列排布，不重叠 */}
+        <text x={hitX - 26} y="14" className="label-txt dim" style={{ fontSize: 14 }} textAnchor="end" fill="rgba(255,120,120,0.92)">①</text>
+        <text x={hitX + 26} y="14" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">②</text>
+
+        {/* 右侧图例 */}
+        <text x="700" y="80" className="label-txt" style={{ fontSize: 15 }}>入射光</text>
+        <line x1="755" y1="76" x2="776" y2="76" stroke="rgba(255,199,62,0.96)" strokeWidth="3" />
+        <text x="700" y="104" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(255,120,120,0.92)">① 上表面反射</text>
+        <text x="700" y="126" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">② 下表面反射</text>
+        <text x="700" y="158" className="label-txt dim" style={{ fontSize: 14 }}>垂直入射 (θ = 0)</text>
+
+        {/* 膜厚标注 */}
+        <line x1="560" y1={168 - (560 - 286) / (688 - 286) * (168 - 72)} x2="560" y2="168" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+        <text x="572" y="142" className="label-txt" style={{ fontSize: 16 }}>t(x)</text>
+
+        {/* 楔角标注 */}
+        <path d="M 308 176 A 74 74 0 0 1 380 156" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+        <text x="330" y="208" className="label-txt" style={{ fontSize: 16 }}>α = {wedgeAngle.toFixed(1)}′</text>
+        <text x="530" y="208" className="label-txt dim" style={{ fontSize: 14 }}>从左到右膜厚增大</text>
       </svg>
     );
   }
@@ -471,34 +523,42 @@ function ThinFilmDiagram({
   const sampleYTop = newtonDiagramLensY(sampleX, sag * 1.1);
   return (
     <svg ref={svgRef} className="thinfilm-diagram" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet">
-      <text x="50" y="34" className="label-txt" style={{ fontSize: 19 }}>1. 结构与入射光</text>
-      <line x1="72" y1="66" x2="228" y2={sampleYTop} className="ray" stroke="rgba(255, 199, 62, 0.96)" strokeWidth="4.8" />
-      <text x="58" y="60" className="label-txt" style={{ fontSize: 18 }}>单色光入射</text>
+      {/* 结构 */}
+      <path d={`M 140 180 Q 280 ${180 - sag * 1.1} 420 180`} className="thinfilm-lens" style={{ strokeWidth: 5 }} />
+      <line x1="118" y1="180" x2="442" y2="180" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
+      <path d={`M 140 180 Q 280 ${180 - sag * 1.1} 420 180 L 420 180 L 140 180 Z`} fill="rgba(131,198,255,0.16)" />
+      <text x="200" y="202" className="label-txt dim" style={{ fontSize: 14 }}>平板玻璃</text>
+      <text x="230" y={130 - sag * 0.5} className="label-txt dim" style={{ fontSize: 14 }}>平凸透镜</text>
+      <text x="240" y="164" className="label-txt dim" style={{ fontSize: 14 }}>空气膜</text>
 
-      <path d={`M 120 180 Q 240 ${180 - sag * 1.1} 360 180`} className="thinfilm-lens" style={{ strokeWidth: 6 }} />
-      <line x1="98" y1="180" x2="382" y2="180" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
-      <path d={`M 120 180 Q 240 ${180 - sag * 1.1} 360 180 L 360 180 L 120 180 Z`} fill="rgba(131, 198, 255, 0.16)" />
-      <text x="150" y="204" className="label-txt dim" style={{ fontSize: 17 }}>平板玻璃</text>
-      <text x="182" y={122 - sag * 0.55} className="label-txt dim" style={{ fontSize: 17 }}>平凸透镜</text>
-      <text x="188" y="160" className="label-txt" style={{ fontSize: 17 }}>空气膜</text>
+      <circle cx="140" cy="180" r="4" fill="rgba(255,255,255,0.92)" />
+      <text x="100" y="216" className="label-txt dim" style={{ fontSize: 13 }}>接触点</text>
 
-      <circle cx="120" cy="180" r="4.5" fill="rgba(255,255,255,0.92)" />
-      <text x="56" y="216" className="label-txt dim" style={{ fontSize: 16 }}>中心接触点</text>
+      {/* 入射光：严格竖直 */}
+      <line x1={sampleX} y1="42" x2={sampleX} y2={sampleYTop} className="ray" stroke="rgba(255,199,62,0.96)" strokeWidth="4" />
+      <polygon points={`${sampleX},${sampleYTop - 2} ${sampleX - 5},${sampleYTop - 16} ${sampleX + 5},${sampleYTop - 16}`} fill="rgba(255,199,62,0.96)" />
 
-      <line x1="228" y1={sampleYTop} x2="500" y2="60" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="4.2" />
-      <line x1="228" y1={sampleYTop} x2={sampleX} y2="180" className="ray" stroke="rgba(255, 199, 62, 0.46)" strokeWidth="2.8" />
-      <line x1={sampleX} y1="180" x2="500" y2="112" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="4.2" />
-      <text x="514" y="62" className="label-txt dim" style={{ fontSize: 16 }}>① 上表面反射光</text>
-      <text x="514" y="114" className="label-txt dim" style={{ fontSize: 16 }}>② 下表面反射光</text>
+      {/* 穿过空气膜 */}
+      <line x1={sampleX} y1={sampleYTop} x2={sampleX} y2="180" className="ray" stroke="rgba(255,199,62,0.44)" strokeWidth="2.5" />
 
-      <text x="560" y="34" className="label-txt" style={{ fontSize: 19 }}>2. 两束反射光叠加形成干涉</text>
-      <line x1={sampleX} y1="180" x2={sampleX} y2={sampleYTop} className="thinfilm-guide" style={{ strokeWidth: 2.2 }} />
-      <text x={sampleX + 12} y={sampleYTop + 16} className="label-txt" style={{ fontSize: 17 }}>t(r)</text>
-      <line x1="120" y1="180" x2={sampleX} y2="180" className="thinfilm-guide" style={{ strokeWidth: 2.6 }} />
+      {/* 上表面反射：偏左 */}
+      <line x1={sampleX} y1={sampleYTop} x2={sampleX - 20} y2="42" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="3.6" />
+      <polygon points={`${sampleX - 20},46 ${sampleX - 25},60 ${sampleX - 15},60`} fill="rgba(255,120,120,0.88)" />
+
+      {/* 下表面反射：偏右 */}
+      <line x1={sampleX} y1="180" x2={sampleX + 20} y2="42" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="3.6" />
+      <polygon points={`${sampleX + 20},46 ${sampleX + 15},60 ${sampleX + 25},60`} fill="rgba(100,220,255,0.88)" />
+
+      {/* 膜厚标注 */}
+      <line x1={sampleX + 36} y1="180" x2={sampleX + 36} y2={sampleYTop} className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+      <text x={sampleX + 44} y={sampleYTop + 16} className="label-txt" style={{ fontSize: 15 }}>t(r)</text>
+
+      {/* 采样半径线 + 绿点 */}
+      <line x1="140" y1="180" x2={sampleX} y2="180" className="thinfilm-guide" style={{ strokeWidth: 2.2 }} />
       <circle
         cx={sampleX}
         cy="184"
-        r="10"
+        r="9"
         fill="rgba(132,255,41,0.96)"
         stroke="rgba(255,255,255,0.92)"
         strokeWidth="2.5"
@@ -508,10 +568,17 @@ function ThinFilmDiagram({
           onNewtonSampleDown?.(event.clientX);
         }}
       />
-      <text x="560" y="160" className="label-txt" style={{ fontSize: 17 }}>拖动绿点观察：</text>
-      <text x="560" y="186" className="label-txt dim" style={{ fontSize: 16 }}>r 变大 {'->'} t(r) 变大</text>
-      <text x="560" y="208" className="label-txt dim" style={{ fontSize: 16 }}>相位差改变 {'->'} 亮/暗改变</text>
-      <text x="560" y="232" className="label-txt dim" style={{ fontSize: 16 }}>中心 t = 0，牛顿环中心为暗</text>
+
+      {/* 右侧说明 */}
+      <text x="530" y="44" className="label-txt" style={{ fontSize: 16 }}>垂直入射 · 两束反射光干涉</text>
+      <line x1="530" y1="60" x2="550" y2="60" stroke="rgba(255,120,120,0.88)" strokeWidth="3" />
+      <text x="556" y="65" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(255,120,120,0.92)">① 上表面反射</text>
+      <line x1="530" y1="82" x2="550" y2="82" stroke="rgba(100,220,255,0.88)" strokeWidth="3" />
+      <text x="556" y="87" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">② 下表面反射</text>
+
+      <text x="530" y="130" className="label-txt" style={{ fontSize: 15 }}>拖动绿点观察：</text>
+      <text x="530" y="152" className="label-txt dim" style={{ fontSize: 14 }}>r 增大 → t(r) 增大 → 亮暗交替</text>
+      <text x="530" y="174" className="label-txt dim" style={{ fontSize: 14 }}>中心 t = 0，牛顿环中心为暗</text>
     </svg>
   );
 }

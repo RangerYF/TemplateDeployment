@@ -1,0 +1,236 @@
+{
+  "id": "P02-EMF012-efield-deflection",
+  "version": "1.0",
+  "name": "电容器偏转模型",
+  "description": "带电粒子水平射入平行板电场后发生偏转并命中后方接收屏；可切换恒压 / 定电荷模型，比较 U、Q、εr 对偏转量与落点的影响。",
+  "category": "P-08",
+  "supportedViewports": ["force", "motion", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 80,
+    "origin": { "x": 200, "y": 350 }
+  },
+  "entities": [
+    {
+      "ref": "efield-1",
+      "type": "uniform-efield",
+      "properties": {
+        "magnitude": 80,
+        "direction": { "x": 0, "y": -1 },
+        "width": 6,
+        "height": 2,
+        "showPlates": true,
+        "capacitorModel": "constant-voltage",
+        "voltage": 60,
+        "plateCharge": 1.59e-9,
+        "dielectric": 1
+      },
+      "transform": { "position": { "x": 1, "y": -1 }, "rotation": 0 },
+      "label": "偏转电场"
+    },
+    {
+      "ref": "particle-1",
+      "type": "point-charge",
+      "properties": {
+        "charge": 0.002,
+        "mass": 0.05,
+        "initialVelocity": { "x": 8, "y": 0 },
+        "initialSpeed": 8,
+        "initialDirectionDeg": 0,
+        "radius": 0.12
+      },
+      "transform": { "position": { "x": 1.3, "y": 0 }, "rotation": 0 },
+      "label": "带电粒子"
+    },
+    {
+      "ref": "screen-1",
+      "type": "detector-screen",
+      "properties": {
+        "width": 0.18,
+        "height": 3.6
+      },
+      "transform": { "position": { "x": 8.4, "y": -1.8 }, "rotation": 0 },
+      "label": "接收屏"
+    }
+  ],
+  "relations": [
+    {
+      "type": "field-effect",
+      "sourceRef": "efield-1",
+      "targetRef": "particle-1",
+      "properties": {}
+    }
+  ],
+  "paramGroups": [
+    {
+      "key": "capacitor-params",
+      "label": "偏转极板",
+      "params": [
+        {
+          "key": "capacitorModel",
+          "label": "电容器模型",
+          "type": "select",
+          "options": [
+            { "value": "constant-voltage", "label": "恒压" },
+            { "value": "constant-charge", "label": "定电荷" }
+          ],
+          "default": "constant-voltage",
+          "targetEntityId": "efield-1",
+          "targetProperty": "capacitorModel"
+        },
+        {
+          "key": "voltage",
+          "label": "板间电压 U",
+          "type": "slider",
+          "visibleWhen": [
+            { "key": "capacitorModel", "equals": "constant-voltage" }
+          ],
+          "min": 20,
+          "max": 400,
+          "step": 10,
+          "default": 60,
+          "unit": "V",
+          "targetEntityId": "efield-1",
+          "targetProperty": "voltage"
+        },
+        {
+          "key": "plateCharge",
+          "label": "极板电荷 Q",
+          "type": "slider",
+          "visibleWhen": [
+            { "key": "capacitorModel", "equals": "constant-charge" }
+          ],
+          "min": 0,
+          "max": 2e-8,
+          "step": 1e-10,
+          "default": 1.59e-9,
+          "unit": "C",
+          "precision": 3,
+          "targetEntityId": "efield-1",
+          "targetProperty": "plateCharge"
+        },
+        {
+          "key": "dielectric",
+          "label": "介电常数 εr",
+          "type": "slider",
+          "min": 1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1,
+          "unit": "",
+          "precision": 1,
+          "targetEntityId": "efield-1",
+          "targetProperty": "dielectric"
+        },
+        {
+          "key": "plateDistance",
+          "label": "板间距 d",
+          "type": "slider",
+          "min": 1,
+          "max": 4,
+          "step": 0.1,
+          "default": 2,
+          "unit": "m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "height"
+        },
+        {
+          "key": "plateLength",
+          "label": "极板长度 L",
+          "type": "slider",
+          "min": 2,
+          "max": 10,
+          "step": 0.2,
+          "default": 6,
+          "unit": "m",
+          "targetEntityId": "efield-1",
+          "targetProperty": "width"
+        }
+      ]
+    },
+    {
+      "key": "particle-params",
+      "label": "粒子属性",
+      "params": [
+        {
+          "key": "charge",
+          "label": "电荷量",
+          "type": "slider",
+          "min": -1,
+          "max": 1,
+          "step": 0.001,
+          "default": 0.002,
+          "unit": "C",
+          "targetEntityId": "particle-1",
+          "targetProperty": "charge"
+        },
+        {
+          "key": "mass",
+          "label": "质量 m",
+          "type": "slider",
+          "min": 0.001,
+          "max": 0.1,
+          "step": 0.001,
+          "default": 0.05,
+          "unit": "kg",
+          "precision": 3,
+          "targetEntityId": "particle-1",
+          "targetProperty": "mass"
+        },
+        {
+          "key": "v0",
+          "label": "初速度大小 v0",
+          "type": "slider",
+          "min": 0,
+          "max": 10,
+          "step": 0.2,
+          "default": 8,
+          "unit": "m/s",
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialSpeed"
+        },
+        {
+          "key": "theta",
+          "label": "初始角度 θ",
+          "type": "slider",
+          "min": 0,
+          "max": 360,
+          "step": 1,
+          "default": 0,
+          "unit": "°",
+          "precision": 0,
+          "targetEntityId": "particle-1",
+          "targetProperty": "initialDirectionDeg"
+        },
+        {
+          "key": "entryY",
+          "label": "入射高度 y₀",
+          "type": "slider",
+          "min": -1.6,
+          "max": 1.6,
+          "step": 0.05,
+          "default": 0,
+          "unit": "m",
+          "targetEntityId": "particle-1",
+          "targetProperty": "transform.position.y"
+        }
+      ]
+    }
+  ],
+  "paramValues": {
+    "capacitorModel": "constant-voltage",
+    "voltage": 60,
+    "plateCharge": 1.59e-9,
+    "dielectric": 1,
+    "plateDistance": 2,
+    "plateLength": 6,
+    "charge": 0.002,
+    "mass": 0.05,
+    "v0": 8,
+    "theta": 0,
+    "entryY": 0
+  },
+  "solveMode": "numerical",
+  "duration": 10,
+  "solverQualifier": { "interaction": "electric" }
+}

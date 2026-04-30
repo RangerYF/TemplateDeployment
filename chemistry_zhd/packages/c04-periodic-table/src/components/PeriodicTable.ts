@@ -49,13 +49,13 @@ export type CategoryDescription = {
 export const CATEGORY_DESCRIPTIONS: Record<ElementCategory, CategoryDescription> = {
   'alkali-metal': {
     summary: '第IA族元素（氢除外），均为活泼金属，与水或酸剧烈反应，最外层只有1个电子，常见氧化态为+1。',
-    relationship: '碱金属是主族金属的子集，活泼性在所有金属中最强。从Li到Cs，活泼性依次增强。',
+    relationship: '碱金属属于广义主族金属，只是因为性质特别典型而单独列出。它与“主族金属”不是并列互斥关系，而是其中一个重要子类。',
     hsNote: '常考：Na与水反应、Na₂O₂的特殊性，焰色反应（Na→黄色，K→紫色），Na₂CO₃与NaHCO₃的区别。',
     examples: 'Li、Na、K、Rb、Cs、Fr',
   },
   'alkaline-earth-metal': {
     summary: '第IIA族元素，活泼金属，最外层有2个电子，常见氧化态为+2，氧化物和氢氧化物多显碱性。',
-    relationship: '碱土金属也属于主族金属，活泼性弱于碱金属但强于大多数过渡金属。',
+    relationship: '碱土金属同样属于广义主族金属。课堂上通常把它和碱金属分开讲，是为了突出“最外层电子数”和典型化学性质。',
     hsNote: '常考：Ca的化合物（CaCO₃、Ca(OH)₂、CaO），Mg在CO₂中燃烧，Be的两性（与酸碱均反应）。',
     examples: 'Be、Mg、Ca、Sr、Ba、Ra',
   },
@@ -67,13 +67,13 @@ export const CATEGORY_DESCRIPTIONS: Record<ElementCategory, CategoryDescription>
   },
   'post-transition-metal': {
     summary: '位于过渡金属右侧的p区金属，性质介于过渡金属和非金属之间，熔点相对较低，多具延展性。',
-    relationship: '注意：此处"主族金属"特指p区金属（如铝族及以右）。碱金属、碱土金属在广义上也是主族金属，但通常单独分类。',
+    relationship: '这里的“主族金属”专指 p 区金属，方便在页面里和碱金属、碱土金属分开说明。三者都属于广义主族金属，并不是互相排斥的三大类。',
     hsNote: '常考：Al的两性（既与盐酸又与NaOH溶液反应），Al₂O₃的特殊性，铝热反应，Pb和Sn的化合物毒性。',
     examples: 'Al、Ga、In、Sn、Tl、Pb、Bi',
   },
   'metalloid': {
-    summary: '性质介于金属与非金属之间的元素，又称"半金属"。既有金属光泽，又具有半导体特性，在元素周期表中沿一条斜线分布。',
-    relationship: '交界元素不归属于金属或非金属任意一类，而是两者的过渡地带。高中教材有时将其归入非金属讨论，但特别指出其"交界"特征。',
+    summary: '这里用“交界元素”标记位于金属与非金属交界地带、常表现出半金属性质的一组元素。高中教学中更常见的说法是“交界元素”或“半金属”，而不是把它当作与金属、非金属并列互补的大类。',
+    relationship: '交界元素强调的是“边界特征”，不是独立于金属/非金属之外的一套互斥分类。页面把它单列，是为了帮助学生理解硅、锗、砷、锑、碲等元素为什么常兼具两侧特征。',
     hsNote: 'Si是最重要的考点：半导体材料、SiO₂与HF反应（唯一与非金属氧化物反应的酸）、硅酸盐工业。B无氧酸（硼酸）是弱酸。',
     examples: 'B、Si、Ge、As、Sb、Te',
   },

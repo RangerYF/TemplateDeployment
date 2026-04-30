@@ -3,8 +3,8 @@ const React = (window as any).React;
 
 interface Material { n: number; label: string; nLabel: string; }
 type MaterialKey = 'air' | 'water' | 'glass' | 'crown' | 'flint' | 'diamond' | 'ice' | 'fiber';
-type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber';
-type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004';
+type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber' | 'apparent' | 'snellwindow';
+type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004' | 'opt-005' | 'opt-006';
 type HemisphereMode = 'center' | 'plane';
 type DragTarget = 'source' | 'element' | 'pan' | null;
 
@@ -31,6 +31,14 @@ interface RefractionSettings {
   fiberCoreN: number;
   fiberCladdingN: number;
   fiberBendRadiusCm: number;
+  apparentMode: 'depth' | 'height';
+  apparentObjectDepthCm: number;
+  apparentWaterN: number;
+  apparentRayAngleDeg: number;
+  snellSourceDepthCm: number;
+  snellWaterN: number;
+  snellIncidentAngleDeg: number;
+  snellViewMode: '3d' | '2d' | 'topview';
   showAngles: boolean;
   showNormals: boolean;
   showFormula: boolean;
@@ -39,7 +47,7 @@ interface RefractionSettings {
 }
 
 interface Point { x: number; y: number; }
-interface RaySegment { from: Point; to: Point; kind: 'incident' | 'refracted' | 'reflected' | 'exit' | 'leak'; }
+interface RaySegment { from: Point; to: Point; kind: 'incident' | 'refracted' | 'reflected' | 'exit' | 'leak' | 'virtual'; }
 interface AngleMark { at: Point; normalAngleDeg: number; rayAngleDeg: number; label: string; radius: number; side?: 'left' | 'right'; }
 
 interface SolveResult {
@@ -59,6 +67,10 @@ interface SolveResult {
   shiftCm?: number | null;
   coreDeg?: number | null;
   effectiveWallDeg?: number | null;
+  apparentDepthCm?: number | null;
+  realDepthCm?: number | null;
+  virtualImagePoint?: Point;
+  objectPoint?: Point;
 }
 
 interface BoundaryHit {
@@ -97,6 +109,8 @@ const SHAPES: ShapeOption[] = [
   { id: 'slab', label: '玻璃砖', desc: '双界面折射、平行出射、侧移', experimentId: 'opt-002' },
   { id: 'half', label: '半球介质', desc: '平面入射 / 球心入射 / 曲面法线', experimentId: 'opt-003' },
   { id: 'fiber', label: '光纤', desc: '导光、弯曲、漏光趋势', experimentId: 'opt-004' },
+  { id: 'apparent', label: '视深与视高', desc: '水中看浅、水下看高、虚像位置', experimentId: 'opt-005' },
+  { id: 'snellwindow', label: '水下光源 3D', desc: '斯涅尔窗、临界角锥、全反射 (Three.js)', experimentId: 'opt-006' },
 ];
 
 const BASE_SHAPE_PRESETS: Record<ShapeKind, Partial<RefractionSettings>> = {
@@ -104,6 +118,8 @@ const BASE_SHAPE_PRESETS: Record<ShapeKind, Partial<RefractionSettings>> = {
   slab: { experimentId: 'opt-002', shape: 'slab', sourceAnchorX: 170, sourceY: 88, sourceAngleDeg: 56, elementCenterX: 500, elementCenterY: 248, slabIndex: 1.5, slabThicknessCm: 6 },
   half: { experimentId: 'opt-003', shape: 'half', sourceAnchorX: 180, sourceY: 92, sourceAngleDeg: 62, elementCenterX: 520, elementCenterY: 266, hemisphereIndex: 1.5, hemisphereRadiusCm: 6, hemisphereMode: 'plane' },
   fiber: { experimentId: 'opt-004', shape: 'fiber', sourceAnchorX: 130, sourceY: 270, sourceAngleDeg: 8, elementCenterX: 560, elementCenterY: 290, fiberCoreN: 1.5, fiberCladdingN: 1.3, fiberBendRadiusCm: 14 },
+  apparent: { experimentId: 'opt-005', shape: 'apparent', sourceAnchorX: 500, sourceY: 90, sourceAngleDeg: -90, elementCenterX: 500, elementCenterY: 260, apparentMode: 'depth' as const, apparentObjectDepthCm: 5, apparentWaterN: 1.333, apparentRayAngleDeg: 20, rayThick: 1.2 },
+  snellwindow: { experimentId: 'opt-006', shape: 'snellwindow', sourceAnchorX: 500, sourceY: 90, elementCenterX: 500, elementCenterY: 260, snellSourceDepthCm: 8, snellWaterN: 1.333, snellIncidentAngleDeg: 30, snellViewMode: '3d' as const },
 };
 
 const deg = (r: number): number => r * 180 / Math.PI;
@@ -320,6 +336,35 @@ function buildRefractionFormulaNotes(settings: RefractionSettings, result: Solve
       '当前路径：主光线先进入纤芯，再与上下壁面持续相互作用。',
       `导光条件：n₁ > n₂，即 ${settings.fiberCoreN.toFixed(3)} > ${settings.fiberCladdingN.toFixed(3)}`,
       '只要壁面处持续满足全反射条件，光就可以沿光纤传播。',
+    ];
+  }
+
+  if (settings.shape === 'apparent') {
+    const mode = settings.apparentMode ?? 'depth';
+    if (mode === 'depth') {
+      return [
+        '当前模式：视深 — 从空气俯视水中物体。',
+        '近轴近似：虚像深度 h\' = h / n（浅于实物）。',
+        `水的折射率 n = ${(settings.apparentWaterN ?? 1.333).toFixed(3)}`,
+      ];
+    }
+    return [
+      '当前模式：视高 — 从水中仰视空气中物体。',
+      '近轴近似：虚像高度 h\' = h × n（高于实物）。',
+      `水的折射率 n = ${(settings.apparentWaterN ?? 1.333).toFixed(3)}`,
+    ];
+  }
+
+  if (settings.shape === 'snellwindow') {
+    const nW = settings.snellWaterN ?? 1.333;
+    const critAngle = deg(Math.asin(Math.min(1, 1 / nW)));
+    const depth = settings.snellSourceDepthCm ?? 8;
+    const windowR = depth * Math.tan(rad(critAngle));
+    return [
+      `水下光源深度 h = ${depth.toFixed(1)} cm，水折射率 n = ${nW.toFixed(3)}。`,
+      `临界角 θc = arcsin(1/n) = ${critAngle.toFixed(2)}°`,
+      `斯涅尔窗半径 r = h × tan(θc) = ${windowR.toFixed(2)} cm`,
+      '临界角锥内的光线折射出水面，锥外全部全反射回水中。',
     ];
   }
 
@@ -703,12 +748,96 @@ function solveFiber(settings: RefractionSettings, source: Point): SolveResult {
   };
 }
 
+function solveApparentDepth(settings: RefractionSettings): SolveResult {
+  const surfaceY = settings.elementCenterY ?? 260;
+  const cx = settings.elementCenterX ?? 500;
+  const mode = settings.apparentMode ?? 'depth';
+  const depthCm = settings.apparentObjectDepthCm ?? 5;
+  const nWater = settings.apparentWaterN ?? 1.333;
+  const depthPx = depthCm * 20;
+
+  let objectPos: Point;
+  let n1: number, n2: number;
+  if (mode === 'depth') {
+    objectPos = { x: cx, y: surfaceY + depthPx };
+    n1 = nWater;
+    n2 = 1.0;
+  } else {
+    objectPos = { x: cx, y: surfaceY - depthPx };
+    n1 = 1.0;
+    n2 = nWater;
+  }
+
+  const segments: RaySegment[] = [];
+  const angleMarks: AngleMark[] = [];
+  const normals: [Point, Point][] = [];
+  const rayAngle = settings.apparentRayAngleDeg ?? 20;
+  const spreadAngles = [-rayAngle, 0, rayAngle];
+  const surfaceNormal: Point = { x: 0, y: -1 };
+  const virtualLen = Math.max(160, depthPx * 1.4);
+
+  for (const angleDeg of spreadAngles) {
+    const baseAngle = mode === 'depth' ? -90 : 90;
+    const rayDir = pointFromAngle(baseAngle + angleDeg);
+    const hit = intersectRayHorizontal(objectPos, rayDir, surfaceY, -2000, 4000);
+    if (!hit) continue;
+
+    const refrResult = refract(rayDir, surfaceNormal, n1, n2);
+    segments.push({ from: objectPos, to: hit, kind: 'incident' });
+
+    if (refrResult.tir || !refrResult.dir) {
+      const reflDir = reflect(rayDir, surfaceNormal);
+      segments.push({ from: hit, to: add(hit, mul(reflDir, 400)), kind: 'reflected' });
+    } else {
+      segments.push({ from: hit, to: add(hit, mul(refrResult.dir, 280)), kind: 'refracted' });
+      const backDir = mul(refrResult.dir, -1);
+      segments.push({ from: hit, to: add(hit, mul(backDir, virtualLen)), kind: 'virtual' });
+
+      if (angleDeg === rayAngle) {
+        const incAngle = angleAgainstNormal(rayDir, surfaceNormal);
+        angleMarks.push(makeArcMark(hit, surfaceNormal, mul(rayDir, -1), `θ₁=${fmt(incAngle, 1)}°`, 32));
+        const refrAngle = angleAgainstNormal(refrResult.dir, mul(surfaceNormal, -1));
+        angleMarks.push(makeArcMark(hit, mul(surfaceNormal, -1), refrResult.dir, `θ₂=${fmt(refrAngle, 1)}°`, 42));
+        normals.push([add(hit, { x: 0, y: -110 }), add(hit, { x: 0, y: 110 })]);
+      }
+    }
+  }
+
+  const apparentCm = mode === 'depth' ? depthCm / nWater : depthCm * nWater;
+  const apparentPx = apparentCm * 20;
+  const virtualImagePos: Point = mode === 'depth'
+    ? { x: cx, y: surfaceY + apparentPx }
+    : { x: cx, y: surfaceY - apparentPx };
+
+  return {
+    segments,
+    angleMarks,
+    normals,
+    hitPoint: virtualImagePos,
+    status: mode === 'depth' ? '视深：虚像比实物浅' : '视高：虚像比实物高',
+    pathMode: mode === 'depth' ? '视深模型' : '视高模型',
+    firstEdge: 'interface',
+    lastEdge: 'interface',
+    criticalDeg: nWater > 1 ? deg(Math.asin(1 / nWater)) : null,
+    apparentDepthCm: apparentCm,
+    realDepthCm: depthCm,
+    virtualImagePoint: virtualImagePos,
+    objectPoint: objectPos,
+  };
+}
+
 function solveRefraction(settings: RefractionSettings): SolveResult {
   const source: Point = { x: clamp(settings.sourceAnchorX, 40, 920), y: clamp(settings.sourceY ?? 90, 20, 320) };
   if (settings.shape === 'interface') return solveInterface(settings, source);
   if (settings.shape === 'slab') return solveSlab(settings, source);
   if (settings.shape === 'half') return solveHemisphere(settings, source);
   if (settings.shape === 'fiber') return solveFiber(settings, source);
+  if (settings.shape === 'apparent') return solveApparentDepth(settings);
+  if (settings.shape === 'snellwindow') {
+    const nW = settings.snellWaterN ?? 1.333;
+    const critDeg = deg(Math.asin(Math.min(1, 1 / nW)));
+    return { segments: [], angleMarks: [], normals: [], status: '3D 场景', pathMode: '3D', firstEdge: null, lastEdge: null, criticalDeg: critDeg };
+  }
   return { segments: [extendRay(source, pointFromAngle(settings.sourceAngleDeg ?? 56))], angleMarks: [], normals: [], status: '当前形状尚未启用', pathMode: '未启用', firstEdge: null, lastEdge: null };
 }
 
@@ -728,7 +857,42 @@ function applyShapePreset(settings: RefractionSettings, shape: ShapeKind): Refra
   };
 }
 
+function SnellWindow3DModule({ settings }: { settings: RefractionSettings }) {
+  const SnellWindowScene = (window as any).SnellWindowScene;
+  const result = solveRefraction(settings);
+  const nW = settings.snellWaterN ?? 1.333;
+  const depth = settings.snellSourceDepthCm ?? 8;
+  const critAngle = Math.asin(Math.min(1, 1 / nW));
+  const windowR = depth * Math.tan(critAngle);
+
+  if (!SnellWindowScene) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ink-3)' }}>3D 场景加载中…</div>;
+  }
+
+  return (
+    <>
+      <div className="snell-3d-container">
+        <SnellWindowScene
+          depthCm={depth}
+          waterN={nW}
+          incidentAngleDeg={settings.snellIncidentAngleDeg ?? 30}
+          viewMode={settings.snellViewMode ?? '3d'}
+          wavelength={settings.wavelength}
+          showColor={settings.showColor}
+        />
+      </div>
+      <div className="hud ref-hud-floating">
+        <span className="chip"><span className="dot" />θc = {fmt(deg(critAngle), 2)}°</span>
+        <span className="chip"><span className="dot" />窗口半径 r = {fmt(windowR, 2)} cm</span>
+        <span className="chip"><span className="dot" />n = {nW.toFixed(3)}</span>
+      </div>
+    </>
+  );
+}
+
 function RefractionModule({ settings }: { settings: RefractionSettings }) {
+  if (settings.shape === 'snellwindow') return <SnellWindow3DModule settings={settings} />;
+
   const result = solveRefraction(settings);
   const rayColor = settings.showColor ? (window as any).wavelengthToColor(settings.wavelength) : 'var(--accent-strong)';
   const svgRef = React.useRef<SVGSVGElement | null>(null);
@@ -810,7 +974,7 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
         <GridBg w={W} h={H} />
         <g transform={`translate(${canvasPanX} ${canvasPanY}) scale(${canvasZoom})`}>
           <MediumShape settings={settings} onPointerDown={beginDrag('element')} />
-          <LaserSource settings={settings} onPointerDown={beginDrag('source')} />
+          {settings.shape !== 'apparent' && <LaserSource settings={settings} onPointerDown={beginDrag('source')} />}
           {settings.showNormals && result.normals.map((line, idx) => (
             <line key={idx} className="normal-line" x1={line[0].x} y1={line[0].y} x2={line[1].x} y2={line[1].y} />
           ))}
@@ -887,6 +1051,46 @@ function MediumShape({ settings, onPointerDown }: { settings: RefractionSettings
       </g>
     );
   }
+  if (settings.shape === 'apparent') {
+    const surfaceY = settings.elementCenterY ?? 260;
+    const cx = settings.elementCenterX ?? 500;
+    const mode = settings.apparentMode ?? 'depth';
+    const depthCm = settings.apparentObjectDepthCm ?? 5;
+    const depthPx = depthCm * 20;
+    const nWater = settings.apparentWaterN ?? 1.333;
+    const apparentCm = mode === 'depth' ? depthCm / nWater : depthCm * nWater;
+    const apparentPx = apparentCm * 20;
+    const objectY = mode === 'depth' ? surfaceY + depthPx : surfaceY - depthPx;
+    const virtualY = mode === 'depth' ? surfaceY + apparentPx : surfaceY - apparentPx;
+    const dimLeftX = cx - 180;
+    const dimRightX = cx + 180;
+    return (
+      <g data-ref-no-pan="true" style={{ cursor: 'grab' }} onPointerDown={onPointerDown}>
+        <rect x={-2000} y={surfaceY} width={4000} height={1600} fill="rgba(129, 171, 228, 0.10)" />
+        <line className="interface" x1={-2000} y1={surfaceY} x2={2000} y2={surfaceY} />
+        <text className="label-txt dim" x={cx + 240} y={surfaceY - 6} style={{ pointerEvents: 'none', fontSize: 13 }}>水面</text>
+        <text className="label-txt dim" x={cx + 240} y={surfaceY - 26} style={{ pointerEvents: 'none', fontSize: 13 }}>空气 n = 1.0</text>
+        <text className="label-txt dim" x={cx + 240} y={surfaceY + 20} style={{ pointerEvents: 'none', fontSize: 13 }}>水 n = {nWater.toFixed(3)}</text>
+        {/* 实物：右侧标签 */}
+        <circle cx={cx} cy={objectY} r={5} fill="oklch(0.60 0.22 150)" />
+        <circle cx={cx} cy={objectY} r={10} fill="none" stroke="oklch(0.60 0.22 150 / 0.25)" />
+        <text className="label-txt" x={cx + 16} y={objectY + 4} style={{ pointerEvents: 'none', fontSize: 13 }} fill="oklch(0.60 0.22 150)">实物</text>
+        {/* 虚像：左侧标签，避免重叠 */}
+        <circle cx={cx} cy={virtualY} r={5} fill="none" stroke="oklch(0.55 0.18 280)" strokeWidth={1.6} strokeDasharray="3 2" />
+        <text className="label-txt" x={cx - 16} y={virtualY + 4} textAnchor="end" fill="oklch(0.55 0.18 280)" style={{ pointerEvents: 'none', fontSize: 13 }}>虚像</text>
+        {/* 左侧标注：实际深度 h */}
+        <line x1={dimLeftX} y1={surfaceY} x2={dimLeftX} y2={objectY} stroke="var(--ink-3)" strokeWidth={0.8} strokeDasharray="4 3" />
+        <line x1={dimLeftX - 4} y1={surfaceY} x2={dimLeftX + 4} y2={surfaceY} stroke="var(--ink-3)" strokeWidth={0.8} />
+        <line x1={dimLeftX - 4} y1={objectY} x2={dimLeftX + 4} y2={objectY} stroke="var(--ink-3)" strokeWidth={0.8} />
+        <text className="label-txt dim" x={dimLeftX - 8} y={(surfaceY + objectY) / 2} textAnchor="end" dominantBaseline="middle" style={{ pointerEvents: 'none', fontSize: 13 }}>h = {depthCm.toFixed(1)} cm</text>
+        {/* 右侧标注：视深/视高 h' */}
+        <line x1={dimRightX} y1={surfaceY} x2={dimRightX} y2={virtualY} stroke="oklch(0.55 0.18 280)" strokeWidth={0.8} strokeDasharray="3 2" />
+        <line x1={dimRightX - 4} y1={surfaceY} x2={dimRightX + 4} y2={surfaceY} stroke="oklch(0.55 0.18 280)" strokeWidth={0.8} />
+        <line x1={dimRightX - 4} y1={virtualY} x2={dimRightX + 4} y2={virtualY} stroke="oklch(0.55 0.18 280)" strokeWidth={0.8} />
+        <text className="label-txt" x={dimRightX + 8} y={(surfaceY + virtualY) / 2} fill="oklch(0.55 0.18 280)" dominantBaseline="middle" style={{ pointerEvents: 'none', fontSize: 13 }}>h' = {apparentCm.toFixed(2)} cm</text>
+      </g>
+    );
+  }
   return null;
 }
 
@@ -908,6 +1112,12 @@ function LaserSource({ settings, onPointerDown }: { settings: RefractionSettings
 }
 
 function RenderedRay({ segment, color, thick }: { segment: RaySegment; color: string; thick: number }) {
+  if (segment.kind === 'virtual') {
+    return (
+      <line className="ray" x1={segment.from.x} y1={segment.from.y} x2={segment.to.x} y2={segment.to.y}
+        stroke="oklch(0.55 0.16 280)" strokeWidth={Math.max(1, thick - 0.3)} strokeDasharray="6 4" opacity={0.6} />
+    );
+  }
   const stroke = segment.kind === 'reflected' ? 'oklch(0.60 0.16 28)' : segment.kind === 'leak' ? 'oklch(0.66 0.17 35)' : color;
   return (
     <g>
@@ -981,8 +1191,12 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
         <span>{activeShape.desc}</span>
       </div>
 
-      <SectionTitle aside="SOURCE">主光源</SectionTitle>
-      <Slider label="光线角 α" value={settings.sourceAngleDeg ?? 56} onChange={(v: number) => setSettings({ ...settings, sourceAngleDeg: v })} min={-85} max={175} step={1} unit="°" hint="光源方向独立于介质位置" />
+      {settings.shape !== 'apparent' && settings.shape !== 'snellwindow' && (
+        <>
+          <SectionTitle aside="SOURCE">主光源</SectionTitle>
+          <Slider label="光线角 α" value={settings.sourceAngleDeg ?? 56} onChange={(v: number) => setSettings({ ...settings, sourceAngleDeg: v })} min={-85} max={175} step={1} unit="°" hint="光源方向独立于介质位置" />
+        </>
+      )}
 
       <SectionTitle aside="MEDIUM">介质参数</SectionTitle>
       {settings.shape === 'interface' && (
@@ -1011,19 +1225,39 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
           <Slider label="弯曲半径 R" value={settings.fiberBendRadiusCm} onChange={(v: number) => setSettings({ ...settings, fiberBendRadiusCm: v })} min={2} max={50} step={1} unit="cm" />
         </>
       )}
+      {settings.shape === 'apparent' && (
+        <>
+          <SegSelect value={settings.apparentMode ?? 'depth'} onChange={(v: string) => setSettings({ ...settings, apparentMode: v as 'depth' | 'height' })} options={[{ value: 'depth', label: '视深（俯视）' }, { value: 'height', label: '视高（仰视）' }]} />
+          <Slider label="物体深度 h" value={settings.apparentObjectDepthCm ?? 5} onChange={(v: number) => setSettings({ ...settings, apparentObjectDepthCm: v })} min={1} max={15} step={0.5} unit="cm" />
+          <Slider label="水折射率 n" value={settings.apparentWaterN ?? 1.333} onChange={(v: number) => setSettings({ ...settings, apparentWaterN: v })} min={1.1} max={1.8} step={0.01} unit="" />
+          <Slider label="光线张角" value={settings.apparentRayAngleDeg ?? 20} onChange={(v: number) => setSettings({ ...settings, apparentRayAngleDeg: v })} min={2} max={80} step={1} unit="°" hint="超过临界角时可观察全反射" />
+        </>
+      )}
+      {settings.shape === 'snellwindow' && (
+        <>
+          <Slider label="入射角 θ₁" value={settings.snellIncidentAngleDeg ?? 30} onChange={(v: number) => setSettings({ ...settings, snellIncidentAngleDeg: v })} min={5} max={85} step={1} unit="°" hint={`临界角 ${(Math.asin(Math.min(1, 1 / (settings.snellWaterN ?? 1.333))) * 180 / Math.PI).toFixed(1)}°`} />
+          <Slider label="水折射率 n" value={settings.snellWaterN ?? 1.333} onChange={(v: number) => setSettings({ ...settings, snellWaterN: v })} min={1.1} max={1.8} step={0.01} unit="" />
+          <Slider label="水深 h" value={settings.snellSourceDepthCm ?? 8} onChange={(v: number) => setSettings({ ...settings, snellSourceDepthCm: v })} min={2} max={20} step={0.5} unit="cm" />
+          <SegSelect value={settings.snellViewMode ?? '3d'} onChange={(v: string) => setSettings({ ...settings, snellViewMode: v as '3d' | '2d' | 'topview' })} options={[{ value: '3d', label: '3D' }, { value: '2d', label: '2D 截面' }, { value: 'topview', label: '俯视' }]} />
+        </>
+      )}
 
-      <SectionTitle aside="OBJECT">介质位置</SectionTitle>
-      <div className="ref-panel-note">
-        <strong>直接拖动对象</strong>
-        <span>画布中可直接拖动主光源和介质对象，滚轮缩放、空白处拖动画布。</span>
-      </div>
+      {settings.shape !== 'snellwindow' && (
+        <>
+          <SectionTitle aside="OBJECT">介质位置</SectionTitle>
+          <div className="ref-panel-note">
+            <strong>直接拖动对象</strong>
+            <span>画布中可直接拖动主光源和介质对象，滚轮缩放、空白处拖动画布。</span>
+          </div>
 
-      <SectionTitle aside="CANVAS">画布</SectionTitle>
-      <Slider label="缩放" value={settings.canvasZoom ?? 1} onChange={(v: number) => setSettings({ ...settings, canvasZoom: v })} min={0.65} max={2.2} step={0.05} unit="x" />
-      <div className="preset-row">
-        <button className="preset-btn" onClick={() => setSettings({ ...settings, canvasPanX: 0, canvasPanY: 0 })}>居中画布</button>
-        <button className="preset-btn" onClick={() => setSettings(applyShapePreset(settings, settings.shape))}>重置对象</button>
-      </div>
+          <SectionTitle aside="CANVAS">画布</SectionTitle>
+          <Slider label="缩放" value={settings.canvasZoom ?? 1} onChange={(v: number) => setSettings({ ...settings, canvasZoom: v })} min={0.65} max={2.2} step={0.05} unit="x" />
+          <div className="preset-row">
+            <button className="preset-btn" onClick={() => setSettings({ ...settings, canvasPanX: 0, canvasPanY: 0 })}>居中画布</button>
+            <button className="preset-btn" onClick={() => setSettings(applyShapePreset(settings, settings.shape))}>重置对象</button>
+          </div>
+        </>
+      )}
 
       <SectionTitle aside="WAVELENGTH">波长</SectionTitle>
       <Slider label="波长 λ" value={settings.wavelength} onChange={(v: number) => setSettings({ ...settings, wavelength: v })} min={380} max={780} step={5} unit="nm" />
@@ -1075,23 +1309,61 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
             <span className="step">当前版本按入口进入后与上下壁面持续作用来解释导光与漏光，仍是模块 1 里最专用的一类对象。</span>
           </>
         )}
+        {settings.shape === 'apparent' && (
+          <>
+            <span className="step"><span className="lhs">视深与视高</span><span className="eq">=</span><span className="rhs">折射导致的虚像偏移</span></span>
+            <span className="step">{(settings.apparentMode ?? 'depth') === 'depth' ? '从空气中俯视水中物体，虚像位置比实物更浅。' : '从水中仰视空气中物体，虚像位置比实物更高。'}</span>
+          </>
+        )}
+        {settings.shape === 'snellwindow' && (
+          <>
+            <span className="step"><span className="lhs">水下光源</span><span className="eq">=</span><span className="rhs">斯涅尔窗 + 全反射 3D</span></span>
+            <span className="step">水下光源向各方向发射光线，临界角锥内折射出水面形成斯涅尔窗，锥外光线全部全反射回水中。</span>
+          </>
+        )}
       </div>
 
       <SectionTitle aside="LIVE">实时数值</SectionTitle>
       <div className="readouts">
         <Readout label="当前对象" value={shapeLabel} unit="" />
-        <Readout label="状态" value={result.status} unit="" />
-        <Readout label="路径模式" value={result.pathMode} unit="" />
-        <Readout label="首次命中边界" value={edgeLabel(result.firstEdge)} unit="" />
-        <Readout label="最后命中边界" value={edgeLabel(result.lastEdge)} unit="" />
-        <Readout label="入射角" value={fmt(result.incidentDeg, 2)} unit={result.incidentDeg == null ? '' : '°'} />
-        <Readout label="折射角" value={fmt(result.refractedDeg, 2)} unit={result.refractedDeg == null ? '' : '°'} hi />
-        <Readout label="反射角" value={fmt(result.reflectedDeg, 2)} unit={result.reflectedDeg == null ? '' : '°'} />
-        {result.exitDeg !== undefined && <Readout label="出射角" value={fmt(result.exitDeg, 2)} unit={result.exitDeg == null ? '' : '°'} />}
-        {result.criticalDeg !== undefined && <Readout label="临界角" value={fmt(result.criticalDeg, 2)} unit={result.criticalDeg == null ? '' : '°'} />}
-        {result.shiftCm !== undefined && <Readout label="侧向位移" value={fmt(result.shiftCm, 2)} unit={result.shiftCm == null ? '' : 'cm'} />}
-        {result.coreDeg !== undefined && <Readout label="纤芯传播角" value={fmt(result.coreDeg, 2)} unit={result.coreDeg == null ? '' : '°'} />}
-        {result.effectiveWallDeg !== undefined && <Readout label="壁面入射角" value={fmt(result.effectiveWallDeg, 2)} unit={result.effectiveWallDeg == null ? '' : '°'} />}
+        {settings.shape !== 'snellwindow' && (
+          <>
+            <Readout label="状态" value={result.status} unit="" />
+            <Readout label="路径模式" value={result.pathMode} unit="" />
+            <Readout label="首次命中边界" value={edgeLabel(result.firstEdge)} unit="" />
+            <Readout label="最后命中边界" value={edgeLabel(result.lastEdge)} unit="" />
+            <Readout label="入射角" value={fmt(result.incidentDeg, 2)} unit={result.incidentDeg == null ? '' : '°'} />
+            <Readout label="折射角" value={fmt(result.refractedDeg, 2)} unit={result.refractedDeg == null ? '' : '°'} hi />
+            <Readout label="反射角" value={fmt(result.reflectedDeg, 2)} unit={result.reflectedDeg == null ? '' : '°'} />
+            {result.exitDeg !== undefined && <Readout label="出射角" value={fmt(result.exitDeg, 2)} unit={result.exitDeg == null ? '' : '°'} />}
+            {result.criticalDeg !== undefined && <Readout label="临界角" value={fmt(result.criticalDeg, 2)} unit={result.criticalDeg == null ? '' : '°'} />}
+            {result.shiftCm !== undefined && <Readout label="侧向位移" value={fmt(result.shiftCm, 2)} unit={result.shiftCm == null ? '' : 'cm'} />}
+            {result.coreDeg !== undefined && <Readout label="纤芯传播角" value={fmt(result.coreDeg, 2)} unit={result.coreDeg == null ? '' : '°'} />}
+            {result.effectiveWallDeg !== undefined && <Readout label="壁面入射角" value={fmt(result.effectiveWallDeg, 2)} unit={result.effectiveWallDeg == null ? '' : '°'} />}
+            {result.realDepthCm != null && <Readout label={(settings.apparentMode ?? 'depth') === 'depth' ? '实际深度 h' : '实际高度 h'} value={fmt(result.realDepthCm, 1)} unit="cm" />}
+            {result.apparentDepthCm != null && <Readout label={(settings.apparentMode ?? 'depth') === 'depth' ? '视深 h\'' : '视高 h\''} value={fmt(result.apparentDepthCm, 2)} unit="cm" hi />}
+          </>
+        )}
+        {settings.shape === 'snellwindow' && (() => {
+          const nW = settings.snellWaterN ?? 1.333;
+          const depth = settings.snellSourceDepthCm ?? 8;
+          const incDeg = settings.snellIncidentAngleDeg ?? 30;
+          const critAngle = deg(Math.asin(Math.min(1, 1 / nW)));
+          const windowR = depth * Math.tan(rad(critAngle));
+          const sinR = Math.sin(rad(incDeg)) * nW;
+          const isTIR = sinR > 1;
+          const refractedDeg = isTIR ? null : deg(Math.asin(sinR));
+          return (
+            <>
+              <Readout label="入射角 θ₁" value={incDeg.toFixed(0)} unit="°" />
+              <Readout label="折射角 θ₂" value={isTIR ? '全反射' : refractedDeg!.toFixed(1)} unit={isTIR ? '' : '°'} hi />
+              <Readout label="临界角 θc" value={critAngle.toFixed(1)} unit="°" />
+              <Readout label="水折射率 n" value={nW.toFixed(3)} unit="" />
+              <Readout label="水深 h" value={depth.toFixed(1)} unit="cm" />
+              <Readout label="斯涅尔窗半径 r" value={windowR.toFixed(2)} unit="cm" hi />
+            </>
+          );
+        })()}
       </div>
 
       {settings.showFormula && (
@@ -1129,6 +1401,35 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
                 <span className="step mono">{settings.fiberCladdingN.toFixed(3)} / {settings.fiberCoreN.toFixed(3)}</span>
               </>
             )}
+            {settings.shape === 'apparent' && (
+              <>
+                <span className="step">---</span>
+                <span className="step"><span className="lhs">h'</span><span className="eq">=</span><span className="rhs">{(settings.apparentMode ?? 'depth') === 'depth' ? 'h / n' : 'h × n'}</span></span>
+                <span className="step mono">{(settings.apparentMode ?? 'depth') === 'depth' ? `${(settings.apparentObjectDepthCm ?? 5).toFixed(1)} / ${(settings.apparentWaterN ?? 1.333).toFixed(3)}` : `${(settings.apparentObjectDepthCm ?? 5).toFixed(1)} × ${(settings.apparentWaterN ?? 1.333).toFixed(3)}`}</span>
+                <span className="step"><span className="lhs">h'</span><span className="eq">=</span><span className="rhs"><span className="hi">{fmt(result.apparentDepthCm, 2)} cm</span></span></span>
+              </>
+            )}
+            {settings.shape === 'snellwindow' && (() => {
+              const nW = settings.snellWaterN ?? 1.333;
+              const depth = settings.snellSourceDepthCm ?? 8;
+              const incDeg = settings.snellIncidentAngleDeg ?? 30;
+              const critAngle = deg(Math.asin(Math.min(1, 1 / nW)));
+              const windowR = depth * Math.tan(rad(critAngle));
+              const sinR = Math.sin(rad(incDeg)) * nW;
+              const isTIR = sinR > 1;
+              return (
+                <>
+                  <span className="step">---</span>
+                  <span className="step"><span className="lhs">n₁ sin θ₁</span><span className="eq">=</span><span className="rhs">n₂ sin θ₂</span></span>
+                  <span className="step mono">{nW.toFixed(3)} × sin({incDeg}°) = 1 × sin θ₂</span>
+                  <span className="step mono">sin θ₂ = {sinR.toFixed(4)}{isTIR ? ' > 1 → 全反射' : ` → θ₂ = ${deg(Math.asin(sinR)).toFixed(1)}°`}</span>
+                  <span className="step">---</span>
+                  <span className="step"><span className="lhs">sin θc</span><span className="eq">=</span><span className="rhs">1 / n = 1 / {nW.toFixed(3)}</span></span>
+                  <span className="step"><span className="lhs">θc</span><span className="eq">=</span><span className="rhs"><span className="hi">{critAngle.toFixed(1)}°</span></span></span>
+                  <span className="step"><span className="lhs">r</span><span className="eq">=</span><span className="rhs">h tan θc = {depth.toFixed(1)} × tan({critAngle.toFixed(1)}°) = <span className="hi">{windowR.toFixed(2)} cm</span></span></span>
+                </>
+              );
+            })()}
           </FormulaBlock>
         </>
       )}

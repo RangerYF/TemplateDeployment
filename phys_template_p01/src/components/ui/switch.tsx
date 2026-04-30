@@ -29,7 +29,7 @@ export function Switch({
   return (
     <label
       className={cn(
-        "relative inline-flex h-[18px] w-8 cursor-pointer items-center rounded-full",
+        "relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full",
         disabled && "pointer-events-none opacity-50",
         className
       )}
@@ -48,8 +48,8 @@ export function Switch({
       />
       <span
         className={cn(
-          "inline-block h-3.5 w-3.5 transform rounded-full shadow",
-          internalChecked ? "translate-x-[14px]" : "translate-x-0.5"
+          "inline-block h-5 w-5 transform rounded-full shadow",
+          internalChecked ? "translate-x-6" : "translate-x-1"
         )}
         style={{
           backgroundColor: COLORS.white,

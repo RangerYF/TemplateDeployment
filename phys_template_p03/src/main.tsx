@@ -13,6 +13,7 @@ async function bootstrap() {
   await import('./ui');
   await import('./optics-primitives');
   await import('./module-refraction');
+  await import('./module-refraction-3d');
   await import('./module-lens');
   await import('./module-doubleslit');
   await import('./module-diffraction');

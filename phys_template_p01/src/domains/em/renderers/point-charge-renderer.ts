@@ -1,15 +1,22 @@
 import { rendererRegistry } from '@/core/registries/renderer-registry';
 import { worldToScreen, worldLengthToScreen } from '@/renderer/coordinate';
+import { useSimulationStore } from '@/store/simulation-store';
 import type { EntityRenderer } from '@/core/registries/renderer-registry';
+import { isInactiveDynamicPointCharge } from '../logic/point-charge-role';
+import { isStaticElectrostaticScene } from '../logic/static-electrostatic-scene';
 
 const POSITIVE_COLOR = '#E53E3E'; // 红色
 const NEGATIVE_COLOR = '#3182CE'; // 蓝色
 
 const pointChargeRenderer: EntityRenderer = (entity, _result, ctx) => {
+  if (isInactiveDynamicPointCharge(entity)) return;
+
   const { coordinateTransform } = ctx;
   const { position } = entity.transform;
   const radius = (entity.properties.radius as number) ?? 0.15;
   const charge = (entity.properties.charge as number) ?? 1e-6;
+  const state = useSimulationStore.getState().simulationState;
+  const hideSceneAnnotations = isStaticElectrostaticScene(state.scene.entities.values(), state.timeline.duration);
 
   const screenPos = worldToScreen(position, coordinateTransform);
   const screenRadius = worldLengthToScreen(radius, coordinateTransform);
@@ -35,7 +42,7 @@ const pointChargeRenderer: EntityRenderer = (entity, _result, ctx) => {
   c.fillText(charge >= 0 ? '+' : '−', screenPos.x, screenPos.y);
 
   // label
-  if (entity.label) {
+  if (entity.label && !hideSceneAnnotations) {
     c.fillStyle = color;
     c.font = '12px Inter, sans-serif';
     c.textAlign = 'center';

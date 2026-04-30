@@ -119,6 +119,7 @@ function SceneLinearSetup({
   onElementDown,
   onScreenDown,
   renderElement,
+  renderScreenOverlay,
 }: {
   svgRef: { current: SVGSVGElement | null };
   sourceX: number;
@@ -130,6 +131,7 @@ function SceneLinearSetup({
   onElementDown: (event: any) => void;
   onScreenDown: (event: any) => void;
   renderElement: () => any;
+  renderScreenOverlay?: () => any;
 }) {
   return (
     <svg ref={svgRef} className="scene-linear-setup" viewBox="0 0 800 150" preserveAspectRatio="xMidYMid meet">
@@ -142,6 +144,7 @@ function SceneLinearSetup({
         <line x1={screenX} y1={12} x2={screenX} y2={138} stroke="transparent" strokeWidth="36" />
         <SceneScreen x={screenX} top={20} bottom={130} label="屏幕" />
       </g>
+      {renderScreenOverlay && renderScreenOverlay()}
       <g style={{ cursor: 'grab', touchAction: 'none' }} onPointerDown={onSourceDown}>
         <circle cx={sourceX} cy={75} r="24" fill="rgba(0,0,0,0.001)" pointerEvents="all" />
         <ScenePointSource x={sourceX} y={75} label="光源" />

@@ -4,8 +4,8 @@
   "name": "两点电荷·库仑力",
   "description": "两个点电荷之间的库仑力分析，调节电荷量观察力的变化",
   "category": "P-02",
-  "supportedViewports": ["force"],
-  "defaultViewport": "force",
+  "supportedViewports": ["force", "field"],
+  "defaultViewport": "field",
   "displayConfig": {
     "scale": 150,
     "origin": { "x": 400, "y": 300 }

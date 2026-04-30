@@ -37,6 +37,12 @@ function clamp01(v: number): number {
   return clamp(v, 0, 1);
 }
 
+function perceptualToneMap(I: number, ap: 'slit' | 'circle'): number {
+  const c = clamp01(I);
+  const gamma = ap === 'circle' ? 0.22 : 0.25;
+  return Math.pow(c, gamma) * 0.82 + Math.pow(c, 0.65) * 0.18;
+}
+
 function besselJ1(x: number): number {
   if (x === 0) return 0;
   const ax = Math.abs(x);
@@ -178,7 +184,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
         const iHoriz = intensityAt(y);
         for (let py = 0; py < H; py++) {
           const I = aperture === 'slit' ? iHoriz : intensityAt(Math.hypot(y, (py - H / 2) / W * screenW));
-          const v = Math.pow(clamp01(I), 0.55);
+          const v = perceptualToneMap(I, aperture);
           const gray = 255 * v;
           const idx = (py * W + px) * 4;
           img.data[idx] = settings.showColor ? cr * v : gray;
@@ -235,7 +241,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
       for (let px = 0; px < W; px++) {
         const y = (px - W / 2) / W * screenW;
         const I = intensityAt(y, wl);
-        const v = Math.pow(clamp01(I), 0.55);
+        const v = perceptualToneMap(I, aperture);
         const gray = 255 * v;
         const y0 = bi * bandH;
         const y1 = bi === 2 ? H : (bi + 1) * bandH;

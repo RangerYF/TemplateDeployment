@@ -1,6 +1,6 @@
 import { entityRegistry } from '@/core/registries/entity-registry';
 import { pointInRect } from '@/core/physics/geometry';
-import type { Entity, Rect, SliderParamSchema } from '@/core/types';
+import type { Entity, Rect, SelectParamSchema, SliderParamSchema } from '@/core/types';
 
 export function registerFixedResistorEntity(): void {
   entityRegistry.register({
@@ -14,18 +14,31 @@ export function registerFixedResistorEntity(): void {
       height: 0.4, // m（渲染用）
       voltage: 0, // V（求解器运行时更新）
       current: 0, // A（求解器运行时更新）
+      faultType: 'none', // 故障类型：'none' | 'open' | 'short'
     },
 
     paramSchemas: [
       {
+        key: 'faultType',
+        label: '故障',
+        type: 'select',
+        options: [
+          { value: 'none', label: '正常' },
+          { value: 'open', label: '断路' },
+          { value: 'short', label: '短路' },
+        ],
+        default: 'none',
+      } satisfies SelectParamSchema,
+      {
         key: 'resistance',
         label: '电阻',
         type: 'slider',
-        min: 0.1,
-        max: 10000,
-        step: 0.1,
+        min: 0.001,
+        max: 20,
+        step: 0.001,
         default: 10,
         unit: 'Ω',
+        inputMax: 999999,
       } satisfies SliderParamSchema,
     ],
 
@@ -67,6 +80,7 @@ export function registerFixedResistorEntity(): void {
           height: 0.4,
           voltage: 0,
           current: 0,
+          faultType: 'none',
           ...overrides?.properties,
         },
         label: overrides?.label ?? '定值电阻',
