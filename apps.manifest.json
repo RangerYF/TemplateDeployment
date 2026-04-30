@@ -129,5 +129,12 @@
     "title": "光学实验台",
     "path": "phys_template_p03",
     "port": 5182
+  },
+  {
+    "id": "p09",
+    "subject": "physics",
+    "title": "天体运动与引力",
+    "path": "visual_p9",
+    "port": 5187
   }
 ]

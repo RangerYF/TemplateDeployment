@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version 2>/dev/null && pnpm --version 2>/dev/null && echo \"---\" && ls /mnt/e/EduMindAI/visual_template/node_modules 2>/dev/null | head -5 || echo \"node_modules not found\")"
+    ]
+  }
+}
