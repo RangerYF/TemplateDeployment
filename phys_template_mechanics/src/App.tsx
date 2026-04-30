@@ -181,7 +181,13 @@ function App() {
   }
 
   if (route.page === 'modules') {
-    return <WorkbenchPage onOpenTemplate={openTemplate} onOpenP06={() => openP06()} />
+    return (
+      <WorkbenchPage
+        onOpenTemplate={openTemplate}
+        onOpenModule={openModule}
+        onOpenP06={() => openP06()}
+      />
+    )
   }
 
   if (route.page === 'p06') {

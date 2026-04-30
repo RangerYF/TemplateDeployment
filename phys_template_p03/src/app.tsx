@@ -25,7 +25,10 @@ const { useState, useEffect } = React;
 
 function App() {
   const [active, setActive] = useState<ModuleId>(
-    () => (localStorage.getItem('p03-active') as ModuleId) || 'refraction'
+    () => {
+      const saved = localStorage.getItem('p03-active') as ModuleId | null;
+      return MODULES.some((module) => module.id === saved) ? saved as ModuleId : 'refraction';
+    }
   );
   const [tweaksOpen, setTweaksOpen] = useState<boolean>(false);
   const [theme, setTheme] = useState<ThemeName>((window as any).__TWEAKS.theme || 'light');
@@ -98,7 +101,7 @@ function App() {
 
   const refrFinal = { ...refr, rayThick };
   const lensFinal = { ...lens, rayThick };
-  const mod = MODULES.find(m => m.id === active)!;
+  const mod = MODULES.find(m => m.id === active) || MODULES[0];
   const activeSettings = active === 'refraction' ? refr : active === 'lens' ? lens : active === 'doubleslit' ? dbl : active === 'diffraction' ? diff : film;
   const experimentMeta = W.getP03Experiment(active, activeSettings.experimentId);
   const experimentLabel = experimentMeta?.title || '';

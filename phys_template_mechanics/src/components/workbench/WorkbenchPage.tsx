@@ -1,6 +1,7 @@
 import {
   templateCatalog,
   type TemplateDefinition,
+  type TemplateModule,
   type TemplateStatus,
 } from '@/templates'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -8,6 +9,7 @@ import { COLORS, FEEDBACK_VISUAL, RADIUS } from '@/styles/tokens'
 
 interface WorkbenchPageProps {
   onOpenTemplate: (templateId: string) => void
+  onOpenModule: (moduleId: TemplateModule) => void
   onOpenP06: () => void
 }
 
@@ -90,7 +92,7 @@ function TemplateCardItem({
   )
 }
 
-export function WorkbenchPage({ onOpenTemplate, onOpenP06 }: WorkbenchPageProps) {
+export function WorkbenchPage({ onOpenTemplate, onOpenModule, onOpenP06 }: WorkbenchPageProps) {
   const readyGroups = templateCatalog
     .map((group) => ({
       ...group,
@@ -189,6 +191,7 @@ export function WorkbenchPage({ onOpenTemplate, onOpenP06 }: WorkbenchPageProps)
                     key={group.module}
                     value={group.module}
                     className="shrink-0"
+                    onSelect={() => onOpenModule(group.module)}
                   >
                     {group.title}
                   </TabsTrigger>

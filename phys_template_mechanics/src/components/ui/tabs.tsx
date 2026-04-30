@@ -63,6 +63,7 @@ interface TabsTriggerProps {
   children: React.ReactNode
   activeTab?: string
   setActiveTab?: (value: string) => void
+  onSelect?: (value: string) => void
   className?: string
   variant?: 'pill' | 'underline'
 }
@@ -72,12 +73,20 @@ const TabsTrigger = ({
   children,
   activeTab,
   setActiveTab,
+  onSelect,
   className,
   variant = 'pill',
 }: TabsTriggerProps) => {
   const context = React.useContext(TabsContext)
   const isActive = (activeTab !== undefined ? activeTab : context?.activeTab) === value
-  const onClick = () => setActiveTab?.(value) || context?.setActiveTab(value)
+  const onClick = () => {
+    onSelect?.(value)
+    if (setActiveTab) {
+      setActiveTab(value)
+      return
+    }
+    context?.setActiveTab(value)
+  }
 
   if (variant === 'underline') {
     return (
