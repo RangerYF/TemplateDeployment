@@ -104,10 +104,12 @@ function drawBody(ctx: CanvasRenderingContext2D, body: SceneFrame['bodies'][numb
   ctx.strokeStyle = 'rgba(255,255,255,0.46)';
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,0.86)';
-  ctx.font = '12px Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(body.label, p.x, p.y + radius + 16);
+  if (!body.hideLabel) {
+    ctx.fillStyle = 'rgba(255,255,255,0.86)';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(body.label, p.x, p.y + radius + 16);
+  }
   ctx.restore();
 }
 
@@ -155,9 +157,11 @@ function drawMarkers(ctx: CanvasRenderingContext2D, frame: SceneFrame, width: nu
       ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.font = '12px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.fillText(marker.label, p.x + 10, p.y - 8);
+    if (marker.label) {
+      ctx.font = '12px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.fillText(marker.label, p.x + (marker.labelOffset?.x ?? 10), p.y + (marker.labelOffset?.y ?? -8));
+    }
     ctx.restore();
   }
 }
@@ -329,8 +333,18 @@ export function OrbitCanvas() {
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       />
-      <div className="pointer-events-none absolute left-4 top-4 rounded-[18px] border px-4 py-3 backdrop-blur-md" style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(5,10,24,0.58)' }}>
+      <div className="pointer-events-none absolute left-4 top-4 max-w-[360px] rounded-[18px] border px-4 py-3 backdrop-blur-md" style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(5,10,24,0.58)' }}>
         <div className="text-xs font-semibold text-white">{model.name_cn}</div>
+        {frame.legend && (
+          <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+            {frame.legend.map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-[11px] text-white/80">
+                <span className="h-2.5 w-2.5 rounded-full border border-white/50" style={{ background: item.color }} />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="mt-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.68)' }}>
           {model.animations.mode} · {frame.scaleLabel}
         </div>

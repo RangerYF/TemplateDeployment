@@ -68,6 +68,8 @@ function getGeometry(preset: LayoutPreset): StageGeometry {
         'bath-main-right': [{ x: 600, y: 360 }, { x: 640, y: 330 }, { x: 680, y: 305 }],
         'bath-center-left': [{ x: 241, y: 300 }, { x: 300, y: 310 }, { x: 340, y: 320 }],
         'bath-center-right': [{ x: 580, y: 320 }, { x: 620, y: 310 }, { x: 671, y: 300 }],
+        'bath-near-left': [{ x: 241, y: 290 }, { x: 280, y: 310 }, { x: 310, y: 320 }],
+        'bath-near-right': [{ x: 671, y: 290 }, { x: 640, y: 310 }, { x: 610, y: 320 }],
         'bridge-left-to-right': [{ x: 370, y: 220 }, { x: 410, y: 185 }, { x: 510, y: 185 }, { x: 550, y: 220 }],
         'bridge-right-to-left': [{ x: 370, y: 220 }, { x: 410, y: 185 }, { x: 510, y: 185 }, { x: 550, y: 220 }],
         'membrane-left-to-right': [{ x: 418, y: 325 }, { x: 502, y: 325 }],
@@ -89,13 +91,15 @@ function getGeometry(preset: LayoutPreset): StageGeometry {
       divider: { x: 451, y: 190, w: 18, h: 220 },
       membraneLabel: { x: 460, y: 286 },
       bathLabels: { left: { x: 320, y: 450 }, right: { x: 600, y: 450 }, main: undefined },
-      gasLabels: { left: { x: 290, y: 160 }, right: { x: 630, y: 160 } },
+      gasLabels: { left: { x: 230, y: 160 }, right: { x: 690, y: 160 } },
       channelMap: {
         'wire-top': [{ x: 299, y: 115 }, { x: 299, y: 81 }, { x: 430, y: 81 }, { x: 490, y: 81 }, { x: 634, y: 81 }, { x: 634, y: 115 }],
         'bath-main-left': [{ x: 305, y: 305 }, { x: 350, y: 330 }, { x: 390, y: 360 }],
         'bath-main-right': [{ x: 530, y: 360 }, { x: 575, y: 330 }, { x: 630, y: 305 }],
         'bath-center-left': [{ x: 305, y: 300 }, { x: 360, y: 315 }, { x: 415, y: 320 }],
         'bath-center-right': [{ x: 505, y: 320 }, { x: 565, y: 315 }, { x: 630, y: 300 }],
+        'bath-near-left': [{ x: 305, y: 290 }, { x: 340, y: 310 }, { x: 370, y: 320 }],
+        'bath-near-right': [{ x: 630, y: 290 }, { x: 600, y: 310 }, { x: 570, y: 320 }],
         'bridge-left-to-right': [{ x: 430, y: 210 }, { x: 490, y: 210 }],
         'bridge-right-to-left': [{ x: 430, y: 210 }, { x: 490, y: 210 }],
         'membrane-left-to-right': [{ x: 418, y: 325 }, { x: 502, y: 325 }],
@@ -114,13 +118,15 @@ function getGeometry(preset: LayoutPreset): StageGeometry {
     rightElectrode: { x: 600, y: 110, h: 280 },
     device: { x: 430, y: 38, w: 60, h: 34 },
     bathLabels: { left: undefined, right: undefined, main: { x: 460, y: 458 } },
-    gasLabels: { left: { x: 320, y: 160 }, right: { x: 600, y: 160 } },
+    gasLabels: { left: { x: 290, y: 170 }, right: { x: 635, y: 170 } },
     channelMap: {
       'wire-top': [{ x: 329, y: 110 }, { x: 329, y: 81 }, { x: 430, y: 81 }, { x: 490, y: 81 }, { x: 609, y: 81 }, { x: 609, y: 110 }],
       'bath-main-left': [{ x: 335, y: 300 }, { x: 410, y: 330 }, { x: 470, y: 360 }],
       'bath-main-right': [{ x: 450, y: 360 }, { x: 520, y: 330 }, { x: 605, y: 300 }],
       'bath-center-left': [{ x: 335, y: 300 }, { x: 435, y: 310 }, { x: 520, y: 320 }],
       'bath-center-right': [{ x: 400, y: 320 }, { x: 500, y: 310 }, { x: 605, y: 300 }],
+      'bath-near-left': [{ x: 335, y: 290 }, { x: 390, y: 310 }, { x: 440, y: 320 }],
+      'bath-near-right': [{ x: 605, y: 290 }, { x: 550, y: 310 }, { x: 500, y: 320 }],
       'bridge-left-to-right': [{ x: 430, y: 210 }, { x: 490, y: 210 }],
       'bridge-right-to-left': [{ x: 430, y: 210 }, { x: 490, y: 210 }],
       'membrane-left-to-right': [{ x: 418, y: 325 }, { x: 502, y: 325 }],
@@ -134,13 +140,13 @@ function getGeometry(preset: LayoutPreset): StageGeometry {
 }
 
 function getEffectWidth(effect: SurfaceEffect, progress: number) {
-  if (effect === 'dissolve' || effect === 'consume') return ELECTRODE_BASE_WIDTH - progress * 7;
+  if (effect === 'dissolve' || effect === 'dissolve-sludge' || effect === 'consume' || effect === 'consume-bubbles') return ELECTRODE_BASE_WIDTH - progress * 7;
   if (effect === 'deposit' || effect === 'coat') return ELECTRODE_BASE_WIDTH + progress * 7;
   return ELECTRODE_BASE_WIDTH;
 }
 
-function buildBubbles(effect: SurfaceEffect, anchorX: number, anchorY: number, progress: number) {
-  if (effect !== 'bubbles') return [];
+function buildBubbles(effect: SurfaceEffect, anchorX: number, anchorY: number, progress: number, color = '#FFFFFF') {
+  if (effect !== 'bubbles' && effect !== 'consume-bubbles') return [];
   return Array.from({ length: 5 }, (_, index) => {
     const offset = (progress * 1.6 + index / 5) % 1;
     return {
@@ -148,12 +154,25 @@ function buildBubbles(effect: SurfaceEffect, anchorX: number, anchorY: number, p
       x: anchorX + (index % 2 === 0 ? -14 : 12) + Math.sin(offset * Math.PI * 2) * 4,
       y: anchorY - offset * 72,
       size: 8 - offset * 2,
+      color,
     };
   });
 }
 
-function estimateLabelWidth(label: string, fontSize: number) {
-  return Math.max(24, label.length * fontSize * 0.92 + 10);
+function buildSludgeParticles(effect: SurfaceEffect, anchorX: number, electrodeBottomY: number, bathBottomY: number, progress: number) {
+  if (effect !== 'dissolve-sludge') return [];
+  return Array.from({ length: 6 }, (_, index) => {
+    const offset = (progress * 0.8 + index / 6) % 1;
+    const fallHeight = bathBottomY - electrodeBottomY;
+    const xJitter = (index % 3 - 1) * 10 + Math.sin(offset * Math.PI * 3 + index) * 5;
+    return {
+      key: `sludge-${anchorX}-${index}`,
+      x: anchorX + xJitter,
+      y: electrodeBottomY + offset * fallHeight,
+      size: 4 + (index % 3),
+      opacity: 0.7 + (1 - offset) * 0.3,
+    };
+  });
 }
 
 export function ElectrochemStage() {
@@ -215,9 +234,17 @@ export function ElectrochemStage() {
   });
   });
 
+  const leftBubbleColor = scenario.leftElectrode.reaction.includes('Cl₂') ? '#C5D94A' : '#FFFFFF';
+  const rightBubbleColor = scenario.rightElectrode.reaction.includes('Cl₂') ? '#C5D94A' : '#FFFFFF';
   const bubbleParticles = [
-    ...buildBubbles(scenario.leftElectrode.surfaceEffect, geometry.leftElectrode.x + 9, geometry.leftElectrode.y + geometry.leftElectrode.h - 24, progress),
-    ...buildBubbles(scenario.rightElectrode.surfaceEffect, geometry.rightElectrode.x + 9, geometry.rightElectrode.y + geometry.rightElectrode.h - 24, progress),
+    ...buildBubbles(scenario.leftElectrode.surfaceEffect, geometry.leftElectrode.x + 9, geometry.leftElectrode.y + geometry.leftElectrode.h - 24, progress, leftBubbleColor),
+    ...buildBubbles(scenario.rightElectrode.surfaceEffect, geometry.rightElectrode.x + 9, geometry.rightElectrode.y + geometry.rightElectrode.h - 24, progress, rightBubbleColor),
+  ];
+
+  const bathBottom = geometry.baths[0].y + geometry.baths[0].h;
+  const sludgeParticles = [
+    ...buildSludgeParticles(scenario.leftElectrode.surfaceEffect, geometry.leftElectrode.x + 9, geometry.leftElectrode.y + geometry.leftElectrode.h, bathBottom - 16, progress),
+    ...buildSludgeParticles(scenario.rightElectrode.surfaceEffect, geometry.rightElectrode.x + 9, geometry.rightElectrode.y + geometry.rightElectrode.h, bathBottom - 16, progress),
   ];
 
   return (
@@ -250,39 +277,96 @@ export function ElectrochemStage() {
           ))}
           {geometry.bridgePath ? <path d={geometry.bridgePath} fill="none" stroke="#A7C3D8" strokeWidth="20" strokeLinecap="round" opacity="0.9" /> : null}
           {geometry.divider ? <rect {...geometry.divider} rx="8" fill="#DDE7F0" /> : null}
-          <rect x={geometry.device.x} y={geometry.device.y} width={geometry.device.w} height={geometry.device.h} rx="14" fill="#F6FAF8" stroke={COLORS.primary} strokeWidth="2" />
-          <text x={geometry.device.x + geometry.device.w / 2} y={geometry.device.y + 22} textAnchor="middle" fontSize="12" fill={COLORS.text} fontWeight="600">{scenario.loopLabel}</text>
-          <path d={`M${geometry.leftElectrode.x + 9} ${geometry.leftElectrode.y} V81 H${geometry.rightElectrode.x + 9} V${geometry.rightElectrode.y}`} fill="none" stroke="#6B7280" strokeWidth="4" strokeLinecap="round" />
-          <ElectrodeRect x={geometry.leftElectrode.x} y={geometry.leftElectrode.y} h={geometry.leftElectrode.h} width={getEffectWidth(scenario.leftElectrode.surfaceEffect, progress)} color="#64748B" />
-          <ElectrodeRect x={geometry.rightElectrode.x} y={geometry.rightElectrode.y} h={geometry.rightElectrode.h} width={getEffectWidth(scenario.rightElectrode.surfaceEffect, progress)} color="#7C8897" />
-          <text x={geometry.leftElectrode.x + 9} y={geometry.leftElectrode.y - 8} textAnchor="middle" fontSize="12" fill={COLORS.text}>{scenario.leftElectrode.label}</text>
-          <text x={geometry.rightElectrode.x + 9} y={geometry.rightElectrode.y - 8} textAnchor="middle" fontSize="12" fill={COLORS.text}>{scenario.rightElectrode.label}</text>
+          {(() => {
+            const cx = geometry.device.x + geometry.device.w / 2;
+            const cy = 81;
+            const isPowerSource = model.family === 'electrolytic' || scenario.loopLabel.includes('电源') || scenario.loopLabel.includes('充电');
+            const gap = isPowerSource ? 10 : 14;
+            const lx = geometry.leftElectrode.x + 9;
+            const rx = geometry.rightElectrode.x + 9;
+            return (
+              <g>
+                <path d={`M${lx} ${geometry.leftElectrode.y} V${cy} H${cx - gap}`} fill="none" stroke="#6B7280" strokeWidth="4" strokeLinecap="round" />
+                <path d={`M${cx + gap} ${cy} H${rx} V${geometry.rightElectrode.y}`} fill="none" stroke="#6B7280" strokeWidth="4" strokeLinecap="round" />
+                {isPowerSource ? (
+                  <g>
+                    <line x1={cx - 4} y1={cy - 7} x2={cx - 4} y2={cy + 7} stroke="#6B7280" strokeWidth="2.8" />
+                    <line x1={cx + 4} y1={cy - 12} x2={cx + 4} y2={cy + 12} stroke="#6B7280" strokeWidth="2.8" />
+                    <text x={cx - 4} y={cy - 11} textAnchor="middle" fontSize="10" fontWeight="700" fill="#6B7280">−</text>
+                    <text x={cx + 4} y={cy - 16} textAnchor="middle" fontSize="10" fontWeight="700" fill="#6B7280">+</text>
+                  </g>
+                ) : (
+                  <g>
+                    <circle cx={cx} cy={cy} r={12} fill="#FBFCFD" stroke="#6B7280" strokeWidth="2.5" />
+                    <line x1={cx - 7} y1={cy - 7} x2={cx + 7} y2={cy + 7} stroke="#6B7280" strokeWidth="2" />
+                    <line x1={cx + 7} y1={cy - 7} x2={cx - 7} y2={cy + 7} stroke="#6B7280" strokeWidth="2" />
+                  </g>
+                )}
+              </g>
+            );
+          })()}
+          <ElectrodeRect x={geometry.leftElectrode.x} y={geometry.leftElectrode.y} h={geometry.leftElectrode.h} width={getEffectWidth(scenario.leftElectrode.surfaceEffect, progress)} color={getElectrodeColor(scenario.leftElectrode.material)} />
+          <ElectrodeRect x={geometry.rightElectrode.x} y={geometry.rightElectrode.y} h={geometry.rightElectrode.h} width={getEffectWidth(scenario.rightElectrode.surfaceEffect, progress)} color={getElectrodeColor(scenario.rightElectrode.material)} />
+          <ElectrodeLabel side="left" electrode={scenario.leftElectrode} x={geometry.leftElectrode.x - 16} y={geometry.leftElectrode.y + 18} />
+          <ElectrodeLabel side="right" electrode={scenario.rightElectrode} x={geometry.rightElectrode.x + 34} y={geometry.rightElectrode.y + 18} />
           {Object.entries(geometry.bathLabels).map(([zone, point]) => point ? <text key={zone} x={point.x} y={point.y} textAnchor="middle" fontSize="13" fill={COLORS.textSecondary}>{zone === 'main' ? model.bathLabel : zone === 'left' ? model.leftChamberLabel : model.rightChamberLabel}</text> : null)}
           {geometry.membraneLabel && model.membraneLabel ? <text x={geometry.membraneLabel.x} y={geometry.membraneLabel.y} textAnchor="middle" fontSize="12" fill={COLORS.textSecondary}>{model.membraneLabel}</text> : null}
           {geometry.bridgePath && model.saltBridgeLabel ? <text x="460" y="165" textAnchor="middle" fontSize="12" fill={COLORS.textSecondary}>{model.saltBridgeLabel}</text> : null}
           {geometry.gasLabels.left && model.gasLabels?.left ? <text x={geometry.gasLabels.left.x} y={geometry.gasLabels.left.y} textAnchor="middle" fontSize="12" fill={COLORS.textMuted}>{model.gasLabels.left}</text> : null}
           {geometry.gasLabels.right && model.gasLabels?.right ? <text x={geometry.gasLabels.right.x} y={geometry.gasLabels.right.y} textAnchor="middle" fontSize="12" fill={COLORS.textMuted}>{model.gasLabels.right}</text> : null}
+          {model.bathLabel && model.layoutPreset === 'separator-cell' ? geometry.baths.map((bath) => <text key={`sol-${bath.zone}`} x={bath.x + bath.w / 2} y={bath.y + bath.h - 28} textAnchor="middle" fontSize="12" fontWeight="500" fill={COLORS.textMuted}>{model.bathLabel}</text>) : null}
 
           {particles.map((particle) => (
             <g key={particle.key}>
               <circle cx={particle.point.x} cy={particle.point.y} r={particle.emphasis ? 5 : 4} fill={particle.color} stroke="#FFFFFF" strokeWidth="1.2" />
               {showIonLabels ? (
-                <g transform={`translate(${particle.point.x + 10}, ${particle.point.y - 14})`}>
-                  <rect width={estimateLabelWidth(particle.label, ionLabelFontSize)} height={ionLabelFontSize + 6} rx="10" fill="rgba(255,255,255,0.94)" stroke={particle.color} strokeWidth="1" />
-                  <text x="5" y={ionLabelFontSize} fontSize={ionLabelFontSize} fontWeight="700" fill={particle.color}>{particle.label}</text>
-                </g>
+                <text x={particle.point.x + 10}
+                  y={particle.point.y - 4}
+                  fontSize={ionLabelFontSize}
+                  fontWeight="700"
+                  fill={particle.color}
+                  stroke="rgba(255,255,255,0.92)"
+                  strokeWidth="2.6"
+                  paintOrder="stroke">{particle.label}</text>
               ) : null}
             </g>
           ))}
 
           {bubbleParticles.map((bubble) => (
-            <circle key={bubble.key} cx={bubble.x} cy={bubble.y} r={bubble.size / 2} fill="#FFFFFF" stroke="#FFFFFFCC" strokeWidth="1" opacity="0.86" />
+            <circle key={bubble.key} cx={bubble.x} cy={bubble.y} r={bubble.size / 2} fill={bubble.color} stroke={`${bubble.color}CC`} strokeWidth="1" opacity="0.86" />
           ))}
+
+          {sludgeParticles.length > 0 ? (
+            <g>
+              {sludgeParticles.map((p) => (
+                <rect key={p.key} x={p.x - p.size / 2} y={p.y - p.size / 2} width={p.size} height={p.size * 0.7} rx="1" fill="#8B7355" opacity={p.opacity} transform={`rotate(${(p.y * 3) % 40 - 20}, ${p.x}, ${p.y})`} />
+              ))}
+              {[
+                ...(scenario.leftElectrode.surfaceEffect === 'dissolve-sludge' ? [{ side: 'left' as const, ex: geometry.leftElectrode.x }] : []),
+                ...(scenario.rightElectrode.surfaceEffect === 'dissolve-sludge' ? [{ side: 'right' as const, ex: geometry.rightElectrode.x }] : []),
+              ].map(({ side, ex }) => {
+                const bath = geometry.baths[geometry.baths.length === 1 ? 0 : side === 'left' ? 0 : 1];
+                const cx = ex + 9;
+                const by = bath.y + bath.h - 6;
+                const bw = 48;
+                const bh = 5 + progress * 7;
+                return (
+                  <g key={`sludge-pile-${side}`}>
+                    <ellipse cx={cx} cy={by} rx={bw / 2} ry={bh / 2} fill="#8B7355" opacity="0.6" />
+                    <ellipse cx={cx - 8} cy={by + 1} rx={6} ry={2.5} fill="#A08060" opacity="0.45" />
+                    <ellipse cx={cx + 10} cy={by - 1} rx={5} ry={2} fill="#6B5B45" opacity="0.5" />
+                    <ellipse cx={cx + 2} cy={by - bh / 2 + 1} rx={3} ry={1.5} fill="#9A8465" opacity="0.35" />
+                    <text x={cx + bw / 2 + 8} y={by + 4} textAnchor="start" fontSize="11" fill="#8B7355" fontWeight="600">阳极泥</text>
+                  </g>
+                );
+              })}
+            </g>
+          ) : null}
         </svg>
 
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-5 top-5 max-w-[360px] rounded-[20px] px-4 py-4" style={{ background: 'rgba(255,255,255,0.92)', boxShadow: SHADOWS.sm }}>
-            <div className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: COLORS.primary }}>{activeKeyframe?.title}</div>
+            <div className="text-xs font-semibold tracking-[0.16em]" style={{ color: COLORS.primary }}>{activeKeyframe?.title}</div>
             <div className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>{activeKeyframe?.description ?? scenario.caption}</div>
           </div>
           {scenario.competition ? (
@@ -305,6 +389,36 @@ export function ElectrochemStage() {
         </div>
       </div>
     </section>
+  );
+}
+
+
+function getElectrodeColor(material: string) {
+  if (material.includes('锌')) return '#7F8EA3';
+  if (material.includes('铜') || material === 'Cu') return '#B87333';
+  if (material.includes('二氧化铅')) return '#3D2B1F';
+  if (material.includes('铅')) return '#6B7280';
+  if (material.includes('Pt') || material.includes('铂')) return '#8A94A6';
+  if (material.includes('镍')) return '#A0A8B0';
+  if (material.includes('石墨') || material.includes('炭')) return '#4B5563';
+  if (material.includes('铁') || material.includes('钢')) return '#728091';
+  return '#64748B';
+}
+
+function getPolarityMark(polarity: string) {
+  if (polarity.includes('正')) return '(+)';
+  if (polarity.includes('负')) return '(-)';
+  return '';
+}
+
+
+function ElectrodeLabel({ side, electrode, x, y }: { side: 'left' | 'right'; electrode: { label: string; polarity: string; role: string }; x: number; y: number }) {
+  const anchor = side === 'left' ? 'end' : 'start';
+  return (
+    <g>
+      <text x={x} y={y} textAnchor={anchor} fontSize="12" fill={COLORS.text} fontWeight="700">{electrode.label}</text>
+      <text x={x} y={y + 16} textAnchor={anchor} fontSize="11" fill={COLORS.textSecondary}>{`${getPolarityMark(electrode.polarity)} ${electrode.polarity} / ${electrode.role}`}</text>
+    </g>
   );
 }
 

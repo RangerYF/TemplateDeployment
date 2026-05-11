@@ -36,7 +36,11 @@ const DEFAULT_MODEL_ID = 'CEL-001';
 const TAU = Math.PI * 2;
 const HOHMANN_VISUAL_ANGULAR_SPEED = 0.18;
 const CHASE_RADIUS_GAP_M = 1e5;
+const ORBIT_RADIUS_GAP_M = 1e5;
+const ELLIPSE_RADIUS_GAP_M = 1e6;
 const HOHMANN_PHASES: HohmannPhase[] = ['low', 'transfer', 'high', 'transferDown'];
+const BASE_ANIMATION_TIME_FACTOR = 0.2;
+const REFERENCE_EARTH_MASS_KG = 6.0e24;
 
 function cloneSnapshot<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -52,6 +56,33 @@ function getActiveParams(modelId: string, paramsByModel: Record<string, Record<s
 }
 
 function applyParamConstraints(modelId: string, params: Record<string, number>, key: string, value: number) {
+  if (modelId === 'CEL-001') {
+    if (key === 'lowOrbitRadiusM') {
+      return { ...params, lowOrbitRadiusM: Math.min(value, params.highOrbitRadiusM - ORBIT_RADIUS_GAP_M) };
+    }
+    if (key === 'highOrbitRadiusM') {
+      return { ...params, highOrbitRadiusM: Math.max(value, params.lowOrbitRadiusM + ORBIT_RADIUS_GAP_M) };
+    }
+    return { ...params, [key]: value };
+  }
+  if (modelId === 'CEL-002') {
+    if (key === 'periapsisRadiusM') {
+      return { ...params, periapsisRadiusM: Math.min(value, params.apoapsisRadiusM - ELLIPSE_RADIUS_GAP_M) };
+    }
+    if (key === 'apoapsisRadiusM') {
+      return { ...params, apoapsisRadiusM: Math.max(value, params.periapsisRadiusM + ELLIPSE_RADIUS_GAP_M) };
+    }
+    return { ...params, [key]: value };
+  }
+  if (modelId === 'CEL-011') {
+    if (key === 'lowOrbitRadiusM') {
+      return { ...params, lowOrbitRadiusM: Math.min(value, params.highOrbitRadiusM - ORBIT_RADIUS_GAP_M) };
+    }
+    if (key === 'highOrbitRadiusM') {
+      return { ...params, highOrbitRadiusM: Math.max(value, params.lowOrbitRadiusM + ORBIT_RADIUS_GAP_M) };
+    }
+    return { ...params, [key]: value };
+  }
   if (modelId !== 'CEL-031') return { ...params, [key]: value };
   if (key === 'innerRadiusM') {
     return { ...params, innerRadiusM: Math.min(value, params.outerRadiusM - CHASE_RADIUS_GAP_M) };
@@ -103,24 +134,23 @@ export function getDefaultSimulationSnapshot(): SimulationSnapshot {
 }
 
 function getTimeScale(modelId: string, params: Record<string, number>): number {
+  const referenceMu = CONSTANTS.gravitationalConstant * REFERENCE_EARTH_MASS_KG;
   if (modelId === 'CEL-001') {
-    const mu = CONSTANTS.gravitationalConstant * params.centralMassKg;
-    const period = Math.PI * 2 * Math.sqrt(params.orbitRadiusM ** 3 / mu);
+    const period = Math.PI * 2 * Math.sqrt(params.lowOrbitRadiusM ** 3 / referenceMu);
     return period / 18;
   }
   if (modelId === 'CEL-002') {
-    const aM = params.semiMajorAxisKm * 1000;
-    const mu = CONSTANTS.gravitationalConstant * params.centralMassKg;
-    const period = Math.PI * 2 * Math.sqrt(aM ** 3 / mu);
+    const aM = (params.periapsisRadiusM + params.apoapsisRadiusM) / 2;
+    const period = Math.PI * 2 * Math.sqrt(aM ** 3 / referenceMu);
     return period / 20;
   }
   if (modelId === 'CEL-031') {
-    const mu = CONSTANTS.gravitationalConstant * params.centralMassKg;
-    const omega1 = Math.sqrt(mu / params.innerRadiusM ** 3);
-    const omega2 = Math.sqrt(mu / params.outerRadiusM ** 3);
+    const referenceOmega1 = Math.sqrt(referenceMu / params.innerRadiusM ** 3);
+    const referenceOmega2 = Math.sqrt(referenceMu / params.outerRadiusM ** 3);
     const delta = (params.initialAngleDeg * Math.PI) / 180;
-    return Math.max(60, delta / Math.max(omega1 - omega2, 1e-12) / 10);
+    return Math.max(60, delta / Math.max(referenceOmega1 - referenceOmega2, 1e-12) / 10);
   }
+  if (modelId === 'CEL-012') return 20;
   return 1;
 }
 
@@ -158,7 +188,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   }),
 
   setPlaying: (playing) => set({ isPlaying: playing }),
-  setSpeedMultiplier: (value) => set({ speedMultiplier: value }),
+  setSpeedMultiplier: (value) => set({
+    speedMultiplier: Math.min(20, Math.max(0.2, value)),
+  }),
   resetTime: () => set({ elapsedSeconds: 0 }),
 
   tick: (deltaSeconds) => set((state) => {
@@ -166,7 +198,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     const params = getActiveParams(state.currentModelId, state.paramsByModel);
     const timeScale = getTimeScale(state.currentModelId, params);
     return {
-      elapsedSeconds: state.elapsedSeconds + deltaSeconds * state.speedMultiplier * timeScale,
+      elapsedSeconds: state.elapsedSeconds + deltaSeconds * state.speedMultiplier * timeScale * BASE_ANIMATION_TIME_FACTOR,
     };
   }),
 
@@ -219,7 +251,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       paramsByModel,
       isPlaying: typeof snapshot.isPlaying === 'boolean' ? snapshot.isPlaying : true,
       speedMultiplier: typeof snapshot.speedMultiplier === 'number' && Number.isFinite(snapshot.speedMultiplier)
-        ? Math.min(4, Math.max(0.2, snapshot.speedMultiplier))
+        ? Math.min(20, Math.max(0.2, snapshot.speedMultiplier))
         : 1,
       showVectors: typeof snapshot.showVectors === 'boolean' ? snapshot.showVectors : true,
       showAreaSectors: typeof snapshot.showAreaSectors === 'boolean' ? snapshot.showAreaSectors : true,

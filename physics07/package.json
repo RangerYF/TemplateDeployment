@@ -1,0 +1,20 @@
+{
+  "name": "physics07",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Standalone P07 thermodynamics simulation extracted from the larger education visualization project.",
+  "scripts": {
+    "dev": "pnpm --filter @physics/p07-thermodynamics dev",
+    "build": "pnpm --filter @physics/p07-thermodynamics build",
+    "dev:p07": "pnpm --filter @physics/p07-thermodynamics dev",
+    "build:p07": "pnpm --filter @physics/p07-thermodynamics build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}

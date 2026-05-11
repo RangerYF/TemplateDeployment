@@ -131,6 +131,14 @@
     "port": 5182
   },
   {
+    "id": "p07",
+    "subject": "physics",
+    "title": "热力学模拟器",
+    "path": "physics07",
+    "port": 5188,
+    "distEntry": "P-07-热力学模拟器.html"
+  },
+  {
     "id": "p09",
     "subject": "physics",
     "title": "天体运动与引力",

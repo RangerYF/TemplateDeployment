@@ -12,6 +12,8 @@ export function ParameterPanel() {
   const setParam = useSimulationStore((state) => state.setParam);
   const resetActiveParams = useSimulationStore((state) => state.resetActiveParams);
   const chaseRadiusGapM = 1e5;
+  const orbitRadiusGapM = 1e5;
+  const ellipseRadiusGapM = 1e6;
 
   return (
     <div className="space-y-3">
@@ -20,9 +22,17 @@ export function ParameterPanel() {
         const scientific = field.displayScale === 'scientific';
         const dynamicMin = model.id === 'CEL-031' && field.key === 'outerRadiusM'
           ? Math.max(field.min, (params.innerRadiusM ?? field.min) + chaseRadiusGapM)
+          : (model.id === 'CEL-001' || model.id === 'CEL-011') && field.key === 'highOrbitRadiusM'
+            ? Math.max(field.min, (params.lowOrbitRadiusM ?? field.min) + orbitRadiusGapM)
+            : model.id === 'CEL-002' && field.key === 'apoapsisRadiusM'
+              ? Math.max(field.min, (params.periapsisRadiusM ?? field.min) + ellipseRadiusGapM)
           : field.min;
         const dynamicMax = model.id === 'CEL-031' && field.key === 'innerRadiusM'
           ? Math.min(field.max, (params.outerRadiusM ?? field.max) - chaseRadiusGapM)
+          : (model.id === 'CEL-001' || model.id === 'CEL-011') && field.key === 'lowOrbitRadiusM'
+            ? Math.min(field.max, (params.highOrbitRadiusM ?? field.max) - orbitRadiusGapM)
+            : model.id === 'CEL-002' && field.key === 'periapsisRadiusM'
+              ? Math.min(field.max, (params.apoapsisRadiusM ?? field.max) - ellipseRadiusGapM)
           : field.max;
         const clampedValue = Math.min(dynamicMax, Math.max(dynamicMin, value));
         const isFixedValue = dynamicMin >= dynamicMax;
@@ -69,6 +79,21 @@ export function ParameterPanel() {
             {model.id === 'CEL-031' && field.key === 'innerRadiusM' && (
               <p className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>
                 已限制：内轨半径必须小于外轨半径。
+              </p>
+            )}
+            {model.id === 'CEL-001' && field.key === 'lowOrbitRadiusM' && (
+              <p className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>
+                已限制：低轨半径高于地球大气层，并小于同步/高轨半径。
+              </p>
+            )}
+            {model.id === 'CEL-002' && field.key === 'periapsisRadiusM' && (
+              <p className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>
+                已限制：近地点半径高于地球大气层，并小于远地点半径。
+              </p>
+            )}
+            {model.id === 'CEL-011' && field.key === 'lowOrbitRadiusM' && (
+              <p className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>
+                已限制：低轨半径必须大于地球半径，并小于高轨半径。
               </p>
             )}
           </div>

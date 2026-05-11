@@ -77,6 +77,7 @@ export interface FaceProperties {
   geometryId: string;
   pointIds: string[];
   source: FaceSource;
+  style?: { color: string; opacity: number };
 }
 
 export interface CoordinateSystemProperties {

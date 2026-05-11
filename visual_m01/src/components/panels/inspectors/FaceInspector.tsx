@@ -1,12 +1,26 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { Entity, PointProperties, FaceProperties } from '@/editor/entities/types';
-import { useEntityStore } from '@/editor';
+import { useEntityStore, useHistoryStore, UpdatePropertiesCommand } from '@/editor';
 import { useBuilderResult } from '@/editor/builderCache';
 import { computePointPosition } from '@/components/scene/renderers/usePointPosition';
 import { COLORS } from '@/styles/tokens';
 import { registerInspector } from './registry';
 import { InspectorHeader } from './InspectorCommon';
 import type { Vec3 } from '@/engine/types';
+
+const FACE_PRESET_COLORS = [
+  { label: '灰', value: '#9ca3af' },
+  { label: '蓝', value: '#3b82f6' },
+  { label: '红', value: '#ef4444' },
+  { label: '绿', value: '#22c55e' },
+  { label: '紫', value: '#a855f7' },
+  { label: '橙', value: '#f97316' },
+  { label: '黄', value: '#facc15' },
+  { label: '黑', value: '#000000' },
+];
+
+const DEFAULT_FACE_COLOR = '#9ca3af';
+const DEFAULT_FACE_OPACITY = 0.12;
 
 /** 用叉积法计算多边形面积 */
 function computePolygonArea(positions: Vec3[]): number {
@@ -24,7 +38,7 @@ function computePolygonArea(positions: Vec3[]): number {
 
 function FaceInspector({ entity }: { entity: Entity }) {
   const faceEntity = entity as Entity<'face'>;
-  const { pointIds, source, geometryId } = faceEntity.properties;
+  const { pointIds, source, geometryId, style } = faceEntity.properties;
 
   const entities = useEntityStore((s) => s.entities);
   const result = useBuilderResult(geometryId);
@@ -64,6 +78,48 @@ function FaceInspector({ entity }: { entity: Entity }) {
     }
     return result;
   }, [entities, entity.id]);
+
+  const currentColor = style?.color ?? DEFAULT_FACE_COLOR;
+  const currentOpacity = style?.opacity ?? DEFAULT_FACE_OPACITY;
+  const hasCustomStyle = style != null;
+
+  const handleColorChange = useCallback((color: string) => {
+    const oldStyle = style ?? { color: DEFAULT_FACE_COLOR, opacity: DEFAULT_FACE_OPACITY };
+    const newStyle = { ...oldStyle, color };
+    useHistoryStore.getState().execute(
+      new UpdatePropertiesCommand<'face'>(
+        faceEntity.id,
+        { style: style },
+        { style: newStyle },
+        '设置面颜色',
+      ),
+    );
+  }, [faceEntity.id, style]);
+
+  const handleOpacityChange = useCallback((opacity: number) => {
+    const oldStyle = style ?? { color: DEFAULT_FACE_COLOR, opacity: DEFAULT_FACE_OPACITY };
+    const newStyle = { ...oldStyle, opacity };
+    useHistoryStore.getState().execute(
+      new UpdatePropertiesCommand<'face'>(
+        faceEntity.id,
+        { style: style },
+        { style: newStyle },
+        '设置面不透明度',
+      ),
+    );
+  }, [faceEntity.id, style]);
+
+  const handleReset = useCallback(() => {
+    if (!hasCustomStyle) return;
+    useHistoryStore.getState().execute(
+      new UpdatePropertiesCommand<'face'>(
+        faceEntity.id,
+        { style },
+        { style: undefined },
+        '重置面样式',
+      ),
+    );
+  }, [faceEntity.id, style, hasCustomStyle]);
 
   const sourceLabel = source.type === 'geometry' ? '几何体面' :
     source.type === 'crossSection' ? '截面' :
@@ -105,6 +161,54 @@ function FaceInspector({ entity }: { entity: Entity }) {
       {source.type === 'crossSection' && (
         <CrossSectionDetail source={source} pointLabels={pointLabels} />
       )}
+
+      {/* 外观设置 */}
+      <div className="space-y-2 pt-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>颜色</span>
+          {FACE_PRESET_COLORS.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => handleColorChange(c.value)}
+              className="w-5 h-5 rounded-full border-2"
+              style={{
+                backgroundColor: c.value,
+                borderColor: currentColor === c.value ? COLORS.primary : 'transparent',
+              }}
+              title={c.label}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm shrink-0" style={{ color: COLORS.textMuted }}>不透明度</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={Math.round(currentOpacity * 100)}
+            onChange={(e) => handleOpacityChange(Number(e.target.value) / 100)}
+            className="flex-1 h-1 accent-[#00C06B]"
+          />
+          <span className="text-xs w-8 text-right" style={{ color: COLORS.textMuted }}>
+            {Math.round(currentOpacity * 100)}%
+          </span>
+        </div>
+
+        {hasCustomStyle && (
+          <button
+            onClick={handleReset}
+            className="text-xs px-2 py-0.5 rounded"
+            style={{
+              color: COLORS.textMuted,
+              backgroundColor: COLORS.bgMuted,
+            }}
+          >
+            重置默认
+          </button>
+        )}
+      </div>
     </div>
   );
 }

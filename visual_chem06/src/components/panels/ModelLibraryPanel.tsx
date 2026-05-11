@@ -29,7 +29,7 @@ export function ModelLibraryPanel() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>模型库</h2>
-            <p className="mt-1 text-xs" style={{ color: COLORS.textMuted }}>13 个预设模型，按 PRD 约束固定配置。</p>
+            <p className="mt-1 text-xs" style={{ color: COLORS.textMuted }}>12 个预设模型，按当前反馈修订后的范围固定配置。</p>
           </div>
           <div className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: COLORS.primaryLight, color: COLORS.primary }}>C-06</div>
         </div>
@@ -91,3 +91,4 @@ function ModelSection({ title, icon, items, selectedModelId, onSelect }: ModelSe
     </section>
   );
 }
+

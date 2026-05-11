@@ -110,8 +110,9 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
     shortName: '圆轨道',
     category: 'kepler',
     params: [
-      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 1e22, max: 1e30, step: 1e22, unit: 'kg', displayScale: 'scientific' },
-      { key: 'orbitRadiusM', label: '轨道半径 r', defaultValue: 6.8e6, min: 1e6, max: 1e9, step: 1e5, unit: 'm', displayScale: 'scientific' },
+      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 6.0e23, max: 6.0e25, step: 1e23, unit: 'kg', displayScale: 'scientific' },
+      { key: 'lowOrbitRadiusM', label: '低轨卫星半径 r低', defaultValue: 6.8e6, min: 6.571e6, max: 4.2e7, step: 1e5, unit: 'm', displayScale: 'scientific' },
+      { key: 'highOrbitRadiusM', label: '高轨卫星半径 r高', defaultValue: 8.0e7, min: 4.3e7, max: 8.0e7, step: 1e6, unit: 'm', displayScale: 'scientific' },
     ],
     formulas: [
       { label: '速度', expression: 'v=\\sqrt{\\frac{GM}{r}}', note: 'r 越大，v 越小' },
@@ -119,8 +120,8 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
       { label: '周期', expression: 'T=2\\pi\\sqrt{\\frac{r^3}{GM}}', note: 'r 越大，T 越大' },
       { label: '加速度', expression: 'a=\\frac{GM}{r^2}', note: 'r 越大，a 越小' },
     ],
-    animations: { mode: 'uniform-circular', defaultSpeed: 1, highlight: ['速度箭头恒长', '高轨低速大周期'] },
-    teaching_points: ['拖动半径，观察速度减小、周期增大。', '引力提供向心力：GMm/r^2 = mv^2/r。'],
+    animations: { mode: 'uniform-circular', defaultSpeed: 1, highlight: ['近地/同步/高轨三卫星', '地球自转', '高轨低速大周期'] },
+    teaching_points: ['同屏比较近地卫星、同步卫星和高轨卫星。', '拖动高轨半径，观察高轨速度减小、周期增大。', '引力提供向心力：GMm/r^2 = mv^2/r。'],
   },
   {
     id: 'CEL-002',
@@ -128,9 +129,9 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
     shortName: '椭圆轨道',
     category: 'kepler',
     params: [
-      { key: 'semiMajorAxisKm', label: '半长轴 a', defaultValue: 1.5e8, min: 1e7, max: 1e9, step: 1e7, unit: 'km', displayScale: 'scientific' },
-      { key: 'eccentricity', label: '离心率 e', defaultValue: 0.3, min: 0.01, max: 0.95, step: 0.01, unit: '' },
-      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 1.99e30, min: 1e24, max: 1e31, step: 1e24, unit: 'kg', displayScale: 'scientific' },
+      { key: 'periapsisRadiusM', label: '近地点半径 r近', defaultValue: 7.0e6, min: 6.571e6, max: 4.0e7, step: 1e5, unit: 'm', displayScale: 'scientific' },
+      { key: 'apoapsisRadiusM', label: '远地点半径 r远', defaultValue: 4.2e7, min: 7.571e6, max: 8.0e7, step: 1e6, unit: 'm', displayScale: 'scientific' },
+      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 6.0e23, max: 6.0e25, step: 1e23, unit: 'kg', displayScale: 'scientific' },
     ],
     formulas: [
       { label: '第一定律', expression: '轨道为椭圆，中心天体位于椭圆的一个焦点。', note: '文字表述开普勒第一定律' },
@@ -139,7 +140,7 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
       { label: '速度比', expression: '\\frac{v_{near}}{v_{far}}=\\frac{1+e}{1-e}', note: '角动量守恒' },
     ],
     animations: { mode: 'kepler-equation', defaultSpeed: 1, highlight: ['近日点速度大', '远日点速度小', '面积扇形相等'] },
-    teaching_points: ['暂停观察等时间面积扇形。', '调节离心率，观察近日点/远日点速度差异。'],
+    teaching_points: ['暂停观察等时间面积扇形。', '调节近地点/远地点半径，观察椭圆形状和近日点/远日点速度差异。'],
   },
   {
     id: 'CEL-011',
@@ -147,7 +148,7 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
     shortName: '霍曼转移',
     category: 'orbit_change',
     params: [
-      { key: 'lowOrbitRadiusM', label: '低轨半径 r1', defaultValue: 6.8e6, min: 6.4e6, max: 1e7, step: 1e4, unit: 'm', displayScale: 'scientific' },
+      { key: 'lowOrbitRadiusM', label: '低轨半径 r1', defaultValue: 6.8e6, min: 6.571e6, max: 1e7, step: 1e4, unit: 'm', displayScale: 'scientific' },
       { key: 'highOrbitRadiusM', label: '高轨半径 r2', defaultValue: 4.2e7, min: 1e7, max: 1e8, step: 1e5, unit: 'm', displayScale: 'scientific' },
       { key: 'earthMassKg', label: '地球质量 M', defaultValue: 6.0e24, min: 6.0e24, max: 6.0e24, step: 1, unit: 'kg', displayScale: 'scientific' },
     ],
@@ -203,7 +204,7 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
       { key: 'innerRadiusM', label: '内轨半径 r1', defaultValue: 6.8e6, min: 1e6, max: 9.99e7, step: 1e5, unit: 'm', displayScale: 'scientific' },
       { key: 'outerRadiusM', label: '外轨半径 r2', defaultValue: 1.0e7, min: 1.1e6, max: 1e8, step: 1e5, unit: 'm', displayScale: 'scientific' },
       { key: 'initialAngleDeg', label: '初始角度差 Δθ', defaultValue: 60, min: 0, max: 350, step: 1, unit: 'deg' },
-      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 1e22, max: 1e30, step: 1e22, unit: 'kg', displayScale: 'scientific' },
+      { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 6.0e23, max: 6.0e25, step: 1e23, unit: 'kg', displayScale: 'scientific' },
     ],
     formulas: [
       { label: '角速度差', expression: '\\omega_1>\\omega_2', note: '内轨角速度更大' },

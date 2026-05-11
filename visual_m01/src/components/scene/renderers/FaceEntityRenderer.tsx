@@ -24,9 +24,22 @@ const CROSS_SECTION_OPACITY = 0.35;
 function useFaceStyle(entityId: string) {
   const isSelected = useSelectionStore((s) => s.selectedIds.includes(entityId));
   const isHovered = useSelectionStore((s) => s.hoveredId === entityId);
-  if (isSelected) return { color: FACE_SELECTED_COLOR, opacity: FACE_SELECTED_OPACITY };
+  const customStyle = useEntityStore((s) => {
+    const entity = s.entities[entityId];
+    if (entity?.type === 'face') {
+      return (entity.properties as import('@/editor/entities/types').FaceProperties).style;
+    }
+    return undefined;
+  });
+  if (isSelected) {
+    if (customStyle) return { color: customStyle.color, opacity: customStyle.opacity };
+    return { color: FACE_SELECTED_COLOR, opacity: FACE_SELECTED_OPACITY };
+  }
   if (isHovered) return { color: FACE_HOVERED_COLOR, opacity: FACE_HOVERED_OPACITY };
-  return { color: FACE_COLOR, opacity: FACE_OPACITY };
+  return {
+    color: customStyle?.color ?? FACE_COLOR,
+    opacity: customStyle?.opacity ?? FACE_OPACITY,
+  };
 }
 
 function FaceEntityRenderer({ entity }: { entity: Entity }) {

@@ -86,7 +86,7 @@ export const useElectrochemStore = create<ElectrochemState>((set, get) => ({
   playing: false,
   speed: 1,
   progress: 0,
-  showIonLabels: false,
+  showIonLabels: true,
   ionLabelFontSize: 12,
 
   selectModel: (id) => {
@@ -179,3 +179,4 @@ export function getFilteredModels(models: ElectrochemModel[], familyFilter: Fami
     return [model.title, model.subtype, model.level, ...model.tags].some((value) => value.toLowerCase().includes(trimmed));
   });
 }
+

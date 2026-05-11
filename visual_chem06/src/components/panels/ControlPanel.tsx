@@ -132,7 +132,7 @@ export function ControlPanel() {
 
       <PanelCard title="当前关键帧" subtitle="关键帧需有文字标注说明当前发生的化学过程">
         <div className="rounded-2xl px-4 py-4" style={{ background: COLORS.primaryLight }}>
-          <div className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: COLORS.primary }}>{scenario.caption}</div>
+          <div className="text-xs font-semibold tracking-[0.14em]" style={{ color: COLORS.primary }}>{scenario.caption}</div>
         </div>
       </PanelCard>
     </div>

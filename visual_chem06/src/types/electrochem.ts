@@ -2,7 +2,7 @@
 export type LevelTag = '[高中必修]' | '[高中选修]' | '[拓展]';
 export type LayoutPreset = 'single-bath' | 'dual-bath' | 'separator-cell';
 export type ScenarioId = 'standard' | 'discharge' | 'charge';
-export type SurfaceEffect = 'stable' | 'dissolve' | 'deposit' | 'bubbles' | 'coat' | 'consume';
+export type SurfaceEffect = 'stable' | 'dissolve' | 'dissolve-sludge' | 'deposit' | 'bubbles' | 'coat' | 'consume' | 'consume-bubbles';
 export type Direction = 'left-to-right' | 'right-to-left' | 'up' | 'down';
 export type StreamKind = 'electron' | 'cation' | 'anion';
 export type StreamChannel =
@@ -11,6 +11,8 @@ export type StreamChannel =
   | 'bath-main-right'
   | 'bath-center-left'
   | 'bath-center-right'
+  | 'bath-near-left'
+  | 'bath-near-right'
   | 'bridge-left-to-right'
   | 'bridge-right-to-left'
   | 'membrane-left-to-right'

@@ -45,7 +45,7 @@ export function ControlPanel() {
         <Slider
           value={[speedMultiplier]}
           min={0.2}
-          max={4}
+          max={20}
           step={0.2}
           onValueChange={([value]) => setSpeedMultiplier(value)}
         />
