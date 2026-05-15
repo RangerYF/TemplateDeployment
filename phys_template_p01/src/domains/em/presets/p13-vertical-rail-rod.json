@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-031-vertical-rail-rod",
+  "version": "1.0",
+  "name": "EMI-031 竖直导轨单棒",
+  "description": "导体棒在竖直导轨中从静止下落，实时联动 ε = BLv、i = BLv / (R + R棒)、向上的安培力以及 v-t / i-t 图，并给出终态速度与终态电流。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

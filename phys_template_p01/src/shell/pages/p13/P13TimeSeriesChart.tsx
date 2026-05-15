@@ -5,14 +5,22 @@ interface TimeSeriesPoint {
   value: number;
 }
 
+interface TimeSeriesSeries {
+  label: string;
+  color: string;
+  samples: TimeSeriesPoint[];
+  currentValue: number;
+}
+
 interface P13TimeSeriesChartProps {
   title: string;
   unit: string;
-  color: string;
   formula?: string;
-  samples: TimeSeriesPoint[];
   currentTime: number;
-  currentValue: number;
+  color?: string;
+  samples?: TimeSeriesPoint[];
+  currentValue?: number;
+  series?: TimeSeriesSeries[];
 }
 
 const CHART_WIDTH = 360;
@@ -37,15 +45,26 @@ function formatTimeTick(value: number, xMax: number): string {
 export function P13TimeSeriesChart({
   title,
   unit,
-  color,
   formula,
-  samples,
   currentTime,
-  currentValue,
+  color = P13_SHELL_COLORS.primary,
+  samples,
+  currentValue = 0,
+  series,
 }: P13TimeSeriesChartProps) {
-  const safeSamples = samples.length > 0 ? samples : [{ time: 0, value: 0 }];
-  const xMax = safeSamples[safeSamples.length - 1]!.time || 1;
-  const values = safeSamples.map((sample) => sample.value);
+  const resolvedSeries = (series && series.length > 0)
+    ? series
+    : [{
+        label: title,
+        color,
+        samples: samples && samples.length > 0 ? samples : [{ time: 0, value: 0 }],
+        currentValue,
+      }];
+  const xMax = Math.max(
+    1e-6,
+    ...resolvedSeries.map((entry) => entry.samples[entry.samples.length - 1]?.time ?? 0),
+  );
+  const values = resolvedSeries.flatMap((entry) => entry.samples.map((sample) => sample.value));
   const rawMin = Math.min(0, ...values);
   const rawMax = Math.max(0, ...values);
   const rawSpan = rawMax - rawMin;
@@ -61,13 +80,8 @@ export function P13TimeSeriesChart({
     return CHART_HEIGHT - PADDING.bottom - (ratio * innerHeight);
   };
 
-  const polylinePoints = safeSamples
-    .map((sample) => `${scaleX(sample.time)},${scaleY(sample.value)}`)
-    .join(' ');
-
   const zeroY = scaleY(0);
   const currentX = scaleX(Math.min(xMax, Math.max(0, currentTime)));
-  const currentY = scaleY(currentValue);
   const xTicks = Array.from({ length: 5 }, (_, index) => {
     const ratio = index / 4;
     return ratio * xMax;
@@ -79,6 +93,22 @@ export function P13TimeSeriesChart({
 
   return (
     <P13PanelCard title={title} subtitle={formula ? `公式口径：${formula}` : undefined}>
+      {resolvedSeries.length > 1 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {resolvedSeries.map((entry) => (
+            <span
+              key={entry.label}
+              className="rounded-full px-2.5 py-1 text-[11px] font-medium"
+              style={{
+                color: entry.color,
+                backgroundColor: `${entry.color}16`,
+              }}
+            >
+              {entry.label}
+            </span>
+          ))}
+        </div>
+      )}
       <svg
         viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
         style={{ width: '100%', display: 'block' }}
@@ -159,25 +189,35 @@ export function P13TimeSeriesChart({
           strokeWidth="1.5"
         />
 
-        <polyline
-          points={polylinePoints}
-          fill="none"
-          stroke={color}
-          strokeWidth="3"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+        {resolvedSeries.map((entry) => {
+          const polylinePoints = entry.samples
+            .map((sample) => `${scaleX(sample.time)},${scaleY(sample.value)}`)
+            .join(' ');
+          const currentY = scaleY(entry.currentValue);
+          return (
+            <g key={entry.label}>
+              <polyline
+                points={polylinePoints}
+                fill="none"
+                stroke={entry.color}
+                strokeWidth="3"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+              <circle cx={currentX} cy={currentY} r="4.5" fill={entry.color} />
+            </g>
+          );
+        })}
 
         <line
           x1={currentX}
           y1={PADDING.top}
           x2={currentX}
           y2={CHART_HEIGHT - PADDING.bottom}
-          stroke={color}
+          stroke={resolvedSeries[0]!.color}
           strokeDasharray="6 4"
           opacity="0.6"
         />
-        <circle cx={currentX} cy={currentY} r="5" fill={color} />
 
         <text
           x={PADDING.left}

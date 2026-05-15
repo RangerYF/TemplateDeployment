@@ -35,7 +35,7 @@ export interface UniformBFieldProps extends Record<string, unknown> {
   /** 半圆朝向，仅 boundaryShape='semicircle' 时使用 */
   boundaryHalf?: 'up' | 'down' | 'left' | 'right';
   /** 自动圆形边界规则 */
-  autoBoundaryMode?: 'focusing-min-radius' | 'divergence-base-speed';
+  autoBoundaryMode?: 'focusing-reference-particle' | 'focusing-min-radius' | 'divergence-base-speed';
 }
 
 /** 匀强磁场实体类型别名 */

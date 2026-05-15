@@ -53,6 +53,11 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
   const screenX = clamp(settings.screenX, slitX + 60, 760);
   const sourceDistanceM = Math.max(0.2, (slitX - sourceX) / 110);
   const sourceIntensityScale = clamp(Math.pow(1.55 / sourceDistanceM, 2), 0.28, 1.65);
+  const setupCenterY = 75;
+  const slitGapPx = clamp(12 + (slitSpacing - 50) / 950 * 42, 12, 54);
+  const slitOpeningH = clamp(5 + (slitWidth - 5) / 75 * 7, 5, 12);
+  const slitTopY = setupCenterY - slitGapPx / 2;
+  const slitBottomY = setupCenterY + slitGapPx / 2;
 
   const screenFringeRects = React.useMemo(() => {
     const N = 55;
@@ -170,23 +175,25 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
     if (!size) return false;
     const W = size.width, H = size.height;
     const dpr = window.devicePixelRatio || 1;
-    cv.width = W * dpr;
-    cv.height = H * dpr;
+    const pixelW = Math.max(1, Math.floor(W * dpr));
+    const pixelH = Math.max(1, Math.floor(H * dpr));
+    cv.width = pixelW;
+    cv.height = pixelH;
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
     const ctx = cv.getContext('2d') as CanvasRenderingContext2D | null;
     if (!ctx) return false;
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, pixelW, pixelH);
 
     const screenW = 0.04;
-    const img = ctx.createImageData(W, H);
+    const img = ctx.createImageData(pixelW, pixelH);
     const m = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/) as RegExpMatchArray;
     const cr = +m[1], cg = +m[2], cb = +m[3];
 
-    for (let px = 0; px < W; px++) {
-      const y = (px - W / 2) / W * screenW;
+    for (let px = 0; px < pixelW; px++) {
+      const y = (px - pixelW / 2) / pixelW * screenW;
       const getIntensity = (wlNm: number): number => {
         const localLam = wlNm * 1e-9;
         const sinTheta = y / L;
@@ -212,8 +219,8 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
       }
 
       const v = Math.pow(Math.max(0, Math.min(1, monoI)), 0.7);
-      for (let py = 0; py < H; py++) {
-        const idx = (py * W + px) * 4;
+      for (let py = 0; py < pixelH; py++) {
+        const idx = (py * pixelW + px) * 4;
         if (whiteLight) {
           const gray = (rr + gg + bb) / 3;
           img.data[idx] = showColor ? rr : gray;
@@ -321,8 +328,14 @@ function DoubleSlitModule({ settings }: { settings: DoubleSlitSettings }) {
             renderElement={() => (
               <>
                 <rect x={slitX - 4} y={44} width={8} height={62} rx={2} fill="var(--ink)" />
-                <line x1={slitX} y1={58} x2={slitX} y2={68} stroke="var(--panel)" strokeWidth="2.8" />
-                <line x1={slitX} y1={82} x2={slitX} y2={92} stroke="var(--panel)" strokeWidth="2.8" />
+                <line x1={sourceX} y1={75} x2={slitX} y2={slitTopY} className="ray" stroke={color} strokeWidth="1.5" opacity="0.42" />
+                <line x1={sourceX} y1={75} x2={slitX} y2={slitBottomY} className="ray" stroke={color} strokeWidth="1.5" opacity="0.42" />
+                <line x1={slitX} y1={slitTopY} x2={screenX} y2={75} className="ray" stroke={color} strokeWidth="1.1" opacity="0.32" strokeDasharray="5 5" />
+                <line x1={slitX} y1={slitBottomY} x2={screenX} y2={75} className="ray" stroke={color} strokeWidth="1.1" opacity="0.32" strokeDasharray="5 5" />
+                <line x1={slitX} y1={slitTopY - slitOpeningH / 2} x2={slitX} y2={slitTopY + slitOpeningH / 2} stroke="var(--panel)" strokeWidth="3.4" />
+                <line x1={slitX} y1={slitBottomY - slitOpeningH / 2} x2={slitX} y2={slitBottomY + slitOpeningH / 2} stroke="var(--panel)" strokeWidth="3.4" />
+                <line x1={slitX + 10} y1={slitTopY} x2={slitX + 10} y2={slitBottomY} stroke="var(--ink-3)" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.55" />
+                <text x={slitX + 16} y={setupCenterY + 4} className="label-txt dim" style={{ fontSize: 11 }}>{`d=${slitSpacing}μm`}</text>
               </>
             )}
             renderScreenOverlay={() => (

@@ -90,6 +90,7 @@ export interface P13SingleRodParams {
   initialVelocity: number;
   frictionCoefficient: number;
   gravity: number;
+  externalForce: number;
   sourceVoltage: number;
   capacitanceMicroFarad: number;
   initialCapacitorVoltage: number;
@@ -103,6 +104,7 @@ export interface P13SingleRodState {
   netCircuitVoltage: number;
   current: number;
   ampereForce: number;
+  externalForce: number;
   frictionForce: number;
   netForce: number;
   acceleration: number;
@@ -140,8 +142,10 @@ export interface P13SingleRodSummary {
   theoreticalTerminalVelocity: number;
   theoreticalTerminalCurrent: number;
   theoreticalTerminalCapacitorVoltage: number;
+  theoreticalAcceleration: number | null;
   asymptoticDisplacement: number | null;
   stopTime: number | null;
+  simplifiedMode: boolean;
   terminalExplanation: string;
   adoptedConvention: string;
 }
@@ -159,7 +163,11 @@ export interface P13SingleRodSimulationResult {
   summary: P13SingleRodSummary;
 }
 
-export type P13DoubleRodVariant = 'basic-frictionless';
+export type P13DoubleRodVariant =
+  | 'basic-frictionless'
+  | 'with-friction'
+  | 'with-capacitor'
+  | 'with-external-force';
 
 export interface P13DoubleRodParams {
   variant: P13DoubleRodVariant;
@@ -172,6 +180,11 @@ export interface P13DoubleRodParams {
   rod2Resistance: number;
   initialVelocity1: number;
   initialVelocity2: number;
+  frictionCoefficient1: number;
+  frictionCoefficient2: number;
+  externalForce1: number;
+  capacitance: number;
+  initialCapacitorVoltage: number;
   initialSeparation: number;
 }
 
@@ -184,10 +197,19 @@ export interface P13DoubleRodState {
   relativeVelocity: number;
   separation: number;
   emf: number;
+  netCircuitVoltage: number;
   current: number;
   totalResistance: number;
+  capacitorVoltage: number;
+  capacitorCharge: number;
   ampereForceOnRod1: number;
   ampereForceOnRod2: number;
+  frictionForceOnRod1: number;
+  frictionForceOnRod2: number;
+  externalForceOnRod1: number;
+  externalForceOnRod2: number;
+  netForceOnRod1: number;
+  netForceOnRod2: number;
   acceleration1: number;
   acceleration2: number;
   momentum: number;
@@ -215,6 +237,22 @@ export interface P13DoubleRodAnalysisStep {
   accentColor: string;
 }
 
+export type P13DoubleRodFirstStopRod =
+  | 'rod1'
+  | 'rod2'
+  | 'simultaneous'
+  | 'none';
+
+export type P13DoubleRodFinalOutcome =
+  | 'both-stopped'
+  | 'common-speed-glide'
+  | 'common-speed-then-stop'
+  | 'single-rod-stop-then-stop'
+  | 'driven-common-acceleration'
+  | 'current-zero-common-speed'
+  | 'current-zero-separated-drift'
+  | 'observation-window-end';
+
 export interface P13DoubleRodSummary {
   totalResistance: number;
   timeConstant: number;
@@ -222,7 +260,19 @@ export interface P13DoubleRodSummary {
   initialMomentum: number;
   theoreticalTerminalVelocity: number;
   theoreticalTerminalCurrent: number;
+  finalVelocity1: number;
+  finalVelocity2: number;
+  finalCurrent: number;
+  finalCapacitorVoltage: number;
+  firstStopRod: P13DoubleRodFirstStopRod;
+  firstStopTime: number | null;
+  enteredCommonSpeed: boolean;
+  commonSpeedTime: number | null;
+  finalOutcome: P13DoubleRodFinalOutcome;
+  theoreticalRelativeVelocity?: number;
+  theoreticalCommonAcceleration?: number;
   terminalExplanation: string;
+  simplificationNote: string;
   adoptedConvention: string;
 }
 

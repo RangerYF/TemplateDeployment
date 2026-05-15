@@ -40,8 +40,7 @@ export class GridRenderer {
           const [sx, sy] = this.cm.toScreen(wx, wy);
 
           if (isMajor) {
-            // Major grid intersection: subtle cross
-            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.06)';
             ctx.lineWidth = 0.5;
             const size = 4;
             ctx.beginPath();
@@ -51,8 +50,7 @@ export class GridRenderer {
             ctx.lineTo(sx, sy + size);
             ctx.stroke();
           } else {
-            // Minor: tiny dot
-            ctx.fillStyle = 'rgba(255,255,255,0.025)';
+            ctx.fillStyle = 'rgba(0,0,0,0.025)';
             ctx.fillRect(sx - 0.5, sy - 0.5, 1, 1);
           }
         }
@@ -60,8 +58,7 @@ export class GridRenderer {
     }
 
     if (style === 'lines') {
-      // Major grid lines (very faint)
-      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.04)';
       ctx.lineWidth = 0.5;
       this.drawGridLines(ctx, wLeft, wRight, wBottom, wTop, majorSpacing);
     }
@@ -71,8 +68,8 @@ export class GridRenderer {
     if (oy >= 0 && oy <= h) {
       const axGrad = ctx.createLinearGradient(0, oy, w, oy);
       axGrad.addColorStop(0, 'transparent');
-      axGrad.addColorStop(0.15, 'rgba(255,255,255,0.08)');
-      axGrad.addColorStop(0.85, 'rgba(255,255,255,0.08)');
+      axGrad.addColorStop(0.15, 'rgba(0,0,0,0.08)');
+      axGrad.addColorStop(0.85, 'rgba(0,0,0,0.08)');
       axGrad.addColorStop(1, 'transparent');
       ctx.strokeStyle = axGrad;
       ctx.lineWidth = 0.5;
@@ -86,8 +83,8 @@ export class GridRenderer {
     if (ox >= 0 && ox <= w) {
       const axGrad = ctx.createLinearGradient(ox, 0, ox, h);
       axGrad.addColorStop(0, 'transparent');
-      axGrad.addColorStop(0.15, 'rgba(255,255,255,0.08)');
-      axGrad.addColorStop(0.85, 'rgba(255,255,255,0.08)');
+      axGrad.addColorStop(0.15, 'rgba(0,0,0,0.08)');
+      axGrad.addColorStop(0.85, 'rgba(0,0,0,0.08)');
       axGrad.addColorStop(1, 'transparent');
       ctx.strokeStyle = axGrad;
       ctx.lineWidth = 0.5;
@@ -99,7 +96,7 @@ export class GridRenderer {
 
     // Labels
     if (showLabels) {
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';

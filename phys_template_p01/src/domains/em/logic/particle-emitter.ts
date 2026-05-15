@@ -104,7 +104,7 @@ function syncEmitterBoundaryCircle(
 
   const autoBoundaryMode = primaryBField.properties.autoBoundaryMode as string | undefined;
   if (!autoBoundaryMode) return;
-  if (autoBoundaryMode === 'focusing-min-radius' && pattern !== 'focusing') return;
+  if ((autoBoundaryMode === 'focusing-reference-particle' || autoBoundaryMode === 'focusing-min-radius') && pattern !== 'focusing') return;
   if (autoBoundaryMode === 'divergence-base-speed' && pattern !== 'divergence') return;
 
   const referenceLaunch = selectBoundaryReferenceLaunch(autoBoundaryMode, emitter, launches, charge, mass, primaryBField);
@@ -314,6 +314,20 @@ function selectBoundaryReferenceLaunch(
   mass: number,
   primaryBField: Entity,
 ): ParticleLaunchConfig | null {
+  if (autoBoundaryMode === 'focusing-reference-particle' || autoBoundaryMode === 'focusing-min-radius') {
+    // 磁聚焦里把“最小回旋半径那条汇聚轨迹”视作参考粒子；
+    // 这样磁场圆半径就直接等于该参考粒子的回旋半径，同时仍能包住其余汇聚轨迹。
+    let bestLaunch: ParticleLaunchConfig | null = null;
+    let bestRadius = Number.POSITIVE_INFINITY;
+    for (const launch of launches) {
+      const orbit = resolveCircularOrbit(launch, charge, mass, primaryBField);
+      if (!orbit || orbit.radius >= bestRadius) continue;
+      bestLaunch = launch;
+      bestRadius = orbit.radius;
+    }
+    return bestLaunch;
+  }
+
   if (autoBoundaryMode === 'divergence-base-speed') {
     const baseSpeed = Math.max(readNumber(emitter.properties.baseSpeed, launches[0]?.speed ?? MIN_SPEED), MIN_SPEED);
     return launches.reduce((best, current) =>
@@ -323,15 +337,7 @@ function selectBoundaryReferenceLaunch(
     );
   }
 
-  let bestLaunch: ParticleLaunchConfig | null = null;
-  let bestRadius = Number.POSITIVE_INFINITY;
-  for (const launch of launches) {
-    const orbit = resolveCircularOrbit(launch, charge, mass, primaryBField);
-    if (!orbit || orbit.radius >= bestRadius) continue;
-    bestLaunch = launch;
-    bestRadius = orbit.radius;
-  }
-  return bestLaunch;
+  return launches[0] ?? null;
 }
 
 function resolveCircularOrbit(

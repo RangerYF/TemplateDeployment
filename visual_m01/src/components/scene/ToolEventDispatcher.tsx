@@ -43,7 +43,7 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
 
   /** 从 intersections 中找到目标命中对象（支持 Ctrl 穿透） */
   const findTargetHit = useCallback(
-    (intersections: THREE.Intersection[], penetrate: boolean) => {
+    (intersections: THREE.Intersection[], penetrate: boolean, preferredType?: string) => {
       // 收集所有有 entityId 的命中（排除 locked 实体）
       const entities = useEntityStore.getState().entities;
       const entityHits = intersections.filter((h) => {
@@ -53,6 +53,11 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
         return e && !e.locked;
       });
       if (entityHits.length === 0) return null;
+
+      if (preferredType) {
+        const preferredHit = entityHits.find((h) => h.object?.userData?.entityType === preferredType);
+        if (preferredHit) return preferredHit;
+      }
 
       if (!penetrate) {
         return entityHits[0];
@@ -68,7 +73,12 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
   const buildToolEvent = useCallback(
     (event: ThreeEvent<PointerEvent>): ToolPointerEvent => {
       const penetrate = event.nativeEvent.ctrlKey || event.nativeEvent.metaKey;
-      const targetHit = findTargetHit(event.intersections, penetrate);
+      const activeTool = getActiveTool();
+      const preferredType =
+        activeTool?.id === 'crossSection' || activeTool?.id === 'drawSegment'
+          ? 'point'
+          : undefined;
+      const targetHit = findTargetHit(event.intersections, penetrate, preferredType);
       return {
         nativeEvent: event.nativeEvent,
         intersection: targetHit ?? undefined,
@@ -76,7 +86,7 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
         hitEntityType: targetHit?.object?.userData?.entityType,
       };
     },
-    [findTargetHit],
+    [findTargetHit, getActiveTool],
   );
 
   /** 将屏幕坐标投影到拖拽平面 */

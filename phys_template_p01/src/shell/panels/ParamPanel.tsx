@@ -1,4 +1,5 @@
 import type { ParamSchema, ParamValues, ParamVisibilityRule } from '@/core/types';
+import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -69,7 +70,7 @@ export function ParamPanel({ schemas, values, onValueChange, onBack }: ParamPane
                 <ParamControl
                   key={schema.key}
                   schema={schema}
-                  value={values[schema.key] ?? schema.default}
+                  value={values[schema.key] ?? getParamDefaultValue(schema)}
                   onChange={(nextValue) => onValueChange(schema.key, nextValue)}
                 />
               ))}
@@ -162,6 +163,21 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
           />
         </div>
       );
+
+    case 'button':
+      return (
+        <div className="space-y-1.5">
+          <Label className="text-xs">{schema.label}</Label>
+          <Button
+            size="sm"
+            variant={schema.variant ?? 'secondary'}
+            onClick={() => onChange('__button_click__')}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            {schema.buttonText ?? schema.label}
+          </Button>
+        </div>
+      );
   }
 }
 
@@ -229,7 +245,21 @@ function resolveParamValue(
     return values[key];
   }
 
-  return schemas.find((schema) => schema.key === key)?.default;
+  const schema = schemas.find((entry) => entry.key === key);
+  return schema ? getParamDefaultValue(schema) : undefined;
+}
+
+function getParamDefaultValue(schema: ParamSchema): ParamValues[string] {
+  switch (schema.type) {
+    case 'slider':
+    case 'input':
+    case 'toggle':
+    case 'select':
+      return schema.default;
+    case 'button':
+    default:
+      return '__button__';
+  }
 }
 
 function formatSliderValue(value: number, precision: number): string {

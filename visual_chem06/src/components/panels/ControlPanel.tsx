@@ -1,4 +1,4 @@
-﻿import { Pause, Play, RotateCcw, SkipForward, Type } from 'lucide-react';
+﻿import { Pause, Play, RotateCcw, Type } from 'lucide-react';
 import { PanelCard } from '@/components/panels/PanelCard';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -18,7 +18,6 @@ export function ControlPanel() {
   const ionLabelFontSize = useElectrochemStore((state) => state.ionLabelFontSize);
   const togglePlaying = useElectrochemStore((state) => state.togglePlaying);
   const reset = useElectrochemStore((state) => state.reset);
-  const stepForward = useElectrochemStore((state) => state.stepForward);
   const setScenario = useElectrochemStore((state) => state.setScenario);
   const setSpeed = useElectrochemStore((state) => state.setSpeed);
   const setProgress = useElectrochemStore((state) => state.setProgress);
@@ -30,7 +29,7 @@ export function ControlPanel() {
 
   return (
     <div className="space-y-4">
-      <PanelCard title="演示控制" subtitle="播放、逐步、调速与模式切换">
+      <PanelCard title="演示控制" subtitle="播放、拖动时间轴、调速与模式切换">
         <div className="space-y-4">
           {model.scenarios.length > 1 ? (
             <div>
@@ -77,10 +76,6 @@ export function ControlPanel() {
             <Button variant="primary" onClick={togglePlaying} className="rounded-2xl px-4 py-2.5">
               {playing ? <Pause size={16} /> : <Play size={16} />}
               {playing ? '暂停' : '播放'}
-            </Button>
-            <Button variant="outline" onClick={stepForward} className="rounded-2xl px-4 py-2.5">
-              <SkipForward size={16} />
-              逐步前进
             </Button>
             <Button variant="secondary" onClick={reset} className="rounded-2xl px-4 py-2.5">
               <RotateCcw size={16} />

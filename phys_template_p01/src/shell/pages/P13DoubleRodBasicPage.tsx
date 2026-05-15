@@ -20,14 +20,24 @@ import {
 import {
   P13LegendBadge,
   P13MetricLine,
+  P13ModelRailChip,
   P13PanelCard,
   P13WorkbenchShell,
   P13_SHELL_COLORS,
 } from './p13/P13WorkbenchShell';
+import {
+  DEFAULT_P13_DISPLAY_OPTIONS,
+  P13DisplayOptionsPanel,
+  P13StageAxes,
+  P13StageGrid,
+  type P13DisplayOptions,
+} from './p13/P13DisplayOptions';
+import { scaleArrowLength } from './p13/P13StagePrimitives';
 import { P13TimeSeriesChart } from './p13/P13TimeSeriesChart';
 
 interface Props {
   onBack: () => void;
+  onSelectPreset: (presetId: string) => void;
 }
 
 const PRIMARY_BUTTON_STYLE = {
@@ -45,12 +55,13 @@ const SECONDARY_BUTTON_STYLE = {
 const PLAYBACK_REALTIME_SECONDS = 6;
 const VARIANT = 'basic-frictionless' as const;
 
-export function P13DoubleRodBasicPage({ onBack }: Props) {
+export function P13DoubleRodBasicPage({ onBack, onSelectPreset }: Props) {
   const meta = getDoubleRodVariantMeta(VARIANT);
   const [params, setParams] = useState(() => normalizeDoubleRodParams(VARIANT));
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [analysisStep, setAnalysisStep] = useState(0);
+  const [displayOptions, setDisplayOptions] = useState<P13DisplayOptions>(DEFAULT_P13_DISPLAY_OPTIONS);
 
   useEffect(() => {
     simulator.unload();
@@ -148,7 +159,7 @@ export function P13DoubleRodBasicPage({ onBack }: Props) {
       subtitle={meta.pageSubtitle}
       onBack={onBack}
       badges={badges}
-      modelRail={<DoubleRodModelRail />}
+      modelRail={<DoubleRodModelRail activeVariant={VARIANT} onSelectPreset={onSelectPreset} />}
       leftPanel={
         <div className="space-y-4">
           <P13PanelCard
@@ -199,6 +210,11 @@ export function P13DoubleRodBasicPage({ onBack }: Props) {
             <P13MetricLine label="F1 / F2" value={`${formatNumber(currentState.ampereForceOnRod1, 3)} N / ${formatNumber(currentState.ampereForceOnRod2, 3)} N`} />
             <P13MetricLine label="a1 / a2" value={`${formatNumber(currentState.acceleration1, 3)} / ${formatNumber(currentState.acceleration2, 3)} m/s²`} />
           </P13PanelCard>
+
+          <P13DisplayOptionsPanel
+            options={displayOptions}
+            onChange={setDisplayOptions}
+          />
         </div>
       }
       stagePanel={
@@ -236,6 +252,7 @@ export function P13DoubleRodBasicPage({ onBack }: Props) {
             result={result}
             state={currentState}
             analysisStep={analysisStep}
+            displayOptions={displayOptions}
           />
 
           <div className="mt-4">
@@ -264,30 +281,32 @@ export function P13DoubleRodBasicPage({ onBack }: Props) {
         </P13PanelCard>
       }
       chartPanel={
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           <P13TimeSeriesChart
-            title="v1-t 图"
+            title="双棒速度 v-t 图"
             unit="m/s"
-            color={P13_SHELL_COLORS.velocity}
-            formula="m1 dv1/dt = -B²L²(v1-v2)/(R1+R2)"
-            samples={result.samples.map((sample) => ({
-              time: sample.time,
-              value: sample.velocity1,
-            }))}
+            formula="v1、v2 同图对比，观察两棒速度逐渐靠拢并最终共速"
             currentTime={currentTime}
-            currentValue={currentState.velocity1}
-          />
-          <P13TimeSeriesChart
-            title="v2-t 图"
-            unit="m/s"
-            color={P13_SHELL_COLORS.field}
-            formula="m2 dv2/dt = +B²L²(v1-v2)/(R1+R2)"
-            samples={result.samples.map((sample) => ({
-              time: sample.time,
-              value: sample.velocity2,
-            }))}
-            currentTime={currentTime}
-            currentValue={currentState.velocity2}
+            series={[
+              {
+                label: 'v1',
+                color: P13_SHELL_COLORS.velocity,
+                samples: result.samples.map((sample) => ({
+                  time: sample.time,
+                  value: sample.velocity1,
+                })),
+                currentValue: currentState.velocity1,
+              },
+              {
+                label: 'v2',
+                color: P13_SHELL_COLORS.field,
+                samples: result.samples.map((sample) => ({
+                  time: sample.time,
+                  value: sample.velocity2,
+                })),
+                currentValue: currentState.velocity2,
+              },
+            ]}
           />
           <P13TimeSeriesChart
             title="i-t 图"
@@ -402,31 +421,32 @@ export function P13DoubleRodBasicPage({ onBack }: Props) {
   );
 }
 
-function DoubleRodModelRail() {
+function DoubleRodModelRail({
+  activeVariant,
+  onSelectPreset,
+}: {
+  activeVariant: 'basic-frictionless' | 'with-external-force';
+  onSelectPreset: (presetId: string) => void;
+}) {
   const entries = [
-    { code: 'EMI-021', title: '双棒基础', state: 'active' as const },
-    { code: 'EMI-022', title: '双棒 + 摩擦', state: 'planned' as const },
-    { code: 'EMI-023', title: '双棒 + 电容', state: 'planned' as const },
+    getDoubleRodVariantMeta('basic-frictionless'),
+    getDoubleRodVariantMeta('with-external-force'),
   ];
 
   return (
     <div className="flex flex-wrap gap-2">
-      {entries.map((entry) => (
-        <div
-          key={entry.code}
-          className="rounded-2xl px-3 py-2 text-sm"
-          style={{
-            color: entry.state === 'active' ? P13_SHELL_COLORS.primary : P13_SHELL_COLORS.secondary,
-            backgroundColor: entry.state === 'active' ? P13_SHELL_COLORS.primarySoft : '#F3F4F6',
-            border: `1px solid ${entry.state === 'active' ? P13_SHELL_COLORS.primaryBorder : P13_SHELL_COLORS.border}`,
-          }}
-        >
-          <span className="font-semibold">{entry.code}</span>
-          <span className="mx-2 opacity-50">·</span>
-          <span>{entry.title}</span>
-          {entry.state === 'planned' && <span className="ml-2 text-xs opacity-70">未开放</span>}
-        </div>
-      ))}
+      {entries.map((entry) => {
+        const isActive = entry.variant === activeVariant;
+        return (
+          <P13ModelRailChip
+            key={entry.code}
+            code={entry.code}
+            title={entry.shortTitle}
+            state={isActive ? 'active' : 'available'}
+            onSelect={!isActive ? () => onSelectPreset(entry.presetId) : undefined}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -541,31 +561,49 @@ function DoubleRodStage({
   result,
   state,
   analysisStep,
+  displayOptions,
 }: {
   result: ReturnType<typeof simulateDoubleRodModel>;
   state: P13DoubleRodState;
   analysisStep: number;
+  displayOptions: P13DisplayOptions;
 }) {
-  const centerX = 380;
+  const railLeft = 104;
+  const railRight = 656;
   const topY = 118;
   const bottomY = 292;
-  const maxObservedSeparation = result.samples.reduce(
-    (max, sample) => Math.max(max, Math.abs(sample.separation)),
-    Math.abs(state.separation),
+  const minPosition = result.samples.reduce(
+    (min, sample) => Math.min(min, sample.position1, sample.position2),
+    Math.min(state.position1, state.position2),
   );
-  const separationScale = Math.max(0.6, maxObservedSeparation);
-  const separationRatio = state.separation / separationScale;
-  const absSeparationPixels = clamp(Math.abs(separationRatio) * 280, 92, 320);
-  const separationSign = state.separation >= 0 ? 1 : -1;
-  const rod1X = centerX + (separationSign * absSeparationPixels * 0.5);
-  const rod2X = centerX - (separationSign * absSeparationPixels * 0.5);
-  const loopLeft = Math.min(rod1X, rod2X);
-  const loopRight = Math.max(rod1X, rod2X);
-  const showRelativeMotion = analysisStep >= 1;
-  const showEmf = analysisStep >= 2;
-  const showCurrent = analysisStep >= 3;
-  const showForce = analysisStep >= 4;
+  const maxPosition = result.samples.reduce(
+    (max, sample) => Math.max(max, sample.position1, sample.position2),
+    Math.max(state.position1, state.position2),
+  );
+  const travelRange = Math.max(0.8, maxPosition - minPosition);
+  const scaleX = (position: number) => {
+    const raw = railLeft + 28 + (((position - minPosition) / travelRange) * (railRight - railLeft - 56));
+    return clamp(raw, railLeft + 28, railRight - 28);
+  };
+  const rod1X = scaleX(state.position1);
+  const rod2X = scaleX(state.position2);
+  const showRelativeMotion = displayOptions.showVectors && analysisStep >= 1;
+  const showEmf = displayOptions.showVectors && analysisStep >= 2;
+  const showCurrent = displayOptions.showVectors && analysisStep >= 3;
+  const showForce = displayOptions.showVectors && analysisStep >= 4;
   const currentDirection = state.currentDirection;
+  const maxSpeedMagnitude = result.samples.reduce(
+    (max, sample) => Math.max(max, Math.abs(sample.velocity1), Math.abs(sample.velocity2)),
+    Math.max(Math.abs(state.velocity1), Math.abs(state.velocity2)),
+  );
+  const maxForceMagnitude = result.samples.reduce(
+    (max, sample) => Math.max(max, Math.abs(sample.ampereForceOnRod1), Math.abs(sample.ampereForceOnRod2)),
+    Math.max(Math.abs(state.ampereForceOnRod1), Math.abs(state.ampereForceOnRod2)),
+  );
+  const velocityArrowLength1 = scaleArrowLength(state.velocity1, maxSpeedMagnitude, 34, 96);
+  const velocityArrowLength2 = scaleArrowLength(state.velocity2, maxSpeedMagnitude, 34, 96);
+  const forceArrowLength1 = scaleArrowLength(state.ampereForceOnRod1, maxForceMagnitude, 30, 88);
+  const forceArrowLength2 = scaleArrowLength(state.ampereForceOnRod2, maxForceMagnitude, 30, 88);
 
   return (
     <svg viewBox="0 0 760 390" style={{ width: '100%', display: 'block' }}>
@@ -590,40 +628,53 @@ function DoubleRodStage({
       <rect x="10" y="10" width="740" height="370" rx="24" fill="#FFFDF9" stroke={P13_SHELL_COLORS.border} />
       <rect x="86" y="72" width="588" height="260" rx="28" fill="#F7FBFF" stroke="#D7E7F9" />
 
-      {Array.from({ length: 8 }).map((_, row) =>
-        Array.from({ length: 13 }).map((__, column) => (
-          <text
-            key={`${row}-${column}`}
-            x={114 + (column * 42)}
-            y={102 + (row * 28)}
-            fill="#90A4B8"
-            fontSize="13"
-            textAnchor="middle"
-          >
-            ×
+      {displayOptions.showGrid && <P13StageGrid left={96} top={86} right={664} bottom={318} />}
+
+      {displayOptions.showGrid &&
+        Array.from({ length: 8 }).map((_, row) =>
+          Array.from({ length: 13 }).map((__, column) => (
+            <text
+              key={`${row}-${column}`}
+              x={114 + (column * 42)}
+              y={102 + (row * 28)}
+              fill="#90A4B8"
+              fontSize="13"
+              textAnchor="middle"
+            >
+              ×
+            </text>
+          )),
+        )}
+
+      {displayOptions.showAxes && <P13StageAxes originX={104} originY={330} />}
+
+      {displayOptions.showLabels && (
+        <>
+          <text x="42" y="44" fill={P13_SHELL_COLORS.text} fontSize="15" fontWeight="600">
+            双棒无摩擦耦合回路
           </text>
-        )),
+          <text x="42" y="64" fill={P13_SHELL_COLORS.secondary} fontSize="12">
+            ε = BL(v1 - v2)，F1 = -F2，动量守恒
+          </text>
+        </>
       )}
 
-      <text x="42" y="44" fill={P13_SHELL_COLORS.text} fontSize="15" fontWeight="600">
-        双棒无摩擦耦合回路
-      </text>
-      <text x="42" y="64" fill={P13_SHELL_COLORS.secondary} fontSize="12">
-        ε = BL(v1 - v2)，F1 = -F2，动量守恒
-      </text>
-
-      <line x1={loopLeft} y1={topY} x2={loopRight} y2={topY} stroke="#64748B" strokeWidth="5" strokeLinecap="round" />
-      <line x1={loopLeft} y1={bottomY} x2={loopRight} y2={bottomY} stroke="#64748B" strokeWidth="5" strokeLinecap="round" />
+      <line x1={railLeft} y1={topY} x2={railRight} y2={topY} stroke="#64748B" strokeWidth="5" strokeLinecap="round" />
+      <line x1={railLeft} y1={bottomY} x2={railRight} y2={bottomY} stroke="#64748B" strokeWidth="5" strokeLinecap="round" />
 
       <line x1={rod2X} y1={topY} x2={rod2X} y2={bottomY} stroke="#0F172A" strokeWidth="11" strokeLinecap="round" />
       <line x1={rod1X} y1={topY} x2={rod1X} y2={bottomY} stroke="#111827" strokeWidth="11" strokeLinecap="round" />
 
-      <text x={rod2X - 32} y="206" fill={P13_SHELL_COLORS.field} fontSize="12" fontWeight="600">
-        棒2
-      </text>
-      <text x={rod1X + 16} y="206" fill={P13_SHELL_COLORS.velocity} fontSize="12" fontWeight="600">
-        棒1
-      </text>
+      {displayOptions.showLabels && (
+        <>
+          <text x={rod2X - 32} y="206" fill={P13_SHELL_COLORS.field} fontSize="12" fontWeight="600">
+            棒2
+          </text>
+          <text x={rod1X + 16} y="206" fill={P13_SHELL_COLORS.velocity} fontSize="12" fontWeight="600">
+            棒1
+          </text>
+        </>
+      )}
 
       {showCurrent && currentDirection !== 'none' && (
         <>
@@ -663,9 +714,29 @@ function DoubleRodStage({
             strokeWidth="4"
             markerEnd="url(#double-rod-current)"
           />
-          <text x="474" y="94" fill={P13_SHELL_COLORS.current} fontSize="12" fontWeight="600">
-            电流：{P13_DOUBLE_ROD_CURRENT_DIRECTION_LABELS[currentDirection]}
-          </text>
+          {displayOptions.showLabels && (
+            <text x="474" y="94" fill={P13_SHELL_COLORS.current} fontSize="12" fontWeight="600">
+              电流：{P13_DOUBLE_ROD_CURRENT_DIRECTION_LABELS[currentDirection]}
+            </text>
+          )}
+          <line
+            x1={rod1X}
+            y1={currentDirection === 'counterclockwise' ? bottomY - 16 : topY + 16}
+            x2={rod1X}
+            y2={currentDirection === 'counterclockwise' ? topY + 16 : bottomY - 16}
+            stroke={P13_SHELL_COLORS.current}
+            strokeWidth="5"
+            markerEnd="url(#double-rod-current)"
+          />
+          <line
+            x1={rod2X}
+            y1={currentDirection === 'counterclockwise' ? topY + 16 : bottomY - 16}
+            x2={rod2X}
+            y2={currentDirection === 'counterclockwise' ? bottomY - 16 : topY + 16}
+            stroke={P13_SHELL_COLORS.current}
+            strokeWidth="5"
+            markerEnd="url(#double-rod-current)"
+          />
         </>
       )}
 
@@ -674,21 +745,23 @@ function DoubleRodStage({
           <line
             x1={rod1X}
             y1="90"
-            x2={rod1X + (state.motionDirection1 === 'right' ? 84 : -84)}
+            x2={rod1X + (state.motionDirection1 === 'right' ? velocityArrowLength1 : -velocityArrowLength1)}
             y2="90"
             stroke={P13_SHELL_COLORS.velocity}
             strokeWidth="4"
             markerEnd="url(#double-rod-v1)"
           />
-          <text
-            x={rod1X + (state.motionDirection1 === 'right' ? 10 : -90)}
-            y="72"
-            fill={P13_SHELL_COLORS.velocity}
-            fontSize="12"
-            fontWeight="600"
-          >
-            v1：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.motionDirection1]}
-          </text>
+          {displayOptions.showLabels && (
+            <text
+              x={rod1X + (state.motionDirection1 === 'right' ? 10 : -90)}
+              y="72"
+              fill={P13_SHELL_COLORS.velocity}
+              fontSize="12"
+              fontWeight="600"
+            >
+              v1：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.motionDirection1]}
+            </text>
+          )}
         </>
       )}
 
@@ -697,21 +770,23 @@ function DoubleRodStage({
           <line
             x1={rod2X}
             y1="330"
-            x2={rod2X + (state.motionDirection2 === 'right' ? 84 : -84)}
+            x2={rod2X + (state.motionDirection2 === 'right' ? velocityArrowLength2 : -velocityArrowLength2)}
             y2="330"
             stroke={P13_SHELL_COLORS.field}
             strokeWidth="4"
             markerEnd="url(#double-rod-v2)"
           />
-          <text
-            x={rod2X + (state.motionDirection2 === 'right' ? 10 : -90)}
-            y="350"
-            fill={P13_SHELL_COLORS.field}
-            fontSize="12"
-            fontWeight="600"
-          >
-            v2：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.motionDirection2]}
-          </text>
+          {displayOptions.showLabels && (
+            <text
+              x={rod2X + (state.motionDirection2 === 'right' ? 10 : -90)}
+              y="350"
+              fill={P13_SHELL_COLORS.field}
+              fontSize="12"
+              fontWeight="600"
+            >
+              v2：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.motionDirection2]}
+            </text>
+          )}
         </>
       )}
 
@@ -726,16 +801,18 @@ function DoubleRodStage({
             strokeWidth="4"
             markerEnd="url(#double-rod-emf)"
           />
-          <text
-            x={rod1X - 62}
-            y="206"
-            fill={P13_SHELL_COLORS.emf}
-            fontSize="12"
-            fontWeight="600"
-            transform={`rotate(-90 ${rod1X - 62} 206)`}
-          >
-            ε：{P13_DOUBLE_ROD_VERTICAL_DIRECTION_LABELS[state.emfDirection]}
-          </text>
+          {displayOptions.showLabels && (
+            <text
+              x={rod1X - 62}
+              y="206"
+              fill={P13_SHELL_COLORS.emf}
+              fontSize="12"
+              fontWeight="600"
+              transform={`rotate(-90 ${rod1X - 62} 206)`}
+            >
+              ε：{P13_DOUBLE_ROD_VERTICAL_DIRECTION_LABELS[state.emfDirection]}
+            </text>
+          )}
         </>
       )}
 
@@ -744,21 +821,23 @@ function DoubleRodStage({
           <line
             x1={rod1X}
             y1="336"
-            x2={rod1X + (state.ampereForceDirectionOnRod1 === 'right' ? 80 : -80)}
+            x2={rod1X + (state.ampereForceDirectionOnRod1 === 'right' ? forceArrowLength1 : -forceArrowLength1)}
             y2="336"
             stroke={P13_SHELL_COLORS.force}
             strokeWidth="4"
             markerEnd="url(#double-rod-force)"
           />
-          <text
-            x={rod1X + (state.ampereForceDirectionOnRod1 === 'right' ? 10 : -98)}
-            y="356"
-            fill={P13_SHELL_COLORS.force}
-            fontSize="12"
-            fontWeight="600"
-          >
-            F1：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.ampereForceDirectionOnRod1]}
-          </text>
+          {displayOptions.showLabels && (
+            <text
+              x={rod1X + (state.ampereForceDirectionOnRod1 === 'right' ? 10 : -98)}
+              y="356"
+              fill={P13_SHELL_COLORS.force}
+              fontSize="12"
+              fontWeight="600"
+            >
+              F1：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.ampereForceDirectionOnRod1]}
+            </text>
+          )}
         </>
       )}
 
@@ -767,40 +846,46 @@ function DoubleRodStage({
           <line
             x1={rod2X}
             y1="72"
-            x2={rod2X + (state.ampereForceDirectionOnRod2 === 'right' ? 80 : -80)}
+            x2={rod2X + (state.ampereForceDirectionOnRod2 === 'right' ? forceArrowLength2 : -forceArrowLength2)}
             y2="72"
             stroke={P13_SHELL_COLORS.force}
             strokeWidth="4"
             markerEnd="url(#double-rod-force)"
           />
-          <text
-            x={rod2X + (state.ampereForceDirectionOnRod2 === 'right' ? 10 : -98)}
-            y="56"
-            fill={P13_SHELL_COLORS.force}
-            fontSize="12"
-            fontWeight="600"
-          >
-            F2：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.ampereForceDirectionOnRod2]}
-          </text>
+          {displayOptions.showLabels && (
+            <text
+              x={rod2X + (state.ampereForceDirectionOnRod2 === 'right' ? 10 : -98)}
+              y="56"
+              fill={P13_SHELL_COLORS.force}
+              fontSize="12"
+              fontWeight="600"
+            >
+              F2：{P13_DOUBLE_ROD_HORIZONTAL_DIRECTION_LABELS[state.ampereForceDirectionOnRod2]}
+            </text>
+          )}
         </>
       )}
 
-      <rect x="484" y="210" width="214" height="110" rx="22" fill="#FFFFFF" stroke={P13_SHELL_COLORS.border} />
-      <text x="500" y="234" fill={P13_SHELL_COLORS.secondary} fontSize="12">
-        当前状态
-      </text>
-      <text x="500" y="256" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
-        v1 = {formatNumber(state.velocity1, 4)} m/s
-      </text>
-      <text x="500" y="276" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
-        v2 = {formatNumber(state.velocity2, 4)} m/s
-      </text>
-      <text x="500" y="296" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
-        i = {formatNumber(state.current, 4)} A
-      </text>
-      <text x="500" y="316" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
-        Δx = {formatNumber(state.separation, 4)} m
-      </text>
+      {displayOptions.showLabels && (
+        <>
+          <rect x="484" y="210" width="214" height="110" rx="22" fill="#FFFFFF" stroke={P13_SHELL_COLORS.border} />
+          <text x="500" y="234" fill={P13_SHELL_COLORS.secondary} fontSize="12">
+            当前状态
+          </text>
+          <text x="500" y="256" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
+            v1 = {formatNumber(state.velocity1, 4)} m/s
+          </text>
+          <text x="500" y="276" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
+            v2 = {formatNumber(state.velocity2, 4)} m/s
+          </text>
+          <text x="500" y="296" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
+            i = {formatNumber(state.current, 4)} A
+          </text>
+          <text x="500" y="316" fill={P13_SHELL_COLORS.text} fontSize="13" fontWeight="600">
+            Δx = {formatNumber(state.separation, 4)} m
+          </text>
+        </>
+      )}
     </svg>
   );
 }

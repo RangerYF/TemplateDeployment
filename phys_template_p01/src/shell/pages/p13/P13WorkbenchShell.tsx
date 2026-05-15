@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 
 export const P13_SHELL_COLORS = {
@@ -23,6 +23,7 @@ export const P13_SHELL_COLORS = {
 } as const;
 
 type BadgeTone = 'primary' | 'muted' | 'warning' | 'success';
+export type P13ModelRailState = 'active' | 'available' | 'planned';
 
 interface WorkbenchBadge {
   label: string;
@@ -36,11 +37,13 @@ interface P13WorkbenchShellProps {
   onBack: () => void;
   badges?: WorkbenchBadge[];
   modelRail?: ReactNode;
+  scrollResetKey?: string;
   leftPanel: ReactNode;
   stagePanel: ReactNode;
   chartPanel: ReactNode;
   analysisPanel?: ReactNode;
   resultPanel: ReactNode;
+  chartBeforeSidebarOnMobile?: boolean;
 }
 
 const BADGE_STYLES: Record<BadgeTone, { color: string; backgroundColor: string }> = {
@@ -68,15 +71,41 @@ export function P13WorkbenchShell({
   onBack,
   badges,
   modelRail,
+  scrollResetKey,
   leftPanel,
   stagePanel,
   chartPanel,
   analysisPanel,
   resultPanel,
+  chartBeforeSidebarOnMobile = false,
 }: P13WorkbenchShellProps) {
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useLayoutEffect(() => {
+    const mainElement = mainRef.current;
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      if (mainElement) {
+        mainElement.scrollTop = 0;
+        mainElement.scrollLeft = 0;
+        mainElement.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
+    };
+
+    resetScroll();
+    const frameId = window.requestAnimationFrame(resetScroll);
+    const timeoutId = window.setTimeout(resetScroll, 0);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [title, scrollResetKey]);
+
   return (
     <div
-      className="flex min-h-screen w-full flex-col"
+      className="flex h-screen w-full flex-col overflow-hidden"
       style={{ backgroundColor: P13_SHELL_COLORS.pageBg }}
     >
       <header
@@ -119,17 +148,21 @@ export function P13WorkbenchShell({
         {modelRail && <div className="mt-4">{modelRail}</div>}
       </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto p-4 md:p-5">
+      <main
+        ref={mainRef}
+        className="min-h-0 flex-1 overflow-y-auto p-4 md:p-5"
+        style={{ overflowAnchor: 'none' }}
+      >
         <div className="grid gap-4 xl:grid-cols-[310px_minmax(0,1fr)_336px] xl:grid-rows-[minmax(0,1fr)_290px]">
           <aside className="order-1 xl:row-span-2">{leftPanel}</aside>
           <section className="order-2 min-h-[360px]">{stagePanel}</section>
-          <section className="order-3 min-h-[260px]">{chartPanel}</section>
-          <aside className="order-4 xl:row-span-2 xl:col-start-3">
+          <aside className={`${chartBeforeSidebarOnMobile ? 'order-4' : 'order-3'} xl:row-span-2 xl:col-start-3`}>
             <div className="flex h-full flex-col gap-4">
               {analysisPanel && <div className="xl:flex-1">{analysisPanel}</div>}
               <div>{resultPanel}</div>
             </div>
           </aside>
+          <section className={`${chartBeforeSidebarOnMobile ? 'order-3' : 'order-4'} min-h-[260px]`}>{chartPanel}</section>
         </div>
       </main>
     </div>
@@ -233,5 +266,48 @@ export function P13LegendBadge({
     >
       {label}
     </span>
+  );
+}
+
+export function P13ModelRailChip({
+  code,
+  title,
+  state,
+  onSelect,
+}: {
+  code: string;
+  title: string;
+  state: P13ModelRailState;
+  onSelect?: () => void;
+}) {
+  const isActive = state === 'active';
+  const isAvailable = state === 'available';
+  const clickable = isAvailable && typeof onSelect === 'function';
+
+  return (
+    <button
+      type="button"
+      onClick={clickable ? onSelect : undefined}
+      disabled={!clickable}
+      aria-current={isActive ? 'page' : undefined}
+      className="rounded-2xl px-3 py-2 text-sm transition-colors"
+      style={{
+        color: isActive ? P13_SHELL_COLORS.primary : P13_SHELL_COLORS.secondary,
+        backgroundColor: isActive
+          ? P13_SHELL_COLORS.primarySoft
+          : isAvailable
+            ? '#F8FAFC'
+            : '#F3F4F6',
+        border: `1px solid ${isActive ? P13_SHELL_COLORS.primaryBorder : P13_SHELL_COLORS.border}`,
+        cursor: clickable ? 'pointer' : 'default',
+        opacity: clickable || isActive ? 1 : 0.78,
+      }}
+    >
+      <span className="font-semibold">{code}</span>
+      <span className="mx-2 opacity-50">·</span>
+      <span>{title}</span>
+      {state === 'planned' && <span className="ml-2 text-xs opacity-70">未开放</span>}
+      {state === 'available' && <span className="ml-2 text-xs opacity-70">已开放</span>}
+    </button>
   );
 }

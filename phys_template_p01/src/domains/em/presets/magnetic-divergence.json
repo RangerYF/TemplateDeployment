@@ -2,7 +2,7 @@
   "id": "P02-EMF036-magnetic-divergence",
   "version": "1.0",
   "name": "磁发散模型",
-  "description": "粒子源从同一点同方向发射多粒子，磁场圆半径固定取 baseSpeed 参考粒子的回旋半径；其余粒子围绕这条参考圆向内或向外发散。",
+  "description": "粒子从同一点源射入圆形匀强磁场区，在场内沿不同圆弧偏转，离场后整理成近似平行的出射束。",
   "category": "P-08",
   "supportedViewports": [
     "motion",

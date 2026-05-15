@@ -15,6 +15,13 @@ interface FeatureMarker {
 const FEATURE_SCAN_STEPS = 600;
 const FEATURE_EPSILON = 1e-7;
 
+function formatCoord(value: number): string {
+  if (Math.abs(value) < 1e-6) return '0';
+  const roundedInt = Math.round(value);
+  if (Math.abs(value - roundedInt) < 1e-4) return String(roundedInt);
+  return String(Number(value.toFixed(3)));
+}
+
 function bisectZero(fn: (x: number) => number | null, left: number, right: number): number {
   let lo = left;
   let hi = right;
@@ -111,8 +118,8 @@ function renderFeatureMarker(
 
   ctx.font = '10px monospace';
   ctx.textBaseline = 'top';
-  ctx.fillStyle = COLORS.textSecondary;
-  ctx.fillText(`(${marker.x.toFixed(2)}, ${marker.y.toFixed(2)})`, cx + 8, cy + 4);
+  ctx.fillStyle = COLORS.textPrimary;
+  ctx.fillText(`(${formatCoord(marker.x)}, ${formatCoord(marker.y)})`, cx + 8, cy + 4);
   ctx.restore();
 }
 

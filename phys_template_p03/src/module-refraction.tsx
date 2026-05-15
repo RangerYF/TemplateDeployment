@@ -6,6 +6,8 @@ type MaterialKey = 'air' | 'water' | 'glass' | 'crown' | 'flint' | 'diamond' | '
 type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber' | 'apparent' | 'snellwindow';
 type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004' | 'opt-005' | 'opt-006';
 type HemisphereMode = 'center' | 'plane';
+type FiberModel = 'straight' | 'bent';
+type SnellSourceShape = 'point' | 'line' | 'polygon';
 type DragTarget = 'source' | 'element' | 'pan' | null;
 
 interface RefractionSettings {
@@ -30,12 +32,16 @@ interface RefractionSettings {
   hemisphereMode: HemisphereMode;
   fiberCoreN: number;
   fiberCladdingN: number;
+  fiberModel?: FiberModel;
   fiberBendRadiusCm: number;
   apparentMode: 'depth' | 'height';
   apparentObjectDepthCm: number;
   apparentWaterN: number;
   apparentRayAngleDeg: number;
   snellSourceDepthCm: number;
+  snellSourceShape?: SnellSourceShape;
+  snellSourceSizeCm?: number;
+  snellPolygonSides?: number;
   snellWaterN: number;
   snellIncidentAngleDeg: number;
   snellViewMode: '3d' | '2d' | 'topview';
@@ -80,6 +86,16 @@ interface BoundaryHit {
   distance: number;
 }
 
+interface FiberGeometry {
+  center: Point;
+  left: number;
+  right: number;
+  width: number;
+  coreHalf: number;
+  claddingHalf: number;
+  amplitude: number;
+}
+
 interface ShapeOption {
   id: ShapeKind;
   label: string;
@@ -117,15 +133,21 @@ const BASE_SHAPE_PRESETS: Record<ShapeKind, Partial<RefractionSettings>> = {
   interface: { experimentId: 'opt-001', shape: 'interface', sourceAnchorX: 180, sourceY: 86, sourceAngleDeg: 56, elementCenterX: 500, elementCenterY: 250, medium1N: 1.0, medium2N: 1.5 },
   slab: { experimentId: 'opt-002', shape: 'slab', sourceAnchorX: 170, sourceY: 88, sourceAngleDeg: 56, elementCenterX: 500, elementCenterY: 248, slabIndex: 1.5, slabThicknessCm: 6 },
   half: { experimentId: 'opt-003', shape: 'half', sourceAnchorX: 180, sourceY: 92, sourceAngleDeg: 62, elementCenterX: 520, elementCenterY: 266, hemisphereIndex: 1.5, hemisphereRadiusCm: 6, hemisphereMode: 'plane' },
-  fiber: { experimentId: 'opt-004', shape: 'fiber', sourceAnchorX: 130, sourceY: 270, sourceAngleDeg: 8, elementCenterX: 560, elementCenterY: 290, fiberCoreN: 1.5, fiberCladdingN: 1.3, fiberBendRadiusCm: 14 },
+  fiber: { experimentId: 'opt-004', shape: 'fiber', sourceAnchorX: 130, sourceY: 270, sourceAngleDeg: 8, elementCenterX: 560, elementCenterY: 290, fiberCoreN: 1.5, fiberCladdingN: 1.3, fiberModel: 'straight', fiberBendRadiusCm: 14 },
   apparent: { experimentId: 'opt-005', shape: 'apparent', sourceAnchorX: 500, sourceY: 90, sourceAngleDeg: -90, elementCenterX: 500, elementCenterY: 260, apparentMode: 'depth' as const, apparentObjectDepthCm: 5, apparentWaterN: 1.333, apparentRayAngleDeg: 20, rayThick: 1.2 },
-  snellwindow: { experimentId: 'opt-006', shape: 'snellwindow', sourceAnchorX: 500, sourceY: 90, elementCenterX: 500, elementCenterY: 260, snellSourceDepthCm: 8, snellWaterN: 1.333, snellIncidentAngleDeg: 30, snellViewMode: '3d' as const },
+  snellwindow: { experimentId: 'opt-006', shape: 'snellwindow', sourceAnchorX: 500, sourceY: 90, elementCenterX: 500, elementCenterY: 260, snellSourceDepthCm: 8, snellSourceShape: 'point', snellSourceSizeCm: 4, snellPolygonSides: 5, snellWaterN: 1.333, snellIncidentAngleDeg: 30, snellViewMode: '3d' as const },
 };
 
 const deg = (r: number): number => r * 180 / Math.PI;
 const rad = (d: number): number => d * Math.PI / 180;
 const fmt = (v: number | null | undefined, digits: number = 2): string => typeof v === 'number' && Number.isFinite(v) ? v.toFixed(digits) : '—';
 const clamp = (v: number, min: number, max: number): number => Math.min(max, Math.max(min, v));
+const REFRACTION_STAGE_W = 1000;
+const REFRACTION_STAGE_H = 620;
+const SOURCE_MIN_X = 20;
+const SOURCE_MAX_X = REFRACTION_STAGE_W - 40;
+const SOURCE_MIN_Y = 10;
+const SOURCE_MAX_Y = REFRACTION_STAGE_H - 30;
 
 function add(a: Point, b: Point): Point { return { x: a.x + b.x, y: a.y + b.y }; }
 function sub(a: Point, b: Point): Point { return { x: a.x - b.x, y: a.y - b.y }; }
@@ -247,6 +269,122 @@ function makeArcMark(at: Point, normal: Point, rayDir: Point, label: string, rad
   };
 }
 
+function makeFiberGeometry(settings: RefractionSettings): FiberGeometry {
+  const center: Point = { x: settings.elementCenterX ?? 560, y: settings.elementCenterY ?? 290 };
+  const width = 520;
+  const bendRadius = settings.fiberBendRadiusCm ?? 14;
+  const bendT = clamp((30 - bendRadius) / 28, 0, 1);
+  return {
+    center,
+    left: center.x - width / 2,
+    right: center.x + width / 2,
+    width,
+    coreHalf: 18,
+    claddingHalf: 28,
+    amplitude: (settings.fiberModel ?? 'straight') === 'bent' ? bendT * 78 : 0,
+  };
+}
+
+function fiberCenterY(geom: FiberGeometry, x: number): number {
+  const t = clamp((x - geom.left) / geom.width, 0, 1);
+  return geom.center.y + geom.amplitude * Math.sin(t * Math.PI * 2);
+}
+
+function fiberSlopeAt(geom: FiberGeometry, x: number): number {
+  const t = clamp((x - geom.left) / geom.width, 0, 1);
+  return geom.amplitude * (Math.PI * 2 / geom.width) * Math.cos(t * Math.PI * 2);
+}
+
+function fiberBoundaryY(geom: FiberGeometry, x: number, edge: 'top' | 'bottom', half: number = geom.coreHalf): number {
+  return fiberCenterY(geom, x) + (edge === 'top' ? -half : half);
+}
+
+function fiberBoundaryNormal(geom: FiberGeometry, x: number, edge: 'top' | 'bottom'): Point {
+  const slope = fiberSlopeAt(geom, x);
+  return edge === 'top' ? norm({ x: slope, y: -1 }) : norm({ x: -slope, y: 1 });
+}
+
+function pointInFiberCore(point: Point, geom: FiberGeometry): boolean {
+  return point.x >= geom.left && point.x <= geom.right && Math.abs(point.y - fiberCenterY(geom, point.x)) <= geom.coreHalf;
+}
+
+function buildFiberBoundaryPath(geom: FiberGeometry, edge: 'top' | 'bottom', half: number, steps: number = 72): string {
+  const parts: string[] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const x = geom.left + geom.width * (i / steps);
+    const y = fiberBoundaryY(geom, x, edge, half);
+    parts.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+  return parts.join(' ');
+}
+
+function buildFiberBandPath(geom: FiberGeometry, half: number, steps: number = 72): string {
+  const points: Point[] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const x = geom.left + geom.width * (i / steps);
+    points.push({ x, y: fiberBoundaryY(geom, x, 'top', half) });
+  }
+  for (let i = steps; i >= 0; i -= 1) {
+    const x = geom.left + geom.width * (i / steps);
+    points.push({ x, y: fiberBoundaryY(geom, x, 'bottom', half) });
+  }
+  return points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ') + ' Z';
+}
+
+function buildFiberCenterPath(geom: FiberGeometry, steps: number = 72): string {
+  const parts: string[] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const x = geom.left + geom.width * (i / steps);
+    const y = fiberCenterY(geom, x);
+    parts.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+  return parts.join(' ');
+}
+
+function findFiberBoundaryHit(pos: Point, dir: Point, geom: FiberGeometry, edge: 'top' | 'bottom'): BoundaryHit | null {
+  const d = norm(dir);
+  const step = 3;
+  const maxT = 1500;
+  const signed = (point: Point): number => point.y - fiberBoundaryY(geom, point.x, edge);
+  const isPastBoundary = (value: number): boolean => edge === 'top' ? value <= 0 : value >= 0;
+  let prevT = 0.5;
+  let prev = add(pos, mul(d, prevT));
+  let prevValue = signed(prev);
+
+  for (let t = prevT + step; t <= maxT; t += step) {
+    const next = add(pos, mul(d, t));
+    if (next.x < geom.left - 2 || next.x > geom.right + 2) {
+      if (next.x > geom.right + 2) break;
+      prevT = t;
+      prev = next;
+      prevValue = signed(prev);
+      continue;
+    }
+    const nextValue = signed(next);
+    if (!isPastBoundary(prevValue) && isPastBoundary(nextValue)) {
+      let lo = prevT;
+      let hi = t;
+      for (let i = 0; i < 16; i += 1) {
+        const mid = (lo + hi) / 2;
+        const midPoint = add(pos, mul(d, mid));
+        if (isPastBoundary(signed(midPoint))) hi = mid;
+        else lo = mid;
+      }
+      const hitPoint = add(pos, mul(d, hi));
+      return {
+        point: hitPoint,
+        normal: fiberBoundaryNormal(geom, hitPoint.x, edge),
+        edge,
+        distance: len(sub(hitPoint, pos)),
+      };
+    }
+    prevT = t;
+    prev = next;
+    prevValue = nextValue;
+  }
+  return null;
+}
+
 function edgeLabel(edge: SolveResult['firstEdge']): string {
   if (edge === 'interface') return '单界面';
   if (edge === 'top') return '上边界';
@@ -325,17 +463,20 @@ function buildRefractionFormulaNotes(settings: RefractionSettings, result: Solve
   }
 
   if (settings.shape === 'fiber') {
+    const modelLabel = (settings.fiberModel ?? 'straight') === 'bent' ? '弯曲光纤' : '直光纤';
     if (result.pathMode.includes('漏光')) {
       return [
-        '当前路径：主光线进入纤芯后，在壁面处不再满足全反射条件，因此出现漏光。',
+        `当前路径：${modelLabel}中，主光线在壁面处不再满足全反射条件，因此出现漏光。`,
         `临界角关系：sin θc = n₂ / n₁ = ${settings.fiberCladdingN.toFixed(3)} / ${settings.fiberCoreN.toFixed(3)}`,
         '当壁面入射角减小到临界角以下，光线将不再稳定导光。',
       ];
     }
     return [
-      '当前路径：主光线先进入纤芯，再与上下壁面持续相互作用。',
+      `当前路径：主光线在${modelLabel}纤芯中与上下壁面持续相互作用。`,
       `导光条件：n₁ > n₂，即 ${settings.fiberCoreN.toFixed(3)} > ${settings.fiberCladdingN.toFixed(3)}`,
-      '只要壁面处持续满足全反射条件，光就可以沿光纤传播。',
+      (settings.fiberModel ?? 'straight') === 'bent'
+        ? '弯曲半径越小，外侧边界处越容易不满足全反射条件。'
+        : '直光纤适合先观察连续全反射的基本路径。',
     ];
   }
 
@@ -360,11 +501,15 @@ function buildRefractionFormulaNotes(settings: RefractionSettings, result: Solve
     const critAngle = deg(Math.asin(Math.min(1, 1 / nW)));
     const depth = settings.snellSourceDepthCm ?? 8;
     const windowR = depth * Math.tan(rad(critAngle));
+    const sourceShape = settings.snellSourceShape ?? 'point';
+    const sourceLabel = sourceShape === 'line' ? '线光源' : sourceShape === 'polygon' ? '多边形光源' : '点光源';
     return [
-      `水下光源深度 h = ${depth.toFixed(1)} cm，水折射率 n = ${nW.toFixed(3)}。`,
+      `${sourceLabel}深度 h = ${depth.toFixed(1)} cm，水折射率 n = ${nW.toFixed(3)}。`,
       `临界角 θc = arcsin(1/n) = ${critAngle.toFixed(2)}°`,
       `斯涅尔窗半径 r = h × tan(θc) = ${windowR.toFixed(2)} cm`,
-      '临界角锥内的光线折射出水面，锥外全部全反射回水中。',
+      sourceShape === 'point'
+        ? '临界角锥内的光线折射出水面，锥外全部全反射回水中。'
+        : '扩展光源可看作多个点光源的叠加，因此水面上会出现多个斯涅尔窗范围的叠加。',
     ];
   }
 
@@ -667,70 +812,75 @@ function solveHemisphere(settings: RefractionSettings, source: Point): SolveResu
 
 function solveFiber(settings: RefractionSettings, source: Point): SolveResult {
   const dir = norm(pointFromAngle(settings.sourceAngleDeg ?? 8));
-  const center: Point = { x: settings.elementCenterX ?? 560, y: settings.elementCenterY ?? 290 };
-  const left = center.x - 260;
-  const right = center.x + 260;
-  const top = center.y - 18;
-  const bottom = center.y + 18;
-
-  const enter = intersectRayVertical(source, dir, left, top, bottom);
+  const geom = makeFiberGeometry(settings);
+  const sourceInside = pointInFiberCore(source, geom);
+  const entranceTop = fiberBoundaryY(geom, geom.left, 'top');
+  const entranceBottom = fiberBoundaryY(geom, geom.left, 'bottom');
+  const enter = sourceInside ? source : intersectRayVertical(source, dir, geom.left, entranceTop, entranceBottom);
   if (!enter) return { segments: [extendRay(source, dir)], angleMarks: [], normals: [], status: '射线未命中光纤入口', pathMode: '未命中', firstEdge: null, lastEdge: null };
 
-  const refrIn = refract(dir, { x: -1, y: 0 }, 1, settings.fiberCoreN);
+  const refrIn = sourceInside ? { dir, tir: false } : refract(dir, { x: -1, y: 0 }, 1, settings.fiberCoreN);
   if (!refrIn.dir) return { segments: [extendRay(source, dir)], angleMarks: [], normals: [], status: '入口未形成有效入射', pathMode: '未进入纤芯', firstEdge: 'left', lastEdge: 'left' };
 
-  const segments: RaySegment[] = [{ from: source, to: enter, kind: 'incident' }];
-  const angleMarks: AngleMark[] = [makeArcMark(enter, { x: -1, y: 0 }, mul(dir, -1), `${fmt(angleAgainstNormal(dir, { x: -1, y: 0 }), 1)}°`, 24)];
-  const normals: [Point, Point][] = [[add(enter, { x: -100, y: 0 }), add(enter, { x: 100, y: 0 })]];
+  const segments: RaySegment[] = sourceInside ? [] : [{ from: source, to: enter, kind: 'incident' }];
+  const angleMarks: AngleMark[] = sourceInside ? [] : [makeArcMark(enter, { x: -1, y: 0 }, mul(dir, -1), `${fmt(angleAgainstNormal(dir, { x: -1, y: 0 }), 1)}°`, 24)];
+  const normals: [Point, Point][] = sourceInside ? [] : [[add(enter, { x: -100, y: 0 }), add(enter, { x: 100, y: 0 })]];
 
   let pos = enter;
   let insideDir = refrIn.dir;
   let guard = 18;
   const criticalDeg = deg(Math.asin(clamp(settings.fiberCladdingN / settings.fiberCoreN, 0, 1)));
   let effectiveWallDeg: number | null = null;
+  let lastEdge: BoundaryHit['edge'] | 'interface' | null = sourceInside ? null : 'left';
 
   while (guard-- > 0) {
-    const hitTop = intersectRayHorizontal(pos, insideDir, top, left, right);
-    const hitBottom = intersectRayHorizontal(pos, insideDir, bottom, left, right);
-    const hitRight = intersectRayVertical(pos, insideDir, right, top, bottom);
-    const candidates = [hitTop, hitBottom, hitRight]
-      .filter(Boolean)
-      .map((p) => ({ p: p as Point, t: len(sub(p as Point, pos)) }))
-      .sort((a, b) => a.t - b.t);
+    const rightTop = fiberBoundaryY(geom, geom.right, 'top');
+    const rightBottom = fiberBoundaryY(geom, geom.right, 'bottom');
+    const hitTop = findFiberBoundaryHit(pos, insideDir, geom, 'top');
+    const hitBottom = findFiberBoundaryHit(pos, insideDir, geom, 'bottom');
+    const hitRight = intersectRayVertical(pos, insideDir, geom.right, rightTop, rightBottom);
+    const candidates = [
+      hitTop,
+      hitBottom,
+      hitRight ? { point: hitRight, normal: { x: 1, y: 0 }, edge: 'right' as const, distance: len(sub(hitRight, pos)) } : null,
+    ].filter(Boolean).sort((a, b) => (a as BoundaryHit).distance - (b as BoundaryHit).distance) as BoundaryHit[];
     if (candidates.length === 0) {
       segments.push({ from: pos, to: add(pos, mul(insideDir, 1400)), kind: 'refracted' });
       break;
     }
-    const hit = candidates[0].p;
-    if (Math.abs(hit.x - right) < 0.5) {
-      segments.push({ from: pos, to: hit, kind: 'refracted' });
-      segments.push({ from: hit, to: add(hit, mul(insideDir, 1400)), kind: 'exit' });
+    const hit = candidates[0];
+    if (hit.edge === 'right') {
+      segments.push({ from: pos, to: hit.point, kind: 'refracted' });
+      segments.push({ from: hit.point, to: add(hit.point, mul(insideDir, 1400)), kind: 'exit' });
+      lastEdge = 'right';
       break;
     }
-    const wallNormal = Math.abs(hit.y - top) < 0.5 ? { x: 0, y: -1 } : { x: 0, y: 1 };
+    const wallNormal = hit.normal;
     effectiveWallDeg = angleAgainstNormal(insideDir, wallNormal);
-    segments.push({ from: pos, to: hit, kind: 'refracted' });
+    segments.push({ from: pos, to: hit.point, kind: 'refracted' });
+    normals.push([add(hit.point, mul(wallNormal, -70)), add(hit.point, mul(wallNormal, 70))]);
     if (effectiveWallDeg <= criticalDeg) {
       const leakDir = refract(insideDir, wallNormal, settings.fiberCoreN, settings.fiberCladdingN).dir || reflect(insideDir, wallNormal);
-      segments.push({ from: hit, to: add(hit, mul(leakDir, 1200)), kind: 'leak' });
-      angleMarks.push(makeArcMark(hit, wallNormal, mul(insideDir, -1), `${fmt(angleAgainstNormal(insideDir, wallNormal), 1)}°`, 24));
+      segments.push({ from: hit.point, to: add(hit.point, mul(leakDir, 1200)), kind: 'leak' });
+      angleMarks.push(makeArcMark(hit.point, wallNormal, mul(insideDir, -1), `${fmt(angleAgainstNormal(insideDir, wallNormal), 1)}°`, 24));
       return {
         segments,
         angleMarks,
         normals,
-        hitPoint: hit,
+        hitPoint: hit.point,
         status: '可能漏光',
-        pathMode: '进入纤芯后漏光',
-        firstEdge: 'left',
-        lastEdge: Math.abs(hit.y - top) < 0.5 ? 'top' : 'bottom',
+        pathMode: sourceInside ? '纤芯内发光后漏光' : '进入纤芯后漏光',
+        firstEdge: sourceInside ? null : 'left',
+        lastEdge: hit.edge,
         criticalDeg,
         coreDeg: angleAgainstNormal(refrIn.dir, { x: -1, y: 0 }),
         effectiveWallDeg,
       };
     }
-    angleMarks.push(makeArcMark(hit, wallNormal, mul(insideDir, -1), `${fmt(angleAgainstNormal(insideDir, wallNormal), 1)}°`, 24));
+    angleMarks.push(makeArcMark(hit.point, wallNormal, mul(insideDir, -1), `${fmt(angleAgainstNormal(insideDir, wallNormal), 1)}°`, 24));
     insideDir = reflect(insideDir, wallNormal);
-    pos = hit;
+    pos = hit.point;
+    lastEdge = hit.edge;
   }
 
   return {
@@ -738,10 +888,10 @@ function solveFiber(settings: RefractionSettings, source: Point): SolveResult {
     angleMarks,
     normals,
     hitPoint: pos,
-    status: '持续导光',
-    pathMode: '进入纤芯并持续导光',
-    firstEdge: 'left',
-    lastEdge: 'right',
+    status: sourceInside ? '纤芯内发光并持续导光' : '持续导光',
+    pathMode: sourceInside ? '纤芯内发光 / 连续全反射' : '进入纤芯并持续导光',
+    firstEdge: sourceInside ? null : 'left',
+    lastEdge,
     criticalDeg,
     coreDeg: angleAgainstNormal(refrIn.dir, { x: -1, y: 0 }),
     effectiveWallDeg,
@@ -827,7 +977,10 @@ function solveApparentDepth(settings: RefractionSettings): SolveResult {
 }
 
 function solveRefraction(settings: RefractionSettings): SolveResult {
-  const source: Point = { x: clamp(settings.sourceAnchorX, 40, 920), y: clamp(settings.sourceY ?? 90, 20, 320) };
+  const source: Point = {
+    x: clamp(settings.sourceAnchorX, SOURCE_MIN_X, SOURCE_MAX_X),
+    y: clamp(settings.sourceY ?? 90, SOURCE_MIN_Y, SOURCE_MAX_Y),
+  };
   if (settings.shape === 'interface') return solveInterface(settings, source);
   if (settings.shape === 'slab') return solveSlab(settings, source);
   if (settings.shape === 'half') return solveHemisphere(settings, source);
@@ -877,6 +1030,9 @@ function SnellWindow3DModule({ settings }: { settings: RefractionSettings }) {
           waterN={nW}
           incidentAngleDeg={settings.snellIncidentAngleDeg ?? 30}
           viewMode={settings.snellViewMode ?? '3d'}
+          sourceShape={settings.snellSourceShape ?? 'point'}
+          sourceSizeCm={settings.snellSourceSizeCm ?? 4}
+          polygonSides={settings.snellPolygonSides ?? 5}
           wavelength={settings.wavelength}
           showColor={settings.showColor}
         />
@@ -901,8 +1057,8 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
   const canvasPanX = settings.canvasPanX ?? 0;
   const canvasPanY = settings.canvasPanY ?? 0;
   const canvasZoom = clamp(settings.canvasZoom ?? 1, 0.65, 2.2);
-  const W = 1000;
-  const H = 620;
+  const W = REFRACTION_STAGE_W;
+  const H = REFRACTION_STAGE_H;
 
   React.useEffect(() => {
     if (!dragTarget || !dragRef.current) return;
@@ -924,8 +1080,8 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
       if (info.kind === 'source') {
         apply((prev: RefractionSettings) => ({
           ...prev,
-          sourceAnchorX: clamp((info.prev.sourceAnchorX ?? 180) + localDx, 20, 960),
-          sourceY: clamp((info.prev.sourceY ?? 90) + localDy, 10, 360),
+          sourceAnchorX: clamp((info.prev.sourceAnchorX ?? 180) + localDx, SOURCE_MIN_X, SOURCE_MAX_X),
+          sourceY: clamp((info.prev.sourceY ?? 90) + localDy, SOURCE_MIN_Y, SOURCE_MAX_Y),
         }));
         return;
       }
@@ -1042,12 +1198,21 @@ function MediumShape({ settings, onPointerDown }: { settings: RefractionSettings
     );
   }
   if (settings.shape === 'fiber') {
-    const center: Point = { x: settings.elementCenterX ?? 560, y: settings.elementCenterY ?? 290 };
+    const geom = makeFiberGeometry(settings);
+    const cladTop = buildFiberBoundaryPath(geom, 'top', geom.claddingHalf);
+    const cladBottom = buildFiberBoundaryPath(geom, 'bottom', geom.claddingHalf);
+    const coreTop = buildFiberBoundaryPath(geom, 'top', geom.coreHalf);
+    const coreBottom = buildFiberBoundaryPath(geom, 'bottom', geom.coreHalf);
+    const centerLine = buildFiberCenterPath(geom);
+    const closedCladding = buildFiberBandPath(geom, geom.claddingHalf);
+    const closedCore = buildFiberBandPath(geom, geom.coreHalf);
     return (
       <g data-ref-no-pan="true" style={{ cursor: 'grab' }} onPointerDown={onPointerDown}>
-        <rect x={center.x - 268} y={center.y - 24} width={536} height={48} fill="rgba(150, 177, 172, 0.10)" stroke="rgba(120, 140, 136, 0.35)" strokeWidth="1.2" />
-        <rect className="glass" x={center.x - 260} y={center.y - 18} width={520} height={36} />
-        <rect x={center.x - 252} y={center.y - 8} width={504} height={16} fill="rgba(255,255,255,0.10)" />
+        <path d={closedCladding} fill="rgba(150, 177, 172, 0.10)" stroke="rgba(120, 140, 136, 0.32)" strokeWidth="1.2" />
+        <path d={closedCore} className="glass" />
+        <path d={centerLine} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="14" strokeLinecap="round" />
+        <path d={coreTop} fill="none" className="interface" />
+        <path d={coreBottom} fill="none" className="interface" />
       </g>
     );
   }
@@ -1118,7 +1283,7 @@ function RenderedRay({ segment, color, thick }: { segment: RaySegment; color: st
         stroke="oklch(0.55 0.16 280)" strokeWidth={Math.max(1, thick - 0.3)} strokeDasharray="6 4" opacity={0.6} />
     );
   }
-  const stroke = segment.kind === 'reflected' ? 'oklch(0.60 0.16 28)' : segment.kind === 'leak' ? 'oklch(0.66 0.17 35)' : color;
+  const stroke = segment.kind === 'leak' ? 'oklch(0.66 0.17 35)' : color;
   return (
     <g>
       <line className="ray" x1={segment.from.x} y1={segment.from.y} x2={segment.to.x} y2={segment.to.y} stroke={stroke} strokeWidth={thick + 2.6} opacity={0.18} filter="url(#ref-soft-glow)" />
@@ -1220,9 +1385,12 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
       )}
       {settings.shape === 'fiber' && (
         <>
+          <SegSelect value={settings.fiberModel ?? 'straight'} onChange={(v: FiberModel) => setSettings({ ...settings, fiberModel: v })} options={[{ value: 'straight', label: '直光纤' }, { value: 'bent', label: '弯曲光纤' }]} />
           <Slider label="纤芯 n₁" value={settings.fiberCoreN} onChange={(v: number) => setSettings({ ...settings, fiberCoreN: Math.max(v, settings.fiberCladdingN + 0.01) })} min={1.3} max={2.0} step={0.01} unit="" />
           <Slider label="包层 n₂" value={settings.fiberCladdingN} onChange={(v: number) => setSettings({ ...settings, fiberCladdingN: Math.min(v, settings.fiberCoreN - 0.01) })} min={1.0} max={1.8} step={0.01} unit="" />
-          <Slider label="弯曲半径 R" value={settings.fiberBendRadiusCm} onChange={(v: number) => setSettings({ ...settings, fiberBendRadiusCm: v })} min={2} max={50} step={1} unit="cm" />
+          {(settings.fiberModel ?? 'straight') === 'bent' && (
+            <Slider label="弯曲半径 R" value={settings.fiberBendRadiusCm} onChange={(v: number) => setSettings({ ...settings, fiberBendRadiusCm: v })} min={2} max={50} step={1} unit="cm" />
+          )}
         </>
       )}
       {settings.shape === 'apparent' && (
@@ -1235,6 +1403,13 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
       )}
       {settings.shape === 'snellwindow' && (
         <>
+          <SegSelect value={settings.snellSourceShape ?? 'point'} onChange={(v: SnellSourceShape) => setSettings({ ...settings, snellSourceShape: v })} options={[{ value: 'point', label: '点光源' }, { value: 'line', label: '线光源' }, { value: 'polygon', label: '多边形' }]} />
+          {(settings.snellSourceShape ?? 'point') !== 'point' && (
+            <Slider label="光源尺寸" value={settings.snellSourceSizeCm ?? 4} onChange={(v: number) => setSettings({ ...settings, snellSourceSizeCm: v })} min={1} max={12} step={0.5} unit="cm" />
+          )}
+          {(settings.snellSourceShape ?? 'point') === 'polygon' && (
+            <Slider label="多边形边数" value={settings.snellPolygonSides ?? 5} onChange={(v: number) => setSettings({ ...settings, snellPolygonSides: Math.round(v) })} min={3} max={8} step={1} unit="" />
+          )}
           <Slider label="入射角 θ₁" value={settings.snellIncidentAngleDeg ?? 30} onChange={(v: number) => setSettings({ ...settings, snellIncidentAngleDeg: v })} min={5} max={85} step={1} unit="°" hint={`临界角 ${(Math.asin(Math.min(1, 1 / (settings.snellWaterN ?? 1.333))) * 180 / Math.PI).toFixed(1)}°`} />
           <Slider label="水折射率 n" value={settings.snellWaterN ?? 1.333} onChange={(v: number) => setSettings({ ...settings, snellWaterN: v })} min={1.1} max={1.8} step={0.01} unit="" />
           <Slider label="水深 h" value={settings.snellSourceDepthCm ?? 8} onChange={(v: number) => setSettings({ ...settings, snellSourceDepthCm: v })} min={2} max={20} step={0.5} unit="cm" />
@@ -1305,8 +1480,8 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
         )}
         {settings.shape === 'fiber' && (
           <>
-            <span className="step"><span className="lhs">光纤</span><span className="eq">=</span><span className="rhs">细长导光通道</span></span>
-            <span className="step">当前版本按入口进入后与上下壁面持续作用来解释导光与漏光，仍是模块 1 里最专用的一类对象。</span>
+            <span className="step"><span className="lhs">光纤</span><span className="eq">=</span><span className="rhs">{(settings.fiberModel ?? 'straight') === 'bent' ? '弯曲导光通道' : '直线导光通道'}</span></span>
+            <span className="step">{(settings.fiberModel ?? 'straight') === 'bent' ? '用于观察弯曲半径变小时的漏光风险。' : '用于观察纤芯内连续全反射的基本路径。'}</span>
           </>
         )}
         {settings.shape === 'apparent' && (
@@ -1317,8 +1492,8 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
         )}
         {settings.shape === 'snellwindow' && (
           <>
-            <span className="step"><span className="lhs">水下光源</span><span className="eq">=</span><span className="rhs">斯涅尔窗 + 全反射 3D</span></span>
-            <span className="step">水下光源向各方向发射光线，临界角锥内折射出水面形成斯涅尔窗，锥外光线全部全反射回水中。</span>
+            <span className="step"><span className="lhs">水下光源</span><span className="eq">=</span><span className="rhs">{(settings.snellSourceShape ?? 'point') === 'point' ? '点光源斯涅尔窗' : '扩展光源斯涅尔窗叠加'}</span></span>
+            <span className="step">{(settings.snellSourceShape ?? 'point') === 'point' ? '点光源向各方向发射光线，临界角锥内折射出水面形成斯涅尔窗。' : '线光源或多边形光源可拆成多个点光源，水面窗口是这些点光源斯涅尔窗的叠加。'}</span>
           </>
         )}
       </div>
@@ -1358,6 +1533,8 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
               <Readout label="入射角 θ₁" value={incDeg.toFixed(0)} unit="°" />
               <Readout label="折射角 θ₂" value={isTIR ? '全反射' : refractedDeg!.toFixed(1)} unit={isTIR ? '' : '°'} hi />
               <Readout label="临界角 θc" value={critAngle.toFixed(1)} unit="°" />
+              <Readout label="光源形态" value={(settings.snellSourceShape ?? 'point') === 'line' ? '线光源' : (settings.snellSourceShape ?? 'point') === 'polygon' ? '多边形光源' : '点光源'} unit="" />
+              {(settings.snellSourceShape ?? 'point') !== 'point' && <Readout label="光源尺寸" value={fmt(settings.snellSourceSizeCm ?? 4, 1)} unit="cm" />}
               <Readout label="水折射率 n" value={nW.toFixed(3)} unit="" />
               <Readout label="水深 h" value={depth.toFixed(1)} unit="cm" />
               <Readout label="斯涅尔窗半径 r" value={windowR.toFixed(2)} unit="cm" hi />

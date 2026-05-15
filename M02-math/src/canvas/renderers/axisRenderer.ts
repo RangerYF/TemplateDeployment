@@ -11,6 +11,7 @@ const TARGET_MIN_PX = 40;
 const TARGET_MAX_PX = 120;
 
 const ARROW_SIZE = 8;
+const LABEL_GAP_PX = 8;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,42 @@ function pickStep(range: number, pixels: number): number {
 function formatLabel(value: number, step: number): string {
   if (step >= 1) return String(Math.round(value));
   return value.toFixed(1);
+}
+
+function drawXLabelIfRoom(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  cx: number,
+  y: number,
+  width: number,
+  occupied: { right: number },
+): void {
+  const textWidth = ctx.measureText(label).width;
+  const left = cx - textWidth / 2;
+  const right = cx + textWidth / 2;
+  if (left < 5 || right > width - 5) return;
+  if (left < occupied.right + LABEL_GAP_PX) return;
+  ctx.fillText(label, cx, y);
+  occupied.right = right;
+}
+
+function drawYLabelIfRoom(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  x: number,
+  cy: number,
+  height: number,
+  occupied: { bottom: number },
+): void {
+  const metrics = ctx.measureText(label);
+  const textHeight =
+    metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || 14;
+  const top = cy - textHeight / 2;
+  const bottom = cy + textHeight / 2;
+  if (top < 5 || bottom > height - 5) return;
+  if (top < occupied.bottom + LABEL_GAP_PX) return;
+  ctx.fillText(label, x, cy);
+  occupied.bottom = bottom;
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
@@ -173,6 +210,7 @@ export function renderAxis(
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
+  const xLabelBounds = { right: -Infinity };
 
   if (piMode) {
     // π-fraction labels for trig-function canvases
@@ -181,16 +219,14 @@ export function renderAxis(
     for (const { value, label } of piTicks) {
       if (Math.abs(value) < piStep * 0.01) continue;  // skip origin
       const [cx] = viewport.toCanvas(value, 0);
-      if (cx < 5 || cx > width - 5) continue;
-      ctx.fillText(label, cx, xLabelY);
+      drawXLabelIfRoom(ctx, label, cx, xLabelY, width, xLabelBounds);
     }
   } else {
     const xLabelStart = Math.ceil(xMin / xStep) * xStep;
     for (let xi = xLabelStart; xi <= xMax + xStep * 0.001; xi += xStep) {
       if (Math.abs(xi) < xStep * 0.01) continue; // skip origin
       const [cx] = viewport.toCanvas(xi, 0);
-      if (cx < 5 || cx > width - 5) continue;    // skip if too close to edge
-      ctx.fillText(formatLabel(xi, xStep), cx, xLabelY);
+      drawXLabelIfRoom(ctx, formatLabel(xi, xStep), cx, xLabelY, width, xLabelBounds);
     }
   }
 
@@ -200,12 +236,12 @@ export function renderAxis(
 
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  const yLabelStart = Math.ceil(yMin / yStep) * yStep;
-  for (let yi = yLabelStart; yi <= yMax + yStep * 0.001; yi += yStep) {
+  const yLabelBounds = { bottom: -Infinity };
+  const yLabelStart = Math.floor(yMax / yStep) * yStep;
+  for (let yi = yLabelStart; yi >= yMin - yStep * 0.001; yi -= yStep) {
     if (Math.abs(yi) < yStep * 0.01) continue; // skip origin
     const [, cy] = viewport.toCanvas(0, yi);
-    if (cy < 5 || cy > height - 5) continue;   // skip if too close to edge
-    ctx.fillText(formatLabel(yi, yStep), yLabelX, cy);
+    drawYLabelIfRoom(ctx, formatLabel(yi, yStep), yLabelX, cy, height, yLabelBounds);
   }
   } // end showLabels
 

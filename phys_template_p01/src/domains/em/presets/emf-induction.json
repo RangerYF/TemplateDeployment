@@ -77,8 +77,8 @@
           "targetProperty": "resistance"
         },
         {
-          "key": "frameWidth",
-          "label": "线框宽度",
+          "key": "effectiveCutLength",
+          "label": "切割边长 L",
           "type": "slider",
           "min": 0.5,
           "max": 3,
@@ -86,7 +86,7 @@
           "default": 1,
           "unit": "m",
           "targetEntityId": "frame-1",
-          "targetProperty": "width"
+          "targetProperty": "height"
         }
       ]
     },
@@ -124,7 +124,7 @@
   "paramValues": {
     "velocity": 2,
     "resistance": 2,
-    "frameWidth": 1,
+    "effectiveCutLength": 1,
     "B": 2,
     "direction": "into"
   },

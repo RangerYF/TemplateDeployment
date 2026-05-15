@@ -74,6 +74,7 @@ export interface P08SceneSummary {
   supportsFieldLineControls: boolean;
   supportsEquipotentialControls: boolean;
   supportsPotentialMapControl: boolean;
+  supportsPotentialSurfaceControl: boolean;
   supportsFieldDensityControl: boolean;
   supportsTrajectoryControl: boolean;
   supportsPotentialDifference: boolean;
@@ -107,6 +108,7 @@ export function getP08SceneSummary({
       supportsFieldLineControls: false,
       supportsEquipotentialControls: false,
       supportsPotentialMapControl: false,
+      supportsPotentialSurfaceControl: false,
       supportsFieldDensityControl: false,
       supportsTrajectoryControl: false,
       supportsPotentialDifference: false,
@@ -157,6 +159,7 @@ export function getP08SceneSummary({
     supportsFieldLineControls: supportsElectrostaticControls || supportsStaticPlateControls,
     supportsEquipotentialControls: supportsElectrostaticControls || supportsStaticPlateControls,
     supportsPotentialMapControl: supportsElectrostaticControls,
+    supportsPotentialSurfaceControl: supportsElectrostaticControls,
     supportsFieldDensityControl: supportsElectrostaticControls || supportsStaticPlateControls,
     supportsTrajectoryControl:
       pointCharges.length > 0 &&
@@ -383,9 +386,9 @@ function buildElectrostaticSummary(
     const chargeMicroC = (charge.properties.charge as number) ?? 0;
     const atOneMeter = computeElectricFieldMagnitudeAtPoint({ x: charge.transform.position.x + 1, y: charge.transform.position.y }, electrostaticCharges);
     return {
-      formula: 'E = kQ / r²，V = kQ / r',
+      formula: 'E = kQ / r²，φ = kQ / r',
       explanation: potentialProbeA && potentialProbeB
-        ? `${layerGuide} 当前已记录两点电势，可直接读取 ΔV = VA - VB。`
+        ? `${layerGuide} 当前已记录两点电势，可直接读取 Δφ = φA - φB。`
         : `${layerGuide} 红/橙色表示正电势较高，蓝色表示负电势较低；点击画布依次放置 A/B 点，可在右下角读取两点电势差。`,
       keyParameters: [
         { label: '电荷量 Q', value: `${formatSignedNumber(chargeMicroC, 1)} μC` },
@@ -397,7 +400,7 @@ function buildElectrostaticSummary(
       metrics: mergeRows(
         [
           { label: '1 m 处场强', value: `${formatPhysics(atOneMeter)} N/C` },
-          { label: '1 m 处电势', value: `${formatPhysics(computePotentialAtPoint({ x: charge.transform.position.x + 1, y: charge.transform.position.y }, electrostaticCharges))} V` },
+          { label: '1 m 处电势 φ', value: `${formatPhysics(computePotentialAtPoint({ x: charge.transform.position.x + 1, y: charge.transform.position.y }, electrostaticCharges))} V` },
         ],
         buildPotentialMeasurementMetrics(electrostaticCharges, potentialProbeA, potentialProbeB),
       ),
@@ -407,7 +410,7 @@ function buildElectrostaticSummary(
   const [leftCharge, rightCharge] = [...chargeEntities].slice(0, 2).sort((a, b) => a.transform.position.x - b.transform.position.x);
   if (!leftCharge || !rightCharge) {
     return {
-      formula: 'E = E₁ + E₂，V = Σ(kQi / ri)',
+      formula: 'E = E₁ + E₂，φ = Σ(kQi / ri)',
       explanation: '当前场景缺少完整的双点电荷配置。',
       keyParameters: [],
       metrics: [],
@@ -428,10 +431,10 @@ function buildElectrostaticSummary(
   const midpointPotential = computePotentialAtPoint(midpoint, electrostaticCharges);
 
   return {
-    formula: 'E = E₁ + E₂，V = Σ(kQi / ri)',
+    formula: 'E = E₁ + E₂，φ = Σ(kQi / ri)',
     explanation: potentialProbeA && potentialProbeB
-      ? `${layerGuide} 当前测得的是 A、B 两点之间的电势差，适合课堂上直接比较不同构型。`
-      : `${layerGuide} 红/橙区更接近正电势高区，蓝区更接近负电势低区；中点场强/电势可快速判断同号、异号和不等量构型差异。`,
+      ? `${layerGuide} 当前测得的是 A、B 两点之间的电势差，适合课堂上直接比较不同构型；右上角可一键恢复教材偶极子。`
+      : `${layerGuide} 红/橙区更接近正电势高区，蓝区更接近负电势低区；可继续调“场线数量 / 积分精度 / 立体感强度”，把偶极子结构看得更完整、更有空间层次。`,
     keyParameters: [
       { label: 'Q1', value: `${formatSignedNumber((leftCharge.properties.charge as number) ?? 0, 1)} μC` },
       { label: 'Q2', value: `${formatSignedNumber((rightCharge.properties.charge as number) ?? 0, 1)} μC` },
@@ -441,7 +444,7 @@ function buildElectrostaticSummary(
     metrics: mergeRows(
       [
         { label: '中点场强', value: `${formatPhysics(midpointField)} N/C` },
-        { label: '中点电势', value: `${formatPhysics(midpointPotential)} V` },
+        { label: '中点电势 φ', value: `${formatPhysics(midpointPotential)} V` },
       ],
       buildPotentialMeasurementMetrics(electrostaticCharges, potentialProbeA, potentialProbeB),
     ),
@@ -986,7 +989,6 @@ function buildMagneticMotionSummary({
   particles,
   representativeParticle: particle,
   representativeMotion: motion,
-  motionStates,
   fields,
 }: MagneticMotionSummaryInput): Partial<P08SceneSummary> {
   const charge = Math.abs((particle.properties.charge as number) ?? 0);
@@ -1002,69 +1004,40 @@ function buildMagneticMotionSummary({
   const radius = charge > 0 && effectiveB > 0 ? (mass * Math.max(speed, 0)) / (charge * effectiveB) : null;
   const period = charge > 0 && effectiveB > 0 ? (2 * Math.PI * mass) / (charge * effectiveB) : null;
   const particleCount = particles.length;
-  const boundaryRadius = (fields[0]?.properties.boundaryRadius as number | undefined) ?? radius;
-
   if (presetId === 'P02-EMF036-magnetic-divergence') {
-    const speeds = particles.map((item) => {
-      const currentMotion = motionStates?.get(item.id);
-      return currentMotion
-        ? Math.hypot(currentMotion.velocity.x, currentMotion.velocity.y)
-        : getPointChargeLaunchState(item).speed;
-    });
-    const speedMin = speeds.length > 0 ? Math.min(...speeds) : 0;
-    const speedMax = speeds.length > 0 ? Math.max(...speeds) : 0;
-    const radiusMin = charge > 0 && effectiveB > 0 ? (mass * speedMin) / (charge * effectiveB) : null;
-    const radiusMax = charge > 0 && effectiveB > 0 ? (mass * speedMax) / (charge * effectiveB) : null;
-
     return {
       formula: 'r = mv / (|q|B)',
-      explanation: '场区圆半径固定取 baseSpeed 参考粒子的回旋半径；参考粒子与磁场圆相切匹配，其余粒子只改变速度，因此会围绕这条参考圆向内/向外发散。',
+      explanation: '磁发散强调“一点射入，平行射出”。同一源点发出的多条粒子先进入圆形匀强磁场区，在场内沿不同圆弧偏转，离场后整理成近似平行的一组出射线。',
       keyParameters: [
         { label: '电荷量 q', value: `${formatSignedNumber(signedCharge, 3)} C` },
         { label: '质量 m', value: `${formatShort(mass)} kg` },
         { label: '参与粒子', value: `${particleCount} 个` },
-        { label: '参考规则', value: '取 baseSpeed 参考粒子' },
+        { label: '入射条件', value: '同一点源，不同入射方向' },
       ],
       metrics: [
         { label: '当前 B', value: `${formatShort(effectiveB)} T` },
-        { label: '速度范围', value: `${formatShort(speedMin)} ~ ${formatShort(speedMax)} m/s` },
-        { label: '场区圆半径', value: boundaryRadius != null ? `${formatShort(boundaryRadius)} m` : '—' },
-        {
-          label: '半径范围 r',
-          value:
-            radiusMin != null && radiusMax != null
-              ? `${formatShort(radiusMin)} ~ ${formatShort(radiusMax)} m`
-              : '—',
-        },
-        { label: '对比方式', value: '参考粒子匹配磁场圆' },
+        { label: '共同轨道半径 r', value: radius != null ? `${formatShort(radius)} m` : '—' },
+        { label: '场区形状', value: '圆形磁场区域' },
+        { label: '出射关系', value: '离场后近似平行' },
       ],
     };
   }
 
   if (presetId === 'P02-EMF033-magnetic-focusing') {
-    const speeds = particles.map((item) => {
-      const currentMotion = motionStates?.get(item.id);
-      return currentMotion
-        ? Math.hypot(currentMotion.velocity.x, currentMotion.velocity.y)
-        : getPointChargeLaunchState(item).speed;
-    });
-    const speedRange = speeds.length > 0
-      ? `${formatShort(Math.min(...speeds))} ~ ${formatShort(Math.max(...speeds))} m/s`
-      : '—';
     return {
       formula: 'r = mv / (|q|B)，T = 2πm / (|q|B)',
-      explanation: '场区圆半径取会聚粒子族中最小回旋半径的基准轨道；这条基准圆同时通过源点和焦点，其余粒子半径更大，但仍在同一磁场圆内汇聚到同一焦点。',
+      explanation: '磁聚焦强调“平行入射，会聚于一点”。多条平行粒子束从同一侧进入圆形匀强磁场区，在场内沿同侧圆弧偏转，离场后会聚到同一个焦点附近。',
       keyParameters: [
         { label: '电荷量 q', value: `${formatSignedNumber(signedCharge, 3)} C` },
         { label: '质量 m', value: `${formatShort(mass)} kg` },
         { label: '参与粒子', value: `${particleCount} 个` },
-        { label: '参考规则', value: '取最小会聚半径轨道' },
+        { label: '入射条件', value: '平行入射粒子束' },
       ],
       metrics: [
         { label: '当前 B', value: `${formatShort(effectiveB)} T` },
-        { label: '速度范围', value: speedRange },
-        { label: '场区圆半径', value: boundaryRadius != null ? `${formatShort(boundaryRadius)} m` : '—' },
-        { label: '几何关系', value: '基准圆经过源点与焦点' },
+        { label: '共同轨道半径 r', value: radius != null ? `${formatShort(radius)} m` : '—' },
+        { label: '场区形状', value: '圆形磁场区域' },
+        { label: '几何关系', value: '离场后会聚到焦点 F' },
         { label: '周期 T', value: period != null ? `${formatShort(period)} s` : '—' },
       ],
     };
@@ -1097,7 +1070,7 @@ function buildMagneticMotionSummary({
       : '—';
     return {
       formula: 'r = mv / (|q|B)',
-      explanation: '旋转圆模型强调“同一点、同速度、不同入射角”时，各轨迹圆半径相同，圆心随入射方向旋转分布，适合讲解从同一点发射的轨迹圆作图。',
+      explanation: '旋转圆模型强调“同一点、同速度、不同入射角”时，各轨迹半径相同；所有粒子从中心点 P 向各个方向发射，不同发射方向只改变圆心位置，主图呈环向分布的等半径完整圆轨迹族。',
       keyParameters: [
         { label: '共同速度 v', value: `${formatShort(speed)} m/s` },
         { label: '共同荷质比 q/m', value: `${formatShort(charge / mass)} C/kg` },
@@ -1107,7 +1080,7 @@ function buildMagneticMotionSummary({
         { label: '当前 B', value: `${formatShort(effectiveB)} T` },
         { label: '共同半径 r', value: radius != null ? `${formatShort(radius)} m` : '—' },
         { label: '入射角范围', value: angleRange },
-        { label: '几何方法', value: '等半径旋转圆' },
+        { label: '几何方法', value: '同点发射 + 等半径完整圆族' },
       ],
     };
   }
@@ -1322,7 +1295,7 @@ function buildPotentialMeasurementSummary(
       prompt: '已记录 A 点，继续点击画布放置 B 点。',
       rows: [
         { label: 'A 点坐标', value: `(${formatShort(potentialProbeA.x)}, ${formatShort(potentialProbeA.y)}) m` },
-        { label: 'A 点电势 VA', value: `${formatPhysics(potentialA)} V` },
+        { label: 'A 点电势 φA', value: `${formatPhysics(potentialA)} V` },
       ],
     };
   }
@@ -1330,10 +1303,10 @@ function buildPotentialMeasurementSummary(
   const potentialB = computePotentialAtPoint(potentialProbeB, charges);
   const deltaV = potentialA - potentialB;
   return {
-    prompt: '当前显示 ΔV = VA - VB。',
+    prompt: '当前显示 Δφ = φA - φB。',
     rows: [
-      { label: 'A 点电势 VA', value: `${formatPhysics(potentialA)} V` },
-      { label: 'B 点电势 VB', value: `${formatPhysics(potentialB)} V` },
+      { label: 'A 点电势 φA', value: `${formatPhysics(potentialA)} V` },
+      { label: 'B 点电势 φB', value: `${formatPhysics(potentialB)} V` },
     ],
     deltaV: `${formatPhysics(deltaV)} V`,
   };
@@ -1349,9 +1322,9 @@ function buildPotentialMeasurementMetrics(
   const potentialA = computePotentialAtPoint(potentialProbeA, charges);
   const potentialB = computePotentialAtPoint(potentialProbeB, charges);
   return [
-    { label: 'A 点电势 VA', value: `${formatPhysics(potentialA)} V` },
-    { label: 'B 点电势 VB', value: `${formatPhysics(potentialB)} V` },
-    { label: '两点电势差 ΔV', value: `${formatPhysics(potentialA - potentialB)} V` },
+    { label: 'A 点电势 φA', value: `${formatPhysics(potentialA)} V` },
+    { label: 'B 点电势 φB', value: `${formatPhysics(potentialB)} V` },
+    { label: '两点电势差 Δφ', value: `${formatPhysics(potentialA - potentialB)} V` },
   ];
 }
 

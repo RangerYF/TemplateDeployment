@@ -593,10 +593,24 @@ function paramKey(entity: Entity, property: string): string {
 }
 
 function readSchemaValue(schema: ParamSchema, entity: Entity): ParamValues[string] {
+  if (schema.type === 'button') return '__button__';
   if (schema.targetProperty) {
-    return readEntityProperty(entity, schema.targetProperty, schema.default);
+    return readEntityProperty(entity, schema.targetProperty, getSchemaDefaultValue(schema));
   }
-  return schema.default;
+  return getSchemaDefaultValue(schema);
+}
+
+function getSchemaDefaultValue(schema: ParamSchema): ParamValues[string] {
+  switch (schema.type) {
+    case 'slider':
+    case 'input':
+    case 'toggle':
+    case 'select':
+      return schema.default;
+    case 'button':
+    default:
+      return '__button__';
+  }
 }
 
 function readEntityProperty(entity: Entity, propertyPath: string, fallback: ParamValues[string]): ParamValues[string] {

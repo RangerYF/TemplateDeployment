@@ -373,12 +373,11 @@ function CurveSegment({
   const lastVisibilityUpdateRef = useRef(0);
 
   useEffect(() => {
-    const nextSplit = { visibleSegments: [curvePoints], hiddenSegments: [] };
-    splitRef.current = nextSplit;
-    setSplit(nextSplit);
+    if (!needsVisibility) return;
+    splitRef.current = split;
     lastCameraKeyRef.current = '';
     lastVisibilityUpdateRef.current = 0;
-  }, [curvePoints, surfaceResult, lineType]);
+  }, [curvePoints, needsVisibility, split, surfaceResult, lineType]);
 
   useFrame(({ camera, clock }) => {
     if (!needsVisibility || interacting) return;

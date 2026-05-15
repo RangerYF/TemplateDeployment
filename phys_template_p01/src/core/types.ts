@@ -85,7 +85,7 @@ export interface Relation<
 // ═══════════════════════════════════════════════
 
 /** 参数控件类型 */
-export type ParamControlType = 'slider' | 'input' | 'toggle' | 'select';
+export type ParamControlType = 'slider' | 'input' | 'toggle' | 'select' | 'button';
 
 export interface ParamVisibilityRule {
   key: string;
@@ -140,12 +140,20 @@ export interface SelectParamSchema extends ParamSchemaBase {
   default: string;
 }
 
+/** 按钮参数 */
+export interface ButtonParamSchema extends ParamSchemaBase {
+  type: 'button';
+  buttonText?: string;
+  variant?: 'primary' | 'secondary' | 'ghost';
+}
+
 /** 参数 Schema 联合类型 */
 export type ParamSchema =
   | SliderParamSchema
   | InputParamSchema
   | ToggleParamSchema
-  | SelectParamSchema;
+  | SelectParamSchema
+  | ButtonParamSchema;
 
 /** 参数分组（驱动面板分区渲染） */
 export interface ParamGroup {

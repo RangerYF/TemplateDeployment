@@ -757,7 +757,7 @@ export function LoopBFieldTeachingWorkspace({
       <div
         style={{
           maxWidth: 1580,
-          height: 'calc(100vh - 40px)',
+          minHeight: 'calc(100vh - 40px)',
           margin: '0 auto',
           display: 'grid',
           gridTemplateRows: 'auto minmax(0, 1fr)',
@@ -819,7 +819,7 @@ export function LoopBFieldTeachingWorkspace({
           style={{
             minHeight: 0,
             display: 'grid',
-            gridTemplateColumns: '280px minmax(0, 2.45fr) 280px',
+            gridTemplateColumns: '268px minmax(0, 2.65fr) 268px',
             gap: 16,
           }}
         >
@@ -837,6 +837,7 @@ export function LoopBFieldTeachingWorkspace({
             style={{
               ...TEACHING_SURFACE_STYLE,
               minHeight: 0,
+              minWidth: 0,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',

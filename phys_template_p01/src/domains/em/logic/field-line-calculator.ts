@@ -66,16 +66,22 @@ const DEFAULT_START_RADIUS = 0.18;
 const DEFAULT_TERMINATE_DISTANCE = 0.12;
 const DEFAULT_MARGIN = 0.5;
 const DEFAULT_SINGULARITY_PADDING = 0.2;
+const DEFAULT_EPSILON = 1e-6;
 
 interface FieldTraceConfig {
   stepSize: number;
   margin: number;
   startRadius: number;
   terminateDistance: number;
+  epsilonRadius: number;
+  maxSteps: number;
 }
 
 interface FieldLineOptions {
   density?: FieldLineDensity;
+  lineCountScale?: number;
+  stepScale?: number;
+  maxSteps?: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -128,6 +134,7 @@ function computeNearestChargeDistance(charges: ChargeBase[]): number | null {
 function computeFieldTraceConfig(
   charges: ChargeBase[],
   bounds: Bounds,
+  options?: FieldLineOptions,
 ): FieldTraceConfig {
   const spanX = Math.max(bounds.maxX - bounds.minX, 1e-6);
   const spanY = Math.max(bounds.maxY - bounds.minY, 1e-6);
@@ -149,7 +156,7 @@ function computeFieldTraceConfig(
     DEFAULT_TERMINATE_DISTANCE,
   );
   const stepSize = clamp(
-    characteristicLength / 25,
+    (characteristicLength / 25) * clamp(options?.stepScale ?? 1, 0.55, 1.8),
     MIN_STEP_SIZE,
     MAX_STEP_SIZE,
   );
@@ -164,6 +171,8 @@ function computeFieldTraceConfig(
     margin,
     startRadius,
     terminateDistance,
+    epsilonRadius: Math.max(DEFAULT_EPSILON, avgRadius * 0.08, characteristicLength * 0.01),
+    maxSteps: Math.max(180, Math.min(1800, Math.round(options?.maxSteps ?? MAX_STEPS))),
   };
 }
 
@@ -185,7 +194,7 @@ function electricField(pos: Vec2, charges: ChargeBase[]): Vec2 {
     const dx = pos.x - c.position.x;
     const dy = pos.y - c.position.y;
     const r2 = dx * dx + dy * dy;
-    if (r2 < 1e-10) continue; // 避免奇点
+    if (r2 < DEFAULT_EPSILON * DEFAULT_EPSILON) continue; // 避免奇点
     const r = Math.sqrt(r2);
     const r3 = r * r * r;
     // E = k * q * r_vec / |r|^3 — 直接向量形式，不拆分标量
@@ -201,7 +210,7 @@ function electricPotential(pos: Vec2, charges: ChargeBase[]): number {
     const dx = pos.x - c.position.x;
     const dy = pos.y - c.position.y;
     const r = Math.sqrt(dx * dx + dy * dy);
-    if (r < 1e-10) continue;
+    if (r < DEFAULT_EPSILON) continue;
     v += K * c.charge / r;
   }
   return v;
@@ -256,7 +265,7 @@ function traceFieldLine(
   let pos = { ...startPos };
   let prevDir: Vec2 | null = null;
 
-  for (let i = 0; i < MAX_STEPS; i++) {
+  for (let i = 0; i < config.maxSteps; i++) {
     // 计算当前场强
     const e = electricField(pos, charges);
     const eMag = Math.sqrt(e.x * e.x + e.y * e.y);
@@ -371,6 +380,81 @@ function computeStartAngles(
   return Array.from({ length: numLines }, (_, i) => offset + i * spacing);
 }
 
+function isDipolePair(charges: ChargeInfo[]): boolean {
+  if (charges.length !== 2) return false;
+  const [a, b] = charges;
+  if (!a || !b) return false;
+  return a.charge > 0 && b.charge < 0 && Math.abs(Math.abs(a.charge) - Math.abs(b.charge)) < 1e-12;
+}
+
+function wrapAngle(angle: number): number {
+  const tau = Math.PI * 2;
+  let normalized = angle % tau;
+  if (normalized < 0) normalized += tau;
+  return normalized;
+}
+
+function angleDistance(a: number, b: number): number {
+  const diff = Math.abs(wrapAngle(a) - wrapAngle(b));
+  return Math.min(diff, (Math.PI * 2) - diff);
+}
+
+function mergeCloseAngles(angles: number[], minGap: number): number[] {
+  const sorted = [...angles].map(wrapAngle).sort((left, right) => left - right);
+  const merged: number[] = [];
+
+  for (const angle of sorted) {
+    const prev = merged[merged.length - 1];
+    if (prev == null || angleDistance(angle, prev) >= minGap) {
+      merged.push(angle);
+    }
+  }
+
+  if (merged.length > 1) {
+    const first = merged[0]!;
+    const last = merged[merged.length - 1]!;
+    if (angleDistance(first, last) < minGap) {
+      merged.pop();
+    }
+  }
+
+  return merged;
+}
+
+function computeDipoleStartAngles(
+  charge: ChargeInfo,
+  allCharges: ChargeInfo[],
+  numLines: number,
+): number[] {
+  const opposite = allCharges.find((candidate) => candidate.id !== charge.id && candidate.charge * charge.charge < 0);
+  if (!opposite) {
+    return computeStartAngles(charge, allCharges, numLines);
+  }
+
+  const axisAngle = Math.atan2(
+    opposite.position.y - charge.position.y,
+    opposite.position.x - charge.position.x,
+  );
+  const bridgeCount = Math.max(4, Math.round(numLines * 0.46));
+  const envelopeCount = Math.max(4, numLines - bridgeCount);
+  const angles: number[] = [];
+
+  for (let i = 0; i < bridgeCount; i += 1) {
+    const t = bridgeCount === 1 ? 0.5 : (i / (bridgeCount - 1));
+    const offset = (t - 0.5) * Math.PI * 0.92;
+    angles.push(axisAngle + offset);
+  }
+
+  const rearCenter = axisAngle + Math.PI;
+  for (let i = 0; i < envelopeCount; i += 1) {
+    const t = envelopeCount === 1 ? 0.5 : (i / (envelopeCount - 1));
+    const offset = (t - 0.5) * Math.PI * 1.48;
+    angles.push(rearCenter + offset);
+  }
+
+  return mergeCloseAngles(angles, (Math.PI * 2) / Math.max(numLines * 1.5, 8));
+}
+
 // ─── 动态线条数量 ────────────────────────────────────
 
 /**
@@ -389,6 +473,16 @@ function linesForCharge(absQ: number, density: FieldLineDensity): number {
   return Math.max(MIN_LINES, Math.min(MAX_LINES, scaledLines));
 }
 
+function effectiveLineCount(
+  absQ: number,
+  density: FieldLineDensity,
+  options?: FieldLineOptions,
+): number {
+  const base = linesForCharge(absQ, density);
+  const scaled = Math.round(base * clamp(options?.lineCountScale ?? 1, 0.6, 2.6));
+  return Math.max(MIN_LINES, Math.min(MAX_LINES * 3, scaled));
+}
+
 // ─── 公共 API ───────────────────────────────────────
 
 export function calculateFieldLines(
@@ -400,17 +494,20 @@ export function calculateFieldLines(
   if (charges.length === 0) return lines;
 
   const density = options?.density ?? 'standard';
-  const traceConfig = computeFieldTraceConfig(charges, bounds);
+  const traceConfig = computeFieldTraceConfig(charges, bounds, options);
   const positives = charges.filter((charge) => charge.charge > 0);
   const negatives = charges.filter((charge) => charge.charge < 0);
   const emitters = positives.length > 0 ? positives : negatives;
+  const dipoleLike = isDipolePair(charges as ChargeInfo[]);
 
   for (const c of emitters) {
     if (c.charge === 0) continue;
 
     const isPositive = c.charge > 0;
-    const numLines = linesForCharge(Math.abs(c.charge), density);
-    const angles = computeStartAngles(c, charges, numLines);
+    const numLines = effectiveLineCount(Math.abs(c.charge), density, options);
+    const angles = dipoleLike
+      ? computeDipoleStartAngles(c, charges as ChargeInfo[], numLines)
+      : computeStartAngles(c, charges as ChargeInfo[], numLines);
 
     for (const angle of angles) {
       const startRadius = Math.max(traceConfig.startRadius, (c.radius ?? 0) * 1.2);

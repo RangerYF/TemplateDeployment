@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { COLORS } from '@/styles/tokens';
-import type { Entity, PointProperties, CoordinateSystemProperties } from '@/editor/entities/types';
+import type { Entity, GeometryProperties, PointProperties, CoordinateSystemProperties } from '@/editor/entities/types';
 import {
   useEntityStore,
   useHistoryStore,
@@ -13,6 +13,7 @@ import {
 export function CoordSystemPanel() {
   const entitiesMap = useEntityStore((s) => s.entities);
   const activeToolId = useToolStore((s) => s.activeToolId);
+  const activeGeometryId = useEntityStore((s) => s.activeGeometryId);
 
   const coordEntity = useMemo(() => {
     for (const e of Object.values(entitiesMap)) {
@@ -26,6 +27,19 @@ export function CoordSystemPanel() {
     const pt = entitiesMap[coordEntity.properties.originPointId];
     return pt?.type === 'point' ? (pt.properties as PointProperties).label : null;
   }, [coordEntity, entitiesMap]);
+
+  const activeGeometryType = useMemo(() => {
+    if (!activeGeometryId) return undefined;
+    const entity = entitiesMap[activeGeometryId];
+    return entity?.type === 'geometry'
+      ? (entity.properties as GeometryProperties).geometryType
+      : undefined;
+  }, [activeGeometryId, entitiesMap]);
+
+  const isRotationGeometry = activeGeometryType === 'cone'
+    || activeGeometryType === 'cylinder'
+    || activeGeometryType === 'truncatedCone'
+    || activeGeometryType === 'sphere';
 
   return (
     <div className="space-y-2">
@@ -65,7 +79,9 @@ export function CoordSystemPanel() {
 
       {!coordEntity && activeToolId === 'coordSystem' && (
         <div className="text-sm" style={{ color: COLORS.textMuted }}>
-          点击场景中的顶点选择原点
+          {isRotationGeometry
+            ? '点击圆心或球心作为原点，自动建立旋转体坐标系'
+            : '按步骤选择原点、定 Z 轴面和 X 轴方向'}
         </div>
       )}
 

@@ -47,6 +47,8 @@ export function renderPotentialMap(
   options?: {
     showFieldLines?: boolean;
     showEquipotentialLines?: boolean;
+    depthStrength?: number;
+    perspectiveDeg?: number;
   },
 ): void {
   if (charges.length === 0) return;
@@ -87,8 +89,13 @@ export function renderPotentialMap(
   const overlayAlpha = options?.showFieldLines || options?.showEquipotentialLines ? 0.76 : 0.86;
 
   canvasContext.save();
+  const depthStrength = clamp(options?.depthStrength ?? 0, 0, 1);
+  const perspectiveDeg = options?.perspectiveDeg ?? 0;
   canvasContext.globalAlpha = overlayAlpha;
   canvasContext.imageSmoothingEnabled = true;
+  if (depthStrength > 1e-3 || Math.abs(perspectiveDeg) > 1e-3) {
+    applyDipolePerspectiveTransform(canvasContext, canvasWidth, canvasHeight, depthStrength, perspectiveDeg);
+  }
   clipAroundCharges(canvasContext, charges, coordinateTransform, canvasWidth, canvasHeight);
   canvasContext.drawImage(potentialMapCache.canvas, 0, 0, canvasWidth, canvasHeight);
   canvasContext.restore();
@@ -99,6 +106,21 @@ export function renderPotentialMap(
     canvasHeight,
     potentialMapCache.legend,
   );
+}
+
+function applyDipolePerspectiveTransform(
+  canvasContext: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  depthStrength: number,
+  perspectiveDeg: number,
+): void {
+  const tilt = (perspectiveDeg * Math.PI) / 180;
+  const shear = Math.sin(tilt) * 0.08 * depthStrength;
+  const scaleY = 1 - (0.06 * depthStrength);
+  canvasContext.translate(canvasWidth * 0.5, canvasHeight * 0.5);
+  canvasContext.transform(1, shear, 0, scaleY, 0, 0);
+  canvasContext.translate(-(canvasWidth * 0.5), -(canvasHeight * 0.5));
 }
 
 function buildPotentialMapCache(
@@ -211,7 +233,7 @@ function drawPotentialLegend(
 ): void {
   const x = Math.max(8, Math.min(16, canvasWidth - LEGEND_BOX_WIDTH - 8));
   const y = Math.max(16, canvasHeight - LEGEND_BOX_HEIGHT - 16);
-  const title = '电势分布 V（相对色标）';
+  const title = '电势分布 φ（相对色标）';
   const subtitle = '红/橙：正电势高   蓝：负电势低';
 
   canvasContext.save();

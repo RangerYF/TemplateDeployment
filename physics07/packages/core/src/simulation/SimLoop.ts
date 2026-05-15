@@ -59,6 +59,19 @@ export class SimLoop<T extends SimState = SimState> {
     return { ...this.currentState };
   }
 
+  replaceState(state: T, render = true): void {
+    this.currentState = { ...state };
+    if (this.currentFrameIndex >= 0) {
+      this.history.truncateAfter(Math.max(0, this.currentFrameIndex - 1));
+      this.history.push(this.currentTime, this.currentState);
+      this.currentFrameIndex = this.history.length - 1;
+    }
+    if (render) {
+      this.renderFn(this.currentTime, this.currentState);
+      this.onStateChange?.(this.currentTime, this.currentState);
+    }
+  }
+
   getTime(): number {
     return this.currentTime;
   }

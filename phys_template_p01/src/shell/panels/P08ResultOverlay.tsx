@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSimulationStore } from '@/store';
 import { COLORS, RADIUS, SHADOWS } from '@/styles/tokens';
 import { getP08SceneSummary } from './p08SceneSummary';
@@ -7,6 +8,7 @@ interface P08ResultOverlayProps {
 }
 
 export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
+  const [collapsed, setCollapsed] = useState(false);
   const entities = useSimulationStore((s) => s.simulationState.scene.entities);
   const result = useSimulationStore((s) => s.simulationState.currentResult);
   const paramValues = useSimulationStore((s) => s.paramValues);
@@ -23,6 +25,39 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
   });
 
   if (!summary.isP08 || summary.metrics.length === 0) return null;
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={(event) => {
+          event.stopPropagation();
+          setCollapsed(false);
+        }}
+        style={{
+          position: 'absolute',
+          right: 12,
+          bottom: 12,
+          zIndex: 55,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '8px 12px',
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: RADIUS.pill,
+          backgroundColor: 'rgba(255, 255, 255, 0.96)',
+          color: COLORS.text,
+          boxShadow: SHADOWS.md,
+          backdropFilter: 'blur(10px)',
+          cursor: 'pointer',
+          fontSize: 12,
+          fontWeight: 600,
+        }}
+      >
+        <span style={{ color: COLORS.primary }}>▲</span>
+        实时结果
+      </button>
+    );
+  }
 
   return (
     <aside
@@ -46,14 +81,35 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
           padding: '12px 14px',
           borderBottom: `1px solid ${COLORS.border}`,
           backgroundColor: COLORS.bg,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
         }}
       >
-        <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.primary }}>
-          {summary.moduleTitle ?? 'P-08'} 实时结果
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.primary }}>
+            {summary.moduleTitle ?? 'P-08'} 实时结果
+          </div>
+          <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: COLORS.text }}>
+            {summary.modelTitle}
+          </div>
         </div>
-        <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: COLORS.text }}>
-          {summary.modelTitle}
-        </div>
+        <button
+          onClick={() => setCollapsed(true)}
+          style={{
+            border: 'none',
+            background: 'none',
+            color: COLORS.textMuted,
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: 'pointer',
+            padding: 0,
+            flexShrink: 0,
+          }}
+        >
+          收起
+        </button>
       </div>
 
       <div style={{ padding: 14 }}>
@@ -100,7 +156,7 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
             </div>
             {summary.potentialMeasurement.deltaV && (
               <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: COLORS.text }}>
-                ΔV = {summary.potentialMeasurement.deltaV}
+                Δφ = {summary.potentialMeasurement.deltaV}
               </div>
             )}
           </div>
@@ -118,7 +174,7 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
               color: COLORS.textSecondary,
             }}
           >
-            电场线看方向，等势线看等值，电势分布看整体高低变化。
+            电场线看方向，等势线看等值，电势分布看整体高低变化，立体电势图看峰谷起伏并对上电荷位置。
           </div>
         )}
 

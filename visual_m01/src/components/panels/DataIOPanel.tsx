@@ -8,6 +8,7 @@ import {
   extractSceneSnapshot,
   validateSnapshotPayload,
 } from '@/runtime/embed';
+import { useNotificationStore } from '@/components/scene/notificationStore';
 
 const btnStyle: React.CSSProperties = {
   background: COLORS.bgMuted,
@@ -47,6 +48,7 @@ function IOButton({ label, onClick }: { label: string; onClick: () => void }) {
 
 export function DataIOPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const notify = useNotificationStore((s) => s.show);
 
   const handleExport = useCallback(() => {
     const snapshot = useEntityStore.getState().getSnapshot();
@@ -73,12 +75,12 @@ export function DataIOPanel() {
         const raw = JSON.parse(reader.result as string);
         const validation = validateSnapshotPayload(raw);
         if (!validation.ok) {
-          alert(`文件格式无效：${validation.errors.join('；')}`);
+          notify(`文件格式无效：${validation.errors.join('；')}`, 4000);
           return;
         }
         const snapshot = extractSceneSnapshot(raw);
         if (!snapshot) {
-          alert('文件格式无效：无法提取 scene snapshot');
+          notify('文件格式无效：无法提取 scene snapshot', 4000);
           return;
         }
         useHistoryStore.setState({ undoStack: [], redoStack: [], canUndo: false, canRedo: false });
@@ -91,12 +93,12 @@ export function DataIOPanel() {
           },
         );
       } catch (err) {
-        alert('解析失败：' + (err instanceof Error ? err.message : String(err)));
+        notify('解析失败：' + (err instanceof Error ? err.message : String(err)), 4000);
       }
     };
     reader.readAsText(file);
     e.target.value = '';
-  }, []);
+  }, [notify]);
 
   return (
     <div className="flex gap-2">

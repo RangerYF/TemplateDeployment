@@ -247,7 +247,7 @@ function cornerTetrahedronCircumSphere(params: Record<string, number>): Circumsc
 
 /**
  * 圆台外接球
- * 球心在轴上 y = (h² + r₂² - r₁²) / (2h)
+ * 球心在轴上 y = (h² + r₁² - r₂²) / (2h)
  * R = √(r₂² + y²)
  */
 function truncatedConeCircumSphere(params: Record<string, number>): CircumscribedSphere {
@@ -259,7 +259,7 @@ function truncatedConeCircumSphere(params: Record<string, number>): Circumscribe
   const r2_2 = r2 * r2;
   const h2 = h * h;
 
-  const centerY = (h2 + r2_2 - r1_2) / (2 * h);
+  const centerY = (h2 + r1_2 - r2_2) / (2 * h);
   const radiusSquared = r2_2 + centerY * centerY;
   const radius = Math.sqrt(radiusSquared);
   const center: Vec3 = [0, centerY, 0];
@@ -272,7 +272,7 @@ function truncatedConeCircumSphere(params: Record<string, number>): Circumscribe
 /**
  * 棱台外接球
  * R_底 = a₂ / (2sin(π/n))
- * 球心在轴上 y = (h² + R₂² - R₁²) / (2h)
+ * 球心在轴上 y = (h² + R₁² - R₂²) / (2h)
  * R_球 = √(R₂² + y²)
  */
 function frustumCircumSphere(params: Record<string, number>): CircumscribedSphere {
@@ -289,7 +289,7 @@ function frustumCircumSphere(params: Record<string, number>): CircumscribedSpher
   const R2_2 = R2 * R2;
   const h2 = h * h;
 
-  const centerY = (h2 + R2_2 - R1_2) / (2 * h);
+  const centerY = (h2 + R1_2 - R2_2) / (2 * h);
   const radiusSquared = R2_2 + centerY * centerY;
   const radius = Math.sqrt(radiusSquared);
   const center: Vec3 = [0, centerY, 0];

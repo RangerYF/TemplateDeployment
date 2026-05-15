@@ -322,7 +322,7 @@ function PotentialMeasurementInfo({ summary }: { summary: PotentialMeasurementSu
         className="rounded px-2.5 py-2"
         style={{ backgroundColor: COLORS.primaryLight, border: `1px solid ${COLORS.primaryDisabled}` }}
       >
-        <div style={{ fontWeight: 600, color: COLORS.primary }}>ΔV = V<sub>A</sub> - V<sub>B</sub></div>
+        <div style={{ fontWeight: 600, color: COLORS.primary }}>Δφ = φ<sub>A</sub> - φ<sub>B</sub></div>
         <div className="mt-1" style={{ color: COLORS.textSecondary }}>{summary.prompt}</div>
       </div>
 
@@ -331,7 +331,7 @@ function PotentialMeasurementInfo({ summary }: { summary: PotentialMeasurementSu
           {summary.rows.map((row) => (
             <InfoRow key={row.label} label={row.label} value={row.value} />
           ))}
-          {summary.deltaV && <InfoRow label="两点电势差 ΔV" value={summary.deltaV} />}
+          {summary.deltaV && <InfoRow label="两点电势差 Δφ" value={summary.deltaV} />}
         </div>
       )}
     </div>
@@ -369,7 +369,7 @@ function PointChargeFieldInfo({
             E = kQ / r²
           </div>
           <div className="mt-1" style={{ fontFamily: '"Courier New", monospace', fontSize: 11, color: COLORS.textSecondary }}>
-            V = kQ / r
+            φ = kQ / r
           </div>
         </div>
 
@@ -380,10 +380,14 @@ function PointChargeFieldInfo({
             value={`(${charge.transform.position.x.toFixed(2)}, ${charge.transform.position.y.toFixed(2)}) m`}
           />
           <InfoRow label="1 m 处场强 |E|" value={formatCompactNumber(eAtOneMeter, 'N/C')} />
-          <InfoRow label="1 m 处电势 V" value={formatCompactNumber(vAtOneMeter, 'V')} />
+          <InfoRow label="1 m 处电势 φ" value={formatCompactNumber(vAtOneMeter, 'V')} />
           <InfoRow label="电场线" value="看方向，箭头指向正试探电荷受力方向" />
           <InfoRow label="等势线" value="同心圆（2D 投影）" />
           <InfoRow label="电势分布" value="热力图：红/橙为正电势高区，蓝为负电势低区" />
+          <InfoRow
+            label="立体电势图"
+            value={qMicroC >= 0 ? '单个正电荷呈单峰，越靠近电荷峰越陡' : '单个负电荷呈单谷，越靠近电荷谷越深'}
+          />
         </div>
       </div>
     );
@@ -411,7 +415,7 @@ function PointChargeFieldInfo({
           sortedCharges[0]!.transform.position.y - sortedCharges[1]!.transform.position.y,
         ) * 100;
 
-  let featureText = '场线、等势线和电势热力图都会按叠加原理实时变化';
+  let featureText = '场线、等势线、电势热力图和立体电势图都会按叠加原理实时变化；可继续调场线数量、精度和立体感';
   if (presetKey === 'dipole') featureText = '电偶极子，中点电势为零';
   if (presetKey === 'same-positive' || presetKey === 'same-negative') featureText = '中点场强为零';
   if (presetKey === 'unequal-dipole') featureText = '场线不对称，部分场线向无穷远延伸';
@@ -426,7 +430,7 @@ function PointChargeFieldInfo({
           E = E₁ + E₂
         </div>
         <div className="mt-1" style={{ fontFamily: '"Courier New", monospace', fontSize: 11, color: COLORS.textSecondary }}>
-          V = kQ₁/r₁ + kQ₂/r₂
+          φ = kQ₁/r₁ + kQ₂/r₂
         </div>
       </div>
 
@@ -436,8 +440,18 @@ function PointChargeFieldInfo({
         <InfoRow label="Q2" value={formatSignedMicroC(q2)} />
         <InfoRow label="间距 d" value={`${distanceCm.toFixed(0)} cm`} />
         <InfoRow label="中点场强 |E|" value={formatCompactNumber(midpointField, 'N/C')} />
-        <InfoRow label="中点电势 V" value={formatCompactNumber(midpointPotential, 'V')} />
+        <InfoRow label="中点电势 φ" value={formatCompactNumber(midpointPotential, 'V')} />
         <InfoRow label="电势分布" value="红/橙更靠近正电势高区，蓝更靠近负电势低区" />
+        <InfoRow
+          label="立体电势图"
+          value={
+            presetKey === 'same-positive'
+              ? '应看到两处正电势高峰，红色引导点对应两座峰'
+              : presetKey === 'same-negative'
+                ? '应看到两处负电势低谷，蓝色引导点对应两处深谷'
+                : '应看到一峰一谷：正电荷抬升成峰，负电荷下陷成谷'
+          }
+        />
       </div>
 
       <div

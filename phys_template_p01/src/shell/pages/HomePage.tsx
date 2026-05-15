@@ -312,7 +312,7 @@ export function HomePage({
               className="text-xs leading-relaxed"
               style={{ color: COLORS.textMuted }}
             >
-              进入独立入口，查看已开放的基础样例、EMI-001 楞次定律、单棒模型族以及双棒 EMI-021，并为后续分支保留扩展位
+              进入独立入口，查看基础动生、楞次定律、单棒、双棒、竖直导轨和自由组装入口
             </span>
           </button>
         )}

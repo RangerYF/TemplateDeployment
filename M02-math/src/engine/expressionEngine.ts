@@ -23,7 +23,7 @@ export function isParseError(v: CompiledExpression | ParseError): v is ParseErro
  * math.js would otherwise treat adjacent tokens as a single identifier.
  *
  * Rules applied in order:
- *  0. Unicode shorthands: ² → ^2, ³ → ^3, × → *, ÷ /, π → pi
+ *  0. Unicode shorthands: ² → ^2, ³ → ^3, × → *, ÷ /, π → pi, |x| → abs(x)
  *  1. digit → letter or `(`:   2x → 2*x,  3sin(x) → 3*sin(x),  2(x+1) → 2*(x+1)
  *  2. single letter (≠ x) → x at an identifier boundary:
  *        ax → a*x,  bx → b*x,  wx → w*x
@@ -39,9 +39,23 @@ export function isParseError(v: CompiledExpression | ParseError): v is ParseErro
  * @param knownFns  User-defined function names (e.g. ['f','g']) that should NOT
  *                  have '*' inserted before their '(' — they are genuine calls.
  */
+const BUILTIN_FUNCTIONS = new Set([
+  'sin', 'cos', 'tan',
+  'csc', 'sec', 'cot',
+  'sqrt', 'abs', 'log', 'ln', 'exp',
+]);
+
+function normalizeAbsoluteValue(expr: string): string {
+  return expr
+    .replace(/\b([A-Za-z]+)\|([^|]+)\|/g, (match, fnName: string, body: string) =>
+      BUILTIN_FUNCTIONS.has(fnName) ? `${fnName}(abs(${body}))` : match,
+    )
+    .replace(/\|([^|]+)\|/g, 'abs($1)');
+}
+
 export function preprocessExpression(expr: string, knownFns: string[] = []): string {
   const knownSet = new Set(knownFns);
-  return expr
+  return normalizeAbsoluteValue(expr)
     // 0. Unicode math shorthands
     .replace(/²/g, '^2')
     .replace(/³/g, '^3')

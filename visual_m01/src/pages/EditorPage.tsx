@@ -65,7 +65,6 @@ export function EditorPage() {
       cancelled = true;
       teardownShortcuts();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geometryType, presetSceneData, presetId]);
 
   useEffect(() => {

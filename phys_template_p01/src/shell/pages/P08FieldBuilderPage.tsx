@@ -381,7 +381,7 @@ function BuilderSidePanel({
                   <BuilderParamControl
                     key={schema.key}
                     schema={schema}
-                    value={values[schema.key] ?? schema.default}
+                    value={values[schema.key] ?? getBuilderSchemaDefaultValue(schema)}
                     onChange={(value) => onValueChange(schema.key, value)}
                   />
                 ))
@@ -392,6 +392,19 @@ function BuilderSidePanel({
       </div>
     </aside>
   );
+}
+
+function getBuilderSchemaDefaultValue(schema: ParamSchema): ParamValues[string] {
+  switch (schema.type) {
+    case 'slider':
+    case 'input':
+    case 'toggle':
+    case 'select':
+      return schema.default;
+    case 'button':
+    default:
+      return '__button__';
+  }
 }
 
 function CardSection({ title, children }: { title: string; children: React.ReactNode }) {

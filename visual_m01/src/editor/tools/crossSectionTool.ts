@@ -4,6 +4,7 @@ import { useEntityStore } from '../store/entityStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { useToolStore } from '../store/toolStore';
 import { createCrossSectionFromPoints } from '../crossSectionHelper';
+import { useNotificationStore } from '@/components/scene/notificationStore';
 
 /**
  * CrossSectionTool — 截面工具
@@ -35,15 +36,16 @@ export const crossSectionTool: Tool = {
 
     if (definingPointIds.length >= 3) {
       // 尝试计算截面
-      const success = tryCreateCrossSection();
+      const result = tryCreateCrossSection();
       // 无论成功与否，重置定义点
       definingPointIds = [];
-      if (success) {
+      if (result.success) {
         // 创建成功，切回选择工具
         useSelectionStore.getState().clear();
         useToolStore.getState().setActiveTool('select');
       } else {
         useSelectionStore.getState().clear();
+        useNotificationStore.getState().show(result.message);
       }
     }
   },
@@ -75,16 +77,28 @@ export const crossSectionTool: Tool = {
 
 /**
  * 尝试从当前定义点计算截面并创建（委托给 crossSectionHelper）
- * @returns 是否成功
+ * @returns 创建结果
  */
-function tryCreateCrossSection(): boolean {
+function tryCreateCrossSection(): { success: boolean; message: string } {
   const entityStore = useEntityStore.getState();
 
   // 获取第一个点的 geometryId
   const firstPoint = entityStore.getEntity(definingPointIds[0]);
-  if (!firstPoint || firstPoint.type !== 'point') return false;
+  if (!firstPoint || firstPoint.type !== 'point') {
+    return { success: false, message: '请选择几何体上的点来创建截面' };
+  }
   const geometryId = (firstPoint.properties as PointProperties).geometryId;
 
-  const result = createCrossSectionFromPoints(geometryId, definingPointIds);
-  return result.success;
+  const selectedPoints = definingPointIds
+    .map((id) => entityStore.getEntity(id))
+    .filter((entity): entity is NonNullable<typeof entity> => Boolean(entity));
+  const allSameGeometry = selectedPoints.every((entity) => {
+    if (entity.type !== 'point') return false;
+    return (entity.properties as PointProperties).geometryId === geometryId;
+  });
+  if (!allSameGeometry) {
+    return { success: false, message: '截面定义点必须属于同一个几何体' };
+  }
+
+  return createCrossSectionFromPoints(geometryId, definingPointIds);
 }

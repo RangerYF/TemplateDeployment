@@ -368,7 +368,7 @@ function CompactEccentricity({ entity }: { entity: ConicEntity }) {
         {...(isAnimating ? {} : btnHover(`${COLORS.primary}38`, `${COLORS.primary}22`))}
       >
         <Play size={11} />
-        Auto Sweep ▶
+        自动演示
       </button>
     </div>
   );

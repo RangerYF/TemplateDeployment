@@ -154,6 +154,14 @@
             {
               "value": "downward",
               "label": "向下，与重力同向"
+            },
+            {
+              "value": "rightward",
+              "label": "向右，与重力叠加成斜向合场"
+            },
+            {
+              "value": "leftward",
+              "label": "向左，与重力叠加成斜向合场"
             }
           ],
           "default": "upward",

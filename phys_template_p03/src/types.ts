@@ -10,6 +10,8 @@ type ShapeKind = 'interface' | 'slab' | 'half' | 'fiber' | 'apparent' | 'snellwi
 type MaterialKey = 'air' | 'water' | 'glass' | 'crown' | 'flint' | 'diamond' | 'ice' | 'fiber';
 type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004' | 'opt-005' | 'opt-006';
 type HemisphereMode = 'center' | 'plane';
+type FiberModel = 'straight' | 'bent';
+type SnellSourceShape = 'point' | 'line' | 'polygon';
 
 interface Material { n: number; label: string; nLabel: string; }
 
@@ -35,12 +37,16 @@ interface RefractionSettings {
   hemisphereMode: HemisphereMode;
   fiberCoreN: number;
   fiberCladdingN: number;
+  fiberModel?: FiberModel;
   fiberBendRadiusCm: number;
   apparentMode: 'depth' | 'height';
   apparentObjectDepthCm: number;
   apparentWaterN: number;
   apparentRayAngleDeg: number;
   snellSourceDepthCm: number;
+  snellSourceShape?: SnellSourceShape;
+  snellSourceSizeCm?: number;
+  snellPolygonSides?: number;
   snellWaterN: number;
   snellIncidentAngleDeg: number;
   snellViewMode: '3d' | '2d' | 'topview';
@@ -89,7 +95,7 @@ interface DoubleSlitSettings {
   showFormula: boolean;
 }
 
-type ApertureKind = 'slit' | 'circle';
+type ApertureKind = 'slit' | 'circle' | 'disk';
 type DiffractionExperimentId = 'opt-031' | 'opt-032';
 
 interface DiffractionSettings {
@@ -109,6 +115,7 @@ interface DiffractionSettings {
 }
 
 type FilmKind = 'newton' | 'wedge' | 'soap';
+type WedgeProfile = 'linear' | 'convex' | 'concave';
 type ThinFilmExperimentId = 'opt-041' | 'opt-042' | 'opt-043';
 
 interface ThinFilmSettings {
@@ -119,6 +126,7 @@ interface ThinFilmSettings {
   filmN: number;
   lensR: number;
   wedgeAngle: number;
+  wedgeProfile?: WedgeProfile;
   showIntensity: boolean;
   showFormula: boolean;
 }

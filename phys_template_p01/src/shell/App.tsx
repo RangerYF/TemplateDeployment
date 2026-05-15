@@ -5,6 +5,7 @@ import {
   isBuilderFreeFeedbackMode,
   isBuilderTemplateFeedbackMode,
   isElectricFeedbackMode,
+  isP13StandaloneMode,
   isP08StandaloneMode,
   isPresetVisible,
 } from '@/app-config';
@@ -37,12 +38,22 @@ import { FieldInfoCards } from './panels/FieldInfoCards';
 import { PanelErrorBoundary } from './components/PanelErrorBoundary';
 import { P08FieldMagnetHome } from './pages/P08FieldMagnetHome';
 import { P08FieldBuilderPage } from './pages/P08FieldBuilderPage';
+import { P08RotationCirclePage } from './pages/P08RotationCirclePage';
+import { P08MagneticFocusDivergencePage } from './pages/P08MagneticFocusDivergencePage';
+import { P08ElectricOscillationPage } from './pages/P08ElectricOscillationPage';
+import { P08TranslationCirclePage } from './pages/P08TranslationCirclePage';
+import { P08ScalingCirclePage } from './pages/P08ScalingCirclePage';
+import { P08VideoExhibitPage } from './pages/P08VideoExhibitPage';
 import { P13InductionHome } from './pages/P13InductionHome';
+import { P13BuilderPage } from './pages/P13BuilderPage';
+import { P13BaseLoopPage } from './pages/P13BaseLoopPage';
 import { P13LenzMagnetCoilPage } from './pages/P13LenzMagnetCoilPage';
 import { P13SingleRodResistivePage } from './pages/P13SingleRodResistivePage';
 import { P13SingleRodWithSourcePage } from './pages/P13SingleRodWithSourcePage';
 import { P13SingleRodWithCapacitorPage } from './pages/P13SingleRodWithCapacitorPage';
 import { P13DoubleRodBasicPage } from './pages/P13DoubleRodBasicPage';
+import { P13DoubleRodDrivenPage } from './pages/P13DoubleRodDrivenPage';
+import { P13VerticalRailRodPage } from './pages/P13VerticalRailRodPage';
 import { P08DisplayControls } from './panels/P08DisplayControls';
 import { P08ResultOverlay } from './panels/P08ResultOverlay';
 import {
@@ -62,13 +73,18 @@ import {
   type P08ModuleKey,
 } from './pages/p08PresetCatalog';
 import { P13_PRESET_IDS } from './pages/p13PresetCatalog';
+import { P13_BASE_LOOP_PRESET_ID } from '@/domains/em/p13/base-loop';
 import { P13_LENZ_MAGNET_COIL_PRESET_ID } from '@/domains/em/p13/lenz-magnet-coil';
 import {
   P13_SINGLE_ROD_RESISTIVE_PRESET_ID,
   P13_SINGLE_ROD_WITH_CAPACITOR_PRESET_ID,
   P13_SINGLE_ROD_WITH_SOURCE_PRESET_ID,
 } from '@/domains/em/p13/single-rod';
-import { P13_DOUBLE_ROD_BASIC_PRESET_ID } from '@/domains/em/p13/double-rod';
+import {
+  P13_DOUBLE_ROD_BASIC_PRESET_ID,
+  P13_DOUBLE_ROD_DRIVEN_PRESET_ID,
+} from '@/domains/em/p13/double-rod';
+import { P13_VERTICAL_RAIL_ROD_PRESET_ID } from '@/domains/em/p13/vertical-rail-rod';
 import type { Entity } from '@/core/types';
 import { WIRE_BFIELD_PRESET_ID } from '@/domains/em/logic/straight-wire-teaching';
 import {
@@ -81,6 +97,15 @@ import {
 } from '@/domains/em/logic/loop-current-3d';
 import { SOLENOID_BFIELD_PRESET_ID } from '@/domains/em/logic/solenoid-teaching';
 
+const P08_ROTATION_CIRCLE_PRESET_ID = 'P02-EMF038-rotation-circle';
+const P08_ELECTRIC_OSCILLATION_PRESET_ID = 'P02-EMF011-efield-acceleration';
+const P08_TRANSLATION_CIRCLE_PRESET_ID = 'P02-EMF037-translation-circle';
+const P08_SCALING_CIRCLE_PRESET_ID = 'P02-EMF039-scaling-circle';
+const P08_MAGNETIC_FOCUSING_PRESET_ID = 'P02-EMF033-magnetic-focusing';
+const P08_MAGNETIC_DIVERGENCE_PRESET_ID = 'P02-EMF036-magnetic-divergence';
+const P08_CYCLOTRON_VIDEO_PRESET_ID = 'P02-EMF042-cyclotron';
+const P08_FLOWMETER_VIDEO_PRESET_ID = 'P02-EMF043-em-flowmeter';
+
 /**
  * 顶层应用组件
  * 三页面：首页 → 预设选择/模拟器 | 自由搭建
@@ -90,6 +115,7 @@ type AppPage =
   | 'home'
   | 'gallery'
   | 'p13'
+  | 'p13-builder'
   | 'p08'
   | 'p08-builder'
   | 'simulator'
@@ -107,7 +133,7 @@ type AppPage =
 interface AppRoute {
   page: AppPage;
   presetId?: string;
-  from?: 'p08' | 'p13';
+  from?: 'p08' | 'p13' | 'p13-builder';
   p08Module?: P08ModuleKey;
 }
 
@@ -162,6 +188,7 @@ function parseHash(): AppRoute {
   if (path === 'current-resistance-method') return { page: 'current-resistance-method' };
   if (path === 'gallery') return { page: 'gallery' };
   if (path === 'p13') return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' };
+  if (path === 'p13-builder') return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' };
   if (path === 'p08') {
     const moduleParam = params.get('module');
     const p08Module = isP08ModuleKey(moduleParam) ? moduleParam : undefined;
@@ -171,7 +198,10 @@ function parseHash(): AppRoute {
   if (path.startsWith('preset/')) {
     const presetId = path.slice(7);
     const fromParam = params.get('from');
-    const from = fromParam === 'p08' || fromParam === 'p13' ? fromParam : undefined;
+    const from =
+      fromParam === 'p08' || fromParam === 'p13' || fromParam === 'p13-builder'
+        ? fromParam
+        : undefined;
     const moduleParam = params.get('module');
     const p08Module = isP08ModuleKey(moduleParam) ? moduleParam : undefined;
     return getVisiblePresetId(presetId)
@@ -180,6 +210,8 @@ function parseHash(): AppRoute {
         ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08', p08Module })
         : from === 'p13'
           ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' })
+          : from === 'p13-builder'
+            ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' })
           : { page: 'gallery' };
   }
   // 兼容旧格式：裸 presetId
@@ -199,6 +231,8 @@ function setHash(route: AppRoute): void {
         params.set('module', route.p08Module);
       }
       window.location.hash = `preset/${route.presetId}?${params.toString()}`;
+    } else if (route.from === 'p13-builder') {
+      window.location.hash = `preset/${route.presetId}?from=p13-builder`;
     } else if (route.from === 'p13') {
       window.location.hash = `preset/${route.presetId}?from=p13`;
     } else {
@@ -210,6 +244,8 @@ function setHash(route: AppRoute): void {
     window.location.hash = 'builder-free';
   } else if (route.page === 'p13') {
     window.location.hash = 'p13';
+  } else if (route.page === 'p13-builder') {
+    window.location.hash = 'p13-builder';
   } else if (route.page === 'p08') {
     const params = new URLSearchParams();
     if (route.p08Module) {
@@ -260,6 +296,15 @@ export function App() {
   const [route, setRoute] = useState<AppRoute>(() => parseHash());
 
   useEffect(() => {
+    if (!isP13StandaloneMode) return;
+    if (route.page === 'p13' || route.page === 'p13-builder' || route.page === 'simulator') return;
+    navigateTo({
+      page: 'p13',
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     function onHashChange() {
       const newRoute = parseHash();
       if (newRoute.page !== 'simulator') simulator.unload();
@@ -275,8 +320,55 @@ export function App() {
     setRoute(r);
   }, []);
 
+  const navigateToP13Preset = useCallback((presetId: string) => {
+    navigateTo({ page: 'simulator', presetId, from: 'p13' });
+  }, [navigateTo]);
+
+  const navigateToP13BuilderPreset = useCallback((presetId: string) => {
+    navigateTo({ page: 'simulator', presetId, from: 'p13-builder' });
+  }, [navigateTo]);
+
+  const navigateBackFromPreset = useCallback((presetRoute: AppRoute) => {
+    if (presetRoute.from === 'p13-builder') {
+      navigateTo({ page: 'p13-builder' });
+      return;
+    }
+
+    const shouldReturnToP13 =
+      presetRoute.from === 'p13' ||
+      P13_PRESET_IDS.has(presetRoute.presetId!);
+    const fallbackP08Module = getP08ModuleKeyByPresetId(presetRoute.presetId!);
+    const shouldReturnToP08 =
+      !shouldReturnToP13 &&
+      (
+        presetRoute.from === 'p08' ||
+        fallbackP08Module === 'particle-electric'
+      );
+
+    if (shouldReturnToP13) {
+      navigateTo({ page: 'p13' });
+      return;
+    }
+
+    navigateTo({
+      page: shouldReturnToP08 || isP08StandaloneMode ? 'p08' : 'gallery',
+      ...((shouldReturnToP08 || isP08StandaloneMode)
+        ? { p08Module: presetRoute.p08Module ?? fallbackP08Module }
+        : {}),
+    });
+  }, [navigateTo]);
+
   switch (route.page) {
     case 'home':
+      if (isP13StandaloneMode) {
+        return (
+          <P13InductionHome
+            onSelectPreset={(id) => navigateTo({ page: 'simulator', presetId: id, from: 'p13' })}
+            onOpenRoute={(target) => navigateTo({ page: target })}
+            onBack={() => navigateTo({ page: 'p13' })}
+          />
+        );
+      }
       if (isBuilderFreeFeedbackMode) {
         return (
           <CircuitBuilderView
@@ -315,6 +407,15 @@ export function App() {
       );
 
     case 'gallery':
+      if (isP13StandaloneMode) {
+        return (
+          <P13InductionHome
+            onSelectPreset={(id) => navigateTo({ page: 'simulator', presetId: id, from: 'p13' })}
+            onOpenRoute={(target) => navigateTo({ page: target })}
+            onBack={() => navigateTo({ page: 'p13' })}
+          />
+        );
+      }
       if (isP08StandaloneMode) {
         return (
           <HomePage
@@ -363,7 +464,16 @@ export function App() {
       return (
         <P13InductionHome
           onSelectPreset={(id) => navigateTo({ page: 'simulator', presetId: id, from: 'p13' })}
+          onOpenRoute={(target) => navigateTo({ page: target })}
           onBack={() => navigateTo({ page: 'gallery' })}
+        />
+      );
+
+    case 'p13-builder':
+      return (
+        <P13BuilderPage
+          onSelectPreset={navigateToP13BuilderPreset}
+          onBack={() => navigateTo({ page: 'p13' })}
         />
       );
 
@@ -428,7 +538,16 @@ export function App() {
           return (
             <P13InductionHome
               onSelectPreset={(id) => navigateTo({ page: 'simulator', presetId: id, from: 'p13' })}
+              onOpenRoute={(target) => navigateTo({ page: target })}
               onBack={() => navigateTo({ page: 'gallery' })}
+            />
+          );
+        }
+        if (route.from === 'p13-builder') {
+          return (
+            <P13BuilderPage
+              onSelectPreset={navigateToP13BuilderPreset}
+              onBack={() => navigateTo({ page: 'p13' })}
             />
           );
         }
@@ -445,30 +564,15 @@ export function App() {
       if (route.presetId === P13_LENZ_MAGNET_COIL_PRESET_ID) {
         return (
           <P13LenzMagnetCoilPage
-            onBack={() => {
-              const shouldReturnToP13 =
-                route.from === 'p13' ||
-                P13_PRESET_IDS.has(route.presetId!);
-              const fallbackP08Module = getP08ModuleKeyByPresetId(route.presetId!);
-              const shouldReturnToP08 =
-                !shouldReturnToP13 &&
-                (
-                  route.from === 'p08' ||
-                  fallbackP08Module === 'particle-electric'
-                );
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
 
-              if (shouldReturnToP13) {
-                navigateTo({ page: 'p13' });
-                return;
-              }
-
-              navigateTo({
-                page: shouldReturnToP08 || isP08StandaloneMode ? 'p08' : 'gallery',
-                ...((shouldReturnToP08 || isP08StandaloneMode)
-                  ? { p08Module: route.p08Module ?? fallbackP08Module }
-                  : {}),
-              });
-            }}
+      if (route.presetId === P13_BASE_LOOP_PRESET_ID) {
+        return (
+          <P13BaseLoopPage
+            onBack={() => navigateBackFromPreset(route)}
           />
         );
       }
@@ -486,61 +590,87 @@ export function App() {
               : P13SingleRodResistivePage;
         return (
           <SingleRodPage
-            onBack={() => {
-              const shouldReturnToP13 =
-                route.from === 'p13' ||
-                P13_PRESET_IDS.has(route.presetId!);
-              const fallbackP08Module = getP08ModuleKeyByPresetId(route.presetId!);
-              const shouldReturnToP08 =
-                !shouldReturnToP13 &&
-                (
-                  route.from === 'p08' ||
-                  fallbackP08Module === 'particle-electric'
-                );
-
-              if (shouldReturnToP13) {
-                navigateTo({ page: 'p13' });
-                return;
-              }
-
-              navigateTo({
-                page: shouldReturnToP08 || isP08StandaloneMode ? 'p08' : 'gallery',
-                ...((shouldReturnToP08 || isP08StandaloneMode)
-                  ? { p08Module: route.p08Module ?? fallbackP08Module }
-                  : {}),
-              });
-            }}
+            onSelectPreset={route.from === 'p13-builder' ? navigateToP13BuilderPreset : navigateToP13Preset}
+            onBack={() => navigateBackFromPreset(route)}
           />
         );
       }
 
-      if (route.presetId === P13_DOUBLE_ROD_BASIC_PRESET_ID) {
+      if (
+        route.presetId === P13_DOUBLE_ROD_BASIC_PRESET_ID ||
+        route.presetId === P13_DOUBLE_ROD_DRIVEN_PRESET_ID
+      ) {
+        const DoubleRodPage =
+          route.presetId === P13_DOUBLE_ROD_DRIVEN_PRESET_ID
+            ? P13DoubleRodDrivenPage
+            : P13DoubleRodBasicPage;
         return (
-          <P13DoubleRodBasicPage
-            onBack={() => {
-              const shouldReturnToP13 =
-                route.from === 'p13' ||
-                P13_PRESET_IDS.has(route.presetId!);
-              const fallbackP08Module = getP08ModuleKeyByPresetId(route.presetId!);
-              const shouldReturnToP08 =
-                !shouldReturnToP13 &&
-                (
-                  route.from === 'p08' ||
-                  fallbackP08Module === 'particle-electric'
-                );
+          <DoubleRodPage
+            onSelectPreset={route.from === 'p13-builder' ? navigateToP13BuilderPreset : navigateToP13Preset}
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
 
-              if (shouldReturnToP13) {
-                navigateTo({ page: 'p13' });
-                return;
-              }
+      if (route.presetId === P13_VERTICAL_RAIL_ROD_PRESET_ID) {
+        return (
+          <P13VerticalRailRodPage
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
 
-              navigateTo({
-                page: shouldReturnToP08 || isP08StandaloneMode ? 'p08' : 'gallery',
-                ...((shouldReturnToP08 || isP08StandaloneMode)
-                  ? { p08Module: route.p08Module ?? fallbackP08Module }
-                  : {}),
-              });
-            }}
+      if (route.presetId === P08_ROTATION_CIRCLE_PRESET_ID) {
+        return (
+          <P08RotationCirclePage
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
+
+      if (route.presetId === P08_ELECTRIC_OSCILLATION_PRESET_ID) {
+        return (
+          <P08ElectricOscillationPage
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
+
+      if (route.presetId === P08_TRANSLATION_CIRCLE_PRESET_ID) {
+        return (
+          <P08TranslationCirclePage
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
+
+      if (route.presetId === P08_SCALING_CIRCLE_PRESET_ID) {
+        return (
+          <P08ScalingCirclePage
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
+
+      if (
+        route.presetId === P08_CYCLOTRON_VIDEO_PRESET_ID ||
+        route.presetId === P08_FLOWMETER_VIDEO_PRESET_ID
+      ) {
+        return (
+          <P08VideoExhibitPage
+            presetId={route.presetId}
+            onBack={() => navigateBackFromPreset(route)}
+          />
+        );
+      }
+
+      if (
+        route.presetId === P08_MAGNETIC_FOCUSING_PRESET_ID ||
+        route.presetId === P08_MAGNETIC_DIVERGENCE_PRESET_ID
+      ) {
+        return (
+          <P08MagneticFocusDivergencePage
+            onBack={() => navigateBackFromPreset(route)}
           />
         );
       }
@@ -549,30 +679,7 @@ export function App() {
         <SimulatorView
           key={route.presetId}
           presetId={route.presetId!}
-          onBack={() => {
-            const shouldReturnToP13 =
-              route.from === 'p13' ||
-              P13_PRESET_IDS.has(route.presetId!);
-            const fallbackP08Module = getP08ModuleKeyByPresetId(route.presetId!);
-            const shouldReturnToP08 =
-              !shouldReturnToP13 &&
-              (
-                route.from === 'p08' ||
-                fallbackP08Module === 'particle-electric'
-              );
-
-            if (shouldReturnToP13) {
-              navigateTo({ page: 'p13' });
-              return;
-            }
-
-            navigateTo({
-              page: shouldReturnToP08 || isP08StandaloneMode ? 'p08' : 'gallery',
-              ...((shouldReturnToP08 || isP08StandaloneMode)
-                ? { p08Module: route.p08Module ?? fallbackP08Module }
-                : {}),
-            });
-          }}
+          onBack={() => navigateBackFromPreset(route)}
         />
       );
 
@@ -639,7 +746,6 @@ export function App() {
       return (
         <MeasureEmfComparisonView
           onBack={() => navigateTo({ page: 'gallery' })}
-          onOpenPreset={() => navigateTo({ page: 'simulator', presetId: 'P04-CIR-EXP004-measure-emf-r' })}
         />
       );
 
@@ -647,15 +753,6 @@ export function App() {
       return (
         <HalfDeflectionComparisonView
           onBack={() => navigateTo({ page: 'gallery' })}
-          onOpenPreset={(mode) =>
-            navigateTo({
-              page: 'simulator',
-              presetId:
-                mode === 'ammeter'
-                  ? 'P04-CIR-EXP003-half-deflection-ammeter'
-                  : 'P04-CIR-EXP003-half-deflection-voltmeter',
-            })
-          }
         />
       );
 
@@ -1279,7 +1376,7 @@ function SimulatorParamPopup({ entity, x, y, onClose }: {
   for (const group of paramGroups) {
     for (const param of group.params) {
       if (param.targetEntityId === entity.id) {
-        entityParams.push({ schema: param, value: paramValues[param.key] ?? param.default });
+        entityParams.push({ schema: param, value: paramValues[param.key] ?? getParamSchemaDefaultValue(param) });
       }
     }
   }
@@ -1409,4 +1506,17 @@ function SimulatorParamPopup({ entity, x, y, onClose }: {
       </div>
     </div>
   );
+}
+
+function getParamSchemaDefaultValue(schema: import('@/core/types').ParamSchema): unknown {
+  switch (schema.type) {
+    case 'slider':
+    case 'input':
+    case 'toggle':
+    case 'select':
+      return schema.default;
+    case 'button':
+    default:
+      return undefined;
+  }
 }

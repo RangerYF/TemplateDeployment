@@ -41,6 +41,19 @@ function roundRectPath(
 /** Intersection accent colour — amber, distinct from any function colour. */
 const XSECT_COLOR = '#FBBF24';
 
+function formatCoord(value: number): string {
+  if (Math.abs(value) < 1e-6) return '0';
+  const roundedInt = Math.round(value);
+  if (Math.abs(value - roundedInt) < 1e-4) return String(roundedInt);
+  const rounded2 = Number(value.toFixed(2));
+  if (Math.abs(value - rounded2) < 1e-6) return String(rounded2);
+  return String(Number(value.toFixed(3)));
+}
+
+function formatPointCoord(x: number, y: number): string {
+  return `(${formatCoord(x)}, ${formatCoord(y)})`;
+}
+
 /**
  * Draw a ⊕ crosshair marker (circle + perpendicular lines) at (cx, cy).
  * `r` is the outer radius.
@@ -155,6 +168,62 @@ function renderTooltip(
   ctx.restore();
 }
 
+function renderPointLabel(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  coordText: string,
+  anchorX: number,
+  anchorY: number,
+  color: string,
+  viewport: Viewport,
+): void {
+  ctx.save();
+
+  const padX = 8;
+  const padY = 5;
+  const gap = 10;
+  const lineGap = 3;
+  const titleFont = 'bold 11px monospace';
+  const coordFont = '11px monospace';
+
+  ctx.font = titleFont;
+  const labelW = ctx.measureText(label).width;
+  ctx.font = coordFont;
+  const coordW = ctx.measureText(coordText).width;
+
+  const boxW = Math.ceil(Math.max(labelW, coordW) + padX * 2);
+  const boxH = 35;
+  let boxX = anchorX + gap;
+  let boxY = anchorY - boxH - gap;
+
+  if (boxX + boxW > viewport.width - 6) boxX = anchorX - boxW - gap;
+  if (boxY < 6) boxY = anchorY + gap;
+
+  boxX = Math.max(4, Math.min(boxX, viewport.width - boxW - 4));
+  boxY = Math.max(4, Math.min(boxY, viewport.height - boxH - 4));
+
+  ctx.fillStyle = 'rgba(255,255,255,0.94)';
+  roundRectPath(ctx, boxX, boxY, boxW, boxH, 5);
+  ctx.fill();
+
+  ctx.strokeStyle = hexToRgba(color, 0.75);
+  ctx.lineWidth = 1;
+  roundRectPath(ctx, boxX, boxY, boxW, boxH, 5);
+  ctx.stroke();
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.font = titleFont;
+  ctx.fillStyle = color;
+  ctx.fillText(label, boxX + padX, boxY + padY);
+
+  ctx.font = coordFont;
+  ctx.fillStyle = COLORS.textPrimary;
+  ctx.fillText(coordText, boxX + padX, boxY + padY + 12 + lineGap);
+
+  ctx.restore();
+}
+
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
@@ -200,18 +269,7 @@ export function renderDynamic(
     ctx.arc(px, py, 7, 0, Math.PI * 2);
     ctx.fill();
 
-    // Label (P1, P2 …) above the point
-    ctx.fillStyle    = fn.color;
-    ctx.font         = 'bold 11px monospace';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(pin.label, px + 10, py - 4);
-
-    // Coordinate text
-    const coordText = `(${pin.mathX.toFixed(2)}, ${pin.mathY.toFixed(2)})`;
-    ctx.font         = '10px monospace';
-    ctx.fillStyle    = '#D1D5DB';
-    ctx.fillText(coordText, px + 10, py + 8);
+    renderPointLabel(ctx, pin.label, formatPointCoord(pin.mathX, pin.mathY), px, py, fn.color, viewport);
 
     ctx.restore();
   }
@@ -244,17 +302,15 @@ export function renderDynamic(
     ctx.lineTo(px, py + 5);
     ctx.stroke();
 
-    // Label (X1, X2 …)
-    ctx.fillStyle    = XSECT_COLOR;
-    ctx.font         = 'bold 11px monospace';
-    ctx.textAlign    = 'left';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(pin.label, px + 11, py - 4);
-
-    // Coordinate text
-    ctx.font      = '10px monospace';
-    ctx.fillStyle = '#D1D5DB';
-    ctx.fillText(`(${pin.mathX.toFixed(3)}, ${pin.mathY.toFixed(3)})`, px + 11, py + 8);
+    renderPointLabel(
+      ctx,
+      `∩ ${pin.label}`,
+      formatPointCoord(pin.mathX, pin.mathY),
+      px,
+      py,
+      XSECT_COLOR,
+      viewport,
+    );
 
     ctx.restore();
   }
@@ -264,11 +320,9 @@ export function renderDynamic(
     const fn = functions.find((f) => f.id === hoveredPoint.functionId);
     if (fn) {
       const { canvasX, canvasY } = hoveredPoint;
-      const xLabel = hoveredPoint.mathX.toFixed(2);
-      const yLabel = hoveredPoint.mathY.toFixed(2);
       renderTooltip(
         ctx,
-        `(${xLabel}, ${yLabel})`,
+        formatPointCoord(hoveredPoint.mathX, hoveredPoint.mathY),
         canvasX, canvasY,
         COLORS.primary,
         viewport,
@@ -301,11 +355,9 @@ export function renderDynamic(
     drawCrosshairMarker(ctx, canvasX, canvasY, 9, XSECT_COLOR, true);
 
     // Tooltip with ∩ prefix
-    const xLabel = hoveredIntersection.mathX.toFixed(3);
-    const yLabel = hoveredIntersection.mathY.toFixed(3);
     renderTooltip(
       ctx,
-      `(${xLabel}, ${yLabel})`,
+      formatPointCoord(hoveredIntersection.mathX, hoveredIntersection.mathY),
       canvasX, canvasY,
       XSECT_COLOR,
       viewport,

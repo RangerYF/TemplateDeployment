@@ -13,6 +13,7 @@ import { isSourcePointCharge } from '@/domains/em/logic/point-charge-role';
 import { renderFieldLines } from '@/domains/em/viewports/field-lines-renderer';
 import { renderMagneticLines } from '@/domains/em/viewports/magnetic-lines-renderer';
 import { renderPotentialMap } from '@/domains/em/viewports/potential-map-renderer';
+import { renderPotentialSurface3D } from '@/domains/em/viewports/potential-surface-renderer';
 import { useSimulationStore } from '@/store/simulation-store';
 import type { ViewportRenderer } from '@/core/registries/renderer-registry';
 import type { Entity, Vec2 } from '@/core/types';
@@ -182,6 +183,7 @@ const fieldViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
   const showFieldLines = useSimulationStore.getState().showFieldLines;
   const showEquipotentialLines = useSimulationStore.getState().showEquipotentialLines;
   const showPotentialMap = useSimulationStore.getState().showPotentialMap;
+  const showPotentialSurface3D = useSimulationStore.getState().showPotentialSurface3D;
   const fieldLineDensity = useSimulationStore.getState().fieldLineDensity;
   const potentialProbeA = useSimulationStore.getState().potentialProbeA;
   const potentialProbeB = useSimulationStore.getState().potentialProbeB;
@@ -223,6 +225,12 @@ const fieldViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
     renderFieldLines(c, cachedFieldLines, cachedEquipotentialLines, coordinateTransform, {
       showFieldLines,
       showEquipotentialLines,
+    });
+  }
+
+  if (!hasUniformField && pointCharges.length > 0 && showPotentialSurface3D) {
+    renderPotentialSurface3D(c, ctx.canvas, coordinateTransform, pointCharges, {
+      avoidBottomLeftLegend: showPotentialMap,
     });
   }
 
@@ -469,7 +477,7 @@ function renderPotentialProbeOverlay(
       y: (start.y + end.y) / 2,
     };
     const deltaV = computePotentialAtPoint(probeA, charges) - computePotentialAtPoint(probeB, charges);
-    drawTextLabel(canvasContext, `ΔV=${formatPotentialValue(deltaV)}`, { x: mid.x, y: mid.y - 10 }, {
+    drawTextLabel(canvasContext, `Δφ=${formatPotentialValue(deltaV)}`, { x: mid.x, y: mid.y - 10 }, {
       color: '#8B5CF6',
       fontSize: 11,
       align: 'center',

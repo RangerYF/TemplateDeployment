@@ -1,0 +1,19 @@
+{
+  "id": "P13-EMI-024-double-rod-driven",
+  "version": "1.0",
+  "name": "EMI-024 双棒 + 恒外力",
+  "description": "双棒闭合回路中，棒1受恒定外力持续推动；系统按 ε = BL(v1-v2)、i = ε/(R1+R2)、F1 = -F2 与外力耦合，长期后进入同加速度前进与稳定速度差的课堂口径。",
+  "category": "P-13",
+  "supportedViewports": ["motion", "circuit", "force", "field"],
+  "defaultViewport": "motion",
+  "displayConfig": {
+    "scale": 100,
+    "origin": { "x": 0, "y": 0 }
+  },
+  "entities": [],
+  "relations": [],
+  "paramGroups": [],
+  "paramValues": {},
+  "solveMode": "analytical",
+  "duration": 1
+}

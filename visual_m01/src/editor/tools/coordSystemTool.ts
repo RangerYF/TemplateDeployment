@@ -31,8 +31,15 @@ const STEP_LABELS: Record<CoordStep, string> = {
   selectZFace: '选面定Z轴',
   selectXDir: '选点定X轴',
 };
+const ROTATION_STEP_LABEL = '选择圆心或球心作为原点';
 
 const STEP_ORDER: CoordStep[] = ['selectOrigin', 'selectZFace', 'selectXDir'];
+const ROTATION_GEOMETRY_TYPES = new Set(['cone', 'cylinder', 'truncatedCone', 'sphere']);
+const ROTATION_AXES: [[number, number, number], [number, number, number], [number, number, number]] = [
+  [0, 0, 1],
+  [1, 0, 0],
+  [0, 1, 0],
+];
 
 let currentStep: CoordStep = 'selectOrigin';
 let pendingOriginPointId: string | null = null;
@@ -70,6 +77,31 @@ function resetState() {
 function setStep(step: CoordStep) {
   currentStep = step;
   useToolStore.getState().setToolSteps(buildSteps(step));
+}
+
+function getActiveGeometryType(): string | null {
+  const store = useEntityStore.getState();
+  const geometryId = store.activeGeometryId;
+  if (!geometryId) return null;
+  const geometry = store.getEntity(geometryId);
+  if (!geometry || geometry.type !== 'geometry') return null;
+  return (geometry.properties as GeometryProperties).geometryType;
+}
+
+function setInitialStep() {
+  currentStep = 'selectOrigin';
+  const geometryType = getActiveGeometryType();
+  if (geometryType && isRotationGeometry(geometryType)) {
+    useToolStore.getState().setToolSteps([
+      { label: ROTATION_STEP_LABEL, status: 'active' },
+    ]);
+    return;
+  }
+  setStep('selectOrigin');
+}
+
+function isRotationGeometry(type: string): boolean {
+  return ROTATION_GEOMETRY_TYPES.has(type);
 }
 
 /** 添加选中高亮 */
@@ -223,7 +255,7 @@ export const coordSystemTool: Tool = {
 
   onActivate() {
     resetState();
-    setStep('selectOrigin');
+    setInitialStep();
   },
 
   onDeactivate() {
@@ -245,6 +277,16 @@ export const coordSystemTool: Tool = {
         pendingOriginPointId = event.hitEntityId;
         pendingGeometryId = props.geometryId;
         addPendingSelection(event.hitEntityId);
+
+        const geometryEntity = entityStore.getEntity(props.geometryId);
+        if (geometryEntity?.type === 'geometry') {
+          const geoProps = geometryEntity.properties as GeometryProperties;
+          if (isRotationGeometry(geoProps.geometryType)) {
+            finalize(ROTATION_AXES);
+            break;
+          }
+        }
+
         setStep('selectZFace');
         break;
       }

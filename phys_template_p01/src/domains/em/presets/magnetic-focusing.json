@@ -1,8 +1,8 @@
 {
   "id": "P02-EMF033-magnetic-focusing",
   "version": "1.0",
-  "name": "磁聚焦模型",
-  "description": "粒子源从同一点发射多粒子，磁场圆取最小会聚半径对应的基准轨道；其余轨迹在同一圆形场区内向同一焦点汇聚，适合讲解磁聚焦几何。",
+  "name": "磁聚焦和磁发散",
+  "description": "用一张对比图同时展示磁发散与磁聚焦：左侧一点射入、平行射出，右侧平行入射、会聚于一点。",
   "category": "P-08",
   "supportedViewports": [
     "motion",
@@ -28,7 +28,7 @@
         "height": 5,
         "boundaryShape": "circle",
         "boundaryRadius": 2.5,
-        "autoBoundaryMode": "focusing-min-radius"
+        "autoBoundaryMode": "focusing-reference-particle"
       },
       "transform": {
         "position": {

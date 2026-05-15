@@ -40,10 +40,45 @@ import { useM03InteractionStore } from '@/editor/store/m03InteractionStore';
 import { useLocusStore } from '@/editor/store/locusStore';
 import { useOpticalStore } from '@/editor/store/opticalStore';
 import { DEFAULT_M03_VIEWPORT } from '@/types';
+import type { ViewportState } from '@/types';
 import type { LineEntity, ConicEntity, MovablePointEntity } from '@/types';
 import { isConicEntity } from '@/types';
 
 const M03_RESET = { xMin: -12, xMax: 12, yMin: -8, yMax: 8 };
+const VIEWPORT_EPS = 1e-9;
+
+function equalScaleViewport(state: ViewportState, width: number, height: number): Viewport {
+  const safeWidth = Math.max(width, 1);
+  const safeHeight = Math.max(height, 1);
+  const cx = (state.xMin + state.xMax) / 2;
+  const cy = (state.yMin + state.yMax) / 2;
+  let xRange = state.xMax - state.xMin;
+  let yRange = state.yMax - state.yMin;
+  const targetRatio = safeWidth / safeHeight;
+  const currentRatio = xRange / yRange;
+
+  if (currentRatio < targetRatio) {
+    xRange = yRange * targetRatio;
+  } else if (currentRatio > targetRatio) {
+    yRange = xRange / targetRatio;
+  }
+
+  return new Viewport(
+    cx - xRange / 2,
+    cx + xRange / 2,
+    cy - yRange / 2,
+    cy + yRange / 2,
+    safeWidth,
+    safeHeight,
+  );
+}
+
+function nearlySameViewport(a: ViewportState, b: Viewport): boolean {
+  return Math.abs(a.xMin - b.xMin) < VIEWPORT_EPS &&
+    Math.abs(a.xMax - b.xMax) < VIEWPORT_EPS &&
+    Math.abs(a.yMin - b.yMin) < VIEWPORT_EPS &&
+    Math.abs(a.yMax - b.yMax) < VIEWPORT_EPS;
+}
 
 /**
  * Dual-layer canvas for the M03 解析几何画板.
@@ -101,6 +136,14 @@ export function GeometryCanvas() {
   // Canvas tool mode subscriptions
   const canvasMode   = useCanvasToolStore((s) => s.mode);
 
+  // Conics require equal x/y pixel scale; otherwise circles render as ellipses.
+  useEffect(() => {
+    const vp = equalScaleViewport(viewport, canvasSize.width, canvasSize.height);
+    if (!nearlySameViewport(viewport, vp)) {
+      editorRef.current?.setViewport(vp);
+    }
+  }, [viewport, canvasSize, editorRef]);
+
   // ── Canvas tool mode → activate appropriate tool ──────────────────────────
   useEffect(() => {
     const editor = editorRef.current;
@@ -127,10 +170,7 @@ export function GeometryCanvas() {
     const cssW = canvas.width / dpr;
     const cssH = canvas.height / dpr;
 
-    const vp = new Viewport(
-      viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-      cssW, cssH,
-    );
+    const vp = equalScaleViewport(viewport, cssW, cssH);
 
     // 1. Clear + axes (dark theme)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -306,10 +346,7 @@ export function GeometryCanvas() {
     const entity = entities.find((e) => e.id === hoveredEntityId);
     if (!entity || !entity.visible) return;
 
-    const vp = new Viewport(
-      viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-      cssW, cssH,
-    );
+    const vp = equalScaleViewport(viewport, cssW, cssH);
 
     const glowColor = COLORS.primary;
     ctx.save();
@@ -423,10 +460,10 @@ export function GeometryCanvas() {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
       const vp = useEntityStore.getState().viewport;
-      const vpObj = new Viewport(vp.xMin, vp.xMax, vp.yMin, vp.yMax, rect.width, rect.height);
+      const vpObj = equalScaleViewport(vp, rect.width, rect.height);
       const [mx, my] = vpObj.toMath(cx, cy);
       const HIT_PX = 10;
-      const mathPerPx = (vp.xMax - vp.xMin) / rect.width;
+      const mathPerPx = vpObj.xRange / vpObj.width;
       const hitRadius = HIT_PX * mathPerPx;
 
       const store = useEntityStore.getState();
@@ -456,7 +493,7 @@ export function GeometryCanvas() {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
       const vp = useEntityStore.getState().viewport;
-      const vpObj = new Viewport(vp.xMin, vp.xMax, vp.yMin, vp.yMax, rect.width, rect.height);
+      const vpObj = equalScaleViewport(vp, rect.width, rect.height);
       const [mx, my] = vpObj.toMath(cx, cy);
 
       const store = useEntityStore.getState();
@@ -494,12 +531,12 @@ export function GeometryCanvas() {
     const vp = useEntityStore.getState().viewport;
     const cssW = rect.width;
     const cssH = rect.height;
-    const vpObj = new Viewport(vp.xMin, vp.xMax, vp.yMin, vp.yMax, cssW, cssH);
+    const vpObj = equalScaleViewport(vp, cssW, cssH);
 
     const [mx, my] = vpObj.toMath(cx, cy);
 
     // Convert snap radius to math units
-    const mathPerPx = (vp.xMax - vp.xMin) / cssW;
+    const mathPerPx = vpObj.xRange / vpObj.width;
 
     // 1. Check movable points first (10px hit radius)
     const HIT_PX = 10;

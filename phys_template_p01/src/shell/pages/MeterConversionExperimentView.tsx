@@ -73,16 +73,16 @@ const DEFAULT_AMMETER_PARAMS = clampAmmeterParams({
   rg: 120,
   ig: 0.003,
   targetCurrent: 0.6,
-  operatingCurrent: 0.42,
-  extraResistance: 0.05,
+  operatingCurrent: 0.6,
+  extraResistance: 0,
 });
 
 const DEFAULT_VOLTMETER_PARAMS = clampVoltmeterParams({
   rg: 120,
   ig: 0.003,
   targetVoltage: 15,
-  operatingVoltage: 9,
-  extraResistance: -180,
+  operatingVoltage: 15,
+  extraResistance: 0,
 });
 
 const animationStyles = `
@@ -100,6 +100,7 @@ export function MeterConversionExperimentView({ onBack }: Props) {
   const [mode, setMode] = useState<MeterConversionMode>('ammeter');
   const [ammeterParams, setAmmeterParams] = useState<AmmeterPageParams>(DEFAULT_AMMETER_PARAMS);
   const [voltmeterParams, setVoltmeterParams] = useState<VoltmeterPageParams>(DEFAULT_VOLTMETER_PARAMS);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const ammeterResult = useMemo(() => calculateAmmeterConversion(ammeterParams), [ammeterParams]);
   const voltmeterResult = useMemo(() => calculateVoltmeterConversion(voltmeterParams), [voltmeterParams]);
@@ -172,7 +173,7 @@ export function MeterConversionExperimentView({ onBack }: Props) {
           电表改装实验 · 电流表 ↔ 电压表
         </h1>
         <span className="text-[11px]" style={{ color: pageStyle.muted }}>
-          在同一表头 G 上切换分流与分压两种改装思路，观察量程、刻度和误差如何联动
+          先固定表头参数，再只调改装后量程，自动得到需要的改装电阻
         </span>
       </header>
 
@@ -190,6 +191,8 @@ export function MeterConversionExperimentView({ onBack }: Props) {
           onApplyHighlightErrorPreset={applyHighlightErrorPreset}
           onApplyNearFullScalePreset={applyNearFullScalePreset}
           onResetMode={resetCurrentMode}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced((value) => !value)}
         />
         <CenterPanel mode={mode} result={activeResult} />
         <RightPanel
@@ -216,6 +219,8 @@ function LeftPanel({
   onApplyHighlightErrorPreset,
   onApplyNearFullScalePreset,
   onResetMode,
+  showAdvanced,
+  onToggleAdvanced,
 }: {
   mode: MeterConversionMode;
   ammeterParams: AmmeterPageParams;
@@ -229,6 +234,8 @@ function LeftPanel({
   onApplyHighlightErrorPreset: () => void;
   onApplyNearFullScalePreset: () => void;
   onResetMode: () => void;
+  showAdvanced: boolean;
+  onToggleAdvanced: () => void;
 }) {
   const activeMeta = MODE_META[mode];
 
@@ -277,20 +284,24 @@ function LeftPanel({
             params={ammeterParams}
             result={ammeterResult}
             onChange={onChangeAmmeter}
+            showAdvanced={showAdvanced}
+            onToggleAdvanced={onToggleAdvanced}
           />
         ) : (
           <VoltmeterControls
             params={voltmeterParams}
             result={voltmeterResult}
             onChange={onChangeVoltmeter}
+            showAdvanced={showAdvanced}
+            onToggleAdvanced={onToggleAdvanced}
           />
         )}
 
         <SectionTitle title="教学预设" />
         <div className="flex flex-wrap gap-2">
           <PresetButton label="理想改装" onClick={onApplyIdealPreset} />
-          <PresetButton label="突出误差" onClick={onApplyHighlightErrorPreset} />
           <PresetButton label="接近满偏" onClick={onApplyNearFullScalePreset} />
+          <PresetButton label="突出误差" onClick={onApplyHighlightErrorPreset} />
           <PresetButton label="恢复默认" onClick={onResetMode} />
         </div>
       </div>
@@ -302,10 +313,14 @@ function AmmeterControls({
   params,
   result,
   onChange,
+  showAdvanced,
+  onToggleAdvanced,
 }: {
   params: AmmeterPageParams;
   result: AmmeterConversionResult;
   onChange: (patch: Partial<AmmeterPageParams>) => void;
+  showAdvanced: boolean;
+  onToggleAdvanced: () => void;
 }) {
   const targetBounds = getAmmeterTargetBounds(params.ig);
   const extraBounds = getAmmeterExtraBounds(params.rg, params.ig, params.targetCurrent);
@@ -342,26 +357,6 @@ function AmmeterControls({
         unit="A"
         onChange={(value) => onChange({ targetCurrent: value })}
       />
-      <RangeControl
-        label="当前真实电流 I"
-        value={params.operatingCurrent}
-        min={0}
-        max={params.targetCurrent * 1.2}
-        step={currentStep(params.targetCurrent)}
-        unit="A"
-        onChange={(value) => onChange({ operatingCurrent: value })}
-      />
-
-      <SectionTitle title="非理想偏差" />
-      <RangeControl
-        label="分流电阻偏差 ΔR"
-        value={params.extraResistance}
-        min={extraBounds.min}
-        max={extraBounds.max}
-        step={resistanceStep(Math.max(Math.abs(extraBounds.min), Math.abs(extraBounds.max)))}
-        unit="Ω"
-        onChange={(value) => onChange({ extraResistance: value })}
-      />
 
       <div
         className="mb-4 rounded-lg p-3"
@@ -377,6 +372,42 @@ function AmmeterControls({
           原表头满偏仅需 {formatCurrent(result.originalFullScale)}，改装后满偏量程变为 {formatCurrent(result.targetRange)}。
         </div>
       </div>
+
+      <button
+        onClick={onToggleAdvanced}
+        className="mb-3 rounded-full px-3 py-1 text-[11px] font-medium"
+        style={{
+          color: pageStyle.accent,
+          border: `1px solid ${pageStyle.accent}33`,
+          backgroundColor: pageStyle.accentSoft,
+        }}
+      >
+        {showAdvanced ? '收起进阶参数' : '展开进阶参数'}
+      </button>
+
+      {showAdvanced && (
+        <>
+          <SectionTitle title="进阶参数" />
+          <RangeControl
+            label="当前真实电流 I"
+            value={params.operatingCurrent}
+            min={0}
+            max={params.targetCurrent * 1.2}
+            step={currentStep(params.targetCurrent)}
+            unit="A"
+            onChange={(value) => onChange({ operatingCurrent: value })}
+          />
+          <RangeControl
+            label="分流电阻偏差 ΔR"
+            value={params.extraResistance}
+            min={extraBounds.min}
+            max={extraBounds.max}
+            step={resistanceStep(Math.max(Math.abs(extraBounds.min), Math.abs(extraBounds.max)))}
+            unit="Ω"
+            onChange={(value) => onChange({ extraResistance: value })}
+          />
+        </>
+      )}
     </>
   );
 }
@@ -385,10 +416,14 @@ function VoltmeterControls({
   params,
   result,
   onChange,
+  showAdvanced,
+  onToggleAdvanced,
 }: {
   params: VoltmeterPageParams;
   result: VoltmeterConversionResult;
   onChange: (patch: Partial<VoltmeterPageParams>) => void;
+  showAdvanced: boolean;
+  onToggleAdvanced: () => void;
 }) {
   const targetBounds = getVoltmeterTargetBounds(params.rg, params.ig);
   const extraBounds = getVoltmeterExtraBounds(params.rg, params.ig, params.targetVoltage);
@@ -425,26 +460,6 @@ function VoltmeterControls({
         unit="V"
         onChange={(value) => onChange({ targetVoltage: value })}
       />
-      <RangeControl
-        label="当前真实电压 U"
-        value={params.operatingVoltage}
-        min={0}
-        max={params.targetVoltage * 1.2}
-        step={voltageStep(params.targetVoltage)}
-        unit="V"
-        onChange={(value) => onChange({ operatingVoltage: value })}
-      />
-
-      <SectionTitle title="非理想偏差" />
-      <RangeControl
-        label="限流电阻偏差 ΔR"
-        value={params.extraResistance}
-        min={extraBounds.min}
-        max={extraBounds.max}
-        step={resistanceStep(Math.max(Math.abs(extraBounds.min), Math.abs(extraBounds.max)))}
-        unit="Ω"
-        onChange={(value) => onChange({ extraResistance: value })}
-      />
 
       <div
         className="mb-4 rounded-lg p-3"
@@ -460,6 +475,42 @@ function VoltmeterControls({
           原表头满偏电压为 {formatVoltage(result.originalFullScale)}，改装后满偏量程变为 {formatVoltage(result.targetRange)}。
         </div>
       </div>
+
+      <button
+        onClick={onToggleAdvanced}
+        className="mb-3 rounded-full px-3 py-1 text-[11px] font-medium"
+        style={{
+          color: pageStyle.accent,
+          border: `1px solid ${pageStyle.accent}33`,
+          backgroundColor: pageStyle.accentSoft,
+        }}
+      >
+        {showAdvanced ? '收起进阶参数' : '展开进阶参数'}
+      </button>
+
+      {showAdvanced && (
+        <>
+          <SectionTitle title="进阶参数" />
+          <RangeControl
+            label="当前真实电压 U"
+            value={params.operatingVoltage}
+            min={0}
+            max={params.targetVoltage * 1.2}
+            step={voltageStep(params.targetVoltage)}
+            unit="V"
+            onChange={(value) => onChange({ operatingVoltage: value })}
+          />
+          <RangeControl
+            label="限流电阻偏差 ΔR"
+            value={params.extraResistance}
+            min={extraBounds.min}
+            max={extraBounds.max}
+            step={resistanceStep(Math.max(Math.abs(extraBounds.min), Math.abs(extraBounds.max)))}
+            unit="Ω"
+            onChange={(value) => onChange({ extraResistance: value })}
+          />
+        </>
+      )}
     </>
   );
 }
@@ -493,7 +544,7 @@ function CenterPanel({ mode, result }: { mode: MeterConversionMode; result: Acti
             )}
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-3">
+          <div className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
             {result.mode === 'ammeter' ? (
               <>
                 <CircuitDetailCard title="电流分配">
@@ -510,12 +561,6 @@ function CenterPanel({ mode, result }: { mode: MeterConversionMode; result: Acti
                     text={result.isOverRange ? '当前已超程，表盘停在满刻度附近' : '当前仍在可读量程内'}
                     accent={result.isOverRange ? COLORS.error : meta.accent}
                   />
-                </CircuitDetailCard>
-                <CircuitDetailCard title="工程视角">
-                  <DetailLine text={`等效内阻 = ${formatResistance(result.loadResistance, 3)}`} />
-                  <DetailLine text={`表头功耗 = ${formatPower(result.meterPower)}`} />
-                  <DetailLine text={`分流电阻功耗 = ${formatPower(result.accessoryPower)}`} />
-                  <DetailLine text={`量程倍率 n = ${result.rangeMultiplier.toFixed(1)}`} />
                 </CircuitDetailCard>
               </>
             ) : (
@@ -535,29 +580,23 @@ function CenterPanel({ mode, result }: { mode: MeterConversionMode; result: Acti
                     accent={result.isOverRange ? COLORS.error : meta.accent}
                   />
                 </CircuitDetailCard>
-                <CircuitDetailCard title="工程视角">
-                  <DetailLine text={`输入电阻 = ${formatResistance(result.inputResistanceActual, 1)}`} />
-                  <DetailLine text={`表头功耗 = ${formatPower(result.meterPower)}`} />
-                  <DetailLine text={`限流电阻功耗 = ${formatPower(result.accessoryPower)}`} />
-                  <DetailLine text={`灵敏度 = ${formatResistance(result.sensitivityOhmsPerVoltActual, 0)}/V`} />
-                </CircuitDetailCard>
               </>
             )}
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-4">
-        <div className="rounded-xl border p-4" style={{ borderColor: pageStyle.border, backgroundColor: pageStyle.blockBg }}>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold" style={{ color: pageStyle.text }}>
-                刻度响应、误差曲线与当前工作点
+        <div className="px-4 py-4">
+          <div className="rounded-xl border p-4" style={{ borderColor: pageStyle.border, backgroundColor: pageStyle.blockBg }}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold" style={{ color: pageStyle.text }}>
+                  进阶分析：刻度响应、误差曲线与当前工作点
+                </div>
+                <div className="mt-1 text-[11px]" style={{ color: pageStyle.muted }}>
+                  第一阶段核心先看上方原理图与自动求得的改装电阻；这里再看非理想偏差如何影响读数。
+                </div>
               </div>
-              <div className="mt-1 text-[11px]" style={{ color: pageStyle.muted }}>
-                蓝虚线表示按公式得到的理想改装，彩色实线表示带有电阻偏差 ΔR 的真实改装。当前滑动位置会在两张图上同时高亮。
-              </div>
-            </div>
             <div className="flex flex-wrap items-center gap-2">
               <LegendPill label="理想" color="#2563EB" />
               <LegendPill label="实际" color={meta.accent} />
@@ -600,28 +639,31 @@ function RightPanel({
     >
       <div className="p-3">
         <PanelTitle title="关键公式卡片" />
-        <FormulaBlock
-          title="电流表改装"
-          color={MODE_META.ammeter.accent}
-          active={mode === 'ammeter'}
-          lines={[
-            'Rs = (Ig / (I - Ig)) × Rg',
-            `当前理论 Rs = ${formatResistance(ammeterResult.idealAccessoryResistance, 3)}`,
-            `当前实际 Rs = ${formatResistance(ammeterResult.actualAccessoryResistance, 3)}`,
-            `量程倍率 n = I / Ig = ${ammeterResult.rangeMultiplier.toFixed(1)}`,
-          ]}
-        />
-        <FormulaBlock
-          title="电压表改装"
-          color={MODE_META.voltmeter.accent}
-          active={mode === 'voltmeter'}
-          lines={[
-            'Rv = U / Ig - Rg',
-            `当前理论 Rv = ${formatResistance(voltmeterResult.idealAccessoryResistance, 1)}`,
-            `当前实际 Rv = ${formatResistance(voltmeterResult.actualAccessoryResistance, 1)}`,
-            `原表头满偏电压 Ug = Ig × Rg = ${formatVoltage(voltmeterResult.originalFullScale)}`,
-          ]}
-        />
+        {mode === 'ammeter' ? (
+          <FormulaBlock
+            title="电流表改装"
+            color={MODE_META.ammeter.accent}
+            active
+            lines={[
+              'Rs = (Ig / (I - Ig)) × Rg',
+              `当前理论 Rs = ${formatResistance(ammeterResult.idealAccessoryResistance, 3)}`,
+              `当前实际 Rs = ${formatResistance(ammeterResult.actualAccessoryResistance, 3)}`,
+              `量程倍率 n = I / Ig = ${ammeterResult.rangeMultiplier.toFixed(1)}`,
+            ]}
+          />
+        ) : (
+          <FormulaBlock
+            title="电压表改装"
+            color={MODE_META.voltmeter.accent}
+            active
+            lines={[
+              'Rv = U / Ig - Rg',
+              `当前理论 Rv = ${formatResistance(voltmeterResult.idealAccessoryResistance, 1)}`,
+              `当前实际 Rv = ${formatResistance(voltmeterResult.actualAccessoryResistance, 1)}`,
+              `原表头满偏电压 Ug = Ig × Rg = ${formatVoltage(voltmeterResult.originalFullScale)}`,
+            ]}
+          />
+        )}
       </div>
 
       <div className="px-3 pb-3">
@@ -632,6 +674,7 @@ function RightPanel({
           lines={[
             '电流表改装本质：分流。目标量程越大，分流电阻 Rs 越小，绝大部分电流绕过表头。',
             '电压表改装本质：分压。目标量程越大，串联电阻 Rv 越大，绝大部分电压落在外接电阻上。',
+            '表头满偏参数 Ig、Rg 先固定不变，改装后的量程变化只通过 Rs 或 Rv 自动对应出来。',
             '机械刻度并没有变，变化的是“每一小格对应的物理量”。改装后的刻度数字只是把同一偏角重新标尺。',
           ]}
         />
@@ -656,7 +699,7 @@ function RightPanel({
       </div>
 
       <div className="px-3 pb-4" style={{ borderTop: `1px solid ${pageStyle.border}`, paddingTop: 12 }}>
-        <PanelTitle title="工程视角" />
+        <PanelTitle title="进阶：工程视角" />
         <KeyValueInfoBlock
           title="功耗与灵敏度"
           color={MODE_META[mode].accent}
@@ -691,6 +734,11 @@ function AmmeterCircuitDiagram({ result }: { result: AmmeterConversionResult }) 
 
       <line x1="260" y1="96" x2="260" y2="204" stroke={stroke} strokeWidth="2" />
       <line x1="420" y1="96" x2="420" y2="204" stroke={stroke} strokeWidth="2" />
+
+      <line x1="260" y1="96" x2="338" y2="96" stroke={stroke} strokeWidth="2" />
+      <line x1="260" y1="204" x2="338" y2="204" stroke={stroke} strokeWidth="2" />
+      <line x1="382" y1="96" x2="420" y2="96" stroke={stroke} strokeWidth="2" />
+      <line x1="382" y1="204" x2="420" y2="204" stroke={stroke} strokeWidth="2" />
 
       <path
         d={topPath}

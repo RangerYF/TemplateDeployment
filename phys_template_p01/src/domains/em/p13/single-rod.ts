@@ -23,6 +23,7 @@ const MIN_RESISTIVE_DURATION = 2.4;
 const MIN_SOURCE_DURATION = 2.4;
 const MIN_CAPACITOR_DURATION = 0.0004;
 const MAX_DURATION = 20;
+const MAX_SOURCE_DURATION = 40;
 
 const ANALYSIS_ACCENTS = {
   velocity: '#2563EB',
@@ -44,7 +45,9 @@ export type P13SingleRodParamKey =
   | 'rodResistance'
   | 'externalResistance'
   | 'initialVelocity'
+  | 'initialCapacitorVoltage'
   | 'frictionCoefficient'
+  | 'externalForce'
   | 'sourceVoltage'
   | 'capacitanceMicroFarad';
 
@@ -105,8 +108,8 @@ export const P13_SINGLE_ROD_VARIANT_META: Record<
     modelKey: P13_MODEL_KEYS.singleRodWithSource,
     pageSubtitle:
       '采用固定电源极性约定：电源在静止时驱动顺时针电流，使导体棒先向右受力；随着 BLv 增大，电流逐步减小并在 BLv = ε0 时进入匀速。',
-    currentFormula: 'i = (ε - ε0) / (R + R棒)',
-    currentFormulaLabel: 'i = (ε - ε0) / R总',
+    currentFormula: 'i = (ε0 - ε) / (R + R棒)',
+    currentFormulaLabel: 'i = (ε0 - ε) / R总',
     topologyTitle: '含电源回路',
     terminalHeadline: '教材理想终态：BLv终 = ε0，I终 = 0',
     adoptedConvention:
@@ -118,6 +121,7 @@ export const P13_SINGLE_ROD_VARIANT_META: Record<
       'rodResistance',
       'externalResistance',
       'initialVelocity',
+      'frictionCoefficient',
       'sourceVoltage',
     ],
   },
@@ -143,6 +147,9 @@ export const P13_SINGLE_ROD_VARIANT_META: Record<
       'rodResistance',
       'externalResistance',
       'initialVelocity',
+      'initialCapacitorVoltage',
+      'frictionCoefficient',
+      'externalForce',
       'capacitanceMicroFarad',
     ],
   },
@@ -155,7 +162,9 @@ export const P13_SINGLE_ROD_PARAM_CONFIG = {
   rodResistance: { label: '导体棒电阻 R棒', min: 0.1, max: 10, step: 0.1, unit: 'Ω' },
   externalResistance: { label: '外接电阻 R', min: 0.1, max: 20, step: 0.1, unit: 'Ω' },
   initialVelocity: { label: '初速度 v0', min: 0, max: 20, step: 0.1, unit: 'm/s' },
+  initialCapacitorVoltage: { label: '初始电容电压 Uc0', min: 0, max: 20, step: 0.1, unit: 'V' },
   frictionCoefficient: { label: '摩擦系数 μ', min: 0, max: 0.5, step: 0.01, unit: '' },
+  externalForce: { label: '恒定外力 F外', min: 0, max: 20, step: 0.1, unit: 'N' },
   sourceVoltage: { label: '电源电动势 ε0', min: 0, max: 20, step: 0.1, unit: 'V' },
   capacitanceMicroFarad: { label: '电容 C', min: 1, max: 1000, step: 1, unit: 'μF' },
 } as const;
@@ -175,6 +184,7 @@ export const P13_SINGLE_ROD_DEFAULT_PARAMS_BY_VARIANT: Record<
     initialVelocity: 5,
     frictionCoefficient: 0,
     gravity: 9.8,
+    externalForce: 0,
     sourceVoltage: 0,
     capacitanceMicroFarad: 100,
     initialCapacitorVoltage: 0,
@@ -190,6 +200,7 @@ export const P13_SINGLE_ROD_DEFAULT_PARAMS_BY_VARIANT: Record<
     initialVelocity: 0,
     frictionCoefficient: 0,
     gravity: 9.8,
+    externalForce: 0,
     sourceVoltage: 3,
     capacitanceMicroFarad: 100,
     initialCapacitorVoltage: 0,
@@ -205,6 +216,7 @@ export const P13_SINGLE_ROD_DEFAULT_PARAMS_BY_VARIANT: Record<
     initialVelocity: 5,
     frictionCoefficient: 0,
     gravity: 9.8,
+    externalForce: 0,
     sourceVoltage: 0,
     capacitanceMicroFarad: 100,
     initialCapacitorVoltage: 0,
@@ -272,13 +284,17 @@ function computeTotalResistance(params: P13SingleRodParams): number {
 }
 
 function getSourceContribution(params: P13SingleRodParams): number {
-  return params.variant === 'with-source' ? -params.sourceVoltage : 0;
+  return params.variant === 'with-source' ? params.sourceVoltage : 0;
 }
 
 function getCapacitanceFarad(params: P13SingleRodParams): number {
   return params.variant === 'with-capacitor'
     ? microFaradToFarad(params.capacitanceMicroFarad)
     : 0;
+}
+
+function isCapacitorExternalForceScenario(params: P13SingleRodParams): boolean {
+  return params.variant === 'with-capacitor' && params.externalForce > EPSILON;
 }
 
 function computeTimeConstant(params: P13SingleRodParams): number {
@@ -304,8 +320,18 @@ function buildSingleRodState(base: {
   position: number;
   velocity: number;
   capacitorVoltage: number;
+  accelerationOverride?: number;
+  netForceOverride?: number;
 }): P13SingleRodState {
-  const { params, time, position, velocity, capacitorVoltage } = base;
+  const {
+    params,
+    time,
+    position,
+    velocity,
+    capacitorVoltage,
+    accelerationOverride,
+    netForceOverride,
+  } = base;
   const totalResistance = computeTotalResistance(params);
   const timeConstant = computeTimeConstant(params);
   const dampingRatio = Number.isFinite(timeConstant) && timeConstant > EPSILON
@@ -335,8 +361,13 @@ function buildSingleRodState(base: {
   const frictionForce = Math.abs(velocity) <= EPSILON
     ? 0
     : -Math.sign(velocity) * params.frictionCoefficient * params.mass * params.gravity;
-  const netForce = ampereForce + frictionForce;
-  const acceleration = netForce / params.mass;
+  const externalForce = params.externalForce;
+  const netForce = typeof netForceOverride === 'number'
+    ? netForceOverride
+    : ampereForce + frictionForce + externalForce;
+  const acceleration = typeof accelerationOverride === 'number'
+    ? accelerationOverride
+    : netForce / params.mass;
   const capacitanceFarad = getCapacitanceFarad(params);
 
   return {
@@ -347,6 +378,7 @@ function buildSingleRodState(base: {
     netCircuitVoltage,
     current,
     ampereForce,
+    externalForce,
     frictionForce,
     netForce,
     acceleration,
@@ -371,7 +403,39 @@ function estimateSimulationDuration(params: P13SingleRodParams, timeConstant: nu
   const capacitance = getCapacitanceFarad(params);
   const rcTime = computeTotalResistance(params) * capacitance;
 
+  if (params.variant === 'with-source') {
+    return clamp(
+      Math.max(
+        MIN_SOURCE_DURATION,
+        timeConstant * 8,
+        mechanicalStopEstimate * 1.3,
+      ),
+      MIN_SOURCE_DURATION,
+      MAX_SOURCE_DURATION,
+    );
+  }
+
   if (params.variant === 'with-capacitor') {
+    if (isCapacitorExternalForceScenario(params)) {
+      return clamp(
+        Math.max(3.2, timeConstant * 6, rcTime * 8),
+        3.2,
+        12,
+      );
+    }
+    if (params.frictionCoefficient > EPSILON) {
+      return clamp(
+        Math.max(
+          0.8,
+          timeConstant * 8,
+          rcTime * 8,
+          mechanicalStopEstimate * 1.25,
+        ),
+        0.8,
+        MAX_DURATION,
+      );
+    }
+
     return clamp(
       Math.max(MIN_CAPACITOR_DURATION, timeConstant * 8, rcTime * 8, mechanicalStopEstimate * 1.2),
       MIN_CAPACITOR_DURATION,
@@ -381,11 +445,11 @@ function estimateSimulationDuration(params: P13SingleRodParams, timeConstant: nu
 
   return clamp(
     Math.max(
-      params.variant === 'with-source' ? MIN_SOURCE_DURATION : MIN_RESISTIVE_DURATION,
+      MIN_RESISTIVE_DURATION,
       timeConstant * 4.8,
       mechanicalStopEstimate * 1.3,
     ),
-    params.variant === 'with-source' ? MIN_SOURCE_DURATION : MIN_RESISTIVE_DURATION,
+    MIN_RESISTIVE_DURATION,
     MAX_DURATION,
   );
 }
@@ -397,11 +461,50 @@ function chooseTimeStep(params: P13SingleRodParams, duration: number, timeConsta
   const rcStep = capacitance > EPSILON
     ? (computeTotalResistance(params) * capacitance) / 120
     : DEFAULT_TIME_STEP;
+  if (isCapacitorExternalForceScenario(params)) {
+    const externalForceUiStep = Math.max(
+      duration / 2400,
+      Math.max(rcStep * 8, 1e-4),
+    );
+    return clamp(
+      Math.min(DEFAULT_TIME_STEP, durationStep, externalForceUiStep),
+      1e-4,
+      1 / 30,
+    );
+  }
   return clamp(
     Math.min(DEFAULT_TIME_STEP, durationStep, tauStep, rcStep),
     params.variant === 'with-capacitor' ? 1e-7 : 1 / 240,
     1 / 30,
   );
+}
+
+function resolveIntegrationStep(
+  params: P13SingleRodParams,
+  currentState: P13SingleRodState,
+  time: number,
+  baseStep: number,
+): number {
+  if (params.variant !== 'with-capacitor' || params.frictionCoefficient <= EPSILON) {
+    return baseStep;
+  }
+
+  const capacitance = getCapacitanceFarad(params);
+  const rcTime = computeTotalResistance(params) * capacitance;
+  const fastWindow = Math.max(rcTime * 12, baseStep * 64);
+
+  if (time <= fastWindow) {
+    return baseStep;
+  }
+
+  if (
+    Math.abs(currentState.current) <= 1e-3 &&
+    Math.abs(currentState.netCircuitVoltage) <= 1e-3
+  ) {
+    return 1 / 180;
+  }
+
+  return Math.min(1 / 720, Math.max(baseStep * 64, 1 / 240));
 }
 
 function simulateResistiveAnalytical(
@@ -430,6 +533,70 @@ function simulateResistiveAnalytical(
     );
     if (clampedTime >= duration) break;
   }
+  return samples;
+}
+
+function simulateSourceAnalytical(
+  params: P13SingleRodParams,
+  duration: number,
+  timeStep: number,
+  timeConstant: number,
+): P13SingleRodState[] {
+  const bl = Math.abs(params.magneticField) * params.railSpan;
+  const terminalVelocity = bl > EPSILON ? params.sourceVoltage / bl : 0;
+  const settleTime = timeConstant > EPSILON
+    ? Math.min(duration, timeConstant * 6)
+    : duration;
+  const settledDecay = timeConstant > EPSILON ? Math.exp(-settleTime / timeConstant) : 0;
+  const settledPosition = (terminalVelocity * settleTime) + (
+    (params.initialVelocity - terminalVelocity) *
+    timeConstant *
+    (1 - settledDecay)
+  );
+  const samples: P13SingleRodState[] = [];
+
+  for (let time = 0; time <= duration + timeStep * 0.5; time += timeStep) {
+    const clampedTime = Math.min(time, duration);
+    const beforeSettle = clampedTime <= settleTime + EPSILON;
+    const decay = timeConstant > EPSILON ? Math.exp(-clampedTime / timeConstant) : 0;
+    const velocity = beforeSettle
+      ? terminalVelocity + ((params.initialVelocity - terminalVelocity) * decay)
+      : terminalVelocity;
+    const position = beforeSettle
+      ? (terminalVelocity * clampedTime) + (
+        (params.initialVelocity - terminalVelocity) *
+        timeConstant *
+        (1 - decay)
+      )
+      : settledPosition + (terminalVelocity * (clampedTime - settleTime));
+    samples.push(
+      buildSingleRodState({
+        params,
+        time: clampedTime,
+        position,
+        velocity,
+        capacitorVoltage: 0,
+      }),
+    );
+    if (clampedTime >= duration) break;
+  }
+
+  if (samples.length > 0) {
+    const lastIndex = samples.length - 1;
+    const lastTime = samples[lastIndex]!.time;
+    if (duration - lastTime > EPSILON) {
+      samples.push(
+        buildSingleRodState({
+          params,
+          time: duration,
+          position: settledPosition + (terminalVelocity * Math.max(0, duration - settleTime)),
+          velocity: terminalVelocity,
+          capacitorVoltage: 0,
+        }),
+      );
+    }
+  }
+
   return samples;
 }
 
@@ -469,8 +636,12 @@ function simulateNumerical(
       velocity,
       capacitorVoltage,
     });
+    const integrationStep = Math.min(
+      resolveIntegrationStep(params, currentState, time, timeStep),
+      duration - time,
+    );
 
-    let nextVelocity = velocity + currentState.acceleration * timeStep;
+    let nextVelocity = velocity + currentState.acceleration * integrationStep;
     if (Math.abs(nextVelocity) <= 1e-5) {
       nextVelocity = 0;
     }
@@ -478,12 +649,12 @@ function simulateNumerical(
       nextVelocity = 0;
     }
 
-    const nextPosition = position + ((velocity + nextVelocity) * 0.5 * timeStep);
+    const nextPosition = position + ((velocity + nextVelocity) * 0.5 * integrationStep);
     const nextCapacitorVoltage = capacitanceFarad > EPSILON
-      ? capacitorVoltage + ((currentState.current / capacitanceFarad) * timeStep)
+      ? capacitorVoltage + ((currentState.current / capacitanceFarad) * integrationStep)
       : 0;
 
-    time = Math.min(duration, time + timeStep);
+    time = Math.min(duration, time + integrationStep);
     position = nextPosition;
     velocity = nextVelocity;
     capacitorVoltage = nextCapacitorVoltage;
@@ -512,11 +683,74 @@ function simulateNumerical(
   return { samples, stopTime };
 }
 
+function simulateCapacitorExternalForceSimplified(
+  params: P13SingleRodParams,
+  duration: number,
+  timeStep: number,
+): {
+  samples: P13SingleRodState[];
+  stopTime: number | null;
+} {
+  const acceleration = params.mass > EPSILON ? params.externalForce / params.mass : 0;
+  const totalResistance = computeTotalResistance(params);
+  const capacitanceFarad = getCapacitanceFarad(params);
+  const signedFluxDensity = resolveSignedFluxDensity(
+    params.magneticField,
+    params.magneticFieldDirection,
+  );
+  const emfSlope = computeMotionalEmf({
+    signedFluxDensity,
+    effectiveCutLength: params.railSpan,
+    velocity: acceleration,
+  });
+  const rcTime = totalResistance * capacitanceFarad;
+  const baseTimes: number[] = [];
+  for (let time = 0; time <= duration + (timeStep * 0.5); time += timeStep) {
+    baseTimes.push(Math.min(time, duration));
+  }
+
+  if (rcTime > EPSILON) {
+    const transientEnd = Math.min(duration, Math.max(rcTime * 10, timeStep * 6));
+    const transientStep = Math.max(rcTime / 24, 1e-5);
+    for (let time = 0; time <= transientEnd + (transientStep * 0.5); time += transientStep) {
+      baseTimes.push(Math.min(time, duration));
+    }
+  }
+
+  const sortedTimes = Array.from(new Set(
+    baseTimes.map((time) => Number(time.toFixed(8))),
+  )).sort((left, right) => left - right);
+
+  const samples = sortedTimes.map((time) => {
+    const velocity = acceleration * time;
+    const position = 0.5 * acceleration * time * time;
+    const capacitorVoltage = rcTime > EPSILON
+      ? (
+        (emfSlope * (time - rcTime)) +
+        ((params.initialCapacitorVoltage + (emfSlope * rcTime)) * Math.exp(-time / rcTime))
+      )
+      : (emfSlope * time);
+    return buildSingleRodState({
+      params,
+      time,
+      position,
+      velocity,
+      capacitorVoltage,
+      accelerationOverride: acceleration,
+      netForceOverride: params.externalForce,
+    });
+  });
+
+  return { samples, stopTime: null };
+}
+
 function computeTheoreticalSummary(params: P13SingleRodParams): Pick<
   P13SingleRodSimulationResult['summary'],
   | 'theoreticalTerminalVelocity'
   | 'theoreticalTerminalCurrent'
   | 'theoreticalTerminalCapacitorVoltage'
+  | 'theoreticalAcceleration'
+  | 'simplifiedMode'
   | 'terminalExplanation'
   | 'adoptedConvention'
 > {
@@ -525,11 +759,39 @@ function computeTheoreticalSummary(params: P13SingleRodParams): Pick<
   const bl = bAbs * params.railSpan;
 
   if (params.variant === 'with-source') {
+    if (params.frictionCoefficient > EPSILON) {
+      const frictionCurrentMagnitude = bl > EPSILON
+        ? (params.frictionCoefficient * params.mass * params.gravity) / bl
+        : 0;
+      const terminalCurrent = -frictionCurrentMagnitude;
+      const terminalVelocity = bl > EPSILON
+        ? Math.max(
+            0,
+            (
+              params.sourceVoltage -
+              (computeTotalResistance(params) * frictionCurrentMagnitude)
+            ) / bl,
+          )
+        : 0;
+      return {
+        theoreticalTerminalVelocity: terminalVelocity,
+        theoreticalTerminalCurrent: terminalCurrent,
+        theoreticalTerminalCapacitorVoltage: 0,
+        theoreticalAcceleration: null,
+        simplifiedMode: false,
+        terminalExplanation:
+          '含电源且存在摩擦时，终态不再要求电流为 0，而是由安培力平衡摩擦力：电源维持非零电流，导体棒以更低的终态速度匀速前进；若摩擦很小，则终态退化回 BLv终 = ε0。',
+        adoptedConvention: meta.adoptedConvention,
+      };
+    }
+
     const terminalVelocity = bl > EPSILON ? params.sourceVoltage / bl : 0;
     return {
       theoreticalTerminalVelocity: terminalVelocity,
       theoreticalTerminalCurrent: 0,
       theoreticalTerminalCapacitorVoltage: 0,
+      theoreticalAcceleration: null,
+      simplifiedMode: false,
       terminalExplanation:
         '固定极性下，电源先驱动顺时针电流并让导体棒向右加速；当 BLv 增大到与 ε0 相等时，回路总电压差为 0，电流与安培力都消失，导体棒转入匀速。',
       adoptedConvention: meta.adoptedConvention,
@@ -537,18 +799,53 @@ function computeTheoreticalSummary(params: P13SingleRodParams): Pick<
   }
 
   if (params.variant === 'with-capacitor') {
+    if (isCapacitorExternalForceScenario(params)) {
+      const acceleration = params.mass > EPSILON ? params.externalForce / params.mass : 0;
+      const capacitance = getCapacitanceFarad(params);
+      const currentPlateau = capacitance * bl * acceleration;
+      return {
+        theoreticalTerminalVelocity: 0,
+        theoreticalTerminalCurrent: currentPlateau,
+        theoreticalTerminalCapacitorVoltage: 0,
+        theoreticalAcceleration: acceleration,
+        simplifiedMode: true,
+        terminalExplanation:
+          '本情形按课堂简化处理：导体棒始终受恒定外力并近似做匀加速运动，电磁感应只用来展示电容电压与回路电流如何建立，不把安培力再反作用回速度。因此长期看电流会趋向稳定值，U电容 与 BLv 始终保持固定滞后差。',
+        adoptedConvention:
+          `${meta.adoptedConvention} 本情形额外采用教学简化：棒受恒定外力 F外，机械侧直接取 a = F外 / m；回路仍按 i = (BLv - U电容) / (R + R棒)、dU电容/dt = i / C 演示充电过程。`,
+      };
+    }
+    if (params.frictionCoefficient > EPSILON) {
+      return {
+        theoreticalTerminalVelocity: 0,
+        theoreticalTerminalCurrent: 0,
+        theoreticalTerminalCapacitorVoltage: 0,
+        theoreticalAcceleration: null,
+        simplifiedMode: false,
+        terminalExplanation:
+          '含电容且存在摩擦时，电容会先被动生电动势充电，随后电流逐步减弱；摩擦继续耗散剩余机械能，系统最终回到 v = 0、i = 0，电容电压也随之回落到 0。',
+        adoptedConvention: meta.adoptedConvention,
+      };
+    }
+
     const capacitance = getCapacitanceFarad(params);
     const denominator = params.mass + (capacitance * bl * bl);
+    const conservedMotionCharge = (
+      (params.mass * params.initialVelocity) +
+      (capacitance * bl * params.initialCapacitorVoltage)
+    );
     const terminalVelocity = denominator > EPSILON
-      ? (params.mass * params.initialVelocity) / denominator
+      ? conservedMotionCharge / denominator
       : 0;
     const terminalCapacitorVoltage = bl * terminalVelocity;
     return {
       theoreticalTerminalVelocity: terminalVelocity,
       theoreticalTerminalCurrent: 0,
       theoreticalTerminalCapacitorVoltage: terminalCapacitorVoltage,
+      theoreticalAcceleration: null,
+      simplifiedMode: false,
       terminalExplanation:
-        '电容起初被动生电动势充电，U电容 逐渐建立并抵消回路中的电压差；终态满足 i = 0，因此 U电容 = BLv终。无摩擦时剩余速度转为匀速保留。',
+        '无摩擦时，初始机械能或初始电容储能都会在暂态内相互转化；当回路最终满足 i = 0 时，必有 U电容 = BLv终，因此放电式也会留下非零终态速度。',
       adoptedConvention: meta.adoptedConvention,
     };
   }
@@ -557,6 +854,8 @@ function computeTheoreticalSummary(params: P13SingleRodParams): Pick<
     theoreticalTerminalVelocity: 0,
     theoreticalTerminalCurrent: 0,
     theoreticalTerminalCapacitorVoltage: 0,
+    theoreticalAcceleration: null,
+    simplifiedMode: false,
     terminalExplanation:
       params.frictionCoefficient <= EPSILON
         ? '纯电阻回路里没有外加电源维持运动，动生电流与安培力只会不断耗散机械能，所以速度和电流一起衰减到 0。'
@@ -610,6 +909,11 @@ export function normalizeSingleRodParams(
       P13_SINGLE_ROD_PARAM_CONFIG.frictionCoefficient.max,
     ),
     gravity: Math.max(0, readFiniteNumber(input?.gravity, fallback.gravity)),
+    externalForce: clamp(
+      readFiniteNumber(input?.externalForce, fallback.externalForce),
+      P13_SINGLE_ROD_PARAM_CONFIG.externalForce.min,
+      P13_SINGLE_ROD_PARAM_CONFIG.externalForce.max,
+    ),
     sourceVoltage: clamp(
       readFiniteNumber(input?.sourceVoltage, fallback.sourceVoltage),
       P13_SINGLE_ROD_PARAM_CONFIG.sourceVoltage.min,
@@ -636,10 +940,19 @@ export function simulateSingleRodModel(
   const duration = estimateSimulationDuration(params, timeConstant);
   const timeStep = chooseTimeStep(params, duration, timeConstant);
   const useAnalytical =
-    variant === 'resistive' && params.frictionCoefficient <= EPSILON;
-  const numericalRun = useAnalytical ? null : simulateNumerical(params, duration, timeStep);
+    (variant === 'resistive' && params.frictionCoefficient <= EPSILON) ||
+    (variant === 'with-source' && params.frictionCoefficient <= EPSILON);
+  const numericalRun = useAnalytical
+    ? null
+    : isCapacitorExternalForceScenario(params)
+      ? simulateCapacitorExternalForceSimplified(params, duration, timeStep)
+      : simulateNumerical(params, duration, timeStep);
   const samples = useAnalytical
-    ? simulateResistiveAnalytical(params, duration, timeStep, timeConstant)
+    ? (
+      variant === 'with-source'
+        ? simulateSourceAnalytical(params, duration, timeStep, timeConstant)
+        : simulateResistiveAnalytical(params, duration, timeStep, timeConstant)
+    )
     : (numericalRun?.samples ?? []);
   const finalSample = samples[samples.length - 1];
   const firstSample = samples[0];
@@ -666,8 +979,10 @@ export function simulateSingleRodModel(
       theoreticalTerminalVelocity: theoretical.theoreticalTerminalVelocity,
       theoreticalTerminalCurrent: theoretical.theoreticalTerminalCurrent,
       theoreticalTerminalCapacitorVoltage: theoretical.theoreticalTerminalCapacitorVoltage,
+      theoreticalAcceleration: theoretical.theoreticalAcceleration,
       asymptoticDisplacement,
       stopTime: useAnalytical ? null : numericalRun?.stopTime ?? null,
+      simplifiedMode: theoretical.simplifiedMode,
       terminalExplanation: theoretical.terminalExplanation,
       adoptedConvention: theoretical.adoptedConvention,
     },
@@ -742,14 +1057,19 @@ export function buildSingleRodAnalysisSteps(
     ? P13_HORIZONTAL_DIRECTION_LABELS[state.ampereForceDirection]
     : '无明确方向';
   const formulaMeta = getSingleRodVariantMeta(result.variant);
+  const capacitorExternalForceMode = isCapacitorExternalForceScenario(result.params);
 
   const currentDescription =
     result.variant === 'with-source'
       ? energized
-        ? `固定电源极性下，回路总驱动电压为 ε - ε0 = ${state.netCircuitVoltage.toFixed(3)} V，所以 ${formulaMeta.currentFormula}。当前电流沿${currentLabel}方向闭合。`
+        ? `固定电源极性下，回路总驱动电压为 ε0 - ε = ${state.netCircuitVoltage.toFixed(3)} V，所以 ${formulaMeta.currentFormula}。当前电流沿${currentLabel}方向闭合。`
         : '当 BLv 恰好增大到与 ε0 相等时，回路电压差为 0，电流随之减到 0。'
       : result.variant === 'with-capacitor'
-        ? energized
+        ? capacitorExternalForceMode
+          ? energized
+            ? `本情形按教学简化，机械侧直接取 a = F外 / m，不把安培力再反作用回速度。当前仍按 ${formulaMeta.currentFormula} 计算回路电流，所以 i = ${state.current.toFixed(3)} A，U电容 = ${state.capacitorVoltage.toFixed(3)} V。`
+            : '本情形按教学简化处理；当回路初始电压差较小或短时刻内接近平衡时，电流会暂时接近 0，但后续仍会随着 BLv 继续建立。'
+          : energized
           ? `电容当前电压 U电容 = ${state.capacitorVoltage.toFixed(3)} V，会抵消部分动生电动势，所以 ${formulaMeta.currentFormula}。当前电流沿${currentLabel}方向闭合。`
           : '当 U电容 增大到与 BLv 相等时，回路电压差为 0，所以电流衰减到 0。'
         : energized
@@ -759,12 +1079,20 @@ export function buildSingleRodAnalysisSteps(
   const forceDescription =
     result.variant === 'with-source'
       ? energized
-        ? `当前安培力${forceLabel}。若 BLv < ε0，则电源占优并继续推动导体棒；若 BLv > ε0，则动生电动势占优并把导体棒制动回终态速度。`
-        : '当电流减到 0 时，安培力也同时归零，导体棒保持此刻速度继续匀速运动。'
+        ? `当前安培力${forceLabel}。若 BLv < ε0，则电源占优并继续推动导体棒；若 BLv > ε0，则动生电动势占优并把导体棒制动回终态速度。${result.params.frictionCoefficient > EPSILON ? ` 同时还要扣除摩擦力 f = ${Math.abs(state.frictionForce).toFixed(3)} N。` : ''}`.trim()
+        : result.params.frictionCoefficient > EPSILON
+          ? '当电流减小后，安培力也会同步变弱；若仍有滑动，摩擦力会继续把导体棒拖向更低速度。'
+          : '当电流减到 0 时，安培力也同时归零，导体棒保持此刻速度继续匀速运动。'
       : result.variant === 'with-capacitor'
-        ? energized
-          ? `当前安培力${forceLabel}。随着电容继续充电，回路电流与安培力都会一起减弱，最终满足 i = 0。`
-          : '当前没有稳定电流，所以安培力也减到 0；终态只剩已经建立好的 U电容 与剩余匀速。'
+        ? capacitorExternalForceMode
+          ? energized
+            ? `当前安培力${forceLabel}，但这一支按教学简化不把安培力再反作用回速度；机械侧直接由恒外力 F外 = ${state.externalForce.toFixed(3)} N 给出 a = ${state.acceleration.toFixed(3)} m/s²，电磁侧只负责展示电容充电和电流建立。`
+            : '当前没有明显电流，安培力也暂时接近 0；但导体棒仍按恒外力驱动保持匀加速教学口径。'
+          : energized
+          ? `当前安培力${forceLabel}。随着电容继续充电，回路电流与安培力都会一起减弱，最终满足 i = 0。${result.params.frictionCoefficient > EPSILON ? ` 若此时仍有滑动，摩擦力还会继续耗散剩余动能。` : ''}`.trim()
+          : result.params.frictionCoefficient > EPSILON
+            ? '当前没有稳定电流，安培力也减到 0；若导体棒还在滑动，后续主要由摩擦力继续把系统拖向静止。'
+            : '当前没有稳定电流，所以安培力也减到 0；终态只剩已经建立好的 U电容 与剩余匀速。'
         : energized
           ? `导体棒内电流与磁场作用产生安培力，F安 = BIL。当前安培力${forceLabel}，始终阻碍导体棒继续原来的运动。`
           : '没有稳定电流时，安培力也趋近于 0；这正对应终态下速度和电流一起衰减。';
@@ -774,7 +1102,11 @@ export function buildSingleRodAnalysisSteps(
       key: 'velocity',
       title: '速度方向',
       directionLabel: motionLabel,
-      description: moving
+      description: capacitorExternalForceMode
+        ? moving
+          ? `本情形按教学简化，导体棒当前沿导轨${motionLabel}做匀加速运动，速度由恒外力直接给定。`
+          : '本情形从静止开始，随后由恒外力驱动导体棒做匀加速运动。'
+        : moving
         ? `导体棒当前沿导轨${motionLabel}运动，切割磁感线的方向由速度直接决定。`
         : '导体棒此刻速度约为 0，已经接近静止，后续感应效应也会同步消失。',
       accentColor: ANALYSIS_ACCENTS.velocity,
@@ -783,7 +1115,11 @@ export function buildSingleRodAnalysisSteps(
       key: 'emf',
       title: 'EMF 方向',
       directionLabel: emfLabel,
-      description: moving
+      description: capacitorExternalForceMode
+        ? moving
+          ? `虽然机械侧按教学简化处理，但电路侧仍按 ε = BLv 建立动生电动势。当前棒速为 ${state.velocity.toFixed(3)} m/s，因此 ε 的方向仍为${emfLabel}。`
+          : '速度还接近 0，所以 ε = BLv 也接近 0。'
+        : moving
         ? `磁场固定垂直纸面向内，按右手定则，棒内正电荷被推向${emfLabel}，因此动生电动势仍满足 ε = BLv。`
         : '因为 ε = BLv，而此刻 v≈0，所以动生电动势本身趋近于 0，不再有稳定方向。',
       accentColor: ANALYSIS_ACCENTS.emf,

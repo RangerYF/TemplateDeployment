@@ -33,22 +33,23 @@ const ARROW_LENGTH = 30;
 
 // ─── 场线密度参数 ───
 /** 最少/最多场线条数 */
-const MIN_LINES = 3;
-const MAX_LINES = 24;
+const MIN_LINES = 4;
+const MAX_LINES = 32;
 /**
  * E → 场线条数映射：对数缩放，使低场强区间也有明显变化
- * E=50 → 3条, E=100 → 5条, E=200 → 8条, E=500 → 14条, E=1000 → 18条
+ * 并整体上调基础条数，让疏密变化在课堂演示中更敏感。
+ * E=50 → 5条, E=100 → 7条, E=200 → 10条, E=500 → 16条, E=1000 → 21条
  */
 function eToLineCount(e: number): number {
   if (e <= 0) return MIN_LINES;
-  // log 映射：lineCount = 4 * ln(E/20)，clamp 到 [MIN, MAX]
-  const raw = 4 * Math.log(e / 20);
+  // log 映射：lineCount = 5 * ln(E/20) + 1，clamp 到 [MIN, MAX]
+  const raw = (5 * Math.log(e / 20)) + 1;
   return Math.max(MIN_LINES, Math.min(MAX_LINES, Math.round(raw)));
 }
 /** 中间直线区域占板长比例 */
 const INNER_RATIO = 0.65;
-/** 边缘弯曲区域每侧条数 */
-const EDGE_LINES_PER_SIDE = 3;
+/** 边缘弯曲区域每侧基准条数 */
+const EDGE_LINES_PER_SIDE = 4;
 /** 场线上箭头间距（像素） */
 const LINE_ARROW_INTERVAL = 80;
 /** 场线箭头大小 */
@@ -59,24 +60,38 @@ const MIN_VISIBLE_EQUIPOTENTIAL_VOLTAGE = 0.5;
 function densityFactor(density: FieldLineDensity): number {
   switch (density) {
     case 'sparse':
-      return 0.7;
+      return 0.9;
     case 'dense':
-      return 1.4;
+      return 1.7;
     case 'standard':
     default:
-      return 1;
+      return 1.25;
   }
 }
 
 function equipotentialStep(density: FieldLineDensity): number {
   switch (density) {
     case 'sparse':
-      return 30;
+      return 24;
     case 'dense':
-      return 12;
+      return 10;
     case 'standard':
     default:
-      return 20;
+      return 16;
+  }
+}
+
+function edgeLineCount(lineCount: number, density: FieldLineDensity): number {
+  const base = Math.max(2, Math.round(lineCount * 0.36));
+
+  switch (density) {
+    case 'sparse':
+      return Math.min(EDGE_LINES_PER_SIDE, base);
+    case 'dense':
+      return Math.min(EDGE_LINES_PER_SIDE + 2, base + 1);
+    case 'standard':
+    default:
+      return Math.min(EDGE_LINES_PER_SIDE + 1, base);
   }
 }
 
@@ -248,7 +263,7 @@ function formatFieldValue(value: number): string {
  * 绘制平行板电容器电场线
  *
  * - 中间区域：等间距平行直线 + 方向箭头，线数随 E 变化
- * - 边缘区域：每侧 3 条弯曲场线（贝塞尔曲线），表现边缘效应
+ * - 边缘区域：两侧弯曲场线随密度档位联动增加，表现边缘效应
  */
 function drawCapacitorFieldLines(
   c: CanvasRenderingContext2D,
@@ -269,9 +284,9 @@ function drawCapacitorFieldLines(
   const isVertical = Math.abs(direction.y) > Math.abs(direction.x);
 
   if (isVertical) {
-    drawVerticalFieldLines(c, topLeft, w, h, direction.y < 0, lineCount, showEdgeFieldLines);
+    drawVerticalFieldLines(c, topLeft, w, h, direction.y < 0, lineCount, density, showEdgeFieldLines);
   } else {
-    drawHorizontalFieldLines(c, topLeft, w, h, direction.x > 0, lineCount, showEdgeFieldLines);
+    drawHorizontalFieldLines(c, topLeft, w, h, direction.x > 0, lineCount, density, showEdgeFieldLines);
   }
 }
 
@@ -423,6 +438,7 @@ function drawVerticalFieldLines(
   h: number,
   downward: boolean,
   lineCount: number,
+  density: FieldLineDensity,
   showEdgeFieldLines: boolean,
 ): void {
   const plateMargin = w * 0.05;
@@ -460,7 +476,7 @@ function drawVerticalFieldLines(
 
   // ── 边缘弯曲场线 ──
   if (showEdgeFieldLines) {
-    const edgeLines = Math.min(EDGE_LINES_PER_SIDE, Math.max(1, Math.round(lineCount * 0.3)));
+    const edgeLines = edgeLineCount(lineCount, density);
     drawEdgeLinesVertical(c, topLeft, w, h, downward, edgeLines, plateMargin);
   }
 }
@@ -475,6 +491,7 @@ function drawHorizontalFieldLines(
   h: number,
   rightward: boolean,
   lineCount: number,
+  density: FieldLineDensity,
   showEdgeFieldLines: boolean,
 ): void {
   const plateMargin = h * 0.05;
@@ -507,7 +524,7 @@ function drawHorizontalFieldLines(
   }
 
   if (showEdgeFieldLines) {
-    const edgeLines = Math.min(EDGE_LINES_PER_SIDE, Math.max(1, Math.round(lineCount * 0.3)));
+    const edgeLines = edgeLineCount(lineCount, density);
     drawEdgeLinesHorizontal(c, topLeft, w, h, rightward, edgeLines, plateMargin);
   }
 }

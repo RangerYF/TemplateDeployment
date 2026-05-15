@@ -121,12 +121,7 @@ function ParamRow({
         min={field.min}
         max={field.max}
         step={field.step}
-        onChange={(e) => {
-          const v = parseFloat(e.target.value);
-          if (!isNaN(v) && v >= field.min && v <= field.max) {
-            onInputCommit(v);
-          }
-        }}
+        onChange={(e) => onInputCommit(parseFloat(e.target.value))}
         className="w-14 h-6 text-xs text-center px-1 py-0 flex-shrink-0"
         style={{ borderRadius: 4 }}
       />
@@ -442,12 +437,7 @@ export function ParameterPanel() {
                     min={field.min}
                     max={field.max}
                     step={field.step}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v) && v >= field.min && v <= field.max) {
-                        inputCommit(field.key, v);
-                      }
-                    }}
+                    onChange={(e) => inputCommit(field.key, parseFloat(e.target.value))}
                     className="w-full h-6 text-xs text-center px-1 py-0"
                     style={{ borderRadius: 4 }}
                   />

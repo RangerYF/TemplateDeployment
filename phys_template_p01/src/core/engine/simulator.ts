@@ -29,6 +29,7 @@ const SAMPLE_RATE = 60; // 解析解预计算采样率
 const TWO_CHARGE_DISTANCE_MIN_CM = 2;
 const TWO_CHARGE_DISTANCE_MAX_CM = 30;
 const TWO_CHARGE_DISTANCE_DEFAULT_CM = 10;
+const TWO_CHARGE_DEFAULT_ABS_CHARGE = 1;
 const MIN_ELECTRIC_SCENE_DURATION = 0.8;
 const MAX_ELECTRIC_SCENE_DURATION = 8;
 const COLLISION_STOP_BUFFER = 0.12;
@@ -65,6 +66,12 @@ function clampDistanceCm(value: unknown): number {
     TWO_CHARGE_DISTANCE_MIN_CM,
     Math.min(TWO_CHARGE_DISTANCE_MAX_CM, Math.round(num)),
   );
+}
+
+function clampDipoleAbsCharge(value: unknown): number {
+  const num = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(num)) return TWO_CHARGE_DEFAULT_ABS_CHARGE;
+  return Math.round(Math.max(0.5, Math.min(5, num)) * 10) / 10;
 }
 
 function isClose(a: number, b: number, epsilon: number = 1e-6): boolean {
@@ -405,11 +412,48 @@ export function createSimulator(): ISimulator {
       scene!.paramValues.distanceCm = distanceCm;
     };
 
+    const syncDipoleAbsCharge = () => {
+      const q1 = Math.abs(clampCharge(scene!.paramValues.chargeQ1, 1));
+      const q2 = Math.abs(clampCharge(scene!.paramValues.chargeQ2, -1));
+      const magnitudes = [q1, q2].filter((m) => m > 0);
+      const base = magnitudes.length > 0 ? Math.min(...magnitudes) : TWO_CHARGE_DEFAULT_ABS_CHARGE;
+      scene!.paramValues.dipoleChargeAbs = clampDipoleAbsCharge(base);
+    };
+
     const syncPreset = () => {
       const q1 = clampCharge(scene!.paramValues.chargeQ1, 1);
       const q2 = clampCharge(scene!.paramValues.chargeQ2, -1);
       scene!.paramValues.chargePreset = classifyTwoChargePreset(q1, q2);
     };
+
+    const applyDipoleReset = () => {
+      const absCharge = clampDipoleAbsCharge(scene!.paramValues.dipoleChargeAbs);
+      applyParamValue('chargePreset', 'dipole');
+      applyParamValue('chargeQ1', absCharge);
+      applyParamValue('chargeQ2', -absCharge);
+      applyParamValue('distanceCm', TWO_CHARGE_DISTANCE_DEFAULT_CM);
+      applyDistance();
+      syncPreset();
+      syncDipoleAbsCharge();
+    };
+
+    if (changedParamKey === 'resetDipoleView') {
+      applyDipoleReset();
+      return;
+    }
+
+    if (changedParamKey === 'dipoleChargeAbs') {
+      scene.paramValues.dipoleChargeAbs = clampDipoleAbsCharge(scene.paramValues.dipoleChargeAbs);
+      if (String(scene.paramValues.chargePreset) === 'dipole') {
+        const absCharge = clampDipoleAbsCharge(scene.paramValues.dipoleChargeAbs);
+        applyParamValue('chargeQ1', absCharge);
+        applyParamValue('chargeQ2', -absCharge);
+        applyDistance();
+      }
+      syncPreset();
+      syncDipoleAbsCharge();
+      return;
+    }
 
     if (changedParamKey === 'chargePreset') {
       const currentQ1 = clampCharge(scene.paramValues.chargeQ1, 1);
@@ -443,29 +487,34 @@ export function createSimulator(): ISimulator {
 
       applyDistance();
       syncPreset();
+      syncDipoleAbsCharge();
       return;
     }
 
     if (changedParamKey === 'chargeQ1') {
       applyParamValue('chargeQ1', clampCharge(scene.paramValues.chargeQ1, 1));
       syncPreset();
+      syncDipoleAbsCharge();
       return;
     }
 
     if (changedParamKey === 'chargeQ2') {
       applyParamValue('chargeQ2', clampCharge(scene.paramValues.chargeQ2, -1));
       syncPreset();
+      syncDipoleAbsCharge();
       return;
     }
 
     if (changedParamKey === 'distanceCm') {
       scene.paramValues.distanceCm = clampDistanceCm(scene.paramValues.distanceCm);
       applyDistance();
+      syncDipoleAbsCharge();
       return;
     }
 
     applyDistance();
     syncPreset();
+    syncDipoleAbsCharge();
   }
 
   function updatePointChargePosition(entityId: string, position: Vec2): void {
@@ -1011,6 +1060,13 @@ export function createSimulator(): ISimulator {
 
     updateParam(paramKey: string, value: ParamValues[string]): void {
       if (!scene) return;
+
+      if (paramKey === 'resetDipoleView') {
+        applyTwoChargeFieldEffects(paramKey);
+        applyP08SceneEffects();
+        resetAfterSceneMutation();
+        return;
+      }
 
       applyParamValue(paramKey, value);
       applyTwoChargeFieldEffects(paramKey);

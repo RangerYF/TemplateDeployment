@@ -11,6 +11,10 @@ export type StreamChannel =
   | 'bath-main-right'
   | 'bath-center-left'
   | 'bath-center-right'
+  | 'bath-center-to-left'
+  | 'bath-center-to-right'
+  | 'bath-left-to-center'
+  | 'bath-right-to-center'
   | 'bath-near-left'
   | 'bath-near-right'
   | 'bridge-left-to-right'
@@ -36,6 +40,9 @@ export interface ParticleStream {
   count: number;
   note: string;
   emphasis?: boolean;
+  movementMode?: 'directed' | 'diffusion';
+  diffusionBias?: 'directional' | 'strong-directional';
+  fixedLabel?: boolean;
 }
 
 export interface Keyframe {

@@ -105,6 +105,7 @@ const AXIS_SAMPLE_FACTORS = [-1.7, -1.25, -0.85, -0.45, 0, 0.45, 0.85, 1.25, 1.7
 
 const PAPER_BACKGROUND = '#f6fbff';
 const PAPER_PANEL = 'rgba(255, 255, 255, 0.92)';
+const PAPER_SURFACE = 'rgba(255, 255, 255, 0.94)';
 const PAPER_BORDER = 'rgba(117, 148, 177, 0.24)';
 const PAPER_MUTED = '#69829a';
 const PAPER_TEXT = '#20394f';
@@ -154,19 +155,42 @@ export function LoopBFieldExperimentalStage({
   const [labelsDimmed, setLabelsDimmed] = useState(false);
   const [activeCompassId, setActiveCompassId] = useState<string | null>(null);
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null);
+  const [zoomScale, setZoomScale] = useState(1.06);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{
     mode: 'none' | 'compass' | 'orbit';
     compassId: string | null;
     suppressClick: boolean;
     moved: boolean;
+    panActive: boolean;
+    panStartX: number;
+    panStartY: number;
+    panOriginX: number;
+    panOriginY: number;
   }>({
     mode: 'none',
     compassId: null,
     suppressClick: false,
     moved: false,
+    panActive: false,
+    panStartX: 0,
+    panStartY: 0,
+    panOriginX: 0,
+    panOriginY: 0,
   });
 
-  const geometry = useMemo(() => getLoopLabStageGeometry(animatedRadius), [animatedRadius]);
+  useEffect(() => {
+    setZoomScale(1.06);
+    setPanOffset({ x: 0, y: 0 });
+  }, [cameraResetVersion, viewMode]);
+
+  const geometry = useMemo(() => {
+    const base = getLoopLabStageGeometry(animatedRadius);
+    return {
+      ...base,
+      scale: base.scale * zoomScale,
+    };
+  }, [animatedRadius, zoomScale]);
   const fieldPlaneAngles = useMemo(
     () => getFieldPlaneAngles(displayMode, viewMode),
     [displayMode, viewMode],
@@ -317,6 +341,15 @@ export function LoopBFieldExperimentalStage({
 
   const handleStageMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
+    if (event.shiftKey) {
+      event.preventDefault();
+      dragRef.current.panActive = true;
+      dragRef.current.panStartX = event.clientX;
+      dragRef.current.panStartY = event.clientY;
+      dragRef.current.panOriginX = panOffset.x;
+      dragRef.current.panOriginY = panOffset.y;
+      return;
+    }
     if (viewMode !== 'isometric') return;
     event.preventDefault();
     dragRef.current.mode = 'orbit';
@@ -328,6 +361,17 @@ export function LoopBFieldExperimentalStage({
   };
 
   const handleStageMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (dragRef.current.panActive) {
+      event.preventDefault();
+      const dx = event.clientX - dragRef.current.panStartX;
+      const dy = event.clientY - dragRef.current.panStartY;
+      setPanOffset({
+        x: clamp(dragRef.current.panOriginX + dx, -240, 240),
+        y: clamp(dragRef.current.panOriginY + dy, -180, 180),
+      });
+      return;
+    }
+
     if (dragRef.current.mode === 'orbit') {
       event.preventDefault();
       dragRef.current.moved = true;
@@ -363,6 +407,7 @@ export function LoopBFieldExperimentalStage({
   };
 
   const stopInteraction = (clearHover = false) => {
+    dragRef.current.panActive = false;
     if (dragRef.current.mode === 'orbit') {
       endOrbit();
     }
@@ -396,6 +441,19 @@ export function LoopBFieldExperimentalStage({
     setActiveCompassId(id);
   };
 
+  const zoomIn = () => setZoomScale((previous) => clamp(previous + 0.12, 0.84, 1.8));
+  const zoomOut = () => setZoomScale((previous) => clamp(previous - 0.12, 0.84, 1.8));
+  const resetZoom = () => {
+    setZoomScale(1.06);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const handleStageWheel = (event: ReactMouseEvent<HTMLDivElement> | WheelEvent) => {
+    if ('preventDefault' in event) event.preventDefault();
+    const deltaY = 'deltaY' in event ? event.deltaY : 0;
+    setZoomScale((previous) => clamp(previous + (deltaY < 0 ? 0.06 : -0.06), 0.84, 1.8));
+  };
+
   return (
     <div
       ref={stageRef}
@@ -403,7 +461,7 @@ export function LoopBFieldExperimentalStage({
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: 680,
+        minHeight: 520,
         overflow: 'hidden',
         borderRadius: 12,
         border: `1px solid ${PAPER_BORDER}`,
@@ -420,222 +478,225 @@ export function LoopBFieldExperimentalStage({
       onMouseUp={() => stopInteraction()}
       onMouseLeave={() => stopInteraction(true)}
       onClick={handleStageClick}
+      onWheel={(event) => handleStageWheel(event.nativeEvent)}
     >
       <svg
         viewBox={`0 0 ${LOOP_LAB_STAGE_WIDTH} ${LOOP_LAB_STAGE_HEIGHT}`}
         style={{ width: '100%', height: '100%', display: 'block' }}
       >
-        <rect x="0" y="0" width={LOOP_LAB_STAGE_WIDTH} height={LOOP_LAB_STAGE_HEIGHT} fill={PAPER_BACKGROUND} />
+        <g transform={`translate(${panOffset.x} ${panOffset.y})`}>
+          <rect x="0" y="0" width={LOOP_LAB_STAGE_WIDTH} height={LOOP_LAB_STAGE_HEIGHT} fill={PAPER_BACKGROUND} />
 
-        {useTextbookTopFigure ? (
-          <TextbookFieldFigure
-            geometry={geometry}
-            direction={direction}
-            displayMode="textbook"
-            viewMode={viewMode}
-            fieldStrength={fieldStrength}
-          />
-        ) : (
-          <>
-            {viewMode !== 'top' && fieldLoops.map((fieldLoop, index) => (
-              <g key={fieldLoop.id}>
-                <path
-                  d={fieldLoop.path}
-                  fill="none"
-                  stroke={FIELD_BLUE_LIGHT}
-                  strokeWidth={getFieldLineWidth(fieldLoop.scale, fieldStrength, displayMode)}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray={viewMode === 'isometric' ? '7 7' : undefined}
-                  opacity={getHiddenFieldOpacity(fieldLoop.scale, displayMode, fieldLoop.planeIndex, viewMode)}
-                />
-                {fieldLoop.visibleSegments.map((segment, segmentIndex) => (
+          {useTextbookTopFigure ? (
+            <TextbookFieldFigure
+              geometry={geometry}
+              direction={direction}
+              displayMode="textbook"
+              viewMode={viewMode}
+              fieldStrength={fieldStrength}
+            />
+          ) : (
+            <>
+              {viewMode !== 'top' && fieldLoops.map((fieldLoop, index) => (
+                <g key={fieldLoop.id}>
                   <path
-                    key={`${fieldLoop.id}-${segmentIndex}`}
-                    d={pointsToSvgPath(segment)}
+                    d={fieldLoop.path}
                     fill="none"
-                    stroke={FIELD_BLUE_STRONG}
+                    stroke={FIELD_BLUE_LIGHT}
                     strokeWidth={getFieldLineWidth(fieldLoop.scale, fieldStrength, displayMode)}
-                    strokeOpacity={getVisibleFieldOpacity(
-                      index,
-                      fieldLoop.scale,
-                      displayMode,
-                      fieldStrength,
-                      fieldLoop.planeIndex,
-                      viewMode,
-                    )}
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    strokeDasharray={viewMode === 'isometric' ? '7 7' : undefined}
+                    opacity={getHiddenFieldOpacity(fieldLoop.scale, displayMode, fieldLoop.planeIndex, viewMode)}
                   />
-                ))}
-              </g>
-            ))}
+                  {fieldLoop.visibleSegments.map((segment, segmentIndex) => (
+                    <path
+                      key={`${fieldLoop.id}-${segmentIndex}`}
+                      d={pointsToSvgPath(segment)}
+                      fill="none"
+                      stroke={FIELD_BLUE_STRONG}
+                      strokeWidth={getFieldLineWidth(fieldLoop.scale, fieldStrength, displayMode)}
+                      strokeOpacity={getVisibleFieldOpacity(
+                        index,
+                        fieldLoop.scale,
+                        displayMode,
+                        fieldStrength,
+                        fieldLoop.planeIndex,
+                        viewMode,
+                      )}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  ))}
+                </g>
+              ))}
 
-            {viewMode !== 'top' && (
-              <path
-                d={axisGuidePath}
-                fill="none"
-                stroke={FIELD_BLUE}
-                strokeOpacity={0.14}
-                strokeWidth={1.1}
-                strokeLinecap="round"
-                strokeDasharray="7 9"
-              />
-            )}
+              {viewMode !== 'top' && (
+                <path
+                  d={axisGuidePath}
+                  fill="none"
+                  stroke={FIELD_BLUE}
+                  strokeOpacity={0.14}
+                  strokeWidth={1.1}
+                  strokeLinecap="round"
+                  strokeDasharray="7 9"
+                />
+              )}
 
-            <path
-              d={pointsToSvgPath(ringPoints, true)}
-              fill="none"
-              stroke={CURRENT_ORANGE_DARK}
-              strokeOpacity={0.42}
-              strokeWidth={(geometry.tubeRadius * geometry.scale * 1.22) + 4}
-              strokeLinecap="round"
-            />
-            {ringVisibleSegments.map((segment, index) => (
               <path
-                key={`ring-front-${index}`}
-                d={pointsToSvgPath(segment)}
+                d={pointsToSvgPath(ringPoints, true)}
                 fill="none"
-                stroke={CURRENT_ORANGE}
+                stroke={CURRENT_ORANGE_DARK}
+                strokeOpacity={0.42}
                 strokeWidth={(geometry.tubeRadius * geometry.scale * 1.22) + 4}
                 strokeLinecap="round"
-                opacity={0.96}
               />
-            ))}
-            {ringVisibleSegments.map((segment, index) => (
-              <path
-                key={`ring-highlight-${index}`}
-                d={pointsToSvgPath(segment)}
-                fill="none"
-                stroke="rgba(255, 244, 236, 0.84)"
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                opacity={0.78}
-              />
-            ))}
-
-            {viewMode !== 'top' && fieldFlowMarkers.map((marker) => (
-              <FieldArrowGlyph key={marker.id} marker={marker} color={FIELD_BLUE_STRONG} />
-            ))}
-
-            {currentDirectionArrows.map((arrow) => (
-              <g
-                key={arrow.id}
-                transform={`translate(${arrow.point.x} ${arrow.point.y}) rotate(${arrow.angleDeg})`}
-                opacity={0.94}
-              >
-                <line x1={-18} y1="0" x2={10} y2="0" stroke={CURRENT_ORANGE_DARK} strokeWidth="2.3" strokeLinecap="round" />
-                <path d="M 8 -5 L 18 0 L 8 5 Z" fill={CURRENT_ORANGE_DARK} />
-              </g>
-            ))}
-
-            {displayMode !== 'textbook' && currentFlowMarkers.map((marker) => (
-              <FieldArrowGlyph key={marker.id} marker={marker} color={CURRENT_ORANGE_DARK} />
-            ))}
-
-            {displayMode !== 'textbook' && viewMode !== 'top' && axisSamples.map((sample) => (
-              <AxisFieldMarker
-                key={sample.id}
-                sample={sample}
-                displayMode={displayMode}
-              />
-            ))}
-
-            {viewMode === 'top' ? (
-              <g opacity={0.96}>
-                <circle
-                  cx={geometry.centerX}
-                  cy={geometry.centerY}
-                  r={geometry.scale * 0.16}
-                  fill={FIELD_BLUE_LIGHT}
-                />
-                <text
-                  x={geometry.centerX}
-                  y={geometry.centerY + 8}
-                  textAnchor="middle"
-                  fill={FIELD_BLUE_STRONG}
-                  fontSize="28"
-                  fontFamily={TEXTBOOK_FONT}
-                  fontWeight="700"
-                >
-                  {direction === 'counterclockwise' ? '⊙' : '⊗'}
-                </text>
-              </g>
-            ) : (
-              <g opacity={0.96}>
-                <circle
-                  cx={centerProjection.from.x}
-                  cy={centerProjection.from.y}
-                  r={16 + fieldStrength * 6}
-                  fill={FIELD_BLUE_LIGHT}
-                />
-                <line
-                  x1={centerProjection.from.x}
-                  y1={centerProjection.from.y}
-                  x2={centerProjection.to.x}
-                  y2={centerProjection.to.y}
-                  stroke={FIELD_BLUE_STRONG}
-                  strokeWidth={3.2 + fieldStrength * 1.1}
-                  strokeLinecap="round"
-                />
+              {ringVisibleSegments.map((segment, index) => (
                 <path
-                  d={buildArrowHeadPath(centerProjection.to.x, centerProjection.to.y, centerProjection.angleDeg, 11 + fieldStrength * 3)}
-                  fill={FIELD_BLUE_STRONG}
+                  key={`ring-front-${index}`}
+                  d={pointsToSvgPath(segment)}
+                  fill="none"
+                  stroke={CURRENT_ORANGE}
+                  strokeWidth={(geometry.tubeRadius * geometry.scale * 1.22) + 4}
+                  strokeLinecap="round"
+                  opacity={0.96}
                 />
-                <text
-                  x={centerProjection.to.x + 12}
-                  y={centerProjection.to.y - 12}
-                  fill={FIELD_BLUE_STRONG}
-                  fontSize="13"
-                  fontFamily={TEXTBOOK_FONT}
-                  fontWeight="700"
-                >
-                  中心 B
-                </text>
-              </g>
-            )}
-          </>
-        )}
+              ))}
+              {ringVisibleSegments.map((segment, index) => (
+                <path
+                  key={`ring-highlight-${index}`}
+                  d={pointsToSvgPath(segment)}
+                  fill="none"
+                  stroke="rgba(255, 244, 236, 0.84)"
+                  strokeWidth={1.6}
+                  strokeLinecap="round"
+                  opacity={0.78}
+                />
+              ))}
 
-        {localHint && (
-          <g opacity={localHint.hovered ? 1 : 0.64}>
-            <path
-              d={localHint.segmentPath}
-              fill="none"
-              stroke={CURRENT_ORANGE}
-              strokeWidth={localHint.hovered ? 8 : 6}
-              strokeLinecap="round"
-              strokeOpacity={localHint.hovered ? 0.98 : 0.68}
-            />
-            <path
-              d={localHint.segmentPath}
-              fill="none"
-              stroke="rgba(255,255,255,0.86)"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeOpacity={localHint.hovered ? 0.9 : 0.56}
-            />
-            {localHint.orbitPaths.map((path, index) => (
+              {viewMode !== 'top' && fieldFlowMarkers.map((marker) => (
+                <FieldArrowGlyph key={marker.id} marker={marker} color={FIELD_BLUE_STRONG} />
+              ))}
+
+              {currentDirectionArrows.map((arrow) => (
+                <g
+                  key={arrow.id}
+                  transform={`translate(${arrow.point.x} ${arrow.point.y}) rotate(${arrow.angleDeg})`}
+                  opacity={0.94}
+                >
+                  <line x1={-18} y1="0" x2={10} y2="0" stroke={CURRENT_ORANGE_DARK} strokeWidth="2.3" strokeLinecap="round" />
+                  <path d="M 8 -5 L 18 0 L 8 5 Z" fill={CURRENT_ORANGE_DARK} />
+                </g>
+              ))}
+
+              {displayMode !== 'textbook' && currentFlowMarkers.map((marker) => (
+                <FieldArrowGlyph key={marker.id} marker={marker} color={CURRENT_ORANGE_DARK} />
+              ))}
+
+              {displayMode !== 'textbook' && viewMode !== 'top' && axisSamples.map((sample) => (
+                <AxisFieldMarker
+                  key={sample.id}
+                  sample={sample}
+                  displayMode={displayMode}
+                />
+              ))}
+
+              {viewMode === 'top' ? (
+                <g opacity={0.96}>
+                  <circle
+                    cx={geometry.centerX}
+                    cy={geometry.centerY}
+                    r={geometry.scale * 0.16}
+                    fill={FIELD_BLUE_LIGHT}
+                  />
+                  <text
+                    x={geometry.centerX}
+                    y={geometry.centerY + 8}
+                    textAnchor="middle"
+                    fill={FIELD_BLUE_STRONG}
+                    fontSize="28"
+                    fontFamily={TEXTBOOK_FONT}
+                    fontWeight="700"
+                  >
+                    {direction === 'counterclockwise' ? '⊙' : '⊗'}
+                  </text>
+                </g>
+              ) : (
+                <g opacity={0.96}>
+                  <circle
+                    cx={centerProjection.from.x}
+                    cy={centerProjection.from.y}
+                    r={16 + fieldStrength * 6}
+                    fill={FIELD_BLUE_LIGHT}
+                  />
+                  <line
+                    x1={centerProjection.from.x}
+                    y1={centerProjection.from.y}
+                    x2={centerProjection.to.x}
+                    y2={centerProjection.to.y}
+                    stroke={FIELD_BLUE_STRONG}
+                    strokeWidth={3.2 + fieldStrength * 1.1}
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d={buildArrowHeadPath(centerProjection.to.x, centerProjection.to.y, centerProjection.angleDeg, 11 + fieldStrength * 3)}
+                    fill={FIELD_BLUE_STRONG}
+                  />
+                  <text
+                    x={centerProjection.to.x + 12}
+                    y={centerProjection.to.y - 12}
+                    fill={FIELD_BLUE_STRONG}
+                    fontSize="13"
+                    fontFamily={TEXTBOOK_FONT}
+                    fontWeight="700"
+                  >
+                    中心 B
+                  </text>
+                </g>
+              )}
+            </>
+          )}
+
+          {localHint && (
+            <g opacity={localHint.hovered ? 1 : 0.64}>
               <path
-                key={`local-orbit-${index}`}
-                d={path}
+                d={localHint.segmentPath}
                 fill="none"
-                stroke={FIELD_BLUE_STRONG}
-                strokeWidth={index === 0 ? 1.7 : 1.35}
+                stroke={CURRENT_ORANGE}
+                strokeWidth={localHint.hovered ? 8 : 6}
                 strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeDasharray={index === 0 ? '6 6' : '4 6'}
-                strokeOpacity={localHint.hovered ? 0.42 - (index * 0.08) : 0.24 - (index * 0.05)}
+                strokeOpacity={localHint.hovered ? 0.98 : 0.68}
               />
-            ))}
-            {localHint.orbitArrow && (
-              <FieldArrowGlyph
-                marker={localHint.orbitArrow}
-                color={FIELD_BLUE_STRONG}
+              <path
+                d={localHint.segmentPath}
+                fill="none"
+                stroke="rgba(255,255,255,0.86)"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeOpacity={localHint.hovered ? 0.9 : 0.56}
               />
-            )}
-          </g>
-        )}
+              {localHint.orbitPaths.map((path, index) => (
+                <path
+                  key={`local-orbit-${index}`}
+                  d={path}
+                  fill="none"
+                  stroke={FIELD_BLUE_STRONG}
+                  strokeWidth={index === 0 ? 1.7 : 1.35}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray={index === 0 ? '6 6' : '4 6'}
+                  strokeOpacity={localHint.hovered ? 0.42 - (index * 0.08) : 0.24 - (index * 0.05)}
+                />
+              ))}
+              {localHint.orbitArrow && (
+                <FieldArrowGlyph
+                  marker={localHint.orbitArrow}
+                  color={FIELD_BLUE_STRONG}
+                />
+              )}
+            </g>
+          )}
+        </g>
       </svg>
 
       <div
@@ -650,7 +711,7 @@ export function LoopBFieldExperimentalStage({
       >
         <StagePaperNote>
           {viewMode === 'isometric'
-            ? '拖拽可旋转 3D 视角；悬停线圈局部可查看淡化的环绕提示'
+            ? '拖拽旋转视角；按住 Shift 再拖拽可平移画布'
             : viewMode === 'top'
               ? '俯视图先判断顺逆时针电流，再看中心 B 的 ⊙ / ⊗'
               : '侧视图突出中心轴线磁场最强，外部磁感线向两侧回弯闭合'}
@@ -690,6 +751,21 @@ export function LoopBFieldExperimentalStage({
         <StagePaperNote>
           {modeNote}
         </StagePaperNote>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 20,
+          bottom: 18,
+          display: 'flex',
+          gap: 8,
+          pointerEvents: 'auto',
+        }}
+      >
+        <StageToolButton label="－" onClick={zoomOut} />
+        <StageToolButton label={`${Math.round(zoomScale * 100)}%`} onClick={resetZoom} compact />
+        <StageToolButton label="＋" onClick={zoomIn} />
       </div>
 
       {localHint?.hovered && (
@@ -747,7 +823,59 @@ export function LoopBFieldExperimentalStage({
           />
         ))}
       </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 20,
+          bottom: 18,
+          display: 'flex',
+          gap: 8,
+          pointerEvents: 'auto',
+        }}
+      >
+        <StageToolButton label="拖动画布: Shift+拖拽" onClick={() => {}} compact passive />
+      </div>
     </div>
+  );
+}
+
+function StageToolButton({
+  label,
+  onClick,
+  compact = false,
+  passive = false,
+}: {
+  label: string;
+  onClick: () => void;
+  compact?: boolean;
+  passive?: boolean;
+}) {
+  return (
+    <button
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!passive) onClick();
+      }}
+      onMouseDown={(event) => event.stopPropagation()}
+      style={{
+        minWidth: compact ? 60 : 36,
+        height: 34,
+        padding: compact ? '0 10px' : '0 12px',
+        borderRadius: 999,
+        border: `1px solid ${PAPER_BORDER}`,
+        background: PAPER_SURFACE,
+        color: PAPER_TEXT,
+        fontSize: compact ? 11 : 18,
+        fontWeight: 700,
+        cursor: passive ? 'default' : 'pointer',
+        boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
+        opacity: passive ? 0.84 : 1,
+      }}
+    >
+      {label}
+    </button>
   );
 }
 

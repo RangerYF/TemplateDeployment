@@ -4,7 +4,6 @@ import {
   buildHalfDeflectionCurve,
   calculateAmmeterHalfDeflection,
   calculateVoltmeterHalfDeflection,
-  getHalfDeflectionAssumption,
   getHalfDeflectionModeLabel,
   type HalfDeflectionCurvePoint,
   type HalfDeflectionMode,
@@ -60,7 +59,6 @@ const pageStyle = {
 
 interface Props {
   onBack: () => void;
-  onOpenPreset: (mode: HalfDeflectionMode) => void;
 }
 
 interface HalfDeflectionViewResult {
@@ -81,9 +79,10 @@ interface DetailRow {
   accent?: string;
 }
 
-export function HalfDeflectionComparisonView({ onBack, onOpenPreset }: Props) {
+export function HalfDeflectionComparisonView({ onBack }: Props) {
   const [mode, setMode] = useState<HalfDeflectionMode>('ammeter');
   const [paramsByMode, setParamsByMode] = useState<Record<HalfDeflectionMode, HalfDeflectionPageParams>>(DEFAULT_PARAMS);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const params = paramsByMode[mode];
 
@@ -155,22 +154,11 @@ export function HalfDeflectionComparisonView({ onBack, onOpenPreset }: Props) {
         >
           ← 返回
         </button>
-        <button
-          onClick={() => onOpenPreset(mode)}
-          className="px-3 py-1 text-xs font-medium"
-          style={{
-            color: pageStyle.accent,
-            border: `1px solid ${pageStyle.accent}55`,
-            backgroundColor: pageStyle.accentSoft,
-          }}
-        >
-          进入原实验
-        </button>
         <h1 className="text-sm font-semibold" style={{ color: pageStyle.text }}>
-          半偏法测内阻 · 理想与真实对比
+          半偏法测电表内阻
         </h1>
         <span className="text-[11px]" style={{ color: pageStyle.muted }}>
-          调节滑动变阻器，观察理想实验与真实实验误差如何变化
+          电流表半偏法 / 电压表半偏法
         </span>
       </header>
 
@@ -181,7 +169,8 @@ export function HalfDeflectionComparisonView({ onBack, onOpenPreset }: Props) {
           onChangeMode={setMode}
           onChangeParam={setParam}
           onReset={resetCurrentMode}
-          onOpenPreset={() => onOpenPreset(mode)}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced((value) => !value)}
         />
         <HalfCenterPanel
           mode={mode}
@@ -201,14 +190,16 @@ function HalfLeftPanel({
   onChangeMode,
   onChangeParam,
   onReset,
-  onOpenPreset,
+  showAdvanced,
+  onToggleAdvanced,
 }: {
   mode: HalfDeflectionMode;
   params: HalfDeflectionPageParams;
   onChangeMode: (mode: HalfDeflectionMode) => void;
   onChangeParam: (key: keyof HalfDeflectionPageParams, value: number) => void;
   onReset: () => void;
-  onOpenPreset: () => void;
+  showAdvanced: boolean;
+  onToggleAdvanced: () => void;
 }) {
   return (
     <div
@@ -246,21 +237,13 @@ function HalfLeftPanel({
             {getHalfDeflectionModeLabel(mode)}
           </div>
           <div className="mt-1 text-[10px]" style={{ color: pageStyle.muted, lineHeight: 1.7 }}>
-            {getHalfDeflectionAssumption(mode)} 滑动变阻器阻值变化会改变真实实验误差，图上会同步标记当前点。
+            {mode === 'ammeter'
+              ? 'R2 与 S2 串联后并联在电流表两端；先满偏，再闭合支路调到半偏。'
+              : 'R2 与电压表 V 串联；先满偏，再接入 R2 使电压表半偏。'}
           </div>
         </div>
 
-        <SectionTitle title="参数控制" />
-        <RangeControl label="电动势 ε" value={params.emf} min={1} max={12} step={0.1} unit="V" onChange={(value) => onChangeParam('emf', value)} />
-        <RangeControl
-          label="电源内阻 r"
-          value={params.sourceInternalResistance}
-          min={mode === 'ammeter' ? 0 : 0}
-          max={mode === 'ammeter' ? 2 : 1000}
-          step={mode === 'ammeter' ? 0.05 : 10}
-          unit="Ω"
-          onChange={(value) => onChangeParam('sourceInternalResistance', value)}
-        />
+        <SectionTitle title="核心参数" />
         <RangeControl
           label={mode === 'ammeter' ? '电流表内阻' : '电压表内阻'}
           value={params.meterResistance}
@@ -271,7 +254,7 @@ function HalfLeftPanel({
           onChange={(value) => onChangeParam('meterResistance', value)}
         />
         <RangeControl
-          label="滑动变阻器最大阻值"
+          label="滑动变阻器总阻值"
           value={params.maxResistance}
           min={mode === 'ammeter' ? 5 : 500}
           max={mode === 'ammeter' ? 50 : 6000}
@@ -298,9 +281,36 @@ function HalfLeftPanel({
           onChange={(value) => onChangeParam('halfResistance', value)}
         />
 
+        <button
+          onClick={onToggleAdvanced}
+          className="mb-3 rounded-full px-3 py-1 text-[11px] font-medium"
+          style={{
+            color: pageStyle.accent,
+            border: `1px solid ${pageStyle.accent}33`,
+            backgroundColor: pageStyle.accentSoft,
+          }}
+        >
+          {showAdvanced ? '收起进阶参数' : '展开进阶参数'}
+        </button>
+
+        {showAdvanced && (
+          <>
+            <SectionTitle title="进阶参数" />
+            <RangeControl label="电动势 ε" value={params.emf} min={1} max={12} step={0.1} unit="V" onChange={(value) => onChangeParam('emf', value)} />
+            <RangeControl
+              label="电源内阻 r"
+              value={params.sourceInternalResistance}
+              min={0}
+              max={mode === 'ammeter' ? 2 : 1000}
+              step={mode === 'ammeter' ? 0.05 : 10}
+              unit="Ω"
+              onChange={(value) => onChangeParam('sourceInternalResistance', value)}
+            />
+          </>
+        )}
+
         <div className="mt-4 flex flex-wrap gap-2">
           <PresetButton label="恢复默认" onClick={onReset} />
-          <PresetButton label="打开原实验" onClick={onOpenPreset} />
         </div>
       </div>
     </div>
@@ -427,16 +437,6 @@ function HalfRightPanel({
             },
           ]}
         />
-        <KeyValueInfoBlock
-          title="理想值与真实值"
-          color="#2563EB"
-          rows={[
-            { label: '理想测得内阻', value: formatResistance(result.current.idealHalfResistance, mode === 'ammeter' ? 2 : 0) },
-            { label: '真实半偏值', value: formatResistance(result.current.exactHalfResistance, mode === 'ammeter' ? 2 : 0) },
-            { label: "按当前 R' 估算误差", value: formatSignedPercent(result.current.currentErrorPercent) },
-            { label: '滑变阻理论误差', value: formatSignedPercent(result.current.realErrorPercent) },
-          ]}
-        />
       </div>
 
       <div className="px-3 pb-3">
@@ -452,6 +452,30 @@ function HalfRightPanel({
             {mode === 'ammeter'
               ? '滑动变阻器越大，干路总电阻越大，真实半偏值逐渐逼近理想值，误差减小。'
               : '滑动变阻器越大，额外分压越明显，真实半偏值偏离理想值更多，误差增大。'}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-3 pb-3">
+        <PanelTitle title="核心步骤" />
+        <div
+          className="rounded-xl border p-3"
+          style={{ borderColor: pageStyle.border, backgroundColor: pageStyle.blockBg }}
+        >
+          <div className="text-[11px]" style={{ color: pageStyle.secondary, lineHeight: 1.85 }}>
+            {mode === 'ammeter' ? (
+              <>
+                <div>1. 先断开 S2，调主回路使电流表满偏。</div>
+                <div>2. 再闭合 S2，调 R' 到电流表半偏。</div>
+                <div>3. 教材近似下记 R' ≈ RA。</div>
+              </>
+            ) : (
+              <>
+                <div>1. 先闭合 S2 旁路 R'，调电压表满偏得到 U0。</div>
+                <div>2. 再断开 S2，让 R' 与 V 串联分压。</div>
+                <div>3. 调 R' 到电压表半偏，教材近似下记 R' ≈ RV。</div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -479,6 +503,20 @@ function HalfRightPanel({
             ]}
           />
         )}
+        <div
+          className="mt-3 rounded-xl border p-3"
+          style={{ borderColor: pageStyle.border, backgroundColor: pageStyle.blockBg }}
+        >
+          <div className="mb-1 text-[11px] font-semibold" style={{ color: pageStyle.text }}>
+            进阶：理想值与真实值
+          </div>
+          <div className="space-y-1 text-[10px]" style={{ color: pageStyle.secondary, lineHeight: 1.75 }}>
+            <div>理想测得内阻：{formatResistance(result.current.idealHalfResistance, mode === 'ammeter' ? 2 : 0)}</div>
+            <div>真实半偏值：{formatResistance(result.current.exactHalfResistance, mode === 'ammeter' ? 2 : 0)}</div>
+            <div>按当前 R' 估算误差：{formatSignedPercent(result.current.currentErrorPercent)}</div>
+            <div>滑变阻理论误差：{formatSignedPercent(result.current.realErrorPercent)}</div>
+          </div>
+        </div>
       </div>
     </div>
   );

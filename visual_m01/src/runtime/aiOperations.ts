@@ -570,7 +570,7 @@ function executeAddDistanceMeasurement(operation: AiOperation): void {
   const entityIds = asStringArray(operation.entityIds);
   const store = useEntityStore.getState();
 
-  let props: DistanceMeasurementProperties | null = null;
+  let props: DistanceMeasurementProperties;
 
   if (kind === 'pointPoint') {
     const p1 = entityIds[0] ? store.getEntity(entityIds[0]) : findPointByLabelOrThrow(labels[0]);
@@ -675,7 +675,7 @@ function executeAddDistanceMeasurement(operation: AiOperation): void {
 function executeAddAngleMeasurement(operation: AiOperation): void {
   const kind = asString(operation.kind);
   const labels = asStringArray(operation.labels);
-  let props: AngleMeasurementProperties | null = null;
+  let props: AngleMeasurementProperties;
 
   if (kind === 'lineLine') {
     const seg1 = resolveSegmentFromOperation(operation, labels, 0);

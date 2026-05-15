@@ -30,8 +30,8 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'particle-electric',
     title: '带电粒子在电场中',
-    summary: '加速电场、电容器偏转模型与两段式电场，聚焦 qU = ΔEk、入口速度、偏转量和出口偏角。',
-    teachingUse: '建议先看“加速电场”，再切到“两段式电场模型”把加速与偏转串起来，最后用“电容器偏转模型”做单段偏转对比。',
+    summary: '平行板交变电场中的往返运动、电容器偏转模型与两段式电场，聚焦水平匀速、竖直往返、偏转量和出口偏角。',
+    teachingUse: '建议先看“平行板交变电场中的粒子往返运动”，再切到“两段式电场模型”把入口速度与偏转串起来，最后用“电容器偏转模型”做单段偏转对比。',
     recommendedPresetId: 'P02-EMF013-two-stage-efield',
     presetIds: [
       'P02-EMF013-two-stage-efield',
@@ -55,8 +55,8 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'particle-magnetic',
     title: '带电粒子在磁场中',
-    summary: '洛伦兹力圆周运动、直线/圆形/半圆边界、平移圆、旋转圆、放缩圆、双边界、磁聚焦与磁发散。',
-    teachingUse: '建议先看“洛伦兹力圆周运动”，再进入边界模型，以及平移圆/旋转圆/放缩圆与磁聚焦/磁发散的成对对比。',
+    summary: '洛伦兹力圆周运动、直线/圆形边界、平移圆、旋转圆、放缩圆，以及磁聚焦与磁发散。',
+    teachingUse: '建议先看“洛伦兹力圆周运动”，再进入直线/圆形边界，以及平移圆/旋转圆/放缩圆和磁聚焦/磁发散的成对对比。',
     recommendedPresetId: 'P02-EM003-cyclotron-motion',
     presetIds: [
       'P02-EM003-cyclotron-motion',
@@ -65,8 +65,6 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
       'P02-EMF037-translation-circle',
       'P02-EMF038-rotation-circle',
       'P02-EMF039-scaling-circle',
-      'P02-EMF034-bfield-dual-boundary',
-      'P02-EMF035-bfield-semicircle',
       'P02-EMF033-magnetic-focusing',
       'P02-EMF036-magnetic-divergence',
     ],
@@ -99,6 +97,12 @@ export interface P08ModuleSection {
   presets: PresetData[];
 }
 
+const P08_HIDDEN_HOME_PRESET_IDS = new Set<string>([
+  'P02-EMF034-bfield-dual-boundary',
+  'P02-EMF035-bfield-semicircle',
+  'P02-EMF036-magnetic-divergence',
+]);
+
 export const P08_PRESET_IDS: Set<string> = new Set(
   P08_MODULES.flatMap((module) => module.presetIds),
 );
@@ -107,7 +111,7 @@ const P08_SCENE_TEACHING_USES: Record<string, string> = {
   'P02-EMF001-point-charge-field': '库仑定律、场强与电势的空间分布。',
   'P02-EMF002-two-charges-field': '电偶极子、同号电荷与不等量异号构型对比。',
   'P02-EMF003-parallel-plate-efield': '匀强电场近似、边缘效应与板间电势差。',
-  'P02-EMF011-efield-acceleration': '电场力做功、动能定理与加速电场。',
+  'P02-EMF011-efield-acceleration': '平行板交变电场下的水平匀速与竖直往返运动展示。',
   'P02-EMF012-efield-deflection': '类平抛轨迹、偏转量、出口偏角与接收屏落点。',
   'P02-EMF013-two-stage-efield': '先由加速电场给出入口速度，再在偏转电场中比较偏移量、出口偏角与接收屏落点。',
   'P02-EMF021-wire-bfield': '安培定则以及 B 与 r 的反比关系。',
@@ -118,16 +122,16 @@ const P08_SCENE_TEACHING_USES: Record<string, string> = {
   'P02-EMF031-bfield-straight-boundary': '入射角、偏转角与出射对称关系。',
   'P02-EMF032-bfield-circular-boundary': '轨迹圆与磁场区域圆的几何关系。',
   'P02-EMF037-translation-circle': '同速度、不同入射点下的等半径平移圆轨迹族。',
-  'P02-EMF038-rotation-circle': '同一点、不同入射角下的等半径旋转圆轨迹族。',
+  'P02-EMF038-rotation-circle': '中心同点、各个入射方向下的等半径旋转圆轨迹族。',
   'P02-EMF039-scaling-circle': '同一点、同方向下的多半径放缩圆轨迹族。',
-  'P02-EMF034-bfield-dual-boundary': '分段磁场中的 S 形偏转与几何拼接。',
-  'P02-EMF035-bfield-semicircle': '半圆边界题型中的出射角与回旋半径。',
-  'P02-EMF033-magnetic-focusing': '以基准会聚轨道半径定义磁场圆，观察同源粒子在圆内汇聚到同一焦点。',
+  'P02-EMF034-bfield-dual-boundary': '旧版分段磁场边界题型，首页已不作为推荐入口。',
+  'P02-EMF035-bfield-semicircle': '旧版半圆边界题型，首页已不作为推荐入口。',
+  'P02-EMF033-magnetic-focusing': '用一张对比图同时讲清“磁发散：一点入、平行出”和“磁聚焦：平行入、一点出”。',
   'P02-EMF036-magnetic-divergence': '以 baseSpeed 参考粒子的回旋半径定义磁场圆，比对不同速度粒子的圆弧发散。',
   'P02-EMF041-velocity-selector': '电场力与磁场力反向平衡时，粒子按 v = E / B 直线通过。',
-  'P02-EMF042-cyclotron': '回旋周期、加速半径与交变电场配合。',
-  'P02-EMF043-em-flowmeter': 'E = vB 与 U = BvL 的流速测量。',
-  'P02-EMF044-electrogravity-circular-motion': '把带电小球看作绳拴小球，比较完整圆周、临界过顶与松绳后斜抛。',
+  'P02-EMF042-cyclotron': '改为视频演示入口，直观展示回旋半径逐步增大与交变电场加速过程。',
+  'P02-EMF043-em-flowmeter': '改为视频演示入口，用成片画面讲清 E = vB 与 U = BvL 的流速测量。',
+  'P02-EMF044-electrogravity-circular-motion': '把带电小球看作绳拴小球，比较完整圆周、临界过顶与松绳后斜抛，并可切换电场方向观察与重力叠加后的效果。',
 };
 
 export function getP08SceneTeachingUse(presetId: string): string {
@@ -145,7 +149,11 @@ export function getP08ModuleSections(): P08ModuleSection[] {
     pendingNote: module.pendingNote,
     presets: module.presetIds.flatMap((presetId) => {
       const preset = presetRegistry.get(presetId);
-      return preset && isPresetVisible(preset) ? [preset] : [];
+      return preset &&
+        isPresetVisible(preset) &&
+        !P08_HIDDEN_HOME_PRESET_IDS.has(preset.id)
+        ? [preset]
+        : [];
     }),
   }));
 }

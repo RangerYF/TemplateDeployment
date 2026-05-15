@@ -21,7 +21,10 @@ const CROSS_SECTION_OPACITY = 0.35;
 
 // ─── FaceEntityRenderer ───
 
-function useFaceStyle(entityId: string) {
+function useFaceStyle(
+  entityId: string,
+  defaults: { color: string; opacity: number } = { color: FACE_COLOR, opacity: FACE_OPACITY },
+) {
   const isSelected = useSelectionStore((s) => s.selectedIds.includes(entityId));
   const isHovered = useSelectionStore((s) => s.hoveredId === entityId);
   const customStyle = useEntityStore((s) => {
@@ -37,8 +40,8 @@ function useFaceStyle(entityId: string) {
   }
   if (isHovered) return { color: FACE_HOVERED_COLOR, opacity: FACE_HOVERED_OPACITY };
   return {
-    color: customStyle?.color ?? FACE_COLOR,
-    opacity: customStyle?.opacity ?? FACE_OPACITY,
+    color: customStyle?.color ?? defaults.color,
+    opacity: customStyle?.opacity ?? defaults.opacity,
   };
 }
 
@@ -194,8 +197,10 @@ function CrossSectionFace({ entity }: { entity: Entity<'face'> }) {
   const props = entity.properties;
   const result = useBuilderResult(props.geometryId);
   const entities = useEntityStore((s) => s.entities);
-  const isSelected = useSelectionStore((s) => s.selectedIds.includes(entity.id));
-  const isHovered = useSelectionStore((s) => s.hoveredId === entity.id);
+  const style = useFaceStyle(entity.id, {
+    color: CROSS_SECTION_COLOR,
+    opacity: CROSS_SECTION_OPACITY,
+  });
 
   const positions = useMemo(() => {
     if (!result) return null;
@@ -215,15 +220,12 @@ function CrossSectionFace({ entity }: { entity: Entity<'face'> }) {
 
   if (!positions || positions.length < 3) return null;
 
-  const meshColor = isSelected ? FACE_SELECTED_COLOR : isHovered ? FACE_HOVERED_COLOR : CROSS_SECTION_COLOR;
-  const meshOpacity = isSelected ? FACE_SELECTED_OPACITY : isHovered ? FACE_HOVERED_OPACITY : CROSS_SECTION_OPACITY;
-
   return (
     <group>
-      <FaceMesh entityId={entity.id} positions={positions} color={meshColor} opacity={meshOpacity} />
+      <FaceMesh entityId={entity.id} positions={positions} color={style.color} opacity={style.opacity} />
       <Line
         points={[...positions, positions[0]]}
-        color={CROSS_SECTION_COLOR}
+        color={style.color}
         lineWidth={2}
       />
     </group>

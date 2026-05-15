@@ -36,11 +36,11 @@ export class EnergyBar {
     const barWidth = Math.min(32, (w - padding * 2) / (bars.length + 1));
     const gap = barWidth * 0.4;
 
-    ctx.fillStyle = '#080e1a';
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, w, h);
 
     if (title) {
-      ctx.fillStyle = 'rgba(139, 156, 184, 0.6)';
+      ctx.fillStyle = '#333333';
       ctx.font = 'bold 11px -apple-system, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(title, w / 2, 18);
@@ -49,8 +49,7 @@ export class EnergyBar {
     const totalWidth = bars.length * (barWidth + gap) - gap;
     let x = (w - totalWidth) / 2;
 
-    // Reference lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)';
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= 4; i++) {
       const ly = barAreaTop + barAreaHeight * (1 - i / 4);
@@ -101,7 +100,7 @@ export class EnergyBar {
 
       // Value label above bar
       if (bar.value > 0.01) {
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.font = 'bold 10px -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(bar.value.toFixed(1), x + barWidth / 2, barY - 5);
@@ -116,8 +115,7 @@ export class EnergyBar {
       x += barWidth + gap;
     }
 
-    // Baseline
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.moveTo(padding / 2, barAreaTop + barAreaHeight);

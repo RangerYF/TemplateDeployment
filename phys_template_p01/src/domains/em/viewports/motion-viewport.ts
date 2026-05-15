@@ -150,7 +150,11 @@ const motionViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
   const focusingEmitter = emitters.find(
     (entity) =>
       entity.properties.pattern === 'focusing' &&
-      bfields.some((field) => field.properties.autoBoundaryMode === 'focusing-min-radius'),
+      bfields.some(
+        (field) =>
+          field.properties.autoBoundaryMode === 'focusing-reference-particle'
+          || field.properties.autoBoundaryMode === 'focusing-min-radius',
+      ),
   );
   if (showTrajectory && focusingEmitter) {
     drawFocusingGuide(

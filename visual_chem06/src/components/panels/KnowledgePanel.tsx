@@ -1,5 +1,5 @@
 ﻿import type { ReactNode } from 'react';
-import { AlertTriangle, ArrowLeftRight, Beaker, BookOpenText, Lightbulb } from 'lucide-react';
+import { ArrowLeftRight, Beaker, BookOpenText, Lightbulb } from 'lucide-react';
 import { PanelCard } from '@/components/panels/PanelCard';
 import { COLORS } from '@/styles/tokens';
 import { getCurrentModel, getCurrentScenario, useElectrochemStore } from '@/store/electrochemStore';
@@ -18,8 +18,8 @@ export function KnowledgePanel() {
       <PanelCard title="反应与关键帧" subtitle={model.environment} right={<KeyframeBadge title={activeKeyframe?.title ?? '演示中'} />}>
         <div className="space-y-4">
           <EquationBlock title="总反应" value={scenario.totalReaction} accent={COLORS.primaryLight} />
-          <EquationBlock title={scenario.leftElectrode.label} value={scenario.leftElectrode.reaction} accent="#EEF5FF" alternate={getAlternateOxidationForm(scenario.leftElectrode.reaction, scenario.leftElectrode.role)} />
-          <EquationBlock title={scenario.rightElectrode.label} value={scenario.rightElectrode.reaction} accent="#FFF7EE" alternate={getAlternateOxidationForm(scenario.rightElectrode.reaction, scenario.rightElectrode.role)} />
+          <EquationBlock title={scenario.leftElectrode.label} value={scenario.leftElectrode.reaction} accent="#EEF5FF" alternate={getAlternateOxidationForm(scenario.leftElectrode.reaction)} />
+          <EquationBlock title={scenario.rightElectrode.label} value={scenario.rightElectrode.reaction} accent="#FFF7EE" alternate={getAlternateOxidationForm(scenario.rightElectrode.reaction)} />
           <div className="rounded-2xl border px-4 py-4" style={{ borderColor: COLORS.border, background: COLORS.bgPage }}>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: COLORS.textMuted }}>
               <BookOpenText size={12} />
@@ -31,12 +31,11 @@ export function KnowledgePanel() {
         </div>
       </PanelCard>
 
-      <PanelCard title="内电路观察" subtitle="离子迁移、物质变化、竞争反应与环境提示">
+      <PanelCard title="内电路观察" subtitle="离子迁移、物质变化与环境提示">
         <div className="space-y-4 text-sm">
           <InfoBullet icon={<ArrowLeftRight size={14} />} title="粒子迁移" body={scenario.streams.map((stream) => `${stream.label}：${stream.note.replace(/。$/, '')}`).join('；')} />
           <InfoBullet icon={<Beaker size={14} />} title="电极表面" body={`${scenario.leftElectrode.surfaceNote.replace(/。$/, '')}；${scenario.rightElectrode.surfaceNote.replace(/。$/, '')}`} />
           {scenario.phIndicators?.length ? <InfoBullet icon={<Lightbulb size={14} />} title="pH 指示" body={scenario.phIndicators.map((item) => `${item.label}${item.trend === 'up' ? '↑' : item.trend === 'down' ? '↓' : '→'}：${item.note.replace(/。$/, '')}`).join('；')} /> : null}
-          {scenario.competition ? <InfoBullet icon={<AlertTriangle size={14} />} title={scenario.competition.title} body={`${scenario.competition.winner} 优先于 ${scenario.competition.loser}：${scenario.competition.explanation}`} /> : null}
           {scenario.trend ? <InfoBullet icon={<ArrowLeftRight size={14} />} title={scenario.trend.title} body={scenario.trend.points.map((p) => p.replace(/。$/, '')).join('；')} /> : null}
           {model.crossDisciplineNote ? <InfoBullet icon={<BookOpenText size={14} />} title="跨学科提示" body={model.crossDisciplineNote} /> : null}
         </div>
@@ -73,8 +72,7 @@ function EquationBlock({ title, value, accent, alternate }: EquationBlockProps) 
   );
 }
 
-function getAlternateOxidationForm(reaction: string, role: string) {
-  if (role !== '阳极') return null;
+function getAlternateOxidationForm(reaction: string) {
   const electronMatch = reaction.match(/\s-\s(\d*e⁻)/);
   if (!electronMatch) return null;
   const electronTerm = electronMatch[1];

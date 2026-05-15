@@ -54,6 +54,16 @@ function CircumSphereRenderer({ entity }: { entity: Entity }) {
   return (
     <group>
       <group position={sphere.center}>
+        <mesh renderOrder={-2}>
+          <sphereGeometry args={[sphere.radius, 64, 32]} />
+          <meshBasicMaterial
+            color="#8b5cf6"
+            transparent
+            opacity={0.08}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
         {GREAT_CIRCLE_ROTATIONS.map((rotation, i) => (
           <lineLoop key={i} geometry={circleGeo} rotation={rotation}>
             <lineBasicMaterial color="#7c3aed" transparent opacity={0.7} depthWrite={false} />

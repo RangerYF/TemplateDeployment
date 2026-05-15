@@ -1,7 +1,7 @@
 // Module 4: Single-slit / circular aperture diffraction
 const React = (window as any).React;
 
-type ApertureKind = 'slit' | 'circle';
+type ApertureKind = 'slit' | 'circle' | 'disk';
 interface DiffractionSettings {
   experimentId: 'opt-031' | 'opt-032';
   aperture: ApertureKind;
@@ -23,6 +23,7 @@ const COMPARE_WLS = [450, 532, 650];
 const DIFFRACTION_VIEW_SPAN = {
   slit: 0.066,
   circle: 0.040,
+  disk: 0.040,
 } as const;
 
 function clamp(v: number, min: number, max: number): number {
@@ -91,6 +92,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
   const sourceDistanceM = Math.max(0.2, (apertureX - sourceX) / 110);
   const sourceIntensityScale = clamp(Math.pow(1.55 / sourceDistanceM, 2), 0.28, 1.65);
   const isSlit = aperture === 'slit';
+  const isDisk = aperture === 'disk';
   const screenSpan = DIFFRACTION_VIEW_SPAN[aperture];
 
   React.useEffect(() => {
@@ -177,7 +179,14 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
       const x = Math.PI * D * sinTheta / lamLocal;
       if (Math.abs(x) < 1e-6) return sourceIntensityScale;
       const v = 2 * besselJ1(x) / x;
-      baseI = sourceIntensityScale * v * v;
+      const airy = sourceIntensityScale * v * v;
+      if (aperture === 'disk') {
+        const poisson = Math.exp(-Math.pow(x / 1.05, 2));
+        const weakRings = Math.pow(Math.abs(v), 1.4) * 0.2;
+        baseI = sourceIntensityScale * clamp(poisson + weakRings, 0, 1);
+      } else {
+        baseI = airy;
+      }
     }
     return baseI;
   }
@@ -220,7 +229,11 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
           img.data[idx + 3] = 255;
       }
     }
-    ctx.putImageData(img, 0, 0);
+    const bitmap = document.createElement('canvas');
+    bitmap.width = W;
+    bitmap.height = H;
+    bitmap.getContext('2d')?.putImageData(img, 0, 0);
+    ctx.drawImage(bitmap, 0, 0, W, H);
 
     if (!compare) {
       const ink = 'rgba(255,255,255,0.74)';
@@ -252,7 +265,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
         ctx.stroke();
         ctx.fillStyle = 'rgba(255,255,255,0.88)';
         ctx.font = '12px JetBrains Mono, monospace';
-        ctx.fillText('艾里斑', W / 2 - 20, 18);
+        ctx.fillText(aperture === 'disk' ? '泊松亮斑' : '艾里斑', W / 2 - 30, 18);
       }
     }
     return true;
@@ -281,7 +294,11 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
         }
       }
     }
-    ctx.putImageData(img, 0, 0);
+    const bitmap = document.createElement('canvas');
+    bitmap.width = W;
+    bitmap.height = H;
+    bitmap.getContext('2d')?.putImageData(img, 0, 0);
+    ctx.drawImage(bitmap, 0, 0, W, H);
     ctx.strokeStyle = 'rgba(255,255,255,0.25)';
     ctx.lineWidth = 1;
     for (let i = 1; i < 3; i++) {
@@ -404,7 +421,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
             sourceX={sourceX}
             elementX={apertureX}
             screenX={screenX}
-            elementLabel={aperture === 'slit' ? '单缝' : '圆孔'}
+            elementLabel={aperture === 'slit' ? '单缝' : aperture === 'disk' ? '圆板' : '圆孔'}
             distanceLabel={`L = ${screenDistance.toFixed(2)} m`}
             onSourceDown={beginDrag('source')}
             onElementDown={beginDrag('aperture')}
@@ -413,7 +430,9 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
               <>
                 {aperture === 'slit'
                   ? <rect x={apertureX - 4} y={42} width={8} height={66} rx={2} fill="var(--ink)" />
-                  : <><rect x={apertureX - 4} y={42} width={8} height={66} rx={2} fill="var(--ink)" /><circle cx={apertureX} cy={75} r="11" fill="var(--panel)" stroke="var(--ink)" strokeWidth="2.4" /></>}
+                  : aperture === 'disk'
+                    ? <><rect x={apertureX - 4} y={42} width={8} height={66} rx={2} fill="rgba(30,35,37,0.28)" /><circle cx={apertureX} cy={75} r="12" fill="var(--ink)" stroke="var(--ink)" strokeWidth="2.4" /></>
+                    : <><rect x={apertureX - 4} y={42} width={8} height={66} rx={2} fill="var(--ink)" /><circle cx={apertureX} cy={75} r="11" fill="var(--panel)" stroke="var(--ink)" strokeWidth="2.4" /></>}
                 {aperture === 'slit' && (
                   <>
                     <line x1={apertureX} y1={58} x2={apertureX} y2={68} stroke="var(--panel)" strokeWidth="2.4" />
@@ -428,7 +447,7 @@ function DiffractionModule({ settings }: { settings: DiffractionSettings }) {
 
       <div className="pattern-card">
         <div className="card-head">
-          <span>{aperture === 'slit' ? '单缝衍射图样 · 中央主极大' : '圆孔衍射图样 · 艾里斑'}</span>
+          <span>{aperture === 'slit' ? '单缝衍射图样 · 中央主极大' : aperture === 'disk' ? '圆板衍射图样 · 泊松亮斑' : '圆孔衍射图样 · 艾里斑'}</span>
           {settings.compareMode
             ? <span className="chip"><span className="dot" style={{ background: 'linear-gradient(90deg, #4080ff, #40ff80, #ff4040)' }} />RGB 对比</span>
             : <span className="chip"><span className="dot" style={{ background: color }} />λ = {wavelength} nm</span>}
@@ -464,12 +483,12 @@ function DiffractionControls({ settings, setSettings }: { settings: DiffractionS
   return (
     <>
       <SectionTitle aside="APERTURE">孔径类型</SectionTitle>
-      <SegSelect value={settings.aperture} onChange={(v: ApertureKind) => setSettings({ ...settings, aperture: v, experimentId: v === 'slit' ? 'opt-031' : 'opt-032' })} options={[{ value: 'slit', label: '单缝' }, { value: 'circle', label: '圆孔' }]} />
+      <SegSelect value={settings.aperture} onChange={(v: ApertureKind) => setSettings({ ...settings, aperture: v, experimentId: v === 'slit' ? 'opt-031' : 'opt-032' })} options={[{ value: 'slit', label: '单缝' }, { value: 'circle', label: '圆孔' }, { value: 'disk', label: '圆板' }]} />
 
       <SectionTitle aside="PARAMS">参数调节</SectionTitle>
       {settings.aperture === 'slit'
         ? <Slider label="缝宽 a" value={settings.slitWidth} onChange={(v: number) => setSettings({ ...settings, slitWidth: v })} min={getParamSpec('slitWidth')?.min ?? 10} max={getParamSpec('slitWidth')?.max ?? 500} step={getParamSpec('slitWidth')?.step ?? 5} unit="μm" hint="缝越窄，中央亮纹越宽" />
-        : <Slider label="孔径 D" value={settings.diameter} onChange={(v: number) => setSettings({ ...settings, diameter: v })} min={getParamSpec('diameter')?.min ?? 20} max={getParamSpec('diameter')?.max ?? 1000} step={getParamSpec('diameter')?.step ?? 10} unit="μm" />}
+        : <Slider label={settings.aperture === 'disk' ? '圆板直径 D' : '孔径 D'} value={settings.diameter} onChange={(v: number) => setSettings({ ...settings, diameter: v })} min={getParamSpec('diameter')?.min ?? 20} max={getParamSpec('diameter')?.max ?? 1000} step={getParamSpec('diameter')?.step ?? 10} unit="μm" />}
       <Slider label="波长 λ" value={settings.wavelength} onChange={(v: number) => setSettings({ ...settings, wavelength: v })} min={getParamSpec('wavelength')?.min ?? 380} max={getParamSpec('wavelength')?.max ?? 780} step={getParamSpec('wavelength')?.step ?? 10} unit="nm" />
       <Slider label="屏距 L" value={settings.screenDistance} onChange={(v: number) => setSettings({ ...settings, screenDistance: v, screenX: settings.apertureX + v * 110 })} min={0.5} max={3.0} step={0.05} unit="m" />
 
@@ -500,7 +519,7 @@ function DiffractionControls({ settings, setSettings }: { settings: DiffractionS
 
       <SectionTitle aside="LAYOUT">布局</SectionTitle>
       <Slider label="光源位置 x" value={settings.sourceX} onChange={(v: number) => setSettings({ ...settings, sourceX: v })} min={50} max={180} step={1} unit="" />
-      <Slider label={`${settings.aperture === 'slit' ? '单缝' : '圆孔'}位置 x`} value={settings.apertureX} onChange={(v: number) => setSettings({ ...settings, apertureX: v, screenDistance: Number(((settings.screenX - v) / 110).toFixed(2)) })} min={220} max={430} step={1} unit="" />
+      <Slider label={`${settings.aperture === 'slit' ? '单缝' : settings.aperture === 'disk' ? '圆板' : '圆孔'}位置 x`} value={settings.apertureX} onChange={(v: number) => setSettings({ ...settings, apertureX: v, screenDistance: Number(((settings.screenX - v) / 110).toFixed(2)) })} min={220} max={430} step={1} unit="" />
       <Slider label="屏幕位置 x" value={settings.screenX} onChange={(v: number) => setSettings({ ...settings, screenX: v, screenDistance: Number(((v - settings.apertureX) / 110).toFixed(2)) })} min={settings.apertureX + 70} max={760} step={1} unit="" />
 
       <SectionTitle aside="DISPLAY">显示选项</SectionTitle>
@@ -530,29 +549,29 @@ function DiffractionReadouts({ settings }: { settings: DiffractionSettings }) {
       <SectionTitle aside="CORE">教学结论</SectionTitle>
       <div className="diff-readout-hero-grid">
         <div className="diff-summary-card primary">
-          <div className="diff-summary-label">{isSlit ? '中央主极大宽度' : '艾里斑半径'}</div>
+          <div className="diff-summary-label">{isSlit ? '中央主极大宽度' : settings.aperture === 'disk' ? '泊松亮斑尺度' : '艾里斑半径'}</div>
           <div className="diff-summary-value mono">{fmt(primaryMm, 3)} <span>mm</span></div>
-          <div className="diff-summary-note">{isSlit ? '中央主峰左右第一极小之间的距离' : '中央亮斑到第一暗环的半径'}</div>
+          <div className="diff-summary-note">{isSlit ? '中央主峰左右第一极小之间的距离' : settings.aperture === 'disk' ? '圆板阴影中心出现亮斑，外围有弱环纹。' : '中央亮斑到第一暗环的半径'}</div>
         </div>
         <div className="diff-summary-card">
           <div className="diff-summary-label">变化趋势</div>
-          <div className="diff-summary-text">{isSlit ? 'a ↓ 或 λ ↑ => 中央主极大变宽' : 'D ↓ 或 λ ↑ => 艾里斑变大'}</div>
-          <div className="diff-summary-note">{isSlit ? '中央亮纹最宽最亮，是单缝讲解的主结论。' : '艾里斑的尺寸由孔径和波长共同决定。'}</div>
+          <div className="diff-summary-text">{isSlit ? 'a ↓ 或 λ ↑ => 中央主极大变宽' : settings.aperture === 'disk' ? 'D ↓ 或 λ ↑ => 泊松亮斑及弱环尺度变大' : 'D ↓ 或 λ ↑ => 艾里斑变大'}</div>
+          <div className="diff-summary-note">{isSlit ? '中央亮纹最宽最亮，是单缝讲解的主结论。' : settings.aperture === 'disk' ? '泊松亮斑来自圆板边缘衍射在阴影中心相干增强。' : '艾里斑的尺寸由孔径和波长共同决定。'}</div>
         </div>
       </div>
 
       <SectionTitle aside="LIVE">实时数值</SectionTitle>
       <div className="readouts">
-        {isSlit ? <Readout label="缝宽 a" value={settings.slitWidth} unit="μm" /> : <Readout label="孔径 D" value={settings.diameter} unit="μm" />}
+        {isSlit ? <Readout label="缝宽 a" value={settings.slitWidth} unit="μm" /> : <Readout label={settings.aperture === 'disk' ? '圆板直径 D' : '孔径 D'} value={settings.diameter} unit="μm" />}
         <Readout label="波长 λ" value={settings.wavelength} unit="nm" />
         <Readout label="屏距 L" value={L.toFixed(2)} unit="m" />
         <Readout label="布局间距" value={(settings.screenX - settings.apertureX).toFixed(0)} unit="px" />
-        {isSlit ? <Readout label="第一极小 y₁" value={fmt(firstMinMm, 3)} unit="mm" /> : <Readout label="第一暗环 r₁" value={fmt(firstMinMm, 3)} unit="mm" />}
-        <Readout label={isSlit ? '中央主极大宽度' : '艾里斑半径'} value={fmt(primaryMm, 3)} unit="mm" hi />
+        {isSlit ? <Readout label="第一极小 y₁" value={fmt(firstMinMm, 3)} unit="mm" /> : <Readout label={settings.aperture === 'disk' ? '弱环参考半径' : '第一暗环 r₁'} value={fmt(firstMinMm, 3)} unit="mm" />}
+        <Readout label={isSlit ? '中央主极大宽度' : settings.aperture === 'disk' ? '泊松亮斑尺度' : '艾里斑半径'} value={fmt(primaryMm, 3)} unit="mm" hi />
       </div>
       {settings.showFormula && (
         <>
-          <SectionTitle aside={isSlit ? 'FRAUNHOFER' : 'AIRY'}>公式</SectionTitle>
+          <SectionTitle aside={isSlit ? 'FRAUNHOFER' : settings.aperture === 'disk' ? 'POISSON' : 'AIRY'}>公式</SectionTitle>
           <FormulaBlock>
             {isSlit ? (
               <>
@@ -560,6 +579,11 @@ function DiffractionReadouts({ settings }: { settings: DiffractionSettings }) {
                 <span className="step"><span className="lhs">y₁ ≈ Lλ/a</span></span>
                 <span className="step"><span className="lhs">中央主极大宽度</span><span className="eq">≈</span><span className="rhs">2Lλ/a = <span className="hi">{fmt(primaryMm, 3)} mm</span></span></span>
                 <span className="step"><span className="lhs">y₁</span><span className="eq">=</span><span className="rhs"><span className="hi">{fmt(firstMinMm, 3)} mm</span></span></span>
+              </>
+            ) : settings.aperture === 'disk' ? (
+              <>
+                <span className="step">圆板边缘衍射波在几何阴影中心等光程叠加，形成泊松亮斑。</span>
+                <span className="step"><span className="lhs">特征尺度</span><span className="eq">≈</span><span className="rhs">1.22 Lλ/D = <span className="hi">{fmt(primaryMm, 3)} mm</span></span></span>
               </>
             ) : (
               <>

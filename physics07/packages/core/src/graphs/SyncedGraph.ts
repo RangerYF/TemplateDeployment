@@ -90,8 +90,7 @@ export class SyncedGraph {
     const w = this.width;
     const h = this.height;
 
-    // Background
-    ctx.fillStyle = '#080e1a';
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, w, h);
 
     if (this.traces.length === 0) return;
@@ -106,8 +105,8 @@ export class SyncedGraph {
       const gy = this.plotTop + (plotH * i) / 5;
       const grad = ctx.createLinearGradient(this.plotLeft, gy, this.plotLeft + plotW, gy);
       grad.addColorStop(0, 'transparent');
-      grad.addColorStop(0.1, 'rgba(255,255,255,0.03)');
-      grad.addColorStop(0.9, 'rgba(255,255,255,0.03)');
+      grad.addColorStop(0.1, 'rgba(0,0,0,0.06)');
+      grad.addColorStop(0.9, 'rgba(0,0,0,0.06)');
       grad.addColorStop(1, 'transparent');
       ctx.strokeStyle = grad;
       ctx.lineWidth = 0.5;
@@ -117,8 +116,7 @@ export class SyncedGraph {
       ctx.stroke();
     }
 
-    // Tick labels
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.font = '10px -apple-system, sans-serif';
     ctx.textAlign = 'center';
     for (let i = 0; i <= 5; i++) {
@@ -207,9 +205,9 @@ export class SyncedGraph {
       const cursorX = this.plotLeft + ((this.currentTime - xMin) / (xMax - xMin)) * plotW;
       if (cursorX >= this.plotLeft && cursorX <= this.plotLeft + plotW) {
         const cursorGrad = ctx.createLinearGradient(cursorX, this.plotTop, cursorX, this.plotTop + plotH);
-        cursorGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
-        cursorGrad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-        cursorGrad.addColorStop(1, 'rgba(255,255,255,0.4)');
+        cursorGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+        cursorGrad.addColorStop(0.5, 'rgba(0,0,0,0.08)');
+        cursorGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
         ctx.strokeStyle = cursorGrad;
         ctx.lineWidth = 1;
         ctx.setLineDash([2, 3]);
@@ -223,10 +221,10 @@ export class SyncedGraph {
         const timeText = `${this.currentTime.toFixed(2)}s`;
         ctx.font = 'bold 9px -apple-system, sans-serif';
         const tw = ctx.measureText(timeText).width + 6;
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
         roundRect(ctx, cursorX - tw / 2, this.plotTop - 14, tw, 13, 3);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(timeText, cursorX, this.plotTop - 7.5);
@@ -235,7 +233,7 @@ export class SyncedGraph {
 
     // Title
     if (this.title) {
-      ctx.fillStyle = 'rgba(139, 156, 184, 0.7)';
+      ctx.fillStyle = '#333333';
       ctx.font = 'bold 11px -apple-system, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(this.title, w / 2, 14);
@@ -260,8 +258,7 @@ export class SyncedGraph {
       legendY += 13;
     }
 
-    // Axis labels
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.font = '10px -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(this.xLabel, this.plotLeft + plotW / 2, h - 4);
@@ -272,8 +269,7 @@ export class SyncedGraph {
     ctx.fillText(this.yLabel, 0, 0);
     ctx.restore();
 
-    // Plot area border (very subtle)
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
     ctx.lineWidth = 0.5;
     ctx.strokeRect(this.plotLeft, this.plotTop, plotW, plotH);
   }

@@ -1,29 +1,26 @@
 export interface LayoutElements {
   root: HTMLElement;
-  sidebar: HTMLElement;
+  leftSidebar: HTMLElement;
+  rightSidebar: HTMLElement;
   canvas: HTMLElement;
   bottomPanel: HTMLElement;
   controlBar: HTMLElement;
   title: HTMLElement;
+  tabBar: HTMLElement;
+  subtitleLine: HTMLElement;
+  /** @deprecated Use leftSidebar or rightSidebar */
+  sidebar: HTMLElement;
 }
 
-/**
- * Creates a 1920x1080-optimized layout:
- * - Left sidebar: 280px (parameter panel)
- * - Center: canvas area (auto-fill)
- * - Bottom: 280px (graphs + playback controls)
- */
 export function createLayout(container: HTMLElement, titleText: string): LayoutElements {
   container.innerHTML = '';
 
   const root = document.createElement('div');
   root.className = 'layout-root';
 
-  // Title bar
   const title = document.createElement('div');
   title.className = 'layout-title';
 
-  // Home button
   const homeBtn = document.createElement('a');
   homeBtn.className = 'home-btn';
   homeBtn.href = 'index.html';
@@ -31,37 +28,62 @@ export function createLayout(container: HTMLElement, titleText: string): LayoutE
   homeBtn.innerHTML = '⌂';
   title.appendChild(homeBtn);
 
-  // Title text
   const titleSpan = document.createElement('span');
   titleSpan.textContent = titleText;
   title.appendChild(titleSpan);
 
-  // Main area (sidebar + canvas)
-  const main = document.createElement('div');
-  main.className = 'layout-main';
+  const tabBar = document.createElement('div');
+  tabBar.className = 'scene-tab-bar';
+  title.appendChild(tabBar);
 
-  const sidebar = document.createElement('div');
-  sidebar.className = 'layout-sidebar';
+  const subtitleLine = document.createElement('div');
+  subtitleLine.className = 'layout-subtitle';
+
+  const body = document.createElement('div');
+  body.className = 'layout-body';
+
+  const leftSidebar = document.createElement('div');
+  leftSidebar.className = 'layout-left-sidebar';
+
+  const center = document.createElement('div');
+  center.className = 'layout-center';
 
   const canvasArea = document.createElement('div');
   canvasArea.className = 'layout-canvas';
 
-  main.appendChild(sidebar);
-  main.appendChild(canvasArea);
-
-  // Bottom panel (graphs + controls)
   const bottomPanel = document.createElement('div');
   bottomPanel.className = 'layout-bottom';
 
   const controlBar = document.createElement('div');
   controlBar.className = 'layout-controls';
 
+  center.appendChild(canvasArea);
+  center.appendChild(bottomPanel);
+  center.appendChild(controlBar);
+
+  const rightSidebar = document.createElement('div');
+  rightSidebar.className = 'layout-right-sidebar';
+
+  body.appendChild(leftSidebar);
+  body.appendChild(center);
+  body.appendChild(rightSidebar);
+
   root.appendChild(title);
-  root.appendChild(main);
-  root.appendChild(bottomPanel);
-  root.appendChild(controlBar);
+  root.appendChild(subtitleLine);
+  root.appendChild(body);
 
   container.appendChild(root);
 
-  return { root, sidebar, canvas: canvasArea, bottomPanel, controlBar, title };
+  return {
+    root,
+    leftSidebar,
+    rightSidebar,
+    canvas: canvasArea,
+    bottomPanel,
+    controlBar,
+    title,
+    tabBar,
+    subtitleLine,
+    sidebar: rightSidebar,
+  };
 }

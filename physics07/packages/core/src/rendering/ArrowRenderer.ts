@@ -127,8 +127,7 @@ export class ArrowRenderer {
       const tw = textMetrics.width + 12;
       const th = 22;
 
-      // Background pill with border
-      ctx.fillStyle = 'rgba(5, 10, 18, 0.8)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.strokeStyle = adjustAlpha(options.color, 0.2);
       ctx.lineWidth = 0.5;
       ctx.beginPath();

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Viewport } from '@/canvas/Viewport';
+import { Viewport, centerOriginViewport } from '@/canvas/Viewport';
 import { useFunctionStore } from '@/editor/store/functionStore';
 import { editorInstance } from '@/editor/core/Editor';
 import { COLORS } from '@/styles/colors';
@@ -70,6 +70,12 @@ export function ViewportPanel() {
     editorInstance?.setViewport(
       new Viewport(-10, 10, -6, 6, current?.width ?? 800, current?.height ?? 600),
     );
+  };
+
+  const handleCenterOrigin = () => {
+    const current = editorInstance?.getViewport();
+    if (!current) return;
+    editorInstance?.setViewport(centerOriginViewport(current));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -157,25 +163,24 @@ export function ViewportPanel() {
             </p>
           )}
 
-          {/* Reset viewport */}
-          <button
-            onClick={handleReset}
-            style={{
-              width: '100%',
-              marginTop: '4px',
-              padding: '5px',
-              fontSize: '12px',
-              borderRadius: '10px',
-              border: `1px solid ${COLORS.border}`,
-              background: COLORS.surface,
-              color: COLORS.textSecondary,
-              cursor: 'pointer',
-              transition: 'background 0.12s',
-            }}
-            {...btnHover(COLORS.surfaceAlt, COLORS.surface)}
-          >
-            重置视口
-          </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '4px' }}>
+            <button
+              onClick={handleCenterOrigin}
+              title="保持当前缩放比例，将原点移到中心"
+              style={actionButtonStyle}
+              {...btnHover(COLORS.surfaceAlt, COLORS.surface)}
+            >
+              原点居中
+            </button>
+            <button
+              onClick={handleReset}
+              title="重置到默认视口范围"
+              style={actionButtonStyle}
+              {...btnHover(COLORS.surfaceAlt, COLORS.surface)}
+            >
+              重置视图
+            </button>
+          </div>
         </>
       )}
     </div>
@@ -212,4 +217,16 @@ const inputStyle: React.CSSProperties = {
   color: COLORS.textPrimary,
   outline: 'none',
   textAlign: 'right',
+};
+
+const actionButtonStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '5px',
+  fontSize: '12px',
+  borderRadius: '10px',
+  border: `1px solid ${COLORS.border}`,
+  background: COLORS.surface,
+  color: COLORS.textSecondary,
+  cursor: 'pointer',
+  transition: 'background 0.12s',
 };

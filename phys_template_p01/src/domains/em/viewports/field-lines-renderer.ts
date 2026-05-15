@@ -39,26 +39,42 @@ export function renderFieldLines(
   options?: {
     showFieldLines?: boolean;
     showEquipotentialLines?: boolean;
+    depthStrength?: number;
+    perspectiveDeg?: number;
   },
 ): void {
   const ct = coordinateTransform;
   const showFieldLines = options?.showFieldLines ?? true;
   const showEquipotentialLines = options?.showEquipotentialLines ?? true;
+  const depthStrength = clamp(options?.depthStrength ?? 0, 0, 1);
+  const perspectiveDeg = options?.perspectiveDeg ?? 0;
 
   // ─── 电场线 ─────────────────────────────────────
   if (showFieldLines) {
-    for (const line of fieldLines) {
+    const projectedLines = fieldLines
+      .map((line) => ({
+        line,
+        screenPts: line.points.map((point) => projectFieldPoint(toScreen(point, ct), point, depthStrength, perspectiveDeg)),
+        depth: computeAverageDepth(line.points),
+      }))
+      .sort((left, right) => left.depth - right.depth);
+
+    for (const projected of projectedLines) {
+      const { line, screenPts, depth } = projected;
       if (line.points.length < 2) continue;
 
       const color = line.sourceSign === 1 ? POSITIVE_COLOR : NEGATIVE_COLOR;
-      const screenPts = line.points.map(p => toScreen(p, ct));
+      const alpha = lerp(0.32, 0.88, 1 - ((depthStrength * 0.5) + (depth * 0.5)));
+      const widthScale = lerp(0.82, 1.22, 1 - ((depthStrength * 0.45) + (depth * 0.55)));
 
-      // 绘制平滑曲线（quadratic bezier 通过中点）
       c.save();
       c.strokeStyle = color;
-      c.lineWidth = LINE_WIDTH;
+      c.lineWidth = LINE_WIDTH * widthScale;
       c.lineJoin = 'round';
       c.lineCap = 'round';
+      c.globalAlpha = alpha;
+      c.shadowColor = color;
+      c.shadowBlur = lerp(1.5, 8, depthStrength * (1 - depth));
 
       c.beginPath();
       c.moveTo(screenPts[0]!.x, screenPts[0]!.y);
@@ -82,8 +98,14 @@ export function renderFieldLines(
       c.stroke();
       c.restore();
 
-      // 在曲线上绘制方向箭头
-      drawDirectionArrows(c, screenPts, color, line.sourceSign === -1 ? -1 : 1);
+      drawDirectionArrows(
+        c,
+        screenPts,
+        color,
+        line.sourceSign === -1 ? -1 : 1,
+        alpha,
+        widthScale,
+      );
     }
   }
 
@@ -95,17 +117,17 @@ export function renderFieldLines(
     c.setLineDash([6, 4]);
     c.lineJoin = 'round';
     c.lineCap = 'round';
-    c.globalAlpha = 0.7;
+    c.globalAlpha = lerp(0.54, 0.74, 1 - (depthStrength * 0.5));
 
     for (const eqLine of equipotentialLines) {
       if (eqLine.points.length < 2) continue;
 
       c.beginPath();
-      const sp0 = toScreen(eqLine.points[0]!, ct);
+      const sp0 = projectFieldPoint(toScreen(eqLine.points[0]!, ct), eqLine.points[0]!, depthStrength, perspectiveDeg);
       c.moveTo(sp0.x, sp0.y);
 
       for (let i = 1; i < eqLine.points.length; i++) {
-        const sp = toScreen(eqLine.points[i]!, ct);
+        const sp = projectFieldPoint(toScreen(eqLine.points[i]!, ct), eqLine.points[i]!, depthStrength, perspectiveDeg);
         c.lineTo(sp.x, sp.y);
       }
       c.stroke();
@@ -122,6 +144,8 @@ function drawDirectionArrows(
   screenPts: Vec2[],
   color: string,
   direction: 1 | -1 = 1,
+  alpha: number = 1,
+  widthScale: number = 1,
 ): void {
   if (screenPts.length < 2) return;
 
@@ -166,18 +190,19 @@ function drawDirectionArrows(
     // 三角形箭头（等腰三角形，尖端朝前进方向）
     c.save();
     c.fillStyle = color;
+    c.globalAlpha = alpha;
     c.beginPath();
     c.moveTo(
-      px + ARROW_SIZE * Math.cos(angle),
-      py + ARROW_SIZE * Math.sin(angle),
+      px + (ARROW_SIZE * widthScale) * Math.cos(angle),
+      py + (ARROW_SIZE * widthScale) * Math.sin(angle),
     );
     c.lineTo(
-      px + ARROW_SIZE * Math.cos(angle + 2.5),
-      py + ARROW_SIZE * Math.sin(angle + 2.5),
+      px + (ARROW_SIZE * widthScale) * Math.cos(angle + 2.5),
+      py + (ARROW_SIZE * widthScale) * Math.sin(angle + 2.5),
     );
     c.lineTo(
-      px + ARROW_SIZE * Math.cos(angle - 2.5),
-      py + ARROW_SIZE * Math.sin(angle - 2.5),
+      px + (ARROW_SIZE * widthScale) * Math.cos(angle - 2.5),
+      py + (ARROW_SIZE * widthScale) * Math.sin(angle - 2.5),
     );
     c.closePath();
     c.fill();
@@ -185,4 +210,41 @@ function drawDirectionArrows(
 
     nextArrowDist += ARROW_INTERVAL_PX;
   }
+}
+
+function projectFieldPoint(
+  screenPoint: Vec2,
+  worldPoint: Vec2,
+  depthStrength: number,
+  perspectiveDeg: number,
+): Vec2 {
+  if (depthStrength <= 1e-3 && Math.abs(perspectiveDeg) <= 1e-3) return screenPoint;
+
+  const tilt = (perspectiveDeg * Math.PI) / 180;
+  const depth = computePointDepth(worldPoint);
+  const perspectiveScale = 1 - (depthStrength * 0.12 * depth);
+  const elevatedY = screenPoint.y - (Math.sin(tilt) * depthStrength * 26 * depth);
+
+  return {
+    x: screenPoint.x * perspectiveScale + (1 - perspectiveScale) * screenPoint.x,
+    y: elevatedY,
+  };
+}
+
+function computePointDepth(point: Vec2): number {
+  return clamp((point.y + 1.4) / 2.8, 0, 1);
+}
+
+function computeAverageDepth(points: Vec2[]): number {
+  if (points.length === 0) return 0;
+  const total = points.reduce((sum, point) => sum + computePointDepth(point), 0);
+  return total / points.length;
+}
+
+function lerp(start: number, end: number, t: number): number {
+  return start + ((end - start) * t);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }

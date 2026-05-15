@@ -69,6 +69,8 @@ import p13SingleRodResistivePreset from './presets/p13-single-rod-resistive.json
 import p13SingleRodWithSourcePreset from './presets/p13-single-rod-with-source.json';
 import p13SingleRodWithCapacitorPreset from './presets/p13-single-rod-with-capacitor.json';
 import p13DoubleRodBasicPreset from './presets/p13-double-rod-basic.json';
+import p13DoubleRodDrivenPreset from './presets/p13-double-rod-driven.json';
+import p13VerticalRailRodPreset from './presets/p13-vertical-rail-rod.json';
 import voltammetryInternalPreset from './presets/voltammetry-internal.json';
 import voltammetryExternalPreset from './presets/voltammetry-external.json';
 import measureEmfRPreset from './presets/measure-emf-r.json';
@@ -188,6 +190,8 @@ export function registerEmDomain(): void {
   presetRegistry.register(p13SingleRodWithSourcePreset as unknown as PresetData);
   presetRegistry.register(p13SingleRodWithCapacitorPreset as unknown as PresetData);
   presetRegistry.register(p13DoubleRodBasicPreset as unknown as PresetData);
+  presetRegistry.register(p13DoubleRodDrivenPreset as unknown as PresetData);
+  presetRegistry.register(p13VerticalRailRodPreset as unknown as PresetData);
   presetRegistry.register(voltammetryInternalPreset as unknown as PresetData);
   presetRegistry.register(voltammetryExternalPreset as unknown as PresetData);
   presetRegistry.register(measureEmfRPreset as unknown as PresetData);

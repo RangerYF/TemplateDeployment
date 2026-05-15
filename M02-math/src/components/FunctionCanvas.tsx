@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Viewport } from '@/canvas/Viewport';
+import { Viewport, centerOriginViewport } from '@/canvas/Viewport';
 import { initEditor, editorInstance } from '@/editor/core/Editor';
 import type { Editor } from '@/editor/core/Editor';
 import { PanZoomTool } from '@/editor/tools/PanZoomTool';
@@ -820,8 +820,14 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     };
   }, []);
 
-  // ── Recenter handler — resets viewport to default ─────────────────────
-  const handleRecenter = () => {
+  // ── Viewport helpers ──────────────────────────────────────────────────
+  const handleCenterOrigin = () => {
+    const current = editorRef.current?.getViewport();
+    if (!current) return;
+    editorRef.current?.setViewport(centerOriginViewport(current));
+  };
+
+  const handleResetViewport = () => {
     const vp = new Viewport(-10, 10, -6, 6, canvasSize.width, canvasSize.height);
     editorRef.current?.setViewport(vp);
     useFunctionStore.getState().setViewport({ xMin: -10, xMax: 10, yMin: -6, yMax: 6 });
@@ -932,32 +938,30 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       <AnimationHUD />
       {/* Debug overlay — Ctrl+Shift+D in dev mode */}
       <DebugOverlay debugInfo={debugInfo} />
-      {/* Recenter button — bottom-right, light card style */}
-      <button
-        onClick={handleRecenter}
-        title="重置视图 (回到中心)"
+      {/* Viewport quick actions — bottom-right, light card style */}
+      <div
         style={{
           position: 'absolute',
           bottom: 12,
           right: 10,
-          padding: '5px 12px',
-          fontSize: '11px',
-          fontWeight: 500,
-          background: COLORS.surface,
-          color: COLORS.textSecondary,
-          border: `1px solid ${COLORS.border}`,
-          borderRadius: '8px',
-          cursor: 'pointer',
+          display: 'flex',
+          gap: 6,
           zIndex: 10,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-          transition: 'background 0.12s, color 0.12s',
-          lineHeight: '1.5',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.surfaceAlt; e.currentTarget.style.color = COLORS.textPrimary; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.surface; e.currentTarget.style.color = COLORS.textSecondary; }}
       >
-        重置视图
-      </button>
+        <ViewportActionButton
+          onClick={handleCenterOrigin}
+          title="保持当前缩放比例，将原点移到画布中心"
+        >
+          原点居中
+        </ViewportActionButton>
+        <ViewportActionButton
+          onClick={handleResetViewport}
+          title="重置视图到默认范围"
+        >
+          重置视图
+        </ViewportActionButton>
+      </div>
 
       {/* Right-click context menu */}
       {ctxMenu && (
@@ -984,6 +988,40 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     </div>
   );
 });
+
+function ViewportActionButton({
+  onClick,
+  title,
+  children,
+}: {
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+          padding: '5px 12px',
+          fontSize: '11px',
+          fontWeight: 500,
+          background: COLORS.surface,
+          color: COLORS.textSecondary,
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+          transition: 'background 0.12s, color 0.12s',
+          lineHeight: '1.5',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = COLORS.surfaceAlt; e.currentTarget.style.color = COLORS.textPrimary; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.surface; e.currentTarget.style.color = COLORS.textSecondary; }}
+      >
+      {children}
+    </button>
+  );
+}
 
 // ─── Context menu overlay ────────────────────────────────────────────────────
 

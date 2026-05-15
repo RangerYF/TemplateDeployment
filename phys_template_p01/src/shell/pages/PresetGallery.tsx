@@ -17,47 +17,50 @@ const CATEGORY_LABELS: Record<string, string> = {
   'P-13': '电磁感应',
 };
 
+const MERGED_P04_PRESET_IDS = new Set([
+  'P04-CIR-EXP001-voltammetry-internal',
+  'P04-CIR-EXP002-voltammetry-external',
+  'P04-CIR-EXP003-half-deflection-ammeter',
+  'P04-CIR-EXP003-half-deflection-voltmeter',
+  'P04-CIR-EXP004-measure-emf-r',
+  'P04-CIR-EXP004-measure-emf-r-divider',
+  'P04-CIR-EXP005-ohmmeter',
+  'P04-CIR-EXP007-voltammetry-compare',
+]);
+
 /** 专题实验（独立页面，不走 simulator 流程） */
 const SPECIAL_EXPERIMENTS = [
   {
-    id: '__meter-error__',
-    hash: 'meter-error',
-    name: '电表测量误差对比',
-    description: '对比理想电路、电压表内接法、外接法的测量差异，实时显示误差与推荐方案',
-    category: 'P-04',
-    icon: '📊',
-  },
-  {
-    id: '__measure-emf-compare__',
+    id: '__measure-emf-combined__',
     hash: 'measure-emf-compare',
-    name: '测电源E/r内外接对比',
-    description: '同屏比较理想、内接法、外接法的 U-I 图线、拟合值和误差变化',
+    name: '测电源电动势及内阻',
+    description: '合并限流接法、分压接法与 U-I 图像法，在同一实验页中切换并比较测量结果。',
     category: 'P-04',
     icon: '📈',
   },
   {
-    id: '__half-deflection-compare__',
+    id: '__slider-connection__',
+    hash: 'measure-emf-compare',
+    name: '滑动变阻器接法',
+    description: '分压式与限流式已并入同一实验页，不再拆成重复模块。',
+    category: 'P-04',
+    icon: '🎚️',
+  },
+  {
+    id: '__half-deflection-combined__',
     hash: 'half-deflection-compare',
-    name: '半偏法内阻对比',
-    description: '切换电流表半偏/电压表半偏，观察滑动变阻器阻值与误差的关系',
+    name: '半偏法测电表内阻',
+    description: '在一个实验页中切换电流表半偏法与电压表半偏法，统一查看标准电路图、步骤和误差。',
     category: 'P-04',
     icon: '📉',
   },
   {
-    id: '__ohmmeter-midpoint-compare__',
-    hash: 'ohmmeter-midpoint-compare',
-    name: '欧姆表中值电阻对比',
-    description: '比较理想调零与当前调零状态，直观看出 Rx=R中 时的半偏关系',
+    id: '__meter-family__',
+    hash: 'meter-conversion',
+    name: '电表改装与欧姆表',
+    description: '合并电流表改装、电压表改装、欧姆表原理与相关专题入口，内部再做 tab 切换。',
     category: 'P-04',
-    icon: '🎯',
-  },
-  {
-    id: '__meter-reading-trainer__',
-    hash: 'meter-reading-trainer',
-    name: '电表表头读数训练',
-    description: '训练常见电流表、电压表、灵敏电流计的表盘读数，支持整格和半格估读',
-    category: 'P-04',
-    icon: '🧭',
+    icon: '🛠️',
   },
   {
     id: '__voltage-resistance-method__',
@@ -76,12 +79,12 @@ const SPECIAL_EXPERIMENTS = [
     icon: '🔍',
   },
   {
-    id: '__meter-conversion__',
-    hash: 'meter-conversion',
-    name: '电表改装实验',
-    description: '切换分流与分压两种改装方式，观察量程、电路分配、刻度和误差如何同步变化',
+    id: '__meter-reading-trainer__',
+    hash: 'meter-reading-trainer',
+    name: '电表表头读数训练',
+    description: '训练常见电流表、电压表、灵敏电流计的表盘读数，支持整格和半格估读。',
     category: 'P-04',
-    icon: '🛠️',
+    icon: '🧭',
   },
 ];
 
@@ -219,7 +222,7 @@ export function PresetGallery({
                         className="mt-2 text-sm leading-6"
                         style={{ color: COLORS.textMuted }}
                       >
-                        从独立入口查看当前已开放的基础样例、EMI-001、单棒模型族与双棒 EMI-021，并为后续分支保留清晰扩展结构。
+                        从独立入口查看基础动生、楞次定律、单棒、双棒、竖直导轨和自由组装入口。
                       </div>
                     </div>
                   </div>
@@ -237,7 +240,7 @@ export function PresetGallery({
 
         {categories.map((cat) => {
           const presets = filterVisiblePresets(presetRegistry.getByCategory(cat)).filter(
-            (preset) => !P08_PRESET_IDS.has(preset.id),
+            (preset) => !P08_PRESET_IDS.has(preset.id) && !MERGED_P04_PRESET_IDS.has(preset.id),
           );
           const experiments = SPECIAL_EXPERIMENTS.filter((exp) => exp.category === cat);
           if (presets.length === 0 && experiments.length === 0) return null;

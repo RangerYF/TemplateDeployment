@@ -26,6 +26,7 @@ type ParamKey = keyof Transform;
 interface ParamSpec {
   key:    ParamKey;
   label:  string;
+  displayLabel: string;
   min:    number;
   max:    number;
   skipZ:  boolean;
@@ -34,11 +35,14 @@ interface ParamSpec {
 }
 
 const PARAMS: ParamSpec[] = [
-  { key: 'a', label: 'a', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0 },
-  { key: 'b', label: 'b', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0 },
-  { key: 'h', label: 'h', min: -100, max: 100, skipZ: false, demoTo: 3.0,
+  { key: 'a', label: 'a', displayLabel: 'A', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0,
+    hint: '纵向缩放：A>1 拉高，0<A<1 压扁，A<0 关于 x 轴翻折' },
+  { key: 'b', label: 'b', displayLabel: 'B', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0,
+    hint: '横向缩放：|B| 越大图像越窄，B<0 关于 y 轴翻折' },
+  { key: 'h', label: 'h', displayLabel: 'H', min: -100, max: 100, skipZ: false, demoTo: 3.0,
     hint: 'f(x−h)：h>0 右移，h<0 左移' },
-  { key: 'k', label: 'k', min: -100, max: 100, skipZ: false, demoTo: 2.0 },
+  { key: 'k', label: 'k', displayLabel: 'K', min: -100, max: 100, skipZ: false, demoTo: 2.0,
+    hint: '纵向平移：K>0 上移，K<0 下移' },
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -117,7 +121,7 @@ export function TransformPanel() {
         fnId,
         { transform: { ...before } },
         { transform: { ...transform, [key]: value } },
-        `调整 ${key} (${(before[key] as number).toFixed(1)} → ${value.toFixed(1)})`,
+        `调整 ${spec.displayLabel} (${(before[key] as number).toFixed(1)} → ${value.toFixed(1)})`,
       ),
     );
   };
@@ -162,7 +166,7 @@ export function TransformPanel() {
         fnId,
         { transform: { ...transform } },
         { transform: { ...transform, [key]: value } },
-        `调整 ${key} → ${value.toFixed(2)}`,
+        `调整 ${spec.displayLabel} → ${value.toFixed(2)}`,
       ),
     );
     setDrafts((d) => ({ ...d, [key]: String(value) }));
@@ -215,7 +219,7 @@ export function TransformPanel() {
             fnId,
             { transform: capturedTransform },
             { transform: { ...capturedTransform, [key]: toValue } },
-            `演示 ${key} 动画`,
+            `演示 ${spec.displayLabel} 动画`,
           ),
         );
         setAnimatingParam(null);
@@ -229,17 +233,20 @@ export function TransformPanel() {
     <div style={{ marginBottom: '16px' }}>
       {/* Header */}
       <p style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary, margin: '0 0 4px' }}>
-        全局变换
+        图像变换
+      </p>
+      <p style={{ fontSize: '11px', color: COLORS.textSecondary, margin: '0 0 4px' }}>
+        这里控制整条图像；上方“函数参数”控制原函数本身。
       </p>
       <p style={{ fontSize: '11px', color: COLORS.textSecondary, margin: '0 0 10px', fontFamily: 'monospace' }}>
         y ={' '}
-        <span style={{ color: transform.a !== 1 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.a !== 1 ? 600 : 400 }}>a</span>
+        <span style={{ color: transform.a !== 1 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.a !== 1 ? 600 : 400 }}>A</span>
         {' · f('}
-        <span style={{ color: transform.b !== 1 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.b !== 1 ? 600 : 400 }}>b</span>
+        <span style={{ color: transform.b !== 1 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.b !== 1 ? 600 : 400 }}>B</span>
         {'(x − '}
-        <span style={{ color: transform.h !== 0 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.h !== 0 ? 600 : 400 }}>h</span>
+        <span style={{ color: transform.h !== 0 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.h !== 0 ? 600 : 400 }}>H</span>
         {')) + '}
-        <span style={{ color: transform.k !== 0 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.k !== 0 ? 600 : 400 }}>k</span>
+        <span style={{ color: transform.k !== 0 ? COLORS.primary : COLORS.textSecondary, fontWeight: transform.k !== 0 ? 600 : 400 }}>K</span>
       </p>
 
       {/* Slider rows */}
@@ -257,7 +264,7 @@ export function TransformPanel() {
             }}>
               {/* Param label */}
               <span style={{ fontSize: '13px', fontWeight: 600, color: COLORS.primary, fontFamily: 'monospace' }}>
-                {spec.label}
+                {spec.displayLabel}
               </span>
 
               {/* Slider */}
@@ -300,7 +307,7 @@ export function TransformPanel() {
               {/* Demo button */}
               <button
                 onClick={() => handleDemo(spec)}
-                title={isAnim ? '停止演示' : `演示 ${spec.key} 动画`}
+                title={isAnim ? '停止演示' : `演示 ${spec.displayLabel} 动画`}
                 style={{
                   background: isAnim ? COLORS.primary : COLORS.surfaceAlt,
                   border:     `1px solid ${isAnim ? COLORS.primaryHover : COLORS.border}`,

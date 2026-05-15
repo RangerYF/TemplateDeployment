@@ -203,19 +203,12 @@ export class CanvasManager {
 
   // ===== Clear with optional vignette =====
 
-  clear(bgColor: string = '#050a12'): void {
+  clear(bgColor: string = '#FAFAFA'): void {
     const ctx = this.ctx;
     const w = this.logicalWidth;
     const h = this.logicalHeight;
 
     ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, w, h);
-
-    // Subtle radial vignette
-    const vignette = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.8);
-    vignette.addColorStop(0, 'transparent');
-    vignette.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-    ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, w, h);
   }
 
@@ -264,7 +257,7 @@ export class CanvasManager {
 
     // Crisp outline
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = options?.outlineColor ?? `rgba(255,255,255,0.15)`;
+    ctx.strokeStyle = options?.outlineColor ?? `rgba(0,0,0,0.1)`;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -287,13 +280,13 @@ export class CanvasManager {
     // Secondary bottom rim light
     ctx.beginPath();
     ctx.arc(sx, sy + radiusPx * 0.2, radiusPx * 0.9, Math.PI * 0.15, Math.PI * 0.85);
-    ctx.strokeStyle = `rgba(255,255,255,0.04)`;
+    ctx.strokeStyle = `rgba(0,0,0,0.04)`;
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // Label
     if (options?.label) {
-      ctx.fillStyle = options.labelColor ?? 'rgba(255,255,255,0.95)';
+      ctx.fillStyle = options.labelColor ?? 'rgba(0,0,0,0.85)';
       ctx.font = `bold ${Math.max(10, radiusPx * 0.65)}px -apple-system, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -392,8 +385,8 @@ export class CanvasManager {
       const metrics = ctx.measureText(text);
       const tw = metrics.width + 10;
       const th = 20;
-      ctx.fillStyle = 'rgba(5, 10, 18, 0.75)';
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
       ctx.lineWidth = 0.5;
       const rx = options?.align === 'center' ? sx + ox - tw / 2 : sx + ox - 5;
       roundRect(ctx, rx, sy + oy - th / 2, tw, th, 4);
@@ -401,7 +394,7 @@ export class CanvasManager {
       ctx.stroke();
     }
 
-    ctx.fillStyle = options?.color ?? '#e2e8f0';
+    ctx.fillStyle = options?.color ?? '#1A1A1A';
     ctx.fillText(text, sx + ox, sy + oy);
     ctx.restore();
   }

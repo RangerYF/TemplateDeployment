@@ -186,7 +186,7 @@ export function EntityListPanel() {
                 ))}
                 <div style={{ borderTop: `1px solid ${COLORS.border}`, margin: '4px 8px' }} />
                 <MenuItem onClick={handleAddLine}>直线 (y=kx+b)</MenuItem>
-                <MenuItem onClick={handleAddImplicit}>自定义曲线 f(x,y)=0</MenuItem>
+                <MenuItem onClick={handleAddImplicit}>方程曲线 f(x,y)=0</MenuItem>
               </div>
             </>
           )}

@@ -134,6 +134,10 @@ export function BuilderEntityParamField({
     );
   }
 
+  if (schema.type === 'button') {
+    return null;
+  }
+
   const selectValue = String(currentValue ?? schema.default);
 
   return (

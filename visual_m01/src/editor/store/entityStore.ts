@@ -474,9 +474,14 @@ export const useEntityStore = create<EntityStoreState>()((set, get) => ({
   },
 
   loadSnapshot(snapshot) {
+    const maxNumericId = Object.keys(snapshot.entities).reduce((max, id) => {
+      const numericId = Number(id);
+      return Number.isInteger(numericId) && numericId > max ? numericId : max;
+    }, 0);
+
     set({
       entities: snapshot.entities,
-      nextId: snapshot.nextId,
+      nextId: Math.max(snapshot.nextId, maxNumericId + 1),
       activeGeometryId: snapshot.activeGeometryId,
     });
   },

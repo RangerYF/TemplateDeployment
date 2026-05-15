@@ -2,6 +2,7 @@
 const React = (window as any).React;
 
 type FilmKind = 'newton' | 'wedge' | 'soap';
+type WedgeProfile = 'linear' | 'convex' | 'concave';
 interface ThinFilmSettings {
   experimentId: 'opt-041' | 'opt-042' | 'opt-043';
   filmType: FilmKind;
@@ -10,6 +11,7 @@ interface ThinFilmSettings {
   filmN: number;
   lensR: number;
   wedgeAngle: number;
+  wedgeProfile?: WedgeProfile;
   showIntensity: boolean;
   showFormula: boolean;
 }
@@ -52,6 +54,27 @@ function newtonThicknessAtR(r_m: number, lensR: number): number {
 function newtonDiagramLensY(x: number, apexSag: number): number {
   const t = clamp((x - 120) / 240, 0, 1);
   return 180 - 2 * apexSag * t * (1 - t);
+}
+
+function putImageDataCover(ctx: CanvasRenderingContext2D, img: ImageData, width: number, height: number): void {
+  const bitmap = document.createElement('canvas');
+  bitmap.width = width;
+  bitmap.height = height;
+  bitmap.getContext('2d')?.putImageData(img, 0, 0);
+  ctx.drawImage(bitmap, 0, 0, width, height);
+}
+
+function wedgeAngleRad(angleMin: number): number {
+  return angleMin * Math.PI / 180 / 60;
+}
+
+function wedgeProfileThickness(x_m: number, angleMin: number, profile: WedgeProfile = 'linear'): number {
+  const base = Math.max(0, x_m) * Math.tan(wedgeAngleRad(angleMin));
+  const u = clamp(x_m / 0.030, 0, 1);
+  const curvature = Math.tan(wedgeAngleRad(angleMin)) * 0.030;
+  if (profile === 'convex') return base + 1.8 * curvature * u * u;
+  if (profile === 'concave') return Math.max(0, base + 1.8 * curvature * (2 * u - u * u));
+  return base;
 }
 
 function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
@@ -120,7 +143,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
       window.cancelAnimationFrame(frame);
       observer?.disconnect();
     };
-  }, [filmType, wavelength, thickness, filmN, lensR, wedgeAngle, settings.showIntensity, newtonSampleRatio]);
+  }, [filmType, wavelength, thickness, filmN, lensR, wedgeAngle, settings.wedgeProfile, settings.showIntensity, newtonSampleRatio]);
 
   function ringsIntensityAtR(r_m: number): number {
     const t = (r_m * r_m) / (2 * lensR);
@@ -128,7 +151,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
   }
 
   function wedgeIntensityAtX(x_m: number): number {
-    const t = Math.max(0, x_m) * Math.tan(wedgeAngle * Math.PI / 180 / 60);
+    const t = wedgeProfileThickness(x_m, wedgeAngle, settings.wedgeProfile ?? 'linear');
     return soapIntensityAtThickness(t, lam, filmN);
   }
 
@@ -153,7 +176,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     const img = ctx.createImageData(W, H);
 
     if (filmType === 'newton') {
-      const rMax = Math.sqrt(8 * lam * lensR / filmN);
+      const rMax = 0.0032;
       const scale = Math.min(W, H) / 2 / Math.max(rMax, 1e-9);
       const sampleRPx = newtonSampleR * scale;
       for (let py = 0; py < H; py++) {
@@ -170,7 +193,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
           img.data[idx + 3] = 255;
         }
       }
-      ctx.putImageData(img, 0, 0);
+      putImageDataCover(ctx, img, W, H);
       ctx.strokeStyle = 'rgba(255,255,255,0.72)';
       ctx.lineWidth = 1.3;
       ctx.beginPath();
@@ -195,7 +218,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     }
 
     if (filmType === 'wedge') {
-      const xMax = 50 * lam / (2 * filmN) / Math.max(Math.tan(wedgeAngle * Math.PI / 180 / 60), 1e-7);
+      const xMax = 0.030;
       for (let py = 0; py < H; py++) {
         for (let px = 0; px < W; px++) {
           const x_m = (px / W) * xMax;
@@ -208,7 +231,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
           img.data[idx + 3] = 255;
         }
       }
-      ctx.putImageData(img, 0, 0);
+      putImageDataCover(ctx, img, W, H);
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
       ctx.font = '12px JetBrains Mono, monospace';
       ctx.fillText('等厚干涉条纹', 12, 18);
@@ -237,7 +260,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
         img.data[idx + 3] = 255;
       }
     }
-    ctx.putImageData(img, 0, 0);
+    putImageDataCover(ctx, img, W, H);
     ctx.fillStyle = 'rgba(255,255,255,0.88)';
     ctx.font = '12px JetBrains Mono, monospace';
     ctx.fillText('白光下不同波长在不同厚度位置增强', 12, 18);
@@ -279,7 +302,7 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
     let detail = '';
 
     if (filmType === 'newton') {
-      const rMax = Math.sqrt(8 * lam * lensR / filmN);
+      const rMax = 0.0032;
       const r1 = Math.sqrt(1 * lam * lensR / filmN);
       const r5 = Math.sqrt(5 * lam * lensR / filmN);
       const xSample = m + (newtonSampleR / rMax) * plotW;
@@ -320,8 +343,8 @@ function ThinFilmModule({ settings }: { settings: ThinFilmSettings }) {
       ctx.fillText('I(r) 径向分布', m + 4, m + 12);
       ctx.fillText(`采样点：r = ${fmt(newtonSampleR * 1000)} mm`, W - m - 180, m + 12);
     } else if (filmType === 'wedge') {
-      const xMax = 50 * lam / (2 * filmN) / Math.max(Math.tan(wedgeAngle * Math.PI / 180 / 60), 1e-7);
-      const dx = lam / (2 * filmN * Math.max(Math.tan(wedgeAngle * Math.PI / 180 / 60), 1e-7));
+      const xMax = 0.030;
+      const dx = lam / (2 * filmN * Math.max(Math.tan(wedgeAngleRad(wedgeAngle)), 1e-7));
       ctx.strokeStyle = color;
       ctx.beginPath();
       for (let px = 0; px <= plotW; px++) {
@@ -498,49 +521,66 @@ function ThinFilmDiagram({
 
   if (filmType === 'wedge') {
     const hitX = 440;
-    const topY = 168 - (hitX - 286) / (688 - 286) * (168 - 72);
+    const profile = settings.wedgeProfile ?? 'linear';
+    const topPath = profile === 'linear'
+      ? 'M 286 128 L 688 72'
+      : profile === 'convex'
+        ? 'M 286 128 Q 500 18 688 72'
+        : 'M 286 128 Q 500 184 688 72';
+    const topYAt = (x: number): number => {
+      const t = clamp((x - 286) / (688 - 286), 0, 1);
+      if (profile === 'linear') return 128 + (72 - 128) * t;
+      const controlY = profile === 'convex' ? 18 : 184;
+      return (1 - t) * (1 - t) * 128 + 2 * (1 - t) * t * controlY + t * t * 72;
+    };
+    const topSlopeAt = (x: number): number => {
+      const t = clamp((x - 286) / (688 - 286), 0, 1);
+      if (profile === 'linear') return (72 - 128) / (688 - 286);
+      const controlY = profile === 'convex' ? 18 : 184;
+      const dyDt = 2 * (1 - t) * (controlY - 128) + 2 * t * (72 - controlY);
+      return dyDt / (688 - 286);
+    };
+    const topY = topYAt(hitX);
     const bottomY = 168;
     return (
       <svg className="thinfilm-diagram" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet">
         {/* 楔形结构 */}
-        <line x1="286" y1="128" x2="688" y2="72" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
+        <path d={topPath} className="thinfilm-plate" style={{ strokeWidth: 5 }} fill="none" />
         <line x1="286" y1="168" x2="688" y2="168" className="thinfilm-plate" style={{ strokeWidth: 5 }} />
-        <polygon points="286,168 286,128 688,72 688,168" fill="rgba(170,220,205,0.18)" />
+        <path d={`${topPath} L 688 168 L 286 168 Z`} fill="rgba(170,220,205,0.18)" />
 
-        {/* 入射光：严格竖直 */}
+        {/* 入射光：课堂示意按近似垂直入射处理 */}
         <line x1={hitX} y1="18" x2={hitX} y2={topY} className="ray" stroke="rgba(255,199,62,0.96)" strokeWidth="4" />
-        <polygon points={`${hitX},${topY - 4} ${hitX - 5},${topY - 18} ${hitX + 5},${topY - 18}`} fill="rgba(255,199,62,0.96)" />
+        <circle cx={hitX} cy={topY} r="4" fill="rgba(255,199,62,0.96)" />
 
         {/* 穿过楔形膜 */}
         <line x1={hitX} y1={topY} x2={hitX} y2={bottomY} className="ray" stroke="rgba(255,199,62,0.44)" strokeWidth="2.5" />
 
-        {/* 上表面反射：偏左 */}
-        <line x1={hitX} y1={topY} x2={hitX - 22} y2="18" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="3.6" />
-        <polygon points={`${hitX - 22},22 ${hitX - 27},36 ${hitX - 17},36`} fill="rgba(255,120,120,0.88)" />
+        {/* 上表面反射：向上出射，稍偏左以便区分 */}
+        <line x1={hitX} y1={topY} x2={hitX - 24} y2="18" className="ray" stroke="rgba(255,120,120,0.88)" strokeWidth="3.6" />
+        <polygon points={`${hitX - 24},22 ${hitX - 29},36 ${hitX - 19},36`} fill="rgba(255,120,120,0.88)" />
 
-        {/* 下表面反射：偏右 */}
-        <line x1={hitX} y1={bottomY} x2={hitX + 22} y2="18" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="3.6" />
-        <polygon points={`${hitX + 22},22 ${hitX + 17},36 ${hitX + 27},36`} fill="rgba(100,220,255,0.88)" />
+        {/* 下表面反射后从上表面透出，稍偏右以便区分 */}
+        <line x1={hitX} y1={bottomY} x2={hitX + 24} y2="18" className="ray" stroke="rgba(100,220,255,0.88)" strokeWidth="3.6" />
+        <polygon points={`${hitX + 24},22 ${hitX + 19},36 ${hitX + 29},36`} fill="rgba(100,220,255,0.88)" />
 
         {/* 标签：分列排布，不重叠 */}
-        <text x={hitX - 26} y="14" className="label-txt dim" style={{ fontSize: 14 }} textAnchor="end" fill="rgba(255,120,120,0.92)">①</text>
-        <text x={hitX + 26} y="14" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">②</text>
+        <text x={hitX - 30} y="14" className="label-txt dim" style={{ fontSize: 14 }} textAnchor="end" fill="rgba(255,120,120,0.92)">①</text>
+        <text x={hitX + 30} y="14" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">②</text>
 
         {/* 右侧图例 */}
         <text x="700" y="80" className="label-txt" style={{ fontSize: 15 }}>入射光</text>
         <line x1="755" y1="76" x2="776" y2="76" stroke="rgba(255,199,62,0.96)" strokeWidth="3" />
         <text x="700" y="104" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(255,120,120,0.92)">① 上表面反射</text>
         <text x="700" y="126" className="label-txt dim" style={{ fontSize: 14 }} fill="rgba(100,220,255,0.92)">② 下表面反射</text>
-        <text x="700" y="158" className="label-txt dim" style={{ fontSize: 14 }}>垂直入射 (θ = 0)</text>
+        <text x="700" y="158" className="label-txt dim" style={{ fontSize: 14 }}>近似垂直入射</text>
 
         {/* 膜厚标注 */}
-        <line x1="560" y1={168 - (560 - 286) / (688 - 286) * (168 - 72)} x2="560" y2="168" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
+        <line x1="560" y1={topYAt(560)} x2="560" y2="168" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
         <text x="572" y="142" className="label-txt" style={{ fontSize: 16 }}>t(x)</text>
 
-        {/* 楔角标注 */}
-        <path d="M 308 176 A 74 74 0 0 1 380 156" className="thinfilm-guide" style={{ strokeWidth: 2 }} />
         <text x="330" y="208" className="label-txt" style={{ fontSize: 16 }}>α = {wedgeAngle.toFixed(1)}′</text>
-        <text x="530" y="208" className="label-txt dim" style={{ fontSize: 14 }}>从左到右膜厚增大</text>
+        <text x="530" y="208" className="label-txt dim" style={{ fontSize: 14 }}>{profile === 'linear' ? '从左到右膜厚线性增大' : profile === 'convex' ? '上凸：膜厚变化加快' : '下凹：膜厚变化减慢'}</text>
       </svg>
     );
   }
@@ -615,6 +655,7 @@ function ThinFilmControls({ settings, setSettings }: { settings: ThinFilmSetting
   const SectionTitle = (window as any).SectionTitle;
   const Slider = (window as any).Slider;
   const Toggle = (window as any).Toggle;
+  const SegSelect = (window as any).SegSelect;
   const getParamSpec = (key: string): ExperimentParamSpec | undefined => (window as any).getP03ParamSpec('thinfilm', settings.experimentId, key);
   return (
     <>
@@ -642,7 +683,10 @@ function ThinFilmControls({ settings, setSettings }: { settings: ThinFilmSetting
         <Slider label="透镜曲率半径 R" value={settings.lensR} onChange={(v: number) => setSettings({ ...settings, lensR: v })} min={getParamSpec('lensR')?.min ?? 0.1} max={getParamSpec('lensR')?.max ?? 10.0} step={getParamSpec('lensR')?.step ?? 0.1} unit="m" />
       )}
       {settings.filmType === 'wedge' && (
-        <Slider label="楔角 α" value={settings.wedgeAngle} onChange={(v: number) => setSettings({ ...settings, wedgeAngle: v })} min={getParamSpec('wedgeAngle')?.min ?? 0.1} max={getParamSpec('wedgeAngle')?.max ?? 10} step={getParamSpec('wedgeAngle')?.step ?? 0.1} unit="′" hint="楔角越小，条纹越稀疏" />
+        <>
+          <SegSelect value={settings.wedgeProfile ?? 'linear'} onChange={(v: WedgeProfile) => setSettings({ ...settings, wedgeProfile: v })} options={[{ value: 'linear', label: '平面' }, { value: 'convex', label: '上凸' }, { value: 'concave', label: '下凹' }]} />
+          <Slider label="楔角 α" value={settings.wedgeAngle} onChange={(v: number) => setSettings({ ...settings, wedgeAngle: v })} min={getParamSpec('wedgeAngle')?.min ?? 0.1} max={getParamSpec('wedgeAngle')?.max ?? 10} step={getParamSpec('wedgeAngle')?.step ?? 0.1} unit="′" hint="楔角越小，条纹越稀疏" />
+        </>
       )}
       {settings.filmType === 'soap' && (
         <Slider label="薄膜厚度 t" value={settings.thickness} onChange={(v: number) => setSettings({ ...settings, thickness: v })} min={getParamSpec('thickness')?.min ?? 200} max={getParamSpec('thickness')?.max ?? 1800} step={getParamSpec('thickness')?.step ?? 20} unit="nm" />

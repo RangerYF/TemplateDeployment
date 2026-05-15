@@ -1,4 +1,4 @@
-export type MeasureEmfCompareMode = 'ideal' | 'inner' | 'outer';
+export type MeasureEmfMode = 'variable' | 'divider';
 
 export interface MeasureEmfCompareParams {
   emf: number;
@@ -7,13 +7,28 @@ export interface MeasureEmfCompareParams {
   voltmeterResistance: number;
   maxResistance: number;
   sliderRatio: number;
+  loadResistance: number;
   sampleCount?: number;
+}
+
+export interface MeasureEmfWorkingState {
+  totalCurrent: number;
+  measuredCurrent: number;
+  measuredVoltage: number;
+  terminalVoltage: number;
+  outputVoltage: number;
+  outputCurrent: number;
+  externalBranchResistance?: number;
+  upperResistance?: number;
+  lowerResistance?: number;
+  lowerEquivalentResistance?: number;
 }
 
 export interface MeasureEmfPoint {
   resistance: number;
   I: number;
   U: number;
+  state: MeasureEmfWorkingState;
 }
 
 export interface MeasureEmfFit {
@@ -23,35 +38,23 @@ export interface MeasureEmfFit {
   r: number;
 }
 
-export interface MeasureEmfSeriesResult {
-  mode: MeasureEmfCompareMode;
-  current: MeasureEmfPoint;
-  samples: MeasureEmfPoint[];
-  fit: MeasureEmfFit | null;
-  emfErrorPercent: number;
-  rErrorPercent: number;
-}
-
-export interface MeasureEmfCompareResult {
-  currentResistance: number;
-  ideal: MeasureEmfSeriesResult;
-  inner: MeasureEmfSeriesResult;
-  outer: MeasureEmfSeriesResult;
-  bestForEmf: 'inner' | 'outer' | 'equal';
-  bestForR: 'inner' | 'outer' | 'equal';
-}
-
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function parallelResistance(a: number, b: number): number {
-  const safeA = Math.max(a, 1e-6);
-  const safeB = Math.max(b, 1e-6);
-  return (safeA * safeB) / (safeA + safeB);
+function parallelResistanceMany(resistances: number[]): number {
+  let reciprocalSum = 0;
+
+  for (const resistance of resistances) {
+    if (!Number.isFinite(resistance)) continue;
+    if (resistance <= 0) return 0;
+    reciprocalSum += 1 / resistance;
+  }
+
+  return reciprocalSum > 0 ? 1 / reciprocalSum : Infinity;
 }
 
-function buildResistanceSamples(maxResistance: number, sampleCount: number): number[] {
+export function buildMeasureEmfResistanceSamples(maxResistance: number, sampleCount: number): number[] {
   const count = Math.max(2, Math.round(sampleCount));
   const upper = Math.max(maxResistance, 1);
   const lower = Math.max(upper * 0.08, 0.5);
@@ -65,8 +68,15 @@ function buildResistanceSamples(maxResistance: number, sampleCount: number): num
   return result;
 }
 
+export function resolveMeasureEmfResistance(params: Pick<MeasureEmfCompareParams, 'maxResistance' | 'sliderRatio'>): number {
+  return Math.max(
+    0.5,
+    Math.max(params.maxResistance, 1) * clamp(params.sliderRatio, 0.01, 1),
+  );
+}
+
 export function calculateMeasureEmfPoint(
-  mode: MeasureEmfCompareMode,
+  mode: MeasureEmfMode,
   params: MeasureEmfCompareParams,
   resistance: number,
 ): MeasureEmfPoint {
@@ -74,30 +84,67 @@ export function calculateMeasureEmfPoint(
   const r = Math.max(params.internalResistance, 0);
   const rA = Math.max(params.ammeterResistance, 0);
   const rV = Math.max(params.voltmeterResistance, 1e-6);
-  const load = Math.max(resistance, 1e-6);
+  const rheostatResistance = Math.max(resistance, 1e-6);
 
-  if (mode === 'ideal') {
-    const I = emf / Math.max(r + load, 1e-6);
-    const U = emf - I * r;
-    return { resistance: load, I, U };
+  if (mode === 'divider') {
+    const sliderRatio = clamp(params.sliderRatio, 0.01, 1);
+    const R_upper = rheostatResistance * (1 - sliderRatio);
+    const R_lower = rheostatResistance * sliderRatio;
+    const R_loadExternal = Math.max(params.loadResistance, 1e-6);
+    const R_lowerEq = parallelResistanceMany([R_lower, R_loadExternal]);
+    const R_externalBranch = rA + R_upper + R_lowerEq;
+    const R_parallel = parallelResistanceMany([R_externalBranch, rV]);
+    const R_total = R_parallel + r;
+
+    const totalCurrent = emf / Math.max(R_total, 1e-6);
+    const terminalVoltage = emf - totalCurrent * r;
+    const measuredCurrent = terminalVoltage / Math.max(R_externalBranch, 1e-6);
+    const outputVoltage = measuredCurrent * R_lowerEq;
+    const outputCurrent = outputVoltage / Math.max(R_loadExternal, 1e-6);
+
+    return {
+      resistance: rheostatResistance,
+      I: measuredCurrent,
+      U: terminalVoltage,
+      state: {
+        totalCurrent,
+        measuredCurrent,
+        measuredVoltage: terminalVoltage,
+        terminalVoltage,
+        outputVoltage,
+        outputCurrent,
+        externalBranchResistance: R_externalBranch,
+        upperResistance: R_upper,
+        lowerResistance: R_lower,
+        lowerEquivalentResistance: R_lowerEq,
+      },
+    };
   }
 
-  if (mode === 'inner') {
-    const branchResistance = parallelResistance(load, rV);
-    const I = emf / Math.max(r + rA + branchResistance, 1e-6);
-    const U = I * branchResistance;
-    return { resistance: load, I, U };
-  }
+  const R_main = rA + rheostatResistance;
+  const R_parallel = parallelResistanceMany([R_main, rV]);
+  const R_total = R_parallel + r;
+  const totalCurrent = emf / Math.max(R_total, 1e-6);
+  const terminalVoltage = emf - totalCurrent * r;
+  const measuredCurrent = terminalVoltage / Math.max(R_main, 1e-6);
 
-  const mainBranchResistance = load + rA;
-  const externalEquivalent = parallelResistance(mainBranchResistance, rV);
-  const totalCurrent = emf / Math.max(r + externalEquivalent, 1e-6);
-  const U = emf - totalCurrent * r;
-  const I = U / Math.max(mainBranchResistance, 1e-6);
-  return { resistance: load, I, U };
+  return {
+    resistance: rheostatResistance,
+    I: measuredCurrent,
+    U: terminalVoltage,
+    state: {
+      totalCurrent,
+      measuredCurrent,
+      measuredVoltage: terminalVoltage,
+      terminalVoltage,
+      outputVoltage: terminalVoltage,
+      outputCurrent: measuredCurrent,
+      externalBranchResistance: R_main,
+    },
+  };
 }
 
-function fitLine(points: MeasureEmfPoint[]): MeasureEmfFit | null {
+export function fitMeasureEmfPoints(points: MeasureEmfPoint[]): MeasureEmfFit | null {
   if (points.length < 2) return null;
 
   let sumX = 0;
@@ -124,63 +171,5 @@ function fitLine(points: MeasureEmfPoint[]): MeasureEmfFit | null {
     slope,
     emf: intercept,
     r: -slope,
-  };
-}
-
-function buildSeries(
-  mode: MeasureEmfCompareMode,
-  params: MeasureEmfCompareParams,
-  currentResistance: number,
-  sampleResistances: number[],
-): MeasureEmfSeriesResult {
-  const current = calculateMeasureEmfPoint(mode, params, currentResistance);
-  const samples = sampleResistances.map((resistance) =>
-    calculateMeasureEmfPoint(mode, params, resistance),
-  );
-  const fit = fitLine(samples);
-  const trueEmf = Math.max(params.emf, 1e-6);
-  const trueR = Math.max(params.internalResistance, 1e-6);
-
-  return {
-    mode,
-    current,
-    samples,
-    fit,
-    emfErrorPercent: fit ? ((fit.emf - params.emf) / trueEmf) * 100 : 0,
-    rErrorPercent: fit ? ((fit.r - params.internalResistance) / trueR) * 100 : 0,
-  };
-}
-
-function compareError(a: number, b: number): 'inner' | 'outer' | 'equal' {
-  const absA = Math.abs(a);
-  const absB = Math.abs(b);
-
-  if (Math.abs(absA - absB) < 1e-9) return 'equal';
-  return absA < absB ? 'inner' : 'outer';
-}
-
-export function calculateMeasureEmfComparison(
-  params: MeasureEmfCompareParams,
-): MeasureEmfCompareResult {
-  const currentResistance = Math.max(
-    0.5,
-    Math.max(params.maxResistance, 1) * clamp(params.sliderRatio, 0.01, 1),
-  );
-  const sampleResistances = buildResistanceSamples(
-    Math.max(params.maxResistance, 1),
-    params.sampleCount ?? 8,
-  );
-
-  const ideal = buildSeries('ideal', params, currentResistance, sampleResistances);
-  const inner = buildSeries('inner', params, currentResistance, sampleResistances);
-  const outer = buildSeries('outer', params, currentResistance, sampleResistances);
-
-  return {
-    currentResistance,
-    ideal,
-    inner,
-    outer,
-    bestForEmf: compareError(inner.emfErrorPercent, outer.emfErrorPercent),
-    bestForR: compareError(inner.rErrorPercent, outer.rErrorPercent),
   };
 }

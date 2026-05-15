@@ -43,8 +43,11 @@ const RESERVED = new Set([
  */
 function collectSymbols(node: math.MathNode): string[] {
   const found = new Set<string>();
-  node.traverse((n: math.MathNode) => {
+  node.traverse((n: math.MathNode, path?: string, parent?: math.MathNode) => {
     if (n.type === 'SymbolNode') {
+      // In math.js, function calls like cos(x) contain a SymbolNode named "cos"
+      // at FunctionNode.fn. That symbol is the callable, not a free coefficient.
+      if (parent?.type === 'FunctionNode' && path === 'fn') return;
       const name = (n as math.SymbolNode).name;
       if (!RESERVED.has(name)) {
         found.add(name);

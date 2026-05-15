@@ -73,3 +73,16 @@ export class Viewport {
     );
   }
 }
+
+export function centerOriginViewport(viewport: Viewport): Viewport {
+  const halfX = viewport.xRange / 2;
+  const halfY = viewport.yRange / 2;
+  return new Viewport(
+    -halfX,
+    halfX,
+    -halfY,
+    halfY,
+    viewport.width,
+    viewport.height,
+  );
+}

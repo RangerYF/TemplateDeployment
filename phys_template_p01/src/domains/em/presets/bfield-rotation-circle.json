@@ -2,7 +2,7 @@
   "id": "P02-EMF038-rotation-circle",
   "version": "1.0",
   "name": "旋转圆模型",
-  "description": "粒子源从同一点同时发射多粒子，以相同速度、不同入射角进入同一磁场，形成等半径的旋转圆轨迹族。",
+  "description": "所有粒子从画布中央同一点 P 向各个方向发射；在同一匀强磁场中形成等半径、不同圆心的圆弧轨迹族。",
   "category": "P-08",
   "supportedViewports": [
     "motion",
@@ -44,7 +44,7 @@
         "particleCount": 5,
         "launchAngleDeg": 0,
         "baseSpeed": 2.1,
-        "angleSpreadDeg": 84,
+        "angleSpreadDeg": 360,
         "charge": 0.1,
         "mass": 0.1,
         "particleRadius": 0.11,
@@ -53,7 +53,7 @@
       },
       "transform": {
         "position": {
-          "x": 0.2,
+          "x": 4.4,
           "y": 0
         },
         "rotation": 0
@@ -71,7 +71,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-2",
@@ -84,7 +84,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-3",
@@ -97,7 +97,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-4",
@@ -110,7 +110,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-5",
@@ -123,7 +123,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-6",
@@ -136,7 +136,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-7",
@@ -149,7 +149,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     },
     {
       "ref": "particle-8",
@@ -162,7 +162,7 @@
         "initialVelocity": { "x": 0, "y": 0 },
         "radius": 0.11
       },
-      "transform": { "position": { "x": 0.2, "y": 0 }, "rotation": 0 }
+      "transform": { "position": { "x": 4.4, "y": 0 }, "rotation": 0 }
     }
   ],
   "relations": [
@@ -231,7 +231,7 @@
           "min": 0,
           "max": 360,
           "step": 2,
-          "default": 84,
+          "default": 360,
           "unit": "°",
           "targetEntityId": "emitter-1",
           "targetProperty": "angleSpreadDeg"
@@ -299,7 +299,7 @@
     "particleCount": 5,
     "baseSpeed": 2.1,
     "launchAngleDeg": 0,
-    "angleSpreadDeg": 84,
+    "angleSpreadDeg": 360,
     "charge": 0.1,
     "mass": 0.1,
     "B": 1,

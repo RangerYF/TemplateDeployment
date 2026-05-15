@@ -90,6 +90,9 @@ export interface SimulationStoreState {
   /** 电势分布显示开关 */
   showPotentialMap: boolean;
 
+  /** 三维立体电势图显示开关 */
+  showPotentialSurface3D: boolean;
+
   /** P-08 场线密度 */
   fieldLineDensity: FieldLineDensity;
 
@@ -156,6 +159,9 @@ export interface SimulationStoreActions {
 
   /** 切换电势分布显示/隐藏 */
   togglePotentialMap: () => void;
+
+  /** 切换三维立体电势图显示/隐藏 */
+  togglePotentialSurface3D: () => void;
 
   /** 设置 P-08 场线密度 */
   setFieldLineDensity: (density: FieldLineDensity) => void;
@@ -289,6 +295,7 @@ export const useSimulationStore = create<
   showFieldLines: true,
   showEquipotentialLines: true,
   showPotentialMap: true,
+  showPotentialSurface3D: true,
   fieldLineDensity: 'standard',
   showTrajectory: true,
   potentialProbeA: null,
@@ -365,6 +372,9 @@ export const useSimulationStore = create<
 
   togglePotentialMap: () =>
     set((state) => ({ showPotentialMap: !state.showPotentialMap })),
+
+  togglePotentialSurface3D: () =>
+    set((state) => ({ showPotentialSurface3D: !state.showPotentialSurface3D })),
 
   setFieldLineDensity: (density) =>
     set({ fieldLineDensity: density }),
@@ -589,6 +599,7 @@ export const useSimulationStore = create<
       showFieldLines: true,
       showEquipotentialLines: true,
       showPotentialMap: true,
+      showPotentialSurface3D: true,
       fieldLineDensity: 'standard',
       showTrajectory: true,
       potentialProbeA: null,

@@ -16,11 +16,13 @@ const VIEWPORT_LABELS: Record<string, string> = {
 
 interface P13InductionHomeProps {
   onSelectPreset: (presetId: string) => void;
+  onOpenRoute: (route: 'p13-builder') => void;
   onBack: () => void;
 }
 
 export function P13InductionHome({
   onSelectPreset,
+  onOpenRoute,
   onBack,
 }: P13InductionHomeProps) {
   const availableModels = getP13AvailableModels();
@@ -49,31 +51,31 @@ export function P13InductionHome({
               P-13 电磁感应
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6" style={{ color: COLORS.textMuted }}>
-              在单棒模型族（EMI-011~013）完成后，本轮开始覆盖双棒模型：先开放 EMI-021 双棒基础（无摩擦），继续沿用统一壳层的参数区、视觉演示、图表、分步分析与终态结果区。
+              当前入口按产品口径拆成动生、感生、单棒、双棒、竖直导轨和自由组装六条主线；标准模型与组装入口都从这里进入。
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <SummaryCard
-              label="当前阶段"
-              value="Phase 5"
-              note="启动双棒模型：先开放 EMI-021"
+              label="标准模型"
+              value={String(availableModels.filter((item) => item.code !== 'P13-BUILDER').length)}
+              note="覆盖基础动生、楞次定律、单棒、双棒和竖直导轨"
               background="#FFF4E8"
               borderColor="#F4C48B"
               accent="#B96A16"
             />
             <SummaryCard
-              label="已开放模型"
-              value={String(availableModels.length)}
-              note="保留 Phase 1 / 2，并延伸到双棒 EMI-021"
+              label="组装入口"
+              value="1"
+              note="提供 P13 独立的实时组装工作台"
               background={COLORS.primaryLight}
               borderColor={`${COLORS.primary}33`}
               accent={COLORS.primary}
             />
             <SummaryCard
-              label="后续模型位"
+              label="预留模型"
               value={String(plannedModels.length)}
-              note="不提前做 Phase 4~6，只保留结构位"
+              note="当前暂无额外占位模型"
               background={COLORS.bg}
               borderColor={COLORS.border}
               accent={COLORS.text}
@@ -98,7 +100,7 @@ export function P13InductionHome({
                   统一壳层预览
                 </h2>
                 <p className="mt-1 text-sm leading-6" style={{ color: COLORS.textMuted }}>
-                  当前已把单棒模型族与 EMI-021 双棒基础统一收口到同一产品壳层：顶部模型选择、左侧参数区、中央视觉演示、下方图表、右下角终态结果区。
+                  单棒模型族、双棒模型族和竖直导轨已经统一到同一产品壳层：顶部模型选择、左侧参数区、中央视觉演示、下方图表、右下角结果区和分析面板保持一致。
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -124,20 +126,20 @@ export function P13InductionHome({
             <InfoBoard
               title="当前已可进入"
               lines={[
-                'P13-BASE-001：保留基础动生样例，不回退已有行为。',
-                'EMI-001：继续承担楞次定律方向判断页面。',
-                'EMI-011：纯电阻单棒，保留 Phase 3 的真实力-电-运动耦合。',
-                'EMI-012：单棒 + 含电源，新增 v终 / I终 口径。',
-                'EMI-013：单棒 + 含电容，新增 I终 = 0 与 U电容 口径。',
-                'EMI-021：双棒无摩擦耦合，新增 v1-t / v2-t / i-t 与终态共速口径。',
+                'P13-BASE-001：基础动生样例。',
+                'EMI-001：磁棒-线圈楞次定律。',
+                'EMI-011~013：单棒模型族。',
+                'EMI-021、EMI-024：双棒主展示模型。',
+                'EMI-031：竖直导轨单棒。',
+                'P13-BUILDER：实时组装工作台。',
               ]}
             />
             <InfoBoard
-              title="本轮边界"
+              title="入口说明"
               lines={[
-                '不提前实现 EMI-022/023、EMI-031。',
-                '不提前实现 builder，只保留产品结构位。',
-                '继续按理想模型实现，不引入自感和任意拓扑。',
+                '标准模型适合直接进课堂演示。',
+                '自由组装适合在同一工作台里切结构、调参数、看图表和做分步分析。',
+                '各模型统一提供显示开关、时间轴和结果区。',
               ]}
             />
           </div>
@@ -149,7 +151,7 @@ export function P13InductionHome({
               产品主干模型
             </h2>
             <p className="mt-1 text-sm leading-6" style={{ color: COLORS.textMuted }}>
-              按产品口径拆成 6 条主干。当前可运行模型直接给入口，未开放的条目只展示编号、教学用途和阶段说明。
+              按产品口径拆成 6 条主干。可运行模型直接给入口，未开放的条目只保留最小说明。
             </p>
           </div>
 
@@ -159,6 +161,7 @@ export function P13InductionHome({
                 key={track.key}
                 track={track}
                 onSelectPreset={onSelectPreset}
+                onOpenRoute={onOpenRoute}
               />
             ))}
           </div>
@@ -171,9 +174,11 @@ export function P13InductionHome({
 function TrackSection({
   track,
   onSelectPreset,
+  onOpenRoute,
 }: {
   track: P13ProductTrack;
   onSelectPreset: (presetId: string) => void;
+  onOpenRoute: (route: 'p13-builder') => void;
 }) {
   const availableCount = track.models.filter((model) => model.status === 'available').length;
   return (
@@ -223,6 +228,7 @@ function TrackSection({
             key={model.code}
             model={model}
             onSelectPreset={onSelectPreset}
+            onOpenRoute={onOpenRoute}
           />
         ))}
       </div>
@@ -233,11 +239,13 @@ function TrackSection({
 function ModelCard({
   model,
   onSelectPreset,
+  onOpenRoute,
 }: {
   model: P13ModelCard;
   onSelectPreset: (presetId: string) => void;
+  onOpenRoute: (route: 'p13-builder') => void;
 }) {
-  const clickable = model.status === 'available' && !!model.preset;
+  const clickable = model.status === 'available' && (!!model.preset || !!model.route);
   return (
     <div
       className="rounded-2xl border p-4"
@@ -266,7 +274,7 @@ function ModelCard({
             backgroundColor: clickable ? COLORS.primaryLight : '#FFF4E8',
           }}
         >
-          {clickable ? '已开放' : '占位'}
+          {clickable ? '可进入' : '预留'}
         </span>
       </div>
 
@@ -294,20 +302,18 @@ function ModelCard({
         </div>
       )}
 
-      <div
-        className="mt-4 rounded-2xl px-3 py-2 text-xs leading-5"
-        style={{
-          backgroundColor: COLORS.bgPage,
-          color: COLORS.textMuted,
-        }}
-      >
-        {model.phaseNote}
-      </div>
-
       <div className="mt-4">
         {clickable ? (
           <button
-            onClick={() => model.preset && onSelectPreset(model.preset.id)}
+            onClick={() => {
+              if (model.route) {
+                onOpenRoute(model.route);
+                return;
+              }
+              if (model.preset) {
+                onSelectPreset(model.preset.id);
+              }
+            }}
             className="w-full rounded-2xl px-3 py-2 text-sm font-medium"
             style={{
               color: COLORS.white,
@@ -324,7 +330,7 @@ function ModelCard({
               backgroundColor: COLORS.bgMuted,
             }}
           >
-            当前阶段未开放
+            暂未开放
           </div>
         )}
       </div>
@@ -342,13 +348,13 @@ function ShellPreview() {
       }}
     >
       <div className="mb-3 flex flex-wrap gap-2">
-        {['动生基础', '楞次定律', 'EMI-011', 'EMI-021', '竖直导轨', 'Builder'].map((item, index) => (
+        {['动生基础', '楞次定律', 'EMI-011', 'EMI-021', 'EMI-024', 'EMI-031', 'Builder'].map((item, index) => (
           <span
             key={item}
             className="rounded-full px-3 py-1.5 text-xs font-medium"
             style={{
-              color: index === 3 ? '#B96A16' : COLORS.textSecondary,
-              backgroundColor: index === 3 ? '#FFF4E8' : COLORS.bgPage,
+              color: index >= 3 && index <= 6 ? '#B96A16' : COLORS.textSecondary,
+              backgroundColor: index >= 3 && index <= 6 ? '#FFF4E8' : COLORS.bgPage,
             }}
           >
             {item}
@@ -359,12 +365,12 @@ function ShellPreview() {
       <div className="grid gap-3 xl:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-rows-[minmax(0,1fr)_180px]">
         <PreviewBlock
           title="左侧参数区"
-          subtitle="B / L / m1 / m2 / R1 / R2 / v1_0 / v2_0"
+          subtitle="按模型切换 B / L / m / R / 初态参数"
           className="xl:row-span-2"
         />
         <PreviewBlock title="中央视觉演示区" subtitle="导轨、磁场、导体棒、方向箭头" />
-        <PreviewBlock title="右下角终态结果区" subtitle="v终 / I终 / τ / 观测窗末态" className="xl:row-span-2" />
-        <PreviewBlock title="下方图表区" subtitle="v-t / i-t 联动" />
+        <PreviewBlock title="右下角终态结果区" subtitle="v终 / I终 / Uc终 / τ / 终态解释" className="xl:row-span-2" />
+        <PreviewBlock title="下方图表区" subtitle="v-t / i-t / Uc-t 联动" />
       </div>
     </div>
   );
