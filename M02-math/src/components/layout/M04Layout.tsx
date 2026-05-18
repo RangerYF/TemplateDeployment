@@ -16,7 +16,7 @@
  * visual connection between point P on the unit circle and the curve trace.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Undo2, Redo2 } from 'lucide-react';
 import { UnitCircleCanvas }       from '@/components/UnitCircleCanvas';
 import { FunctionGraphCanvas }    from '@/components/FunctionGraphCanvas';
@@ -40,6 +40,8 @@ export function M04Layout() {
   const undo    = useHistoryStore((s) => s.undo);
   const redo    = useHistoryStore((s) => s.redo);
   const syncY   = useSyncLineStore((s) => s.syncY);
+  const dragStateRef = useRef<{ startX: number; startWidth: number } | null>(null);
+  const [graphWidth, setGraphWidth] = useState(460);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -57,6 +59,34 @@ export function M04Layout() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const drag = dragStateRef.current;
+      if (!drag) return;
+      const next = drag.startWidth - (e.clientX - drag.startX);
+      setGraphWidth(Math.max(320, Math.min(760, next)));
+    };
+
+    const onUp = () => {
+      dragStateRef.current = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, []);
+
+  const handleDividerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dragStateRef.current = { startX: e.clientX, startWidth: graphWidth };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   return (
     <div className="flex flex-col h-screen bg-eduMind-bgPage">
@@ -124,21 +154,34 @@ export function M04Layout() {
 
             {/* ── Sync divider ───────────────────────────────────────────── */}
             <div
+              onPointerDown={handleDividerPointerDown}
+              title="拖动调整左右视图宽度"
               style={{
-                width: 1,
+                width: 9,
                 flexShrink: 0,
-                background: COLORS.border,
+                background: 'transparent',
                 position: 'relative',
                 overflow: 'visible',
                 zIndex: 10,
+                cursor: 'col-resize',
               }}
             >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: 4,
+                  width: 1,
+                  background: COLORS.border,
+                }}
+              />
               {syncY !== null && (
                 <div
                   style={{
                     position: 'absolute',
                     top:  syncY - 5,
-                    left: -4,
+                    left: 0,
                     width:  9,
                     height: 9,
                     borderRadius: '50%',
@@ -151,7 +194,7 @@ export function M04Layout() {
             </div>
 
             {/* Function graph canvas */}
-            <div style={{ width: 460, flexShrink: 0, overflow: 'hidden' }}>
+            <div style={{ width: graphWidth, flexShrink: 0, overflow: 'hidden' }}>
               <FunctionGraphCanvas />
             </div>
 

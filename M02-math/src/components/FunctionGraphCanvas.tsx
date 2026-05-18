@@ -43,6 +43,22 @@ const FN_LABEL: Record<FnType, string> = {
   tan: 'tan θ',
 };
 
+function buildAlignedFunctionViewport(
+  fnViewport: { xMin: number; xMax: number; yMin: number; yMax: number },
+  ucViewport: { yMin: number; yMax: number },
+  width: number,
+  height: number,
+): Viewport {
+  return new Viewport(
+    fnViewport.xMin,
+    fnViewport.xMax,
+    ucViewport.yMin,
+    ucViewport.yMax,
+    width,
+    height,
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function FunctionGraphCanvas() {
@@ -96,9 +112,11 @@ export function FunctionGraphCanvas() {
     if (!canvas || !ctx) return;
     const showRef = useM04FunctionStore.getState().showReference;
 
-    const vp = new Viewport(
-      viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-      canvasSize.width, canvasSize.height,
+    const vp = buildAlignedFunctionViewport(
+      viewport,
+      ucViewport,
+      canvasSize.width,
+      canvasSize.height,
     );
 
     hiDpiClear(ctx, canvas);
@@ -112,7 +130,7 @@ export function FunctionGraphCanvas() {
       const pts = sampleTrigFunction(
         fn, tr,
         viewport.xMin, viewport.xMax,
-        viewport.yMin, viewport.yMax,
+        vp.yMin, vp.yMax,
         600,
       );
       ctx!.save();
@@ -153,7 +171,7 @@ export function FunctionGraphCanvas() {
       const pts = sampleTrigFunction(
         fnType, transform,
         viewport.xMin, viewport.xMax,
-        viewport.yMin, viewport.yMax,
+        vp.yMin, vp.yMax,
         800,
       );
 
@@ -182,7 +200,7 @@ export function FunctionGraphCanvas() {
       ctx.restore();
     }
   }, [
-    viewport, canvasSize, fnType, transform, showReference,
+    viewport, ucViewport, canvasSize, fnType, transform, showReference,
     showAuxiliary, auxiliaryA, auxiliaryB, auxShowC1, auxShowC2, auxShowCR,
     auxResult,
     staticRef,
@@ -195,9 +213,11 @@ export function FunctionGraphCanvas() {
       const ctx    = canvas?.getContext('2d');
       if (!canvas || !ctx) return;
 
-      const vp = new Viewport(
-        viewport.xMin, viewport.xMax, viewport.yMin, viewport.yMax,
-        canvasSize.width, canvasSize.height,
+      const vp = buildAlignedFunctionViewport(
+        viewport,
+        ucViewport,
+        canvasSize.width,
+        canvasSize.height,
       );
 
       hiDpiClear(ctx, canvas);
@@ -305,12 +325,8 @@ export function FunctionGraphCanvas() {
 
       ctx.restore();
 
-      // ── Publish sync pixel-y for divider marker ────────────────────
-      {
-        const ucYRange = ucViewport.yMax - ucViewport.yMin;
-        const syncPixelY = canvasSize.height - (traceY - ucViewport.yMin) / ucYRange * canvasSize.height;
-        useSyncLineStore.getState().setSyncY(syncPixelY);
-      }
+      // ── Publish the actual rendered y so the divider aligns both canvases ──
+      useSyncLineStore.getState().setSyncY(cy);
 
       // ── Five-point markers ─────────────────────────────────────────
       if (fivePointStep > 0) {

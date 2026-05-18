@@ -29,6 +29,7 @@ import { DerivativePanel } from '@/components/panels/DerivativePanel';
 import { AnimationControlPanel } from '@/components/panels/AnimationControlPanel';
 import { PiecewisePanel } from '@/components/panels/PiecewisePanel';
 import { CanvasSettingsPanel } from '@/components/panels/CanvasSettingsPanel';
+import { QuickInputModal } from '@/components/QuickInputModal';
 import { useHistoryStore } from '@/editor/store/historyStore';
 import { useFunctionStore } from '@/editor/store/functionStore';
 import { editorInstance } from '@/editor/core/Editor';
@@ -57,6 +58,7 @@ export function M02Layout() {
 
   const [leftOpen, setLeftOpen]   = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
+  const [customModalOpen, setCustomModalOpen] = useState(false);
 
   const handleUndo = () => { useHistoryStore.getState().undo(); };
   const handleRedo = () => { useHistoryStore.getState().redo(); };
@@ -123,7 +125,7 @@ export function M02Layout() {
 
         {/* Function Library inline in top bar */}
         <div className="ml-2">
-          <FunctionLibraryPanel />
+          <FunctionLibraryPanel onOpenCustom={() => setCustomModalOpen(true)} />
         </div>
 
         {/* ── Right controls ──────────────────────────────────────────────── */}
@@ -250,8 +252,21 @@ export function M02Layout() {
         </aside>
       </div>
 
+      <M02ModalLayer open={customModalOpen} onClose={() => setCustomModalOpen(false)} />
+
     </div>
   );
+}
+
+function M02ModalLayer({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open) return null;
+  return <QuickInputModal onClose={onClose} />;
 }
 
 function Divider() {

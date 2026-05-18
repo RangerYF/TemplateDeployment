@@ -224,10 +224,11 @@ function getLensResult(settings: LensSettings): LensSolveResult {
           ],
         });
       } else {
-        const parallelEnd = extendToX(topHit, focalRight, LENS_STAGE.rayEndX);
-        const throughCenterEnd = extendToX(sourcePoint, centerHit, LENS_STAGE.rayEndX);
+        const rayClipX = realImage && imageX !== null ? Math.min(LENS_STAGE.rayEndX, imageX + 60) : LENS_STAGE.rayEndX;
+        const parallelEnd = extendToX(topHit, focalRight, rayClipX);
+        const throughCenterEnd = extendToX(sourcePoint, centerHit, rayClipX);
         const focusIn = extendToX(sourcePoint, focalLeft, lensX);
-        const parallelAfter = { x: LENS_STAGE.rayEndX, y: focusIn.y };
+        const parallelAfter = { x: rayClipX, y: focusIn.y };
         const isVirtual = virtualImage && imageX !== null && imageHeight !== null;
         const virtualImagePt = isVirtual ? { x: imageX!, y: axisY - imageHeight! } : null;
 
@@ -289,7 +290,18 @@ function LensModule({ settings }: { settings: LensSettings }) {
   const sourcePoint = settings.sourceType === 'point'
     ? { x: sourceX, y: axisY - Math.max(18, settings.objectHeight * 0.78) }
     : { x: sourceX, y: axisY - settings.objectHeight };
-  const dragRef = React.useRef<{ kind: DragTarget; startX: number; prev: LensSettings } | null>(null);
+  const lensVisH = (() => {
+    const minH = 184;
+    if (!settings.showRays || settings.sourceType === 'parallel') return minH;
+    const absF = Math.abs(settings.focalLength);
+    const u = lensX - sourceX;
+    const denom = u - absF;
+    if (Math.abs(denom) < 1) return minH;
+    const offset = settings.objectHeight * absF / Math.abs(denom);
+    return Math.min(H - 40, Math.max(minH, (offset + 20) * 2));
+  })();
+
+  const dragRef = React.useRef<{ kind: DragTarget; startX: number; startY: number; prev: LensSettings } | null>(null);
   const [dragTarget, setDragTarget] = React.useState<DragTarget>(null);
 
   React.useEffect(() => {
@@ -301,10 +313,11 @@ function LensModule({ settings }: { settings: LensSettings }) {
       const info = dragRef.current;
       if (!info) return;
       const dx = event.clientX - info.startX;
+      const dy = event.clientY - info.startY;
       const localDx = dx / (info.prev.canvasZoom ?? 1);
 
       if (info.kind === 'pan') {
-        apply((prev: LensSettings) => ({ ...prev, canvasPanX: (info.prev.canvasPanX ?? 0) + dx }));
+        apply((prev: LensSettings) => ({ ...prev, canvasPanX: (info.prev.canvasPanX ?? 0) + dx, canvasPanY: (info.prev.canvasPanY ?? 0) + dy }));
         return;
       }
       if (info.kind === 'source') {
@@ -346,7 +359,7 @@ function LensModule({ settings }: { settings: LensSettings }) {
 
   const beginDrag = (kind: DragTarget) => (event: React.PointerEvent): void => {
     event.stopPropagation();
-    dragRef.current = { kind, startX: event.clientX, prev: settings };
+    dragRef.current = { kind, startX: event.clientX, startY: event.clientY, prev: settings };
     setDragTarget(kind);
   };
 
@@ -359,11 +372,12 @@ function LensModule({ settings }: { settings: LensSettings }) {
   const handleStageDown = (event: React.PointerEvent<SVGSVGElement>): void => {
     const target = event.target as SVGElement;
     if (target.closest('[data-lens-no-pan="true"]')) return;
-    dragRef.current = { kind: 'pan', startX: event.clientX, prev: settings };
+    dragRef.current = { kind: 'pan', startX: event.clientX, startY: event.clientY, prev: settings };
     setDragTarget('pan');
   };
 
   const panX = settings.canvasPanX ?? 0;
+  const panY = settings.canvasPanY ?? 0;
   const zoom = clamp(settings.canvasZoom ?? 1, 0.7, 1.9);
 
   return (
@@ -375,7 +389,7 @@ function LensModule({ settings }: { settings: LensSettings }) {
           </filter>
         </defs>
         <LensGrid w={W} h={H} />
-        <g transform={`translate(${panX} 0) scale(${zoom})`}>
+        <g transform={`translate(${panX} ${panY}) scale(${zoom})`}>
           <line className="axis" x1={LENS_STAGE.axisLeft} y1={axisY} x2={LENS_STAGE.axisRight} y2={axisY} strokeDasharray="2 4" />
           <text className="label-txt dim" x={LENS_STAGE.axisRight} y={axisY - 8} textAnchor="end">主光轴</text>
 
@@ -385,7 +399,7 @@ function LensModule({ settings }: { settings: LensSettings }) {
           <FocalMark x={lensX + 2 * Math.abs(result.f)} y={axisY} label="2F′" dim />
 
           <g data-lens-no-pan="true" style={{ cursor: 'grab' }} onPointerDown={beginDrag('lens')}>
-            <LensShape type={settings.lensType} x={lensX} y={axisY} height={184} />
+            <LensShape type={settings.lensType} x={lensX} y={axisY} height={lensVisH} />
           </g>
 
           {settings.sourceType === 'object' && (
@@ -533,17 +547,18 @@ function FocusMarker({ x, y, label, virtual }: { x: number; y: number; label: st
 }
 
 function CandleObject({ x, y, h, label }: { x: number; y: number; h: number; label: string }) {
-  const bodyH = Math.max(24, h * 0.72);
+  const s = clamp(h / 80, 0.5, 2.5);
+  const bodyH = Math.min(Math.max(16, h * 0.72), Math.max(1, h - 2));
   const bodyW = Math.max(12, h * 0.18);
   const candleTop = y - bodyH;
-  const flameY = candleTop - 10;
+  const flameY = y - h;
   return (
     <g>
       <rect x={x - bodyW / 2} y={candleTop} width={bodyW} height={bodyH} rx={bodyW / 2} fill="oklch(0.91 0.06 85)" stroke="oklch(0.70 0.05 80)" strokeWidth="1.2" />
       <rect x={x - bodyW / 2 + 2} y={candleTop + 5} width={Math.max(3, bodyW - 4)} height={Math.max(8, bodyH - 10)} rx={Math.max(2, (bodyW - 4) / 2)} fill="oklch(0.97 0.03 90)" opacity="0.55" />
-      <line x1={x} y1={candleTop + 1} x2={x} y2={candleTop - 4} stroke="oklch(0.25 0.02 40)" strokeWidth="1.2" />
-      <path d={`M ${x} ${flameY} C ${x + 5} ${flameY + 6}, ${x + 4} ${flameY + 14}, ${x} ${flameY + 18} C ${x - 5} ${flameY + 14}, ${x - 4} ${flameY + 6}, ${x} ${flameY} Z`} fill="oklch(0.82 0.16 70)" />
-      <path d={`M ${x} ${flameY + 5} C ${x + 2} ${flameY + 9}, ${x + 2} ${flameY + 13}, ${x} ${flameY + 15} C ${x - 2} ${flameY + 13}, ${x - 2} ${flameY + 9}, ${x} ${flameY + 5} Z`} fill="oklch(0.98 0.08 100)" />
+      <line x1={x} y1={candleTop + 1} x2={x} y2={candleTop - 4 * s} stroke="oklch(0.25 0.02 40)" strokeWidth="1.2" />
+      <path d={`M ${x} ${flameY} C ${x + 5 * s} ${flameY + 6 * s}, ${x + 4 * s} ${flameY + 14 * s}, ${x} ${flameY + 18 * s} C ${x - 5 * s} ${flameY + 14 * s}, ${x - 4 * s} ${flameY + 6 * s}, ${x} ${flameY} Z`} fill="oklch(0.82 0.16 70)" />
+      <path d={`M ${x} ${flameY + 5 * s} C ${x + 2 * s} ${flameY + 9 * s}, ${x + 2 * s} ${flameY + 13 * s}, ${x} ${flameY + 15 * s} C ${x - 2 * s} ${flameY + 13 * s}, ${x - 2 * s} ${flameY + 9 * s}, ${x} ${flameY + 5 * s} Z`} fill="oklch(0.98 0.08 100)" />
       <text className="label-txt" x={x + 10} y={candleTop + 4}>{label}</text>
     </g>
   );
@@ -552,11 +567,12 @@ function CandleObject({ x, y, h, label }: { x: number; y: number; h: number; lab
 function CandleImage({ x, y, h, label, virtual }: { x: number; y: number; h: number; label: string; virtual?: boolean }) {
   const absH = Math.abs(h);
   const inverted = h < 0;
-  const bodyH = Math.max(16, absH * 0.72);
+  const s = clamp(absH / 80, 0.4, 2.5);
+  const bodyH = Math.min(Math.max(12, absH * 0.72), Math.max(1, absH - 2));
   const bodyW = Math.max(8, absH * 0.18);
   const scale = inverted ? -1 : 1;
   const candleTop = -bodyH;
-  const flameY = candleTop - 8;
+  const flameY = -absH;
   const op = virtual ? 0.48 : 0.72;
   const dash = virtual ? '3 3' : undefined;
   const fillBody = virtual ? 'oklch(0.78 0.02 220)' : 'oklch(0.75 0.10 154)';
@@ -566,9 +582,9 @@ function CandleImage({ x, y, h, label, virtual }: { x: number; y: number; h: num
   return (
     <g transform={`translate(${x}, ${y}) scale(1, ${scale})`} opacity={op}>
       <rect x={-bodyW / 2} y={candleTop} width={bodyW} height={bodyH} rx={bodyW / 2} fill={fillBody} stroke={strokeBody} strokeWidth="1" strokeDasharray={dash} />
-      <line x1={0} y1={candleTop + 1} x2={0} y2={candleTop - 3} stroke="oklch(0.35 0.02 40)" strokeWidth="1" strokeDasharray={dash} />
-      <path d={`M 0 ${flameY} C 4 ${flameY + 5}, 3 ${flameY + 11}, 0 ${flameY + 14} C -3 ${flameY + 11}, -4 ${flameY + 5}, 0 ${flameY} Z`} fill={fillFlame} />
-      <path d={`M 0 ${flameY + 4} C 1.5 ${flameY + 7}, 1.5 ${flameY + 10}, 0 ${flameY + 12} C -1.5 ${flameY + 10}, -1.5 ${flameY + 7}, 0 ${flameY + 4} Z`} fill={fillCore} />
+      <line x1={0} y1={candleTop + 1} x2={0} y2={candleTop - 3 * s} stroke="oklch(0.35 0.02 40)" strokeWidth="1" strokeDasharray={dash} />
+      <path d={`M 0 ${flameY} C ${4 * s} ${flameY + 5 * s}, ${3 * s} ${flameY + 11 * s}, 0 ${flameY + 14 * s} C ${-3 * s} ${flameY + 11 * s}, ${-4 * s} ${flameY + 5 * s}, 0 ${flameY} Z`} fill={fillFlame} />
+      <path d={`M 0 ${flameY + 4 * s} C ${1.5 * s} ${flameY + 7 * s}, ${1.5 * s} ${flameY + 10 * s}, 0 ${flameY + 12 * s} C ${-1.5 * s} ${flameY + 10 * s}, ${-1.5 * s} ${flameY + 7 * s}, 0 ${flameY + 4 * s} Z`} fill={fillCore} />
       <text className="label-txt" x={bodyW / 2 + 6} y={candleTop + 2} transform={`scale(1, ${scale})`} fill={virtual ? 'var(--ink-3)' : 'var(--ink)'}>{label}</text>
     </g>
   );
@@ -714,8 +730,8 @@ function LensControls({ settings, setSettings }: { settings: LensSettings; setSe
       <SectionTitle aside="CANVAS">画布</SectionTitle>
       <Slider label="缩放" value={settings.canvasZoom ?? 1} onChange={(v: number) => setSettings({ ...settings, canvasZoom: v })} min={0.7} max={1.9} step={0.05} unit="x" />
       <div className="preset-row">
-        <button className="preset-btn" onClick={() => setSettings({ ...settings, canvasPanX: 0 })}>居中画布</button>
-        <button className="preset-btn" onClick={() => setSettings((prev: LensSettings) => ({ ...prev, lensCenterX: 560, objectX: 535, objectDistance: 25, screenX: 900, canvasPanX: 0, canvasZoom: 1 }))}>重置对象</button>
+        <button className="preset-btn" onClick={() => setSettings({ ...settings, canvasPanX: 0, canvasPanY: 0 })}>居中画布</button>
+        <button className="preset-btn" onClick={() => setSettings((prev: LensSettings) => ({ ...prev, lensCenterX: 560, objectX: 440, objectDistance: 120, screenX: 900, canvasPanX: 0, canvasPanY: 0, canvasZoom: 1 }))}>重置对象</button>
       </div>
 
       <SectionTitle aside="DISPLAY">显示</SectionTitle>

@@ -19,6 +19,7 @@ export class RemoveEntityCommand implements Command {
 
   execute(): void {
     const store = useEntityStore.getState();
+    const removedIds = new Set<string>([this.entity.id]);
 
     // Cascade-delete movable points constrained to this entity
     if (this.entity.type !== 'movable-point') {
@@ -26,12 +27,13 @@ export class RemoveEntityCommand implements Command {
         (e) => e.type === 'movable-point' && e.params.constraintEntityId === this.entity.id,
       );
       for (const cp of this.cascadedPoints) {
+        removedIds.add(cp.id);
         store.removeEntity(cp.id);
       }
     }
 
     store.removeEntity(this.entity.id);
-    if (store.activeEntityId === this.entity.id) {
+    if (store.activeEntityId && removedIds.has(store.activeEntityId)) {
       store.setActiveEntityId(null);
     }
   }

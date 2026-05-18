@@ -26,3 +26,9 @@ assert(
 assert('absolute value pipes are converted to abs()', preprocessExpression('|x|') === 'abs(x)');
 assert('implicit multiplication before absolute value is preserved', preprocessExpression('2|x|') === '2*abs(x)');
 assert('builtin function before absolute value treats bars as its argument', preprocessExpression('sin|x|') === 'sin(abs(x))');
+assert('natural shorthand sinx is normalized to sin(x)', preprocessExpression('sinx') === 'sin(x)');
+assert('natural shorthand lnx is normalized to ln(x)', preprocessExpression('lnx') === 'ln(x)');
+assert(
+  'natural shorthand keeps coefficients outside builtin function calls',
+  names('a*sinx+b').join(',') === 'a,b',
+);

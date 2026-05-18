@@ -89,17 +89,25 @@ function FieldInput({
   onChange: (v: number) => void;
 }) {
   const [draft, setDraft] = useState(String(value));
+  const [error, setError] = useState<string | null>(null);
 
   function commit(raw: string) {
     const n = parseFloat(raw);
-    if (isFinite(n) && n > 0) { onChange(n); setDraft(String(n)); }
-    else setDraft(String(value));
+    if (isFinite(n) && n > 0) {
+      onChange(n);
+      setDraft(String(n));
+      setError(null);
+      return;
+    }
+    setDraft(String(value));
+    setError(def.isAngle ? '请输入大于 0 的角度' : '请输入大于 0 的数值');
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-      <span style={{ width: 48, fontSize: 11, color: COLORS.neutral }}>{def.hint}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 48, fontSize: 11, color: COLORS.neutral }}>{def.hint}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
         <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'monospace', color: COLORS.primary, minWidth: 12 }}>
           {def.label}
         </span>
@@ -108,23 +116,37 @@ function FieldInput({
           type="number"
           value={draft}
           step={def.isAngle ? 1 : 0.5}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            if (error) setError(null);
+          }}
           onKeyDown={(e) => e.key === 'Enter' && commit(draft)}
-          {...focusRing(COLORS.primary, COLORS.primaryFocusRing, COLORS.borderMuted, { onBlur: (e) => commit((e.target as HTMLInputElement).value) })}
+          {...focusRing(
+            COLORS.primary,
+            COLORS.primaryFocusRing,
+            error ? COLORS.errorBorder : COLORS.borderMuted,
+            { onBlur: (e) => commit((e.target as HTMLInputElement).value) },
+          )}
           style={{
             flex: 1,
             padding: '3px 6px',
             fontSize: 12, fontFamily: 'monospace',
             background: COLORS.surface,
-            border: `1px solid ${COLORS.borderMuted}`,
+            border: `1px solid ${error ? COLORS.errorBorder : COLORS.borderMuted}`,
             borderRadius: 8,
-            color: COLORS.textPrimary,
+            color: error ? COLORS.errorDark : COLORS.textPrimary,
             outline: 'none',
             textAlign: 'right',
           }}
         />
         {def.isAngle && <span style={{ fontSize: 11, color: COLORS.textSecondary }}>°</span>}
       </div>
+      </div>
+      {error && (
+        <div style={{ paddingLeft: 54, marginTop: 4 }}>
+          <span style={{ fontSize: 10, color: COLORS.errorDark }}>⚠ {error}</span>
+        </div>
+      )}
     </div>
   );
 }

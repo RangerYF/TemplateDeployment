@@ -54,11 +54,13 @@ export const useTriangleSolverStore = create<TriangleSolverState>((set, get) => 
         ...state.inputs,
         [key]: value,
       },
+      result: null,
     })),
 
   setInputs: (inputs) =>
     set({
       inputs,
+      result: null,
     }),
 
   setResult: (result) => set({ result }),

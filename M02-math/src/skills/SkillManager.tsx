@@ -54,6 +54,23 @@ function LoadingFallback() {
   );
 }
 
+function syncDocumentTitle(activeSkill: SkillId) {
+  if (typeof document === 'undefined') return;
+  if (activeSkill === 'm03') {
+    document.title = '解析几何画板';
+    return;
+  }
+  if (activeSkill === 'm04') {
+    document.title = '三角函数演示台';
+    return;
+  }
+  if (activeSkill === 'm02') {
+    document.title = '函数图形实验室';
+    return;
+  }
+  document.title = 'EduMath Lab';
+}
+
 // ─── SkillManager Component ─────────────────────────────────────────────────
 
 export function SkillManager() {
@@ -64,6 +81,10 @@ export function SkillManager() {
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
   }, []);
+
+  useEffect(() => {
+    syncDocumentTitle(activeSkill);
+  }, [activeSkill]);
 
   if (activeSkill === '') {
     return <HomeScreen />;

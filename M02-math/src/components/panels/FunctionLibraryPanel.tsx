@@ -16,12 +16,20 @@ import { createId } from '@/lib/id';
 const MAX_FUNCTIONS = 8;
 const LABELS = ['f(x)', 'g(x)', 'h(x)', 'p(x)', 'q(x)', 'r(x)', 's(x)', 't(x)'];
 
-export function FunctionLibraryPanel() {
+export function FunctionLibraryPanel({
+  onOpenCustom,
+}: {
+  onOpenCustom?: () => void;
+}) {
   const functions = useFunctionStore((s) => s.functions);
   const count     = functions.length;
 
   const addFunction = (templateId: string | null) => {
     console.log('[FunctionLibraryPanel] addFunction called, templateId=', templateId, 'count=', count);
+    if (templateId === null) {
+      if (!disabled) onOpenCustom?.();
+      return;
+    }
     if (count >= MAX_FUNCTIONS) return;
 
     const idx   = count;
@@ -31,13 +39,11 @@ export function FunctionLibraryPanel() {
     let exprStr   = 'x';
     let namedParams: FunctionEntry['namedParams'] = [];
 
-    if (templateId !== null) {
-      const tmpl = FUNCTION_TEMPLATES.find((t) => t.id === templateId);
-      if (tmpl) {
-        namedParams = tmpl.defaultParams.map((p) => ({ ...p }));
-        const values = Object.fromEntries(namedParams.map((p) => [p.name, p.value]));
-        exprStr = tmpl.buildExpr(values);
-      }
+    const tmpl = FUNCTION_TEMPLATES.find((t) => t.id === templateId);
+    if (tmpl) {
+      namedParams = tmpl.defaultParams.map((p) => ({ ...p }));
+      const values = Object.fromEntries(namedParams.map((p) => [p.name, p.value]));
+      exprStr = tmpl.buildExpr(values);
     }
 
     const entry: FunctionEntry = {

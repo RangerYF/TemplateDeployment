@@ -45,6 +45,12 @@ const BUILTIN_FUNCTIONS = new Set([
   'sqrt', 'abs', 'log', 'ln', 'exp',
 ]);
 
+const BUILTIN_FUNCTION_PATTERNS = [
+  'sin', 'cos', 'tan',
+  'csc', 'sec', 'cot',
+  'sqrt', 'abs', 'log', 'ln', 'exp',
+] as const;
+
 function normalizeAbsoluteValue(expr: string): string {
   return expr
     .replace(/\b([A-Za-z]+)\|([^|]+)\|/g, (match, fnName: string, body: string) =>
@@ -55,7 +61,7 @@ function normalizeAbsoluteValue(expr: string): string {
 
 export function preprocessExpression(expr: string, knownFns: string[] = []): string {
   const knownSet = new Set(knownFns);
-  return normalizeAbsoluteValue(expr)
+  let normalized = normalizeAbsoluteValue(expr)
     // 0. Unicode math shorthands
     .replace(/²/g, '^2')
     .replace(/³/g, '^3')
@@ -79,6 +85,17 @@ export function preprocessExpression(expr: string, knownFns: string[] = []): str
     )
     // 6. close paren immediately followed by open paren
     .replace(/\)\(/g, ')*(');
+
+  // 7. Common natural shorthand: sinx → sin(x), lnx → ln(x), sqrtx → sqrt(x)
+  //    Only rewrite when the builtin name is not part of a longer identifier.
+  for (const fnName of BUILTIN_FUNCTION_PATTERNS) {
+    const re = new RegExp(`(^|[^a-zA-Z0-9_])(${fnName})(x)(?![a-zA-Z0-9_])`, 'g');
+    normalized = normalized.replace(re, (_, prefix: string, fnPart: string, xPart: string) =>
+      `${prefix}${fnPart}(${xPart})`,
+    );
+  }
+
+  return normalized;
 }
 
 // ─── LRU Cache (max 50 entries) ──────────────────────────────────────────────

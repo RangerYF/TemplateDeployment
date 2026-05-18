@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Undo2, Redo2, Crosshair, Move, MapPin,
+  Undo2, Redo2, Crosshair, MapPin,
   PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
 } from 'lucide-react';
 import { GeometryCanvas } from '@/components/GeometryCanvas';
@@ -91,12 +91,12 @@ export function M03Layout() {
           <ToolButton
             active={activeTool === 'point-on-curve'}
             onClick={() => setTool(activeTool === 'point-on-curve' ? 'pan-zoom' : 'point-on-curve')}
-            title={activeTool === 'point-on-curve' ? '切换到平移缩放' : '动点追踪'}
+            title={activeTool === 'point-on-curve' ? '退出追踪模式' : '进入追踪模式'}
             activeColor="#00C06B"
           >
             {activeTool === 'point-on-curve'
-              ? <><Crosshair size={13} /><span>追踪</span></>
-              : <><Move size={13} /><span>平移</span></>}
+              ? <><Crosshair size={13} /><span>追踪中</span></>
+              : <><Crosshair size={13} /><span>追踪</span></>}
           </ToolButton>
 
           {/* Movable point tool */}

@@ -244,18 +244,20 @@ export function renderDynamicAngle(
   // ── 1. Angle arc (low visual weight) ──────────────────────────────────
   if (options.showAngleArc && Math.abs(angleRad) > 1e-6) {
     const arcRadius = Math.max(radiusPx * DYNAMIC.arcRadiusFrac, DYNAMIC.arcMinPx);
+    const canvasEndAngle = -angleRad;
+    const drawAnticlockwise = angleRad > 0;
 
     ctx.beginPath();
-    ctx.arc(ox, oy, arcRadius, 0, -angleRad, angleRad < 0);
+    ctx.arc(ox, oy, arcRadius, 0, canvasEndAngle, drawAnticlockwise);
     ctx.strokeStyle = DYNAMIC.arcColor;
     ctx.lineWidth   = DYNAMIC.arcWidth;
     ctx.setLineDash([]);
     ctx.stroke();
 
     // Small arrowhead
-    const endX = ox + arcRadius * Math.cos(-angleRad);
-    const endY = oy + arcRadius * Math.sin(-angleRad);
-    const tangAngle = -angleRad + (angleRad >= 0 ? Math.PI / 2 : -Math.PI / 2);
+    const endX = ox + arcRadius * Math.cos(canvasEndAngle);
+    const endY = oy + arcRadius * Math.sin(canvasEndAngle);
+    const tangAngle = canvasEndAngle + (drawAnticlockwise ? -Math.PI / 2 : Math.PI / 2);
     const A = DYNAMIC.arrowSize;
     ctx.beginPath();
     ctx.moveTo(endX, endY);
