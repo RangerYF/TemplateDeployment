@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useMemo } from 'react';
 import { useHistoryStore } from '@/editor';
 import type { Command } from '@/editor/commands/types';
 import { useDemoEntityStore } from '@/editor/demo/demoEntityStore';
@@ -7,12 +7,23 @@ import {
   UpdateVectorPropsCmd, MovePointCmd, LoadDemoSnapshotCmd,
   CreateVecOpCmd, DeleteVecOpCmd, DeleteVectorCmd, UpdateVecOpCmd,
   BindPointsCmd, UnbindPointsCmd,
+  DeleteMarkerCmd, UpdateMarkerCmd,
+  DeleteGenericCmd, UpdateGenericCmd, UpdateTextCmd,
+  CreateMarkerCmd, CreateConstructionCmd,
 } from '@/editor/demo/demoCommands';
-import type { DemoPoint, DemoVector, DemoVecOp, DemoBinding } from '@/editor/demo/demoTypes';
+import { parseEquation } from '@/engine/algebraParser';
+import type {
+  DemoPoint, DemoVector, DemoVecOp, DemoBinding, DemoEntity,
+  DemoMarker, DemoSegment, DemoCircle, DemoText, DemoAngleMark, DemoDistanceMark,
+  DemoLine, DemoRay, DemoPolygon, DemoSlider, MotionPath,
+} from '@/editor/demo/demoTypes';
 import { DEMO_COLORS } from '@/editor/demo/demoTypes';
 import { COLORS, RADIUS } from '@/styles/tokens';
-import { mag2D, add2D, sub2D, scale2D, dot2D, evalSqrtExpr, fmtSurd } from '@/engine/vectorMath';
+import { mag2D, add2D, sub2D, scale2D, dot2D, fmtSurd } from '@/engine/vectorMath';
+import { evalExact, evalExactScoped, buildSliderScope } from '@/engine/exactMath';
+import { useTraceStore } from '@/editor/demo/traceStore';
 import type { Vec2D } from '@/editor/entities/types';
+import { Eye, EyeOff } from 'lucide-react';
 
 // ─── PanelSection（折叠/展开，匹配 visual_template LeftPanel 样式）───
 
@@ -118,28 +129,226 @@ function LabeledInput({ label, value, onChange }: {
   );
 }
 
-// ─── 颜色圆点选择器（rounded-full）───
+// ─── 表达式紧凑输入框（支持 √ 根号表达式）───
+
+function shouldStoreExpr(raw: string, numVal: number): string | undefined {
+  const trimmed = raw.trim();
+  const asFloat = parseFloat(trimmed);
+  if (!isNaN(asFloat) && Math.abs(asFloat - numVal) < 1e-12) return undefined;
+  return trimmed;
+}
+
+function ExprCompactInput({ value, expr, onCommit, width = 72, scope }: {
+  value: number; expr?: string; onCommit: (v: number, expr?: string) => void; width?: number;
+  scope?: Record<string, number>;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [text, setText] = useState(() => expr ?? fmtSurd(value));
+  const [valid, setValid] = useState(true);
+  const [prevValue, setPrevValue] = useState(value);
+  const [prevExpr, setPrevExpr] = useState(expr);
+
+  if (expr !== prevExpr) {
+    setPrevExpr(expr);
+    setPrevValue(value);
+    setText(expr ?? fmtSurd(value));
+    setValid(true);
+  } else if (Math.abs(value - prevValue) > 0.0001) {
+    setPrevValue(value);
+    setText(expr ?? fmtSurd(value));
+    setValid(true);
+  }
+
+  const commit = useCallback((raw: string) => {
+    const v = scope ? evalExactScoped(raw, scope) : evalExact(raw);
+    if (!isNaN(v)) {
+      setValid(true);
+      setPrevValue(v);
+      const stored = shouldStoreExpr(raw, v);
+      setPrevExpr(stored);
+      onCommit(v, stored);
+    } else {
+      setValid(false);
+    }
+  }, [onCommit, scope]);
+
+  const insertSqrt = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) { const n = text + '√'; setText(n); return; }
+    const start = el.selectionStart ?? text.length;
+    const end = el.selectionEnd ?? text.length;
+    const sel = text.slice(start, end);
+    const ins = sel ? `√(${sel})` : '√';
+    const newText = text.slice(0, start) + ins + text.slice(end);
+    setText(newText);
+    requestAnimationFrame(() => {
+      el.focus();
+      const pos = start + ins.length;
+      el.setSelectionRange(pos, pos);
+    });
+  }, [text]);
+
+  return (
+    <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <input
+        ref={inputRef}
+        type="text"
+        value={text}
+        onChange={(e) => { setText(e.target.value); setValid(true); }}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') commit((e.target as HTMLInputElement).value); }}
+        title="支持根号表达式，如 √2、1+√3、√(2)/2"
+        style={{
+          width, fontSize: 14, textAlign: 'center', borderRadius: RADIUS.sm,
+          border: `1px solid ${valid ? COLORS.border : '#e53e3e'}`, padding: '4px 6px', color: COLORS.text,
+        }}
+      />
+      <button
+        onClick={insertSqrt}
+        title="插入根号 √"
+        style={{
+          width: 22, height: 22, borderRadius: RADIUS.sm,
+          border: `1px solid ${COLORS.border}`, background: COLORS.bgMuted,
+          cursor: 'pointer', fontSize: 13, color: COLORS.text, padding: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >√</button>
+    </div>
+  );
+}
+
+function ExprLabeledInput({ label, value, expr, onCommit, scope }: {
+  label: string; value: number; expr?: string; onCommit: (v: number, expr?: string) => void;
+  scope?: Record<string, number>;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ fontSize: 14, color: COLORS.textMuted }}>{label}:</span>
+      <ExprCompactInput value={value} expr={expr} onCommit={onCommit} width={68} scope={scope} />
+    </div>
+  );
+}
+
+// ─── HSL 工具函数 ───
+
+function hexToHsl(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, Math.round(l * 100)];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? ((g - b) / d + (g < b ? 6 : 0)) / 6
+    : max === g ? ((b - r) / d + 2) / 6
+    : ((r - g) / d + 4) / 6;
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const s1 = s / 100, l1 = l / 100;
+  const c = (1 - Math.abs(2 * l1 - 1)) * s1;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l1 - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  const toHex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+function findClosestBase(hex: string): string {
+  const [h, s] = hexToHsl(hex);
+  let best: string = DEMO_COLORS[0];
+  let bestDist = Infinity;
+  for (const c of DEMO_COLORS) {
+    const [ch, cs] = hexToHsl(c);
+    const dh = Math.min(Math.abs(ch - h), 360 - Math.abs(ch - h));
+    const dist = dh + Math.abs(cs - s) * 0.5;
+    if (dist < bestDist) { bestDist = dist; best = c; }
+  }
+  return best;
+}
+
+// ─── 颜色圆点选择器（rounded-full + 明度滑块）───
 
 function ColorPicker({ current, onChange }: { current: string; onChange: (c: string) => void }) {
+  const [, , curL] = hexToHsl(current);
+  const [baseH, baseS] = hexToHsl(findClosestBase(current));
+
   return (
-    <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-      {DEMO_COLORS.map((c) => (
-        <div
-          key={c}
-          onClick={() => onChange(c)}
-          style={{
-            width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxSizing: 'border-box',
+    <div>
+      <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        {DEMO_COLORS.map((c) => (
+          <div
+            key={c}
+            onClick={() => onChange(c)}
+            style={{
+              width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%', background: c,
+              border: current === c || findClosestBase(current) === c ? `2px solid ${COLORS.primary}` : '2px solid transparent',
+              boxSizing: 'border-box',
+            }} />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+        <span style={{ fontSize: 12, color: COLORS.textMuted, flexShrink: 0 }}>明暗</span>
+        <input
+          type="range" min={15} max={85} value={curL}
+          onChange={(e) => {
+            const l = parseInt(e.target.value);
+            onChange(hslToHex(baseH, baseS, l));
           }}
-        >
-          <div style={{
-            width: 20, height: 20, borderRadius: '50%', background: c,
-            border: current === c ? `2px solid ${COLORS.primary}` : '2px solid transparent',
-            boxSizing: 'border-box',
-          }} />
-        </div>
-      ))}
+          style={{ flex: 1, minWidth: 0 }}
+        />
+        <span style={{ fontSize: 12, color: COLORS.textMuted, flexShrink: 0, width: 30, textAlign: 'right' }}>
+          {curL}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── 可见性 + 透明度控制 ───
+
+function VisibilityOpacityControl({ entity, onUpdate }: {
+  entity: { visible?: boolean; opacity?: number };
+  onUpdate: (patch: { visible?: boolean; opacity?: number }) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <button
+        onClick={() => onUpdate({ visible: entity.visible === false ? true : false })}
+        style={{
+          border: 'none', background: 'transparent', cursor: 'pointer',
+          color: entity.visible === false ? COLORS.textMuted : COLORS.text,
+          padding: 2, display: 'flex', alignItems: 'center',
+        }}
+        title={entity.visible === false ? '显示' : '隐藏'}
+      >
+        {entity.visible === false ? <EyeOff size={14} /> : <Eye size={14} />}
+      </button>
+      <span style={{ fontSize: 12, color: COLORS.textMuted, flexShrink: 0 }}>透明度</span>
+      <input
+        type="range" min={0} max={1} step={0.1}
+        value={entity.opacity ?? 1}
+        onChange={(e) => onUpdate({ opacity: parseFloat(e.target.value) })}
+        style={{ flex: 1, minWidth: 0 }}
+      />
+      <span style={{ fontSize: 12, color: COLORS.textMuted, flexShrink: 0, width: 30, textAlign: 'right' }}>
+        {Math.round((entity.opacity ?? 1) * 100)}%
+      </span>
     </div>
   );
 }
@@ -166,6 +375,25 @@ function ActionBtn({ onClick, children, variant = 'default' }: {
   return <button onClick={onClick} style={styles[variant]}>{children}</button>;
 }
 
+// ─── 切换按钮（用于 boolean 开关）───
+
+function ToggleBtn({ active, onClick, children }: {
+  active: boolean; onClick: () => void; children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '4px 8px', borderRadius: RADIUS.sm, border: `1px solid ${COLORS.border}`,
+        fontSize: 14, color: active ? COLORS.primary : COLORS.textMuted,
+        background: active ? COLORS.primaryLight : COLORS.bgMuted, cursor: 'pointer',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 // ─── 角度/弧度转换 ───
 
 function toDeg(rad: number): number { return rad * 180 / Math.PI; }
@@ -179,11 +407,16 @@ export function DemoPanel() {
   const nextEntityId = useDemoEntityStore((s) => s.nextEntityId);
   const { execute } = useHistoryStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sliderScope = useMemo(() => buildSliderScope(entities), [entities]);
 
   const selectedEntity = selectedId ? entities[selectedId] : null;
 
   const vectors = Object.values(entities).filter((e): e is DemoVector => e.type === 'demoVector');
   const ops = Object.values(entities).filter((e): e is DemoVecOp => e.type === 'demoVecOp');
+  const markers = Object.values(entities).filter((e): e is DemoMarker => e.type === 'demoMarker');
+  const segments = Object.values(entities).filter((e): e is DemoSegment => e.type === 'demoSegment');
+  const circles = Object.values(entities).filter((e): e is DemoCircle => e.type === 'demoCircle');
+  const texts = Object.values(entities).filter((e): e is DemoText => e.type === 'demoText');
 
   function getVecComponents(vec: DemoVector): { dx: number; dy: number; mag: number } | null {
     const startPt = entities[vec.startId] as DemoPoint | undefined;
@@ -243,7 +476,11 @@ export function DemoPanel() {
       {/* Inspector */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {!selectedEntity && (
-          <NoSelectionInspector vectors={vectors} ops={ops} entities={entities} execute={execute} />
+          <NoSelectionInspector
+            vectors={vectors} ops={ops} markers={markers}
+            segments={segments} circles={circles} texts={texts}
+            entities={entities} execute={execute}
+          />
         )}
         {selectedEntity?.type === 'demoVector' && (
           <VectorInspector
@@ -253,13 +490,44 @@ export function DemoPanel() {
             nextEntityId={nextEntityId}
             getVecComponents={getVecComponents}
             onDelete={() => select(null)}
+            scope={sliderScope}
           />
         )}
         {selectedEntity?.type === 'demoPoint' && (
-          <PointInspector pt={selectedEntity as DemoPoint} execute={execute} />
+          <PointInspector pt={selectedEntity as DemoPoint} execute={execute} scope={sliderScope} />
         )}
         {selectedEntity?.type === 'demoVecOp' && (
-          <OpInspector op={selectedEntity as DemoVecOp} entities={entities} execute={execute} onDelete={() => select(null)} />
+          <OpInspector op={selectedEntity as DemoVecOp} entities={entities} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
+        )}
+        {selectedEntity?.type === 'demoMarker' && (
+          <MarkerInspector marker={selectedEntity as DemoMarker} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
+        )}
+        {selectedEntity?.type === 'demoSegment' && (
+          <SegmentInspector seg={selectedEntity as DemoSegment} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoCircle' && (
+          <CircleInspector circle={selectedEntity as DemoCircle} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoText' && (
+          <TextInspector text={selectedEntity as DemoText} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
+        )}
+        {selectedEntity?.type === 'demoAngleMark' && (
+          <AngleMarkInspector angle={selectedEntity as DemoAngleMark} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoDistanceMark' && (
+          <DistanceMarkInspector dist={selectedEntity as DemoDistanceMark} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoLine' && (
+          <LineInspector line={selectedEntity as DemoLine} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoRay' && (
+          <RayInspector ray={selectedEntity as DemoRay} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoPolygon' && (
+          <PolygonInspector polygon={selectedEntity as DemoPolygon} entities={entities} execute={execute} onDelete={() => select(null)} />
+        )}
+        {selectedEntity?.type === 'demoSlider' && (
+          <SliderInspector slider={selectedEntity as DemoSlider} execute={execute} onDelete={() => select(null)} />
         )}
       </div>
 
@@ -285,13 +553,904 @@ export function DemoPanel() {
   );
 }
 
+// ═══════════════════════════════════════════
+// MarkerInspector
+// ═══════════════════════════════════════════
+
+function MarkerInspector({
+  marker, execute, onDelete, scope,
+}: {
+  marker: DemoMarker;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+  scope?: Record<string, number>;
+}) {
+  function handleCoordChange(axis: 'x' | 'y', val: number, expr?: string) {
+    const before = axis === 'x' ? { x: marker.x, xExpr: marker.xExpr } : { y: marker.y, yExpr: marker.yExpr };
+    const after = axis === 'x' ? { x: val, xExpr: expr } : { y: val, yExpr: expr };
+    execute(new UpdateMarkerCmd(marker.id, before, after));
+  }
+
+  function handleLabelChange(label: string) {
+    execute(new UpdateMarkerCmd(marker.id, { label: marker.label }, { label }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateMarkerCmd(marker.id, { color: marker.color }, { color }));
+  }
+
+  function handleShowCoordToggle() {
+    execute(new UpdateMarkerCmd(marker.id, { showCoord: marker.showCoord }, { showCoord: !marker.showCoord }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[marker.id] as DemoMarker;
+    execute(new DeleteMarkerCmd(current));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title={`标记点 ${marker.label}`}>
+        <InfoBlock>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14 }}>x</span>
+            <ExprCompactInput value={marker.x} expr={marker.xExpr} onCommit={(v, e) => handleCoordChange('x', v, e)} scope={scope} />
+            <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14, marginLeft: 4 }}>y</span>
+            <ExprCompactInput value={marker.y} expr={marker.yExpr} onCommit={(v, e) => handleCoordChange('y', v, e)} scope={scope} />
+          </div>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="标签">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <input
+            type="text"
+            value={marker.label}
+            maxLength={8}
+            onChange={(e) => handleLabelChange(e.target.value)}
+            style={{
+              flex: 1, padding: '4px 8px', borderRadius: RADIUS.sm,
+              border: `1px solid ${COLORS.border}`, fontSize: 14, color: COLORS.text,
+            }}
+          />
+          <ToggleBtn active={marker.showCoord} onClick={handleShowCoordToggle}>
+            {marker.showCoord ? '显示坐标' : '隐藏坐标'}
+          </ToggleBtn>
+        </div>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={marker.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={marker}
+          onUpdate={(patch) => execute(new UpdateMarkerCmd(marker.id,
+            { visible: marker.visible, opacity: marker.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除标记点</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// SegmentInspector
+// ═══════════════════════════════════════════
+
+function SegmentInspector({
+  seg, entities, execute, onDelete,
+}: {
+  seg: DemoSegment;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const startPt = entities[seg.startId] as DemoMarker | undefined;
+  const endPt = entities[seg.endId] as DemoMarker | undefined;
+  const dx = (endPt?.x ?? 0) - (startPt?.x ?? 0);
+  const dy = (endPt?.y ?? 0) - (startPt?.y ?? 0);
+  const length = mag2D([dx, dy] as Vec2D);
+
+  function handleStyleToggle() {
+    const newStyle = seg.style === 'solid' ? 'dashed' : 'solid';
+    execute(new UpdateGenericCmd(seg.id, { style: seg.style }, { style: newStyle }));
+  }
+
+  function handleShowLengthToggle() {
+    execute(new UpdateGenericCmd(seg.id, { showLength: seg.showLength }, { showLength: !seg.showLength }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(seg.id, { color: seg.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[seg.id];
+    execute(new DeleteGenericCmd(current, '删除线段'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="线段">
+        <InfoBlock>
+          <InfoRow label="起点">{startPt?.label ?? '?'}</InfoRow>
+          <InfoRow label="终点">{endPt?.label ?? '?'}</InfoRow>
+          <InfoRow label="长度">{length.toFixed(3)}</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="样式">
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <ToggleBtn active={seg.style === 'solid'} onClick={handleStyleToggle}>
+            实线
+          </ToggleBtn>
+          <ToggleBtn active={seg.style === 'dashed'} onClick={handleStyleToggle}>
+            虚线
+          </ToggleBtn>
+        </div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <ToggleBtn active={seg.showLength} onClick={handleShowLengthToggle}>
+            {seg.showLength ? '显示长度' : '隐藏长度'}
+          </ToggleBtn>
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+          <input type="checkbox" checked={!!seg.showSlope}
+            onChange={(e) => execute(new UpdateGenericCmd(seg.id, { showSlope: seg.showSlope }, { showSlope: e.target.checked }))}
+          />
+          显示斜率
+        </label>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={seg.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={seg}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(seg.id,
+            { visible: seg.visible, opacity: seg.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除线段</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// CircleInspector
+// ═══════════════════════════════════════════
+
+function CircleInspector({
+  circle, entities, execute, onDelete,
+}: {
+  circle: DemoCircle;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const center = entities[circle.centerId] as DemoMarker | undefined;
+  const radiusPt = entities[circle.radiusPointId] as DemoMarker | undefined;
+  const dx = (radiusPt?.x ?? 0) - (center?.x ?? 0);
+  const dy = (radiusPt?.y ?? 0) - (center?.y ?? 0);
+  const radius = mag2D([dx, dy] as Vec2D);
+
+  function handleStyleToggle() {
+    const newStyle = circle.style === 'solid' ? 'dashed' : 'solid';
+    execute(new UpdateGenericCmd(circle.id, { style: circle.style }, { style: newStyle }));
+  }
+
+  function handleFillToggle() {
+    execute(new UpdateGenericCmd(circle.id, { fill: circle.fill }, { fill: !circle.fill }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(circle.id, { color: circle.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[circle.id];
+    execute(new DeleteGenericCmd(current, '删除圆'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="圆">
+        <InfoBlock>
+          <InfoRow label="圆心">{center?.label ?? '?'}</InfoRow>
+          <InfoRow label="半径">{radius.toFixed(3)}</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="样式">
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <ToggleBtn active={circle.style === 'solid'} onClick={handleStyleToggle}>
+            实线
+          </ToggleBtn>
+          <ToggleBtn active={circle.style === 'dashed'} onClick={handleStyleToggle}>
+            虚线
+          </ToggleBtn>
+        </div>
+        <div>
+          <ToggleBtn active={circle.fill} onClick={handleFillToggle}>
+            {circle.fill ? '填充' : '无填充'}
+          </ToggleBtn>
+        </div>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={circle.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={circle}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(circle.id,
+            { visible: circle.visible, opacity: circle.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除圆</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// TextInspector
+// ═══════════════════════════════════════════
+
+function TextInspector({
+  text, execute, onDelete, scope,
+}: {
+  text: DemoText;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+  scope?: Record<string, number>;
+}) {
+  function handleTextChange(newText: string) {
+    execute(new UpdateTextCmd(text.id, { text: text.text }, { text: newText }));
+  }
+
+  function handleFontSizeChange(val: string) {
+    const n = parseFloat(val);
+    if (isNaN(n) || n <= 0) return;
+    execute(new UpdateTextCmd(text.id, { fontSize: text.fontSize }, { fontSize: n }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateTextCmd(text.id, { color: text.color }, { color }));
+  }
+
+  function handleCoordChange(axis: 'x' | 'y', val: number, expr?: string) {
+    const before = axis === 'x' ? { x: text.x, xExpr: text.xExpr } : { y: text.y, yExpr: text.yExpr };
+    const after = axis === 'x' ? { x: val, xExpr: expr } : { y: val, yExpr: expr };
+    execute(new UpdateTextCmd(text.id, before, after));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[text.id];
+    execute(new DeleteGenericCmd(current, '删除文字'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="文字">
+        <textarea
+          value={text.text}
+          onChange={(e) => handleTextChange(e.target.value)}
+          rows={3}
+          style={{
+            width: '100%', padding: '6px 8px', borderRadius: RADIUS.sm,
+            border: `1px solid ${COLORS.border}`, fontSize: 14, color: COLORS.text,
+            resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
+          }}
+        />
+      </PanelSection>
+
+      <PanelSection title="字号">
+        <LabeledInput label="px" value={text.fontSize} onChange={handleFontSizeChange} />
+      </PanelSection>
+
+      <PanelSection title="位置">
+        <InfoBlock>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14 }}>x</span>
+            <ExprCompactInput value={text.x} expr={text.xExpr} onCommit={(v, e) => handleCoordChange('x', v, e)} scope={scope} />
+            <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14, marginLeft: 4 }}>y</span>
+            <ExprCompactInput value={text.y} expr={text.yExpr} onCommit={(v, e) => handleCoordChange('y', v, e)} scope={scope} />
+          </div>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="渲染">
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+          <input type="checkbox" checked={!!text.latex}
+            onChange={(e) => execute(new UpdateTextCmd(text.id, { latex: text.latex }, { latex: e.target.checked }))}
+          />
+          LaTeX 渲染
+        </label>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={text.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={text}
+          onUpdate={(patch) => execute(new UpdateTextCmd(text.id,
+            { visible: text.visible, opacity: text.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除文字</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// AngleMarkInspector
+// ═══════════════════════════════════════════
+
+function AngleMarkInspector({
+  angle, entities, execute, onDelete,
+}: {
+  angle: DemoAngleMark;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const ptA = entities[angle.pointAId] as DemoMarker | undefined;
+  const vertex = entities[angle.vertexId] as DemoMarker | undefined;
+  const ptC = entities[angle.pointCId] as DemoMarker | undefined;
+
+  // 计算角度值
+  let angleDeg = 0;
+  if (ptA && vertex && ptC) {
+    const v1x = ptA.x - vertex.x;
+    const v1y = ptA.y - vertex.y;
+    const v2x = ptC.x - vertex.x;
+    const v2y = ptC.y - vertex.y;
+    const dot = v1x * v2x + v1y * v2y;
+    const m1 = Math.sqrt(v1x * v1x + v1y * v1y);
+    const m2 = Math.sqrt(v2x * v2x + v2y * v2y);
+    if (m1 > 0 && m2 > 0) {
+      const cosVal = Math.max(-1, Math.min(1, dot / (m1 * m2)));
+      angleDeg = toDeg(Math.acos(cosVal));
+    }
+  }
+
+  function handleShowValueToggle() {
+    execute(new UpdateGenericCmd(angle.id, { showValue: angle.showValue }, { showValue: !angle.showValue }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(angle.id, { color: angle.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[angle.id];
+    execute(new DeleteGenericCmd(current, '删除角度标注'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="角度标注">
+        <InfoBlock>
+          <InfoRow label="点 A">{ptA?.label ?? '?'}</InfoRow>
+          <InfoRow label="顶点 B">{vertex?.label ?? '?'}</InfoRow>
+          <InfoRow label="点 C">{ptC?.label ?? '?'}</InfoRow>
+          <InfoRow label="角度">{angleDeg.toFixed(2)}°</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <ToggleBtn active={angle.showValue} onClick={handleShowValueToggle}>
+          {angle.showValue ? '显示角度值' : '隐藏角度值'}
+        </ToggleBtn>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={angle.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={angle}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(angle.id,
+            { visible: angle.visible, opacity: angle.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除角度标注</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// DistanceMarkInspector
+// ═══════════════════════════════════════════
+
+function DistanceMarkInspector({
+  dist, entities, execute, onDelete,
+}: {
+  dist: DemoDistanceMark;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const ptA = entities[dist.pointAId] as DemoMarker | undefined;
+  const ptB = entities[dist.pointBId] as DemoMarker | undefined;
+  const dx = (ptB?.x ?? 0) - (ptA?.x ?? 0);
+  const dy = (ptB?.y ?? 0) - (ptA?.y ?? 0);
+  const distance = mag2D([dx, dy] as Vec2D);
+
+  function handleOffsetChange(val: number) {
+    execute(new UpdateGenericCmd(dist.id, { offset: dist.offset }, { offset: val }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(dist.id, { color: dist.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[dist.id];
+    execute(new DeleteGenericCmd(current, '删除距离标注'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="距离标注">
+        <InfoBlock>
+          <InfoRow label="点 A">{ptA?.label ?? '?'}</InfoRow>
+          <InfoRow label="点 B">{ptB?.label ?? '?'}</InfoRow>
+          <InfoRow label="距离">{distance.toFixed(3)}</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="偏移量">
+        <InfoBlock>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: COLORS.textMuted, fontSize: 14 }}>offset</span>
+            <CompactInput value={parseFloat(dist.offset.toFixed(2))} onCommit={handleOffsetChange} />
+          </div>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={dist.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={dist}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(dist.id,
+            { visible: dist.visible, opacity: dist.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除距离标注</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// LineInspector
+// ═══════════════════════════════════════════
+
+function LineInspector({
+  line, entities, execute, onDelete,
+}: {
+  line: DemoLine;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const pt1 = entities[line.point1Id] as DemoMarker | undefined;
+  const pt2 = entities[line.point2Id] as DemoMarker | undefined;
+
+  function handleStyleToggle() {
+    const newStyle = line.style === 'solid' ? 'dashed' : 'solid';
+    execute(new UpdateGenericCmd(line.id, { style: line.style }, { style: newStyle }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(line.id, { color: line.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[line.id];
+    execute(new DeleteGenericCmd(current, '删除直线'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="直线">
+        <InfoBlock>
+          <InfoRow label="点 1">{pt1 ? `${pt1.label} (${pt1.x.toFixed(1)}, ${pt1.y.toFixed(1)})` : '?'}</InfoRow>
+          <InfoRow label="点 2">{pt2 ? `${pt2.label} (${pt2.x.toFixed(1)}, ${pt2.y.toFixed(1)})` : '?'}</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="样式">
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <ToggleBtn active={line.style === 'solid'} onClick={handleStyleToggle}>
+            实线
+          </ToggleBtn>
+          <ToggleBtn active={line.style === 'dashed'} onClick={handleStyleToggle}>
+            虚线
+          </ToggleBtn>
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+          <input type="checkbox" checked={line.showSlope}
+            onChange={(e) => execute(new UpdateGenericCmd(line.id, { showSlope: line.showSlope }, { showSlope: e.target.checked }))}
+          />
+          显示斜率
+        </label>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={line.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={line}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(line.id,
+            { visible: line.visible, opacity: line.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除直线</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// RayInspector
+// ═══════════════════════════════════════════
+
+function RayInspector({
+  ray, entities, execute, onDelete,
+}: {
+  ray: DemoRay;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const origin = entities[ray.originId] as DemoMarker | undefined;
+  const through = entities[ray.throughId] as DemoMarker | undefined;
+
+  function handleStyleToggle() {
+    const newStyle = ray.style === 'solid' ? 'dashed' : 'solid';
+    execute(new UpdateGenericCmd(ray.id, { style: ray.style }, { style: newStyle }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(ray.id, { color: ray.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[ray.id];
+    execute(new DeleteGenericCmd(current, '删除射线'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="射线">
+        <InfoBlock>
+          <InfoRow label="起点">{origin ? `${origin.label} (${origin.x.toFixed(1)}, ${origin.y.toFixed(1)})` : '?'}</InfoRow>
+          <InfoRow label="方向点">{through ? `${through.label} (${through.x.toFixed(1)}, ${through.y.toFixed(1)})` : '?'}</InfoRow>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="样式">
+        <div style={{ display: 'flex', gap: 6 }}>
+          <ToggleBtn active={ray.style === 'solid'} onClick={handleStyleToggle}>
+            实线
+          </ToggleBtn>
+          <ToggleBtn active={ray.style === 'dashed'} onClick={handleStyleToggle}>
+            虚线
+          </ToggleBtn>
+        </div>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={ray.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={ray}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(ray.id,
+            { visible: ray.visible, opacity: ray.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除射线</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// PolygonInspector
+// ═══════════════════════════════════════════
+
+function PolygonInspector({
+  polygon, entities, execute, onDelete,
+}: {
+  polygon: DemoPolygon;
+  entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const vertices = polygon.vertexIds.map((vid) => entities[vid] as DemoMarker | undefined);
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(polygon.id, { color: polygon.color }, { color }));
+  }
+
+  function handleFillToggle() {
+    execute(new UpdateGenericCmd(polygon.id, { fill: polygon.fill }, { fill: !polygon.fill }));
+  }
+
+  function handleShowAreaToggle() {
+    execute(new UpdateGenericCmd(polygon.id, { showArea: polygon.showArea }, { showArea: !polygon.showArea }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[polygon.id];
+    execute(new DeleteGenericCmd(current, '删除多边形'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="多边形">
+        <InfoBlock>
+          <InfoRow label="顶点数">{polygon.vertexIds.length}</InfoRow>
+          {vertices.map((v, i) => (
+            <InfoRow key={polygon.vertexIds[i]} label={`顶点 ${i + 1}`}>
+              {v ? `${v.label} (${v.x.toFixed(1)}, ${v.y.toFixed(1)})` : '?'}
+            </InfoRow>
+          ))}
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="样式">
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <ToggleBtn active={polygon.fill} onClick={handleFillToggle}>
+            {polygon.fill ? '填充' : '无填充'}
+          </ToggleBtn>
+        </div>
+        <div>
+          <ToggleBtn active={polygon.showArea} onClick={handleShowAreaToggle}>
+            {polygon.showArea ? '显示面积' : '隐藏面积'}
+          </ToggleBtn>
+        </div>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={polygon.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={polygon}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(polygon.id,
+            { visible: polygon.visible, opacity: polygon.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除多边形</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// SliderInspector
+// ═══════════════════════════════════════════
+
+const RESERVED_SLIDER_NAMES = new Set([
+  'pi', 'e', 'i', 'Infinity', 'NaN', 'sqrt', 'sin', 'cos', 'tan', 'abs',
+  'log', 'ln', 'exp', 'ceil', 'floor', 'round', 'min', 'max', 'mod',
+  'asin', 'acos', 'atan', 'atan2', 'frac',
+]);
+
+function isValidSliderLabel(label: string): boolean {
+  if (!label || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(label)) return false;
+  return !RESERVED_SLIDER_NAMES.has(label);
+}
+
+function SliderInspector({
+  slider, execute, onDelete,
+}: {
+  slider: DemoSlider;
+  execute: (cmd: Command) => void;
+  onDelete: () => void;
+}) {
+  const [labelDraft, setLabelDraft] = useState(slider.label);
+  const [labelValid, setLabelValid] = useState(true);
+
+  function handleLabelChange(label: string) {
+    setLabelDraft(label);
+    if (isValidSliderLabel(label)) {
+      setLabelValid(true);
+      execute(new UpdateGenericCmd(slider.id, { label: slider.label }, { label }));
+    } else {
+      setLabelValid(false);
+    }
+  }
+
+  function handleMinChange(val: string) {
+    const n = parseFloat(val);
+    if (isNaN(n)) return;
+    execute(new UpdateGenericCmd(slider.id, { min: slider.min }, { min: n }));
+  }
+
+  function handleMaxChange(val: string) {
+    const n = parseFloat(val);
+    if (isNaN(n)) return;
+    execute(new UpdateGenericCmd(slider.id, { max: slider.max }, { max: n }));
+  }
+
+  function handleStepChange(val: string) {
+    const n = parseFloat(val);
+    if (isNaN(n) || n <= 0) return;
+    execute(new UpdateGenericCmd(slider.id, { step: slider.step }, { step: n }));
+  }
+
+  function handleValueChange(val: number) {
+    execute(new UpdateGenericCmd(slider.id, { value: slider.value }, { value: val }));
+  }
+
+  function handleWidthChange(val: string) {
+    const n = parseFloat(val);
+    if (isNaN(n) || n <= 0) return;
+    execute(new UpdateGenericCmd(slider.id, { width: slider.width }, { width: n }));
+  }
+
+  function handleColorChange(color: string) {
+    execute(new UpdateGenericCmd(slider.id, { color: slider.color }, { color }));
+  }
+
+  function handleDelete() {
+    const current = useDemoEntityStore.getState().entities[slider.id];
+    execute(new DeleteGenericCmd(current, '删除滑块'));
+    onDelete();
+  }
+
+  return (
+    <div>
+      <PanelSection title="滑块">
+        <div style={{ marginBottom: 8 }}>
+          <span style={{ fontSize: 14, color: COLORS.textMuted, marginRight: 6 }}>标签</span>
+          <input
+            type="text"
+            value={labelDraft}
+            maxLength={16}
+            placeholder="字母开头，如 k、t1"
+            onChange={(e) => handleLabelChange(e.target.value)}
+            style={{
+              flex: 1, padding: '4px 8px', borderRadius: RADIUS.sm,
+              border: `1px solid ${labelValid ? COLORS.border : '#e53e3e'}`, fontSize: 14, color: COLORS.text,
+            }}
+          />
+          {!labelValid && (
+            <div style={{ fontSize: 11, color: '#e53e3e', marginTop: 2 }}>
+              仅限字母/数字组合（字母开头），不可用 pi、sqrt 等保留名
+            </div>
+          )}
+        </div>
+        <InfoBlock>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <LabeledInput label="min" value={slider.min} onChange={handleMinChange} />
+            <LabeledInput label="max" value={slider.max} onChange={handleMaxChange} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <LabeledInput label="step" value={slider.step} onChange={handleStepChange} />
+            <LabeledInput label="宽度" value={slider.width} onChange={handleWidthChange} />
+          </div>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="当前值">
+        <InfoBlock>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="range"
+              min={slider.min} max={slider.max} step={slider.step}
+              value={slider.value}
+              onChange={(e) => handleValueChange(parseFloat(e.target.value))}
+              style={{ flex: 1 }}
+            />
+            <span style={{ fontSize: 14, fontWeight: 600, minWidth: 40, textAlign: 'right' }}>
+              {slider.value}
+            </span>
+          </div>
+        </InfoBlock>
+      </PanelSection>
+
+      <PanelSection title="颜色">
+        <ColorPicker current={slider.color} onChange={handleColorChange} />
+      </PanelSection>
+
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={slider}
+          onUpdate={(patch) => execute(new UpdateGenericCmd(slider.id,
+            { visible: slider.visible, opacity: slider.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
+      <PanelSection title="操作">
+        <ActionBtn onClick={handleDelete} variant="danger">🗑 删除滑块</ActionBtn>
+      </PanelSection>
+    </div>
+  );
+}
+
 // ─── 无选中：显示实体列表（可展开编辑）───
 
 function NoSelectionInspector({
-  vectors, ops, entities, execute,
+  vectors, ops, markers, segments, circles, texts, entities, execute,
 }: {
   vectors: DemoVector[];
   ops: DemoVecOp[];
+  markers: DemoMarker[];
+  segments: DemoSegment[];
+  circles: DemoCircle[];
+  texts: DemoText[];
   entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
   execute: (cmd: Command) => void;
 }) {
@@ -308,8 +1467,8 @@ function NoSelectionInspector({
     const startPt = entities[vec.startId] as DemoPoint | undefined;
     const endPt = entities[vec.endId] as DemoPoint | undefined;
     if (!startPt || !endPt) return;
-    const before = { x: endPt.x, y: endPt.y };
-    const after = { x: startPt.x + newDx, y: startPt.y + newDy };
+    const before = { x: endPt.x, y: endPt.y, xExpr: endPt.xExpr, yExpr: endPt.yExpr };
+    const after = { x: startPt.x + newDx, y: startPt.y + newDy, xExpr: undefined as string | undefined, yExpr: undefined as string | undefined };
     execute(new MovePointCmd(endPt.id, before, after));
   }
 
@@ -323,10 +1482,18 @@ function NoSelectionInspector({
     const thetaRad = toRad(newAngleDeg);
     const newDx = m * Math.cos(thetaRad);
     const newDy = m * Math.sin(thetaRad);
-    const before = { x: endPt.x, y: endPt.y };
-    const after = { x: startPt.x + newDx, y: startPt.y + newDy };
+    const before = { x: endPt.x, y: endPt.y, xExpr: endPt.xExpr, yExpr: endPt.yExpr };
+    const after = { x: startPt.x + newDx, y: startPt.y + newDy, xExpr: undefined as string | undefined, yExpr: undefined as string | undefined };
     execute(new MovePointCmd(endPt.id, before, after));
   }
+
+  // ─── 列表项样式 ───
+  const listItemStyle: React.CSSProperties = {
+    padding: '6px 8px', marginBottom: 4, borderRadius: RADIUS.sm,
+    border: `1px solid ${COLORS.border}`, cursor: 'pointer',
+    background: COLORS.bgMuted, fontSize: 14,
+    display: 'flex', alignItems: 'center', gap: 6,
+  };
 
   return (
     <div>
@@ -383,9 +1550,9 @@ function NoSelectionInspector({
                 <InfoBlock>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20 }}>dx</span>
-                    <CompactInput value={parseFloat(dx.toFixed(2))} onCommit={(newDx) => commitDxDy(v, newDx, dy)} />
+                    <ExprCompactInput value={dx} onCommit={(newDx) => commitDxDy(v, newDx, dy)} />
                     <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20, marginLeft: 4 }}>dy</span>
-                    <CompactInput value={parseFloat(dy.toFixed(2))} onCommit={(newDy) => commitDxDy(v, dx, newDy)} />
+                    <ExprCompactInput value={dy} onCommit={(newDy) => commitDxDy(v, dx, newDy)} />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20 }}>θ°</span>
@@ -424,6 +1591,98 @@ function NoSelectionInspector({
         </PanelSection>
       )}
 
+      {markers.length > 0 && (
+        <PanelSection title="标记点列表">
+          {markers.map((mk) => (
+            <div
+              key={mk.id}
+              onClick={() => select(mk.id)}
+              style={listItemStyle}
+            >
+              <div style={{
+                width: 10, height: 10, borderRadius: '50%', background: mk.color, flexShrink: 0,
+              }} />
+              <span style={{ fontWeight: 600 }}>{mk.label}</span>
+              <span style={{ color: COLORS.textMuted }}>
+                ({mk.x.toFixed(1)}, {mk.y.toFixed(1)})
+              </span>
+            </div>
+          ))}
+        </PanelSection>
+      )}
+
+      {segments.length > 0 && (
+        <PanelSection title="线段列表">
+          {segments.map((seg) => {
+            const sp = entities[seg.startId] as DemoMarker | undefined;
+            const ep = entities[seg.endId] as DemoMarker | undefined;
+            return (
+              <div
+                key={seg.id}
+                onClick={() => select(seg.id)}
+                style={listItemStyle}
+              >
+                <div style={{
+                  width: 10, height: 10, borderRadius: '50%', background: seg.color, flexShrink: 0,
+                }} />
+                <span style={{ fontWeight: 600 }}>{sp?.label ?? '?'} — {ep?.label ?? '?'}</span>
+                <span style={{ color: COLORS.textMuted, fontSize: 12 }}>
+                  {seg.style === 'dashed' ? '虚线' : '实线'}
+                </span>
+              </div>
+            );
+          })}
+        </PanelSection>
+      )}
+
+      {circles.length > 0 && (
+        <PanelSection title="圆列表">
+          {circles.map((c) => {
+            const center = entities[c.centerId] as DemoMarker | undefined;
+            const rPt = entities[c.radiusPointId] as DemoMarker | undefined;
+            const cdx = (rPt?.x ?? 0) - (center?.x ?? 0);
+            const cdy = (rPt?.y ?? 0) - (center?.y ?? 0);
+            const r = mag2D([cdx, cdy] as Vec2D);
+            return (
+              <div
+                key={c.id}
+                onClick={() => select(c.id)}
+                style={listItemStyle}
+              >
+                <div style={{
+                  width: 10, height: 10, borderRadius: '50%', background: c.color, flexShrink: 0,
+                }} />
+                <span style={{ fontWeight: 600 }}>{center?.label ?? '?'}</span>
+                <span style={{ color: COLORS.textMuted }}>r={r.toFixed(2)}</span>
+              </div>
+            );
+          })}
+        </PanelSection>
+      )}
+
+      {texts.length > 0 && (
+        <PanelSection title="文字列表">
+          {texts.map((t) => (
+            <div
+              key={t.id}
+              onClick={() => select(t.id)}
+              style={listItemStyle}
+            >
+              <div style={{
+                width: 10, height: 10, borderRadius: '50%', background: t.color, flexShrink: 0,
+              }} />
+              <span style={{
+                fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160,
+              }}>
+                {t.text || '(空)'}
+              </span>
+            </div>
+          ))}
+        </PanelSection>
+      )}
+
+      <AlgebraSection execute={execute} nextEntityId={nextEntityId} />
+
       <BindingSection
         vectors={vectors}
         entities={entities}
@@ -432,6 +1691,91 @@ function NoSelectionInspector({
         nextEntityId={nextEntityId}
       />
     </div>
+  );
+}
+
+// ─── 代数输入 section ───
+
+function AlgebraSection({ execute, nextEntityId }: {
+  execute: (cmd: Command) => void;
+  nextEntityId: () => string;
+}) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = useCallback(() => {
+    if (!value.trim()) return;
+    const parsed = parseEquation(value.trim());
+    if (!parsed) { setError('无法识别的格式'); return; }
+
+    if (parsed.kind === 'point') {
+      const id = nextEntityId();
+      execute(new CreateMarkerCmd({ id, type: 'demoMarker', x: parsed.x, y: parsed.y, label: 'P', color: DEMO_COLORS[0], showCoord: true }));
+    } else if (parsed.kind === 'line' || parsed.kind === 'verticalLine') {
+      let x1: number, y1: number, x2: number, y2: number;
+      if (parsed.kind === 'verticalLine') {
+        x1 = parsed.x; y1 = -8; x2 = parsed.x; y2 = 8;
+      } else {
+        x1 = -8; y1 = parsed.slope * -8 + parsed.intercept;
+        x2 = 8; y2 = parsed.slope * 8 + parsed.intercept;
+      }
+      const id1 = nextEntityId();
+      const id2 = nextEntityId();
+      const lineId = nextEntityId();
+      execute(new CreateConstructionCmd('代数创建直线', [
+        { id: id1, type: 'demoMarker', x: x1, y: y1, label: '', color: '#999', showCoord: false },
+        { id: id2, type: 'demoMarker', x: x2, y: y2, label: '', color: '#999', showCoord: false },
+        { id: lineId, type: 'demoLine', point1Id: id1, point2Id: id2, color: DEMO_COLORS[5], style: 'solid', showSlope: true },
+      ] as DemoEntity[]));
+    } else if (parsed.kind === 'circle') {
+      const centerId = nextEntityId();
+      const radiusId = nextEntityId();
+      const circleId = nextEntityId();
+      execute(new CreateConstructionCmd('代数创建圆', [
+        { id: centerId, type: 'demoMarker', x: parsed.cx, y: parsed.cy, label: 'O', color: '#999', showCoord: true },
+        { id: radiusId, type: 'demoMarker', x: parsed.cx + parsed.r, y: parsed.cy, label: '', color: '#999', showCoord: false },
+        { id: circleId, type: 'demoCircle', centerId, radiusPointId: radiusId, color: DEMO_COLORS[4], style: 'solid', fill: false },
+      ] as DemoEntity[]));
+    }
+
+    setValue('');
+    setError('');
+  }, [value, execute, nextEntityId]);
+
+  return (
+    <PanelSection title="代数输入">
+      <div style={{ display: 'flex', gap: 4 }}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => { setValue(e.target.value); setError(''); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
+          placeholder="y=2x+1, x=3, (2,3)"
+          style={{
+            flex: 1, padding: '4px 8px', fontSize: 13,
+            border: `1px solid ${error ? COLORS.error : COLORS.border}`,
+            borderRadius: RADIUS.sm, outline: 'none',
+            background: COLORS.bgMuted, color: COLORS.text,
+            minWidth: 0,
+          }}
+        />
+        <button
+          onClick={handleSubmit}
+          style={{
+            padding: '4px 10px', fontSize: 13, cursor: 'pointer',
+            borderRadius: RADIUS.sm, border: `1px solid ${COLORS.primary}`,
+            background: COLORS.primaryLight, color: COLORS.primary,
+            fontWeight: 600, flexShrink: 0,
+          }}
+        >
+          添加
+        </button>
+      </div>
+      {error && <span style={{ fontSize: 11, color: COLORS.error, marginTop: 2 }}>{error}</span>}
+      <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 4 }}>
+        支持：y=mx+b, x=c, (x-a)²+(y-b)²=r², (x,y)
+      </div>
+    </PanelSection>
   );
 }
 
@@ -467,13 +1811,14 @@ function BindingSection({
   function isAnchorPoint(ptId: string): boolean {
     for (const v of vectors) {
       if (!v.constraint || v.constraint === 'free') continue;
-      if (v.constraint === 'fixedStart' && v.startId === ptId) return true;
-      if (v.constraint === 'fixedEnd' && v.endId === ptId) return true;
+      const locksStart = v.constraint === 'fixedStart' || v.constraint === 'lineEnd' || v.constraint === 'regionEnd';
+      const locksEnd = v.constraint === 'fixedEnd' || v.constraint === 'lineStart' || v.constraint === 'regionStart';
+      if ((locksStart && v.startId === ptId) || (locksEnd && v.endId === ptId)) return true;
     }
     return false;
   }
 
-  /** 获取端点的约束信息（仅约束向量的自由端） */
+  /** 获取端点的约束信息（仅约束向量的自由端，圆约束） */
   function getConstraint(ptId: string): { anchorId: string; length: number } | null {
     for (const v of vectors) {
       if (!v.constraint || v.constraint === 'free' || !v.constraintLength) continue;
@@ -763,80 +2108,158 @@ function SqrtInput({ value, onChange, onCommit, placeholder }: {
 // ─── 约束模式编辑器 ───
 
 function ConstraintEditor({
-  vec, entities, execute,
+  vec, entities, execute, scope,
 }: {
   vec: DemoVector;
   entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
   execute: (cmd: Command) => void;
+  scope?: Record<string, number>;
 }) {
   const current = vec.constraint ?? 'free';
   const [lengthText, setLengthText] = useState(() =>
-    vec.constraintLength != null ? fmtSurd(vec.constraintLength) : '1',
+    vec.constraintLengthExpr ?? (vec.constraintLength != null ? fmtSurd(vec.constraintLength) : '1'),
   );
 
-  function applyConstraint(mode: 'free' | 'fixedStart' | 'fixedEnd') {
+  const sp = entities[vec.startId] as DemoPoint | undefined;
+  const ep = entities[vec.endId] as DemoPoint | undefined;
+
+  const [lp1x, setLp1x] = useState(() => vec.constraintLineP1 ? String(vec.constraintLineP1.x) : sp ? String(sp.x - 2) : '-2');
+  const [lp1y, setLp1y] = useState(() => vec.constraintLineP1 ? String(vec.constraintLineP1.y) : sp ? String(sp.y) : '0');
+  const [lp2x, setLp2x] = useState(() => vec.constraintLineP2 ? String(vec.constraintLineP2.x) : sp ? String(sp.x + 2) : '2');
+  const [lp2y, setLp2y] = useState(() => vec.constraintLineP2 ? String(vec.constraintLineP2.y) : sp ? String(sp.y) : '0');
+
+  const [rMinX, setRMinX] = useState(() => vec.constraintRegionMin ? String(vec.constraintRegionMin.x) : sp ? String(sp.x - 2) : '-2');
+  const [rMinY, setRMinY] = useState(() => vec.constraintRegionMin ? String(vec.constraintRegionMin.y) : sp ? String(sp.y - 2) : '-2');
+  const [rMaxX, setRMaxX] = useState(() => vec.constraintRegionMax ? String(vec.constraintRegionMax.x) : sp ? String(sp.x + 2) : '2');
+  const [rMaxY, setRMaxY] = useState(() => vec.constraintRegionMax ? String(vec.constraintRegionMax.y) : sp ? String(sp.y + 2) : '2');
+
+  type ConstraintMode = typeof current;
+
+  function applyConstraint(mode: ConstraintMode) {
+    const before = {
+      constraint: vec.constraint, constraintLength: vec.constraintLength, constraintLengthExpr: vec.constraintLengthExpr,
+      constraintLineP1: vec.constraintLineP1, constraintLineP2: vec.constraintLineP2,
+      constraintRegionMin: vec.constraintRegionMin, constraintRegionMax: vec.constraintRegionMax,
+    };
     if (mode === 'free') {
-      execute(new UpdateVectorPropsCmd(vec.id,
-        { constraint: vec.constraint, constraintLength: vec.constraintLength },
-        { constraint: 'free', constraintLength: undefined },
-      ));
+      execute(new UpdateVectorPropsCmd(vec.id, before, {
+        constraint: 'free', constraintLength: undefined, constraintLengthExpr: undefined,
+        constraintLineP1: undefined, constraintLineP2: undefined,
+        constraintRegionMin: undefined, constraintRegionMax: undefined,
+      }));
       return;
     }
-    const len = evalSqrtExpr(lengthText);
-    if (isNaN(len) || len <= 0) return;
-    // 设置约束并调整当前端点到正确长度
-    const sp = entities[vec.startId] as DemoPoint | undefined;
-    const ep = entities[vec.endId] as DemoPoint | undefined;
-    if (!sp || !ep) return;
-    const dx = ep.x - sp.x, dy = ep.y - sp.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist > 0.001) {
-      // 调整自由端到正确距离
-      const anchor = mode === 'fixedStart' ? sp : ep;
-      const free = mode === 'fixedStart' ? ep : sp;
-      const fdx = free.x - anchor.x, fdy = free.y - anchor.y;
-      const fDist = Math.sqrt(fdx * fdx + fdy * fdy);
-      if (fDist > 0.001) {
-        const nx = anchor.x + fdx / fDist * len;
-        const ny = anchor.y + fdy / fDist * len;
-        execute(new MovePointCmd(free.id, { x: free.x, y: free.y }, { x: nx, y: ny }));
+    if (mode === 'fixedStart' || mode === 'fixedEnd') {
+      const ev = (s: string) => scope ? evalExactScoped(s, scope) : evalExact(s);
+      const len = ev(lengthText);
+      if (isNaN(len) || len <= 0) return;
+      if (sp && ep) {
+        const anchor = mode === 'fixedStart' ? sp : ep;
+        const free = mode === 'fixedStart' ? ep : sp;
+        const fdx = free.x - anchor.x, fdy = free.y - anchor.y;
+        const fDist = Math.sqrt(fdx * fdx + fdy * fdy);
+        if (fDist > 0.001) {
+          const nx = anchor.x + fdx / fDist * len;
+          const ny = anchor.y + fdy / fDist * len;
+          execute(new MovePointCmd(free.id, { x: free.x, y: free.y }, { x: nx, y: ny }));
+        }
       }
+      execute(new UpdateVectorPropsCmd(vec.id, before, {
+        constraint: mode, constraintLength: len, constraintLengthExpr: shouldStoreExpr(lengthText, len),
+        constraintLineP1: undefined, constraintLineP2: undefined,
+        constraintRegionMin: undefined, constraintRegionMax: undefined,
+      }));
+      return;
     }
-    execute(new UpdateVectorPropsCmd(vec.id,
-      { constraint: vec.constraint, constraintLength: vec.constraintLength },
-      { constraint: mode, constraintLength: len },
-    ));
+    if (mode === 'lineStart' || mode === 'lineEnd') {
+      const ev2 = (s: string) => scope ? evalExactScoped(s, scope) : evalExact(s);
+      const p1 = { x: ev2(lp1x), y: ev2(lp1y) };
+      const p2 = { x: ev2(lp2x), y: ev2(lp2y) };
+      if ([p1.x, p1.y, p2.x, p2.y].some(isNaN)) return;
+      execute(new UpdateVectorPropsCmd(vec.id, before, {
+        constraint: mode, constraintLength: undefined,
+        constraintLineP1: p1, constraintLineP2: p2,
+        constraintRegionMin: undefined, constraintRegionMax: undefined,
+      }));
+      return;
+    }
+    if (mode === 'regionStart' || mode === 'regionEnd') {
+      const ev3 = (s: string) => scope ? evalExactScoped(s, scope) : evalExact(s);
+      const min = { x: ev3(rMinX), y: ev3(rMinY) };
+      const max = { x: ev3(rMaxX), y: ev3(rMaxY) };
+      if ([min.x, min.y, max.x, max.y].some(isNaN)) return;
+      execute(new UpdateVectorPropsCmd(vec.id, before, {
+        constraint: mode, constraintLength: undefined,
+        constraintLineP1: undefined, constraintLineP2: undefined,
+        constraintRegionMin: min, constraintRegionMax: max,
+      }));
+    }
   }
 
   function handleLengthCommit() {
-    const len = evalSqrtExpr(lengthText);
+    const len = scope ? evalExactScoped(lengthText, scope) : evalExact(lengthText);
     if (isNaN(len) || len <= 0) return;
-    if (current !== 'free') applyConstraint(current);
+    if (current === 'fixedStart' || current === 'fixedEnd') applyConstraint(current);
+  }
+
+  function handleLineCommit() {
+    if (current === 'lineStart' || current === 'lineEnd') applyConstraint(current);
+  }
+
+  function handleRegionCommit() {
+    if (current === 'regionStart' || current === 'regionEnd') applyConstraint(current);
   }
 
   const btnStyle = (active: boolean): React.CSSProperties => ({
-    flex: 1, padding: '5px 0', fontSize: 14, fontWeight: active ? 600 : 400, cursor: 'pointer',
+    flex: 1, padding: '5px 0', fontSize: 12, fontWeight: active ? 600 : 400, cursor: 'pointer',
     borderRadius: RADIUS.sm, border: `1px solid ${active ? COLORS.primary : COLORS.border}`,
     background: active ? COLORS.primaryLight : 'transparent',
     color: active ? COLORS.primary : COLORS.textSecondary,
   });
 
+  const paramLabel: React.CSSProperties = { fontSize: 12, color: COLORS.textMuted, whiteSpace: 'nowrap' };
+  const paramInput: React.CSSProperties = {
+    width: 48, padding: '2px 4px', fontSize: 12, borderRadius: RADIUS.sm,
+    border: `1px solid ${COLORS.border}`, background: 'transparent', color: COLORS.text,
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
         <button style={btnStyle(current === 'free')} onClick={() => applyConstraint('free')}>自由</button>
         <button style={btnStyle(current === 'fixedStart')} onClick={() => applyConstraint('fixedStart')}>定起点</button>
         <button style={btnStyle(current === 'fixedEnd')} onClick={() => applyConstraint('fixedEnd')}>定终点</button>
       </div>
-      {current !== 'free' && (
+      <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        <button style={btnStyle(current === 'lineStart')} onClick={() => applyConstraint('lineStart')}>直线(起)</button>
+        <button style={btnStyle(current === 'lineEnd')} onClick={() => applyConstraint('lineEnd')}>直线(终)</button>
+        <button style={btnStyle(current === 'regionStart')} onClick={() => applyConstraint('regionStart')}>区域(起)</button>
+        <button style={btnStyle(current === 'regionEnd')} onClick={() => applyConstraint('regionEnd')}>区域(终)</button>
+      </div>
+      {(current === 'fixedStart' || current === 'fixedEnd') && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 14, color: COLORS.textMuted }}>模长</span>
-          <SqrtInput
-            value={lengthText}
-            onChange={setLengthText}
-            onCommit={handleLengthCommit}
-            placeholder="如 1、√2、1+√3"
-          />
+          <span style={paramLabel}>模长</span>
+          <SqrtInput value={lengthText} onChange={setLengthText} onCommit={handleLengthCommit} placeholder="如 1、√2" />
+        </div>
+      )}
+      {(current === 'lineStart' || current === 'lineEnd') && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <span style={paramLabel}>点1</span>
+          <input style={paramInput} value={lp1x} onChange={e => setLp1x(e.target.value)} onBlur={handleLineCommit} />
+          <input style={paramInput} value={lp1y} onChange={e => setLp1y(e.target.value)} onBlur={handleLineCommit} />
+          <span style={paramLabel}>点2</span>
+          <input style={paramInput} value={lp2x} onChange={e => setLp2x(e.target.value)} onBlur={handleLineCommit} />
+          <input style={paramInput} value={lp2y} onChange={e => setLp2y(e.target.value)} onBlur={handleLineCommit} />
+        </div>
+      )}
+      {(current === 'regionStart' || current === 'regionEnd') && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <span style={paramLabel}>最小</span>
+          <input style={paramInput} value={rMinX} onChange={e => setRMinX(e.target.value)} onBlur={handleRegionCommit} />
+          <input style={paramInput} value={rMinY} onChange={e => setRMinY(e.target.value)} onBlur={handleRegionCommit} />
+          <span style={paramLabel}>最大</span>
+          <input style={paramInput} value={rMaxX} onChange={e => setRMaxX(e.target.value)} onBlur={handleRegionCommit} />
+          <input style={paramInput} value={rMaxY} onChange={e => setRMaxY(e.target.value)} onBlur={handleRegionCommit} />
         </div>
       )}
     </div>
@@ -846,7 +2269,7 @@ function ConstraintEditor({
 // ─── 向量 Inspector（对齐 visual_template 样式）───
 
 function VectorInspector({
-  vec, entities, execute, nextEntityId, getVecComponents, onDelete,
+  vec, entities, execute, nextEntityId, getVecComponents, onDelete, scope,
 }: {
   vec: DemoVector;
   entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
@@ -854,6 +2277,7 @@ function VectorInspector({
   nextEntityId: () => string;
   getVecComponents: (v: DemoVector) => { dx: number; dy: number; mag: number } | null;
   onDelete: () => void;
+  scope?: Record<string, number>;
 }) {
   const comps = getVecComponents(vec);
 
@@ -873,7 +2297,9 @@ function VectorInspector({
     const startPt = entities[vec.startId] as DemoPoint | undefined;
     const endPt = entities[vec.endId] as DemoPoint | undefined;
     if (!startPt || !endPt) return;
-    execute(new MovePointCmd(endPt.id, { x: endPt.x, y: endPt.y }, { x: startPt.x + newDx, y: startPt.y + newDy }));
+    execute(new MovePointCmd(endPt.id,
+      { x: endPt.x, y: endPt.y, xExpr: endPt.xExpr, yExpr: endPt.yExpr },
+      { x: startPt.x + newDx, y: startPt.y + newDy, xExpr: undefined, yExpr: undefined }));
   }
 
   function commitAngle(newAngleDeg: number) {
@@ -884,7 +2310,9 @@ function VectorInspector({
     const thetaRad = toRad(newAngleDeg);
     const newDx = comps.mag * Math.cos(thetaRad);
     const newDy = comps.mag * Math.sin(thetaRad);
-    execute(new MovePointCmd(endPt.id, { x: endPt.x, y: endPt.y }, { x: startPt.x + newDx, y: startPt.y + newDy }));
+    execute(new MovePointCmd(endPt.id,
+      { x: endPt.x, y: endPt.y, xExpr: endPt.xExpr, yExpr: endPt.yExpr },
+      { x: startPt.x + newDx, y: startPt.y + newDy, xExpr: undefined, yExpr: undefined }));
   }
 
   function handleScale() {
@@ -911,7 +2339,7 @@ function VectorInspector({
   const angleDeg = comps ? toDeg(Math.atan2(comps.dy, comps.dx)) : 0;
   const startPt = entities[vec.startId] as DemoPoint | undefined;
 
-  function handleStartChange(axis: 'x' | 'y', val: number) {
+  function handleStartChange(axis: 'x' | 'y', val: number, expr?: string) {
     if (!startPt) return;
     const endPt = entities[vec.endId] as DemoPoint | undefined;
     if (!endPt) return;
@@ -919,9 +2347,12 @@ function VectorInspector({
     const oldDy = endPt.y - startPt.y;
     const newSx = axis === 'x' ? val : startPt.x;
     const newSy = axis === 'y' ? val : startPt.y;
-    // 移动起点，同时移动终点保持向量不变
-    execute(new MovePointCmd(startPt.id, { x: startPt.x, y: startPt.y }, { x: newSx, y: newSy }));
-    execute(new MovePointCmd(endPt.id, { x: endPt.x, y: endPt.y }, { x: newSx + oldDx, y: newSy + oldDy }));
+    execute(new MovePointCmd(startPt.id,
+      { x: startPt.x, y: startPt.y, xExpr: startPt.xExpr, yExpr: startPt.yExpr },
+      { x: newSx, y: newSy, xExpr: axis === 'x' ? expr : startPt.xExpr, yExpr: axis === 'y' ? expr : startPt.yExpr }));
+    execute(new MovePointCmd(endPt.id,
+      { x: endPt.x, y: endPt.y, xExpr: endPt.xExpr, yExpr: endPt.yExpr },
+      { x: newSx + oldDx, y: newSy + oldDy, xExpr: undefined, yExpr: undefined }));
   }
 
   return (
@@ -931,9 +2362,9 @@ function VectorInspector({
           <InfoBlock>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20 }}>dx</span>
-              <CompactInput value={parseFloat(comps.dx.toFixed(2))} onCommit={(newDx) => commitDxDy(newDx, comps.dy)} />
+              <ExprCompactInput value={comps.dx} onCommit={(newDx) => commitDxDy(newDx, comps.dy)} />
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20, marginLeft: 4 }}>dy</span>
-              <CompactInput value={parseFloat(comps.dy.toFixed(2))} onCommit={(newDy) => commitDxDy(comps.dx, newDy)} />
+              <ExprCompactInput value={comps.dy} onCommit={(newDy) => commitDxDy(comps.dx, newDy)} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 20 }}>θ°</span>
@@ -949,16 +2380,16 @@ function VectorInspector({
           <InfoBlock>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14 }}>x</span>
-              <CompactInput value={parseFloat(startPt.x.toFixed(2))} onCommit={(v) => handleStartChange('x', v)} />
+              <ExprCompactInput value={startPt.x} expr={startPt.xExpr} onCommit={(v, e) => handleStartChange('x', v, e)} scope={scope} />
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14, marginLeft: 4 }}>y</span>
-              <CompactInput value={parseFloat(startPt.y.toFixed(2))} onCommit={(v) => handleStartChange('y', v)} />
+              <ExprCompactInput value={startPt.y} expr={startPt.yExpr} onCommit={(v, e) => handleStartChange('y', v, e)} scope={scope} />
             </div>
           </InfoBlock>
         </PanelSection>
       )}
 
       <PanelSection title="约束模式">
-        <ConstraintEditor vec={vec} entities={entities} execute={execute} />
+        <ConstraintEditor vec={vec} entities={entities} execute={execute} scope={scope} />
       </PanelSection>
 
       <PanelSection title="标签">
@@ -990,6 +2421,16 @@ function VectorInspector({
         <ColorPicker current={vec.color} onChange={handleColorChange} />
       </PanelSection>
 
+      <PanelSection title="显示">
+        <VisibilityOpacityControl
+          entity={vec}
+          onUpdate={(patch) => execute(new UpdateVectorPropsCmd(vec.id,
+            { visible: vec.visible, opacity: vec.opacity },
+            patch,
+          ))}
+        />
+      </PanelSection>
+
       <PanelSection title="操作">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <ActionBtn onClick={handleScale} variant="primary">创建 k·{vec.label}…</ActionBtn>
@@ -1003,36 +2444,184 @@ function VectorInspector({
 // ─── 点 Inspector ───
 
 function PointInspector({
-  pt, execute,
+  pt, execute, scope,
 }: {
   pt: DemoPoint;
   execute: (cmd: Command) => void;
+  scope?: Record<string, number>;
 }) {
-  function handleCoordChange(axis: 'x' | 'y', val: string) {
-    const num = parseFloat(val);
-    if (isNaN(num)) return;
-    execute(new MovePointCmd(pt.id, { x: pt.x, y: pt.y }, { x: axis === 'x' ? num : pt.x, y: axis === 'y' ? num : pt.y }));
+  function handleCoordChange(axis: 'x' | 'y', val: number, expr?: string) {
+    const before = { x: pt.x, y: pt.y, xExpr: pt.xExpr, yExpr: pt.yExpr };
+    const after = axis === 'x'
+      ? { x: val, y: pt.y, xExpr: expr, yExpr: pt.yExpr }
+      : { x: pt.x, y: val, xExpr: pt.xExpr, yExpr: expr };
+    execute(new MovePointCmd(pt.id, before, after));
   }
 
   return (
-    <PanelSection title="端点坐标">
-      <div style={{ display: 'flex', gap: 8 }}>
-        <LabeledInput label="x" value={pt.x} onChange={(v) => handleCoordChange('x', v)} />
-        <LabeledInput label="y" value={pt.y} onChange={(v) => handleCoordChange('y', v)} />
+    <>
+      <PanelSection title="端点坐标">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <ExprLabeledInput label="x" value={pt.x} expr={pt.xExpr} onCommit={(v, e) => handleCoordChange('x', v, e)} scope={scope} />
+          <ExprLabeledInput label="y" value={pt.y} expr={pt.yExpr} onCommit={(v, e) => handleCoordChange('y', v, e)} scope={scope} />
+        </div>
+      </PanelSection>
+      <PanelSection title="运动路径">
+        <MotionEditor pt={pt} execute={execute} scope={scope} />
+        {pt.motion && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ToggleBtn active={!!pt.showLocus} onClick={() => execute(new UpdateGenericCmd(pt.id, { showLocus: pt.showLocus }, { showLocus: !pt.showLocus }))}>
+                轨迹线
+              </ToggleBtn>
+              <span style={{ fontSize: 12, color: COLORS.textMuted }}>显示完整运动路径</span>
+            </div>
+            <TraceToggle pointId={pt.id} />
+          </div>
+        )}
+      </PanelSection>
+    </>
+  );
+}
+
+function TraceToggle({ pointId }: { pointId: string }) {
+  const traceEnabled = useTraceStore((s) => s.traceEnabled[pointId] ?? false);
+  const setTraceEnabled = useTraceStore((s) => s.setTraceEnabled);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+      <ToggleBtn active={traceEnabled} onClick={() => setTraceEnabled(pointId, !traceEnabled)}>
+        轨迹追踪
+      </ToggleBtn>
+      <span style={{ fontSize: 12, color: COLORS.textMuted }}>播放动画时描绘运动轨迹</span>
+    </div>
+  );
+}
+
+function MotionEditor({ pt, execute, scope }: { pt: DemoPoint; execute: (cmd: Command) => void; scope?: Record<string, number> }) {
+  const motionKind = pt.motion?.kind ?? 'none';
+  const [saved, setSaved] = useState(false);
+
+  const [cx, setCx] = useState(() => pt.motion?.kind === 'circular' ? String(pt.motion.cx) : String(pt.x));
+  const [cy, setCy] = useState(() => pt.motion?.kind === 'circular' ? String(pt.motion.cy) : String(pt.y));
+  const [radius, setRadius] = useState(() => pt.motion?.kind === 'circular' ? String(pt.motion.radius) : '2');
+  const [cSpeed, setCSpeed] = useState(() => pt.motion?.kind === 'circular' ? String(pt.motion.speed) : '1');
+  const [cDir, setCDir] = useState<1 | -1>(() => pt.motion?.kind === 'circular' ? pt.motion.direction : 1);
+
+  const [lx1, setLx1] = useState(() => pt.motion?.kind === 'linear' ? String(pt.motion.x1) : String(pt.x - 2));
+  const [ly1, setLy1] = useState(() => pt.motion?.kind === 'linear' ? String(pt.motion.y1) : String(pt.y));
+  const [lx2, setLx2] = useState(() => pt.motion?.kind === 'linear' ? String(pt.motion.x2) : String(pt.x + 2));
+  const [ly2, setLy2] = useState(() => pt.motion?.kind === 'linear' ? String(pt.motion.y2) : String(pt.y));
+  const [lSpeed, setLSpeed] = useState(() => pt.motion?.kind === 'linear' ? String(pt.motion.speed) : '0.5');
+  const [bounce, setBounce] = useState(() => pt.motion?.kind === 'linear' ? pt.motion.bounce : true);
+
+  function setMotion(m: MotionPath | undefined) {
+    execute(new UpdateGenericCmd(pt.id, { motion: pt.motion }, { motion: m }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1200);
+  }
+
+  function applyCircular(dirOverride?: 1 | -1) {
+    const ev = (s: string) => scope ? evalExactScoped(s, scope) : evalExact(s);
+    const vals = [cx, cy, radius, cSpeed].map(ev);
+    if (vals.some(isNaN) || vals[2] <= 0) {
+      console.warn('[MotionEditor] Invalid circular params:', { cx, cy, radius, cSpeed, vals });
+      return;
+    }
+    const startAngle = Math.atan2(pt.y - vals[1], pt.x - vals[0]);
+    setMotion({ kind: 'circular', cx: vals[0], cy: vals[1], radius: vals[2], startAngle, speed: vals[3], direction: dirOverride ?? cDir });
+  }
+
+  function applyLinear(bounceOverride?: boolean) {
+    const ev = (s: string) => scope ? evalExactScoped(s, scope) : evalExact(s);
+    const vals = [lx1, ly1, lx2, ly2, lSpeed].map(ev);
+    if (vals.some(isNaN)) {
+      console.warn('[MotionEditor] Invalid linear params:', { lx1, ly1, lx2, ly2, lSpeed, vals });
+      return;
+    }
+    setMotion({ kind: 'linear', x1: vals[0], y1: vals[1], x2: vals[2], y2: vals[3], speed: vals[4], bounce: bounceOverride ?? bounce });
+  }
+
+  function handleKindChange(kind: 'none' | 'circular' | 'linear') {
+    if (kind === 'none') { setMotion(undefined); return; }
+    if (kind === 'circular') applyCircular();
+    if (kind === 'linear') applyLinear();
+  }
+
+  const btnStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1, padding: '4px 0', fontSize: 12, fontWeight: active ? 600 : 400, cursor: 'pointer',
+    borderRadius: RADIUS.sm, border: `1px solid ${active ? COLORS.primary : COLORS.border}`,
+    background: active ? COLORS.primaryLight : 'transparent',
+    color: active ? COLORS.primary : COLORS.textSecondary,
+  });
+  const paramLabel: React.CSSProperties = { fontSize: 12, color: COLORS.textMuted, whiteSpace: 'nowrap' };
+  const paramInput: React.CSSProperties = {
+    width: 44, padding: '2px 4px', fontSize: 12, borderRadius: RADIUS.sm,
+    border: `1px solid ${COLORS.border}`, background: 'transparent', color: COLORS.text,
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        <button style={btnStyle(motionKind === 'none')} onClick={() => handleKindChange('none')}>无</button>
+        <button style={btnStyle(motionKind === 'circular')} onClick={() => handleKindChange('circular')}>圆形</button>
+        <button style={btnStyle(motionKind === 'linear')} onClick={() => handleKindChange('linear')}>直线</button>
       </div>
-    </PanelSection>
+      {motionKind === 'circular' && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <span style={paramLabel}>圆心</span>
+          <input style={paramInput} value={cx} onChange={e => setCx(e.target.value)} onBlur={() => applyCircular()} />
+          <input style={paramInput} value={cy} onChange={e => setCy(e.target.value)} onBlur={() => applyCircular()} />
+          <span style={paramLabel}>半径</span>
+          <input style={paramInput} value={radius} onChange={e => setRadius(e.target.value)} onBlur={() => applyCircular()} />
+          <span style={paramLabel}>速度</span>
+          <input style={{ ...paramInput, width: 36 }} value={cSpeed} onChange={e => setCSpeed(e.target.value)} onBlur={() => applyCircular()} />
+          <span style={paramLabel}>rad/s</span>
+          <button style={{ ...btnStyle(cDir === 1), flex: 'none', padding: '2px 8px' }} onClick={() => { setCDir(1); applyCircular(1); }}>逆时针</button>
+          <button style={{ ...btnStyle(cDir === -1), flex: 'none', padding: '2px 8px' }} onClick={() => { setCDir(-1); applyCircular(-1); }}>顺时针</button>
+        </div>
+      )}
+      {motionKind === 'linear' && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <span style={paramLabel}>起点</span>
+          <input style={paramInput} value={lx1} onChange={e => setLx1(e.target.value)} onBlur={() => applyLinear()} />
+          <input style={paramInput} value={ly1} onChange={e => setLy1(e.target.value)} onBlur={() => applyLinear()} />
+          <span style={paramLabel}>终点</span>
+          <input style={paramInput} value={lx2} onChange={e => setLx2(e.target.value)} onBlur={() => applyLinear()} />
+          <input style={paramInput} value={ly2} onChange={e => setLy2(e.target.value)} onBlur={() => applyLinear()} />
+          <span style={paramLabel}>速度</span>
+          <input style={{ ...paramInput, width: 36 }} value={lSpeed} onChange={e => setLSpeed(e.target.value)} onBlur={() => applyLinear()} />
+          <span style={paramLabel}>次/s</span>
+          <button style={{ ...btnStyle(bounce), flex: 'none', padding: '2px 8px' }} onClick={() => { setBounce(!bounce); applyLinear(!bounce); }}>
+            {bounce ? '往返' : '循环'}
+          </button>
+        </div>
+      )}
+      {motionKind !== 'none' && (
+        <button
+          style={{
+            width: '100%', marginTop: 8, padding: '5px 0', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', borderRadius: RADIUS.sm,
+            border: `1px solid ${COLORS.primary}`, background: COLORS.primary, color: '#fff',
+          }}
+          onClick={() => motionKind === 'circular' ? applyCircular() : applyLinear()}
+        >
+          {saved ? '已保存' : '保存运动路径'}
+        </button>
+      )}
+    </div>
   );
 }
 
 // ─── 运算 Inspector（增加起点编辑）───
 
 function OpInspector({
-  op, entities, execute, onDelete,
+  op, entities, execute, onDelete, scope,
 }: {
   op: DemoVecOp;
   entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>;
   execute: (cmd: Command) => void;
   onDelete: () => void;
+  scope?: Record<string, number>;
 }) {
   // 递归解析向量
   function rvec(id: string, depth = 0): Vec2D | null {
@@ -1103,17 +2692,17 @@ function OpInspector({
     return `(${r[0].toFixed(2)}, ${r[1].toFixed(2)}) |${mag2D(r).toFixed(3)}|`;
   }
 
-  function handleKChange(val: string) {
-    const k = parseFloat(val);
-    if (isNaN(k)) return;
-    execute(new UpdateVecOpCmd(op.id, { scalarK: op.scalarK }, { scalarK: k }));
+  function handleKChange(k: number, expr?: string) {
+    execute(new UpdateVecOpCmd(op.id,
+      { scalarK: op.scalarK, scalarKExpr: op.scalarKExpr },
+      { scalarK: k, scalarKExpr: expr }));
   }
 
-  function handleOriginChange(axis: 'x' | 'y', val: number) {
+  function handleOriginChange(axis: 'x' | 'y', val: number, expr?: string) {
     if (axis === 'x') {
-      execute(new UpdateVecOpCmd(op.id, { originX: op.originX }, { originX: val }));
+      execute(new UpdateVecOpCmd(op.id, { originX: op.originX, originXExpr: op.originXExpr }, { originX: val, originXExpr: expr }));
     } else {
-      execute(new UpdateVecOpCmd(op.id, { originY: op.originY }, { originY: val }));
+      execute(new UpdateVecOpCmd(op.id, { originY: op.originY, originYExpr: op.originYExpr }, { originY: val, originYExpr: expr }));
     }
   }
 
@@ -1139,7 +2728,7 @@ function OpInspector({
 
       {op.kind === 'scale' && (
         <PanelSection title="系数 k">
-          <LabeledInput label="k" value={op.scalarK ?? 1} onChange={handleKChange} />
+          <ExprCompactInput value={op.scalarK ?? 1} expr={op.scalarKExpr} onCommit={handleKChange} scope={scope} />
         </PanelSection>
       )}
 
@@ -1148,9 +2737,9 @@ function OpInspector({
           <InfoBlock>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14 }}>x</span>
-              <CompactInput value={parseFloat(curOriginX.toFixed(2))} onCommit={(v) => handleOriginChange('x', v)} />
+              <ExprCompactInput value={curOriginX} expr={op.originXExpr} onCommit={(v, e) => handleOriginChange('x', v, e)} scope={scope} />
               <span style={{ color: COLORS.textMuted, fontSize: 14, width: 14, marginLeft: 4 }}>y</span>
-              <CompactInput value={parseFloat(curOriginY.toFixed(2))} onCommit={(v) => handleOriginChange('y', v)} />
+              <ExprCompactInput value={curOriginY} expr={op.originYExpr} onCommit={(v, e) => handleOriginChange('y', v, e)} scope={scope} />
             </div>
           </InfoBlock>
         </PanelSection>

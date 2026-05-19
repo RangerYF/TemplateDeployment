@@ -14,15 +14,24 @@ import {
   computeLinearRegression,
   runLawOfLargeNumbers,
   computeStemLeaf,
+  computePieChart,
+  computeLineChart,
+  runTournamentMatch,
+  runBoxSwapBalls,
 } from './simulations';
 import {
+  DEFAULT_REGRESSION_DATA_SPEC,
   HISTOGRAM_DATASETS,
-  REGRESSION_DATASETS,
+  getBallDrawDistributionName,
+  getBallDrawScenario,
   resolveData,
+  resolveRegressionData,
+  syncCustomRegressionDataset,
 } from '../types/simulation';
 import type {
   BallDrawParams,
   BinomialDistParams,
+  BoxSwapBallsParams,
   BuffonsNeedleParams,
   CoinFlipParams,
   DiceRollParams,
@@ -30,14 +39,17 @@ import type {
   HypergeometricDistParams,
   LawOfLargeNumbersParams,
   LinearRegressionParams,
+  LineChartParams,
   MeetingProblemParams,
   MonteCarloPiParams,
   NormalDistParams,
+  PieChartParams,
   SimulationParams,
   SimulationReplayMetadata,
   SimulationResult,
   SimulationType,
   StemLeafParams,
+  TournamentMatchParams,
   TwoDiceSumParams,
 } from '../types/simulation';
 
@@ -89,6 +101,38 @@ export function createSimulationReplay(
     trialCount: getReplayTrialCount(type, params),
     generatedAt: Date.now(),
   };
+}
+
+function getEffectiveRegressionData(params: LinearRegressionParams) {
+  const baseSpec = params.dataSpec ?? {
+    ...DEFAULT_REGRESSION_DATA_SPEC,
+    presetId: params.datasetId || DEFAULT_REGRESSION_DATA_SPEC.presetId,
+  };
+  const useManual = baseSpec.mode === 'manual' || params.datasetId === 'REG-CUSTOM';
+  const effectiveSpec = useManual
+    ? { ...baseSpec, mode: 'manual' as const }
+    : { ...baseSpec, mode: 'preset' as const, presetId: params.datasetId || baseSpec.presetId };
+
+  if (useManual) {
+    syncCustomRegressionDataset(effectiveSpec);
+  }
+
+  return resolveRegressionData(effectiveSpec);
+}
+
+function getRegressionStrengthLabel(r: number): string {
+  const absR = Math.abs(r);
+  if (absR >= 0.9) return '极强线性相关';
+  if (absR >= 0.75) return '较强线性相关';
+  if (absR >= 0.5) return '中等线性相关';
+  if (absR >= 0.3) return '较弱线性相关';
+  return '线性相关较弱';
+}
+
+function getRegressionTrendLabel(b: number): string {
+  if (b > 0) return '正相关';
+  if (b < 0) return '负相关';
+  return '变化趋势不明显';
 }
 
 function buildSimulationData(
@@ -167,12 +211,40 @@ function buildSimulationData(
     }
     case 'linearRegression': {
       const p = params as LinearRegressionParams;
-      const dataset = REGRESSION_DATASETS.find(d => d.id === p.datasetId) ?? REGRESSION_DATASETS[0];
+      const dataset = getEffectiveRegressionData(p);
+      if (dataset.points.length < 2) {
+        return {
+          points: dataset.points,
+          a: 0,
+          b: 0,
+          r: 0,
+          xMean: 0,
+          yMean: 0,
+          predictedPoints: [],
+          residuals: [],
+        };
+      }
       return computeLinearRegression(dataset.points);
     }
     case 'lawOfLargeNumbers': {
       const p = params as LawOfLargeNumbersParams;
       return runLawOfLargeNumbers(p.scenario, replay?.trialCount ?? p.maxN, p.numCurves, rng);
+    }
+    case 'pieChart': {
+      const p = params as PieChartParams;
+      return computePieChart(p.dataSpec, p.binCount, p.sortByValue);
+    }
+    case 'lineChart': {
+      const p = params as LineChartParams;
+      return computeLineChart(p.dataSpec);
+    }
+    case 'tournamentMatch': {
+      const p = params as TournamentMatchParams;
+      return runTournamentMatch(p, rng);
+    }
+    case 'boxSwapBalls': {
+      const p = params as BoxSwapBallsParams;
+      return runBoxSwapBalls(p, rng);
     }
   }
 }
@@ -219,11 +291,25 @@ function buildSimulationStats(type: SimulationType, params: SimulationParams, da
     }
     case 'ballDraw': {
       const p = params as BallDrawParams;
+      const result = data as import('./simulations').BallDrawResult;
+      const scenario = getBallDrawScenario(p.scenarioId);
       stats['试验次数'] = p.n;
-      stats['红球总数'] = p.redCount;
-      stats['白球总数'] = p.whiteCount;
+      stats['课堂场景'] = scenario?.name ?? '教师自定义场景';
+      stats['目标对象'] = p.targetLabel;
+      stats[`${p.targetLabel}总数`] = p.redCount;
+      stats[`${p.otherLabel}总数`] = p.whiteCount;
       stats['每次取球'] = p.drawCount;
       stats['取球方式'] = p.replace ? '有放回' : '无放回';
+      stats['模型判断'] = getBallDrawDistributionName(p.replace);
+      stats['单次目标概率 p'] = (result.successProb ?? (p.redCount / (p.redCount + p.whiteCount))).toFixed(4);
+      stats['k 取值范围'] = `${result.minPossible ?? 0} ~ ${result.maxPossible}`;
+      stats['理论均值 E(X)'] = (result.expectedValue ?? (p.drawCount * p.redCount / (p.redCount + p.whiteCount))).toFixed(4);
+      if (typeof result.variance === 'number') {
+        stats['理论方差 D(X)'] = result.variance.toFixed(4);
+      }
+      if (scenario?.description) {
+        stats['教学说明'] = scenario.description;
+      }
       break;
     }
     case 'monteCarloPi': {
@@ -313,12 +399,38 @@ function buildSimulationStats(type: SimulationType, params: SimulationParams, da
     }
     case 'linearRegression': {
       const result = data as ReturnType<typeof computeLinearRegression>;
+      const p = params as LinearRegressionParams;
+      const dataset = getEffectiveRegressionData(p);
+      const pointCount = dataset.points.length;
+      const xValues = dataset.points.map(point => point.x);
+      const hasXVariance = xValues.length >= 2 && new Set(xValues).size > 1;
+      const rmse = result.residuals.length > 0
+        ? Math.sqrt(result.residuals.reduce((sum, item) => sum + item.residual ** 2, 0) / result.residuals.length)
+        : 0;
       const sign = result.b >= 0 ? '+' : '';
+      stats['数据源'] = dataset.sourceName;
+      stats['数据点数'] = pointCount;
+      if (pointCount < 2) {
+        stats['模型判断'] = '至少需要 2 个数据点才能做线性回归';
+        break;
+      }
+      if (!hasXVariance) {
+        stats['模型判断'] = 'x 数据没有变化，无法确定有效回归直线';
+        break;
+      }
       stats['回归方程'] = `ŷ = ${result.b.toFixed(4)}x ${sign}${result.a.toFixed(4)}`;
       stats['相关系数 r'] = result.r.toFixed(4);
       stats['决定系数 r²'] = (result.r ** 2).toFixed(4);
       stats['斜率 b'] = result.b.toFixed(4);
       stats['截距 a'] = result.a.toFixed(4);
+      stats['均方根误差 RMSE'] = rmse.toFixed(4);
+      stats['趋势判断'] = getRegressionTrendLabel(result.b);
+      stats['线性强度'] = getRegressionStrengthLabel(result.r);
+      stats['模型判断'] = Math.abs(result.r) >= 0.75
+        ? '线性特征较明显，适合用一次回归直线做课堂分析'
+        : Math.abs(result.r) >= 0.5
+          ? '存在一定线性趋势，可作近似分析'
+          : '线性关系较弱，建议提醒学生该数据可能更适合非线性模型';
       break;
     }
     case 'lawOfLargeNumbers': {
@@ -333,6 +445,59 @@ function buildSimulationStats(type: SimulationType, params: SimulationParams, da
         ballDraw: '摸球(3红/8总)',
       };
       stats['场景'] = scenarioNames[p.scenario] ?? p.scenario;
+      break;
+    }
+    case 'pieChart': {
+      const result = data as ReturnType<typeof computePieChart>;
+      stats['数据总数'] = result.total;
+      stats['分组数'] = result.binCount;
+      stats['均值'] = result.mean.toFixed(2);
+      stats['范围'] = `[${result.min.toFixed(1)}, ${result.max.toFixed(1)}]`;
+      const top = [...result.slices].sort((a, b) => b.count - a.count)[0];
+      if (top) stats['占比最高分组'] = `${top.label} (${(top.freq * 100).toFixed(1)}%)`;
+      break;
+    }
+    case 'lineChart': {
+      const result = data as ReturnType<typeof computeLineChart>;
+      stats['数据点数'] = result.points.length;
+      stats['均值'] = result.mean.toFixed(2);
+      stats['最小值'] = result.min.toFixed(2);
+      stats['最大值'] = result.max.toFixed(2);
+      stats['趋势斜率'] = result.trendSlope.toFixed(4);
+      stats['趋势'] = result.trendSlope > 0.01 ? '上升趋势' : result.trendSlope < -0.01 ? '下降趋势' : '趋势平稳';
+      break;
+    }
+    case 'tournamentMatch': {
+      const p = params as TournamentMatchParams;
+      const result = data as import('./simulations').TournamentMatchResult;
+      stats['模拟次数'] = p.n;
+      stats['甲胜乙概率'] = p.pAB.toFixed(2);
+      stats['甲胜丙概率'] = p.pAC.toFixed(2);
+      stats['乙胜丙概率'] = p.pBC.toFixed(2);
+      stats['平均场数'] = result.meanGames.toFixed(2);
+      stats['甲冠军频率'] = result.championDistribution.A.toFixed(4);
+      stats['乙冠军频率'] = result.championDistribution.B.toFixed(4);
+      stats['丙冠军频率'] = result.championDistribution.C.toFixed(4);
+      for (const ev of result.events) {
+        const theory = ev.theoreticalProb !== undefined ? `（理论 ${ev.theoreticalProb.toFixed(4)}）` : '';
+        stats[ev.label] = `${ev.freq.toFixed(4)}${theory}`;
+      }
+      break;
+    }
+    case 'boxSwapBalls': {
+      const p = params as BoxSwapBallsParams;
+      const result = data as import('./simulations').BoxSwapBallsResult;
+      stats['模拟轮数'] = p.n;
+      stats['初始黑/红 (每盒)'] = `${p.initBlack} 黑 + ${p.initRed} 红`;
+      stats['操作次数 n'] = p.operations;
+      stats['甲盒黑球均值'] = result.meanBlackInA.toFixed(4);
+      for (let k = 0; k <= 2 * p.initBlack; k++) {
+        stats[`甲盒含 ${k} 个黑球频率`] = result.distribution[k].toFixed(4);
+      }
+      if (result.theoreticalProbBn !== undefined) {
+        stats['P(B_n) 理论'] = result.theoreticalProbBn.toFixed(4);
+        stats['公式'] = 'P(B_n) = 3/5 + (2/5)·(-1/9)^n';
+      }
       break;
     }
   }

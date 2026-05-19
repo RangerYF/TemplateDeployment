@@ -197,6 +197,19 @@ function buildDerived(operation: OperationType): DerivedSummary {
         angleRad: round(angle3),
         angleDeg: round(toDeg(angle3)),
       };
+    case 'projection':
+      return {
+        projectionVector: projectVec2D(state.vecA, state.vecB),
+        projectionLength: round(projection2D(state.vecA, state.vecB)),
+      };
+    case 'rotation': {
+      const ra = state.rotationAngle;
+      const c = Math.cos(ra), s = Math.sin(ra);
+      return {
+        rotated: [round(state.vecA[0]*c - state.vecA[1]*s), round(state.vecA[0]*s + state.vecA[1]*c)],
+        angleDeg: round(toDeg(ra)),
+      };
+    }
     case 'demoStage':
       return {};
   }
@@ -226,6 +239,10 @@ function buildInterpretationHints(operation: OperationType): string[] {
       return ['叉积结果是向量，方向由右手定则决定，模长等于平行四边形面积。'];
     case 'geometry3D':
       return ['立体几何中叉积常用于求法向量和面积，点积常用于判断垂直与求夹角。'];
+    case 'projection':
+      return ['投影向量 proj_b(a)=(a·b/|b|²)·b，投影长度为标量 a·b/|b|，注意区分投影向量与投影长度。'];
+    case 'rotation':
+      return ['旋转矩阵 [[cosθ,-sinθ],[sinθ,cosθ]]，正角逆时针旋转，模长不变。'];
     case 'demoStage':
       return ['自由演示台中的结果向量由渲染层实时计算；AI 只应创建输入向量和运算节点。'];
   }

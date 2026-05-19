@@ -4,7 +4,7 @@ import { UpdateVec2DCommand } from '@/editor/commands/updateVector';
 import type { Vec2D, OperationType } from '@/editor/entities/types';
 import {
   add2D, sub2D, scale2D, dot2D, mag2D, angle2D, projectVec2D,
-  decomposeVector, toDeg, cross2D,
+  decomposeVector, toDeg, cross2D, fmtSmart, fmtApprox,
 } from '@/engine/vectorMath';
 import { useFmt } from '@/hooks/useFmt';
 import { COLORS, RADIUS } from '@/styles/tokens';
@@ -219,6 +219,8 @@ function DragHandle({ sx, sy, color, onDrag, title }: DragHandleProps) {
 
 // ─── SVG Defs：箭头 Marker ───
 
+const CHAIN_COLORS_DEFS = ['#E67E22', '#8E44AD', '#27AE60', '#2980B9', '#C0392B', '#16A085', '#D35400', '#7F8C8D'];
+
 function ArrowDefs() {
   const markers: { id: string; color: string }[] = [
     { id: 'arrow-a', color: COLORS.vecA },
@@ -229,6 +231,7 @@ function ArrowDefs() {
     { id: 'arrow-basis2', color: COLORS.basis2 },
     { id: 'arrow-target', color: COLORS.decompTarget },
     { id: 'arrow-neg', color: COLORS.negVec },
+    ...CHAIN_COLORS_DEFS.map((c, i) => ({ id: `arrow-chain-${i + 2}`, color: c })),
   ];
 
   return (
@@ -430,7 +433,7 @@ function ConceptLayer() {
 
       {/* 模长标注 */}
       <text x={(ax) / 2 + 12} y={(ay) / 2 - 10} fontSize={18} fontWeight={600} fill={COLORS.vecA} fontFamily="Inter, sans-serif">
-        |a|={f(magVal)}
+        |a|={fmtApprox(magVal)}
       </text>
 
       {/* 信息框 */}
@@ -440,7 +443,7 @@ function ConceptLayer() {
         向量 a = ({f(vecA[0])}, {f(vecA[1])})
       </text>
       <text x={VB_X + 18} y={VB_Y + 56} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        |a| = {f(magVal, 3)}，方向角 α ≈ {f(dirDeg, 1)}°
+        |a| = {fmtApprox(magVal, 3)}，方向角 α ≈ {f(dirDeg, 1)}°
       </text>
 
       {/* 单位向量提示 */}
@@ -535,7 +538,7 @@ function CoordinateLayer() {
         a = ({f(vecA[0])}, {f(vecA[1])})
       </text>
       <text x={VB_X + 18} y={VB_Y + 56} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        |a| = √({f(vecA[0])}² + {f(vecA[1])}²) = {f(mag2D(vecA), 3)}
+        |a| = √({f(vecA[0])}² + {f(vecA[1])}²) = {fmtApprox(mag2D(vecA), 3)}
       </text>
 
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDrag} title="拖拽改变向量" />
@@ -579,8 +582,8 @@ function ParallelogramLayer() {
     };
   }, [animTick]);
 
-  // 共线约束：VEC-011-D (相反向量) / VEC-011-E (同向向量)
-  const isCollinearPreset = activePresetId === 'VEC-011-D' || activePresetId === 'VEC-011-E';
+  const isOpposite = activePresetId === 'VEC-011-D';
+  const isSameDir = activePresetId === 'VEC-011-E';
 
   const sum = add2D(vecA, vecB);
   const [ax, ay] = m2s(vecA[0], vecA[1]);
@@ -589,33 +592,25 @@ function ParallelogramLayer() {
   const pax = ax + bx;
   const pay = ay + by;
 
-  // 将点投影到参考向量所在直线上（共线约束）
-  const projectToLine = useCallback((svgX: number, svgY: number, refVec: Vec2D): Vec2D => {
-    const [mx, my] = [svgX / SCALE, -svgY / SCALE];
-    const refMag = mag2D(refVec);
-    if (refMag < 0.01) return svgToMath(svgX, svgY);
-    const ux = refVec[0] / refMag;
-    const uy = refVec[1] / refMag;
-    const proj = mx * ux + my * uy;
-    const snapped = Math.round(proj * 2) / 2;
-    return [snapped * ux, snapped * uy];
-  }, []);
-
   const handleDragA = useCallback((svgX: number, svgY: number) => {
-    if (isCollinearPreset) {
-      setVecA(projectToLine(svgX, svgY, vecB));
-    } else {
-      setVecA(svgToMath(svgX, svgY));
-    }
-  }, [setVecA, isCollinearPreset, vecB, projectToLine]);
+    const v = svgToMath(svgX, svgY);
+    setVecA(v);
+    if (isOpposite) setVecB([-v[0], -v[1]]);
+    else if (isSameDir) setVecB(v);
+  }, [setVecA, setVecB, isOpposite, isSameDir]);
 
   const handleDragB = useCallback((svgX: number, svgY: number) => {
-    if (isCollinearPreset) {
-      setVecB(projectToLine(svgX, svgY, vecA));
+    const v = svgToMath(svgX, svgY);
+    if (isOpposite) {
+      setVecB(v);
+      setVecA([-v[0], -v[1]]);
+    } else if (isSameDir) {
+      setVecB(v);
+      setVecA(v);
     } else {
-      setVecB(svgToMath(svgX, svgY));
+      setVecB(v);
     }
-  }, [setVecB, isCollinearPreset, vecA, projectToLine]);
+  }, [setVecA, setVecB, isOpposite, isSameDir]);
 
   const commitA = useCallback(() => {
     const before = prevA.current;
@@ -661,7 +656,7 @@ function ParallelogramLayer() {
       {animStep >= 2 && (
         <>
           <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
-          <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
+          <VecLabel sx={bx} sy={by} ox={0} oy={0} label={isOpposite ? '-a' : 'b'} color={COLORS.vecB} />
         </>
       )}
 
@@ -754,7 +749,7 @@ function TriangleLayer() {
         const label = chainLabel(i);
         return (
           <g key={i}>
-            <Arrow x1={ox} y1={oy} x2={ex} y2={ey} color={color} markerId={`arrow-chain-${i}`} />
+            <Arrow x1={ox} y1={oy} x2={ex} y2={ey} color={color} markerId={i === 0 ? 'arrow-a' : i === 1 ? 'arrow-b' : `arrow-chain-${i}`} />
             <VecLabel sx={mx} sy={my} ox={ox} oy={oy} label={label} color={color} />
           </g>
         );
@@ -800,10 +795,12 @@ function SubtractionLayer() {
   const prevB = useRef<Vec2D>(vecB);
 
   const negB: Vec2D = [-vecB[0], -vecB[1]];
+  const aPlusNegB: Vec2D = add2D(vecA, negB);
 
   const [ax, ay] = m2s(vecA[0], vecA[1]);
   const [bx, by] = m2s(vecB[0], vecB[1]);
   const [nbx, nby] = m2s(negB[0], negB[1]);
+  const [rnx, rny] = m2s(aPlusNegB[0], aPlusNegB[1]);
 
   const isCollinear = Math.abs(cross2D(vecA, vecB)) < 0.01 && mag2D(vecA) > 0.1 && mag2D(vecB) > 0.1;
   const isPerp = Math.abs(dot2D(vecA, vecB)) < 0.01 && mag2D(vecA) > 0.1 && mag2D(vecB) > 0.1;
@@ -832,13 +829,21 @@ function SubtractionLayer() {
       <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
       <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
 
-      {/* -b（虚线提示） */}
+      {/* -b（虚线提示，从原点） */}
       <Arrow x1={0} y1={0} x2={nbx} y2={nby} color={COLORS.negVec} markerId="arrow-neg" dashed opacity={0.6} />
       <text x={nbx + 4} y={nby - 4} fontSize={18} fill={COLORS.negVec} fontFamily="Inter, sans-serif" opacity={0.8}>-b</text>
+
+      {/* a+(-b) 首尾相接：-b 从 a 终点出发 */}
+      <Arrow x1={ax} y1={ay} x2={rnx} y2={rny} color={COLORS.negVec} markerId="arrow-neg" dashed opacity={0.5} />
+      <text x={(ax + rnx) / 2 + 8} y={(ay + rny) / 2 - 6} fontSize={16} fill={COLORS.negVec} fontFamily="Inter, sans-serif" opacity={0.7}>-b</text>
 
       {/* 差向量：从 b 终点指向 a 终点 */}
       <Arrow x1={bx} y1={by} x2={ax} y2={ay} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
       <VecLabel sx={ax} sy={ay} ox={bx} oy={by} label="a-b" color={COLORS.vecResult} />
+
+      {/* a+(-b) 结果向量 */}
+      <Arrow x1={0} y1={0} x2={rnx} y2={rny} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={2} dashed opacity={0.7} />
+      <text x={rnx + 8} y={rny - 4} fontSize={16} fill={COLORS.vecResult} fontFamily="Inter, sans-serif" fontWeight={600} opacity={0.8}>a+(-b)</text>
 
       {/* 关系徽章 */}
       {isPerp && <RelationBadge sx={ax} sy={ay} kind="perp" />}
@@ -860,7 +865,6 @@ function ScalarLayer() {
   const scalarK = useVectorStore((s) => s.scalarK);
   const setVecA = useVectorStore((s) => s.setVecA);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
   const prevA = useRef<Vec2D>(vecA);
 
   const scaled = scale2D(vecA, scalarK);
@@ -887,7 +891,7 @@ function ScalarLayer() {
       {(Math.abs(scaled[0]) > 0.01 || Math.abs(scaled[1]) > 0.01) && (
         <>
           <Arrow x1={0} y1={0} x2={kax} y2={kay} color={resultColor} markerId={scalarK >= 0 ? 'arrow-result' : 'arrow-scalar'} strokeWidth={3} />
-          <VecLabel sx={kax} sy={kay} ox={0} oy={0} label={`${f(scalarK)}a`} color={resultColor} />
+          <VecLabel sx={kax} sy={kay} ox={0} oy={0} label={`${fmtSmart(scalarK)}·a`} color={resultColor} />
         </>
       )}
       {Math.abs(scalarK) < 0.01 && (
@@ -1142,6 +1146,171 @@ function DecompositionLayer() {
 }
 
 
+// ─ 向量投影 ─
+
+function ProjectionLayer() {
+  const vecA = useVectorStore((s) => s.vecA);
+  const vecB = useVectorStore((s) => s.vecB);
+  const setVecA = useVectorStore((s) => s.setVecA);
+  const setVecB = useVectorStore((s) => s.setVecB);
+  const { execute } = useHistoryStore();
+  const prevA = useRef<Vec2D>(vecA);
+  const prevB = useRef<Vec2D>(vecB);
+
+  const projVec = projectVec2D(vecA, vecB);
+  const projLen = dot2D(vecA, vecB) / mag2D(vecB);
+  const perpVec: Vec2D = [vecA[0] - projVec[0], vecA[1] - projVec[1]];
+
+  const [ax, ay] = m2s(vecA[0], vecA[1]);
+  const [bx, by] = m2s(vecB[0], vecB[1]);
+  const [px, py] = m2s(projVec[0], projVec[1]);
+  const [perpX, perpY] = m2s(vecA[0], vecA[1]);
+
+  const handleDragA = useCallback((svgX: number, svgY: number) => setVecA(svgToMath(svgX, svgY)), [setVecA]);
+  const handleDragB = useCallback((svgX: number, svgY: number) => setVecB(svgToMath(svgX, svgY)), [setVecB]);
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const commit = useCallback(() => {
+    if (prevA.current[0] !== vecA[0] || prevA.current[1] !== vecA[1]) {
+      execute(new UpdateVec2DCommand('移动向量 a', prevA.current, vecA, setVecA));
+      prevA.current = vecA;
+    }
+    if (prevB.current[0] !== vecB[0] || prevB.current[1] !== vecB[1]) {
+      execute(new UpdateVec2DCommand('移动向量 b', prevB.current, vecB, setVecB));
+      prevB.current = vecB;
+    }
+  }, [vecA, vecB, execute, setVecA, setVecB]);
+
+  return (
+    <g>
+      {/* 向量 b（投影方向） */}
+      <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
+      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
+
+      {/* 向量 a */}
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+
+      {/* 投影虚线（a 终点到投影点） */}
+      <line x1={perpX} y1={perpY} x2={px} y2={py}
+        stroke={COLORS.vecA} strokeWidth={1.5} strokeDasharray="5 3" opacity={0.6} />
+
+      {/* 投影向量 */}
+      <Arrow x1={0} y1={0} x2={px} y2={py} color={COLORS.basis1} markerId="arrow-basis1" strokeWidth={3} />
+      <VecLabel sx={px} sy={py} ox={0} oy={0} label="proj" color={COLORS.basis1} />
+      <circle cx={px} cy={py} r={5} fill={COLORS.basis1} stroke="white" strokeWidth={1.5} />
+
+      {/* 直角标记 */}
+      {Math.abs(px) > 5 && (() => {
+        const bLen = Math.sqrt(bx * bx + by * by);
+        if (bLen < 1) return null;
+        const ubx = bx / bLen * 10, uby = by / bLen * 10;
+        const ppx = -uby, ppy = ubx;
+        return (
+          <polyline
+            points={`${px + ppx},${py + ppy} ${px + ppx + ubx},${py + ppy + uby} ${px + ubx},${py + uby}`}
+            fill="none" stroke={COLORS.basis1} strokeWidth={1.5} opacity={0.7} />
+        );
+      })()}
+
+      {/* HUD */}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={320} height={88} rx={6}
+        fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
+      <text x={VB_X + 18} y={VB_Y + 30} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
+        投影向量 proj_b(a) = (a·b/|b|²)·b
+      </text>
+      <text x={VB_X + 18} y={VB_Y + 54} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
+        投影长度 = a·b/|b| = {fmtApprox(projLen, 3)}
+      </text>
+      <text x={VB_X + 18} y={VB_Y + 78} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
+        |proj| = {fmtApprox(mag2D(projVec), 3)}，|垂直分量| = {fmtApprox(mag2D(perpVec), 3)}
+      </text>
+
+      {/* 控制点 */}
+      <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
+      <DragHandle sx={bx} sy={by} color={COLORS.vecB} onDrag={handleDragB} title="拖拽改变向量 b" />
+      <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
+        onPointerUp={commit} style={{ pointerEvents: 'none' }} />
+    </g>
+  );
+}
+
+// ─ 向量旋转 ─
+
+function RotationLayer() {
+  const vecA = useVectorStore((s) => s.vecA);
+  const rotAngle = useVectorStore((s) => s.rotationAngle);
+  const setVecA = useVectorStore((s) => s.setVecA);
+  const { execute } = useHistoryStore();
+  const { f } = useFmt();
+  const prevA = useRef<Vec2D>(vecA);
+
+  const cosA = Math.cos(rotAngle);
+  const sinA = Math.sin(rotAngle);
+  const rotated: Vec2D = [
+    vecA[0] * cosA - vecA[1] * sinA,
+    vecA[0] * sinA + vecA[1] * cosA,
+  ];
+
+  const [ax, ay] = m2s(vecA[0], vecA[1]);
+  const [rx, ry] = m2s(rotated[0], rotated[1]);
+
+  const handleDragA = useCallback((svgX: number, svgY: number) => setVecA(svgToMath(svgX, svgY)), [setVecA]);
+  const commit = useCallback(() => {
+    if (prevA.current[0] !== vecA[0] || prevA.current[1] !== vecA[1]) {
+      execute(new UpdateVec2DCommand('移动向量 a', prevA.current, vecA, setVecA));
+      prevA.current = vecA;
+    }
+  }, [vecA, execute, setVecA]);
+
+  const degAngle = toDeg(rotAngle);
+  const magA = mag2D(vecA);
+  const radius = magA * SCALE;
+
+  return (
+    <g>
+      {/* 旋转弧线（虚圆弧） */}
+      {radius > 5 && (
+        <circle cx={0} cy={0} r={radius}
+          fill="none" stroke={COLORS.primary} strokeWidth={1} strokeDasharray="4 3" opacity={0.3} />
+      )}
+
+      {/* 旋转角弧线 */}
+      {radius > 5 && (
+        <AngleArc cx={0} cy={0}
+          vec1={vecA} vec2={rotated}
+          angleRad={Math.abs(rotAngle)}
+          radius={Math.min(40, radius * 0.4)} color={COLORS.primary} />
+      )}
+
+      {/* 原始向量 a */}
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+
+      {/* 旋转后向量 a' */}
+      <Arrow x1={0} y1={0} x2={rx} y2={ry} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
+      <VecLabel sx={rx} sy={ry} ox={0} oy={0} label="a'" color={COLORS.vecResult} />
+
+      {/* HUD */}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={340} height={88} rx={6}
+        fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
+      <text x={VB_X + 18} y={VB_Y + 30} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
+        旋转角 θ = {f(degAngle, 1)}°（{fmtApprox(rotAngle, 3)} rad）
+      </text>
+      <text x={VB_X + 18} y={VB_Y + 54} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
+        a = ({f(vecA[0])}, {f(vecA[1])})
+      </text>
+      <text x={VB_X + 18} y={VB_Y + 78} fontSize={18} fill={COLORS.vecResult} fontWeight={600} fontFamily="Inter, sans-serif">
+        a' = ({f(rotated[0])}, {f(rotated[1])})
+      </text>
+
+      {/* 控制点 */}
+      <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
+      <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
+        onPointerUp={commit} style={{ pointerEvents: 'none' }} />
+    </g>
+  );
+}
+
 // ─── 运算层路由 ───
 
 function OperationLayer({ operation }: { operation: OperationType }) {
@@ -1154,6 +1323,8 @@ function OperationLayer({ operation }: { operation: OperationType }) {
     case 'scalar': return <ScalarLayer />;
     case 'dotProduct': return <DotProductLayer />;
     case 'decomposition': return <DecompositionLayer />;
+    case 'projection': return <ProjectionLayer />;
+    case 'rotation': return <RotationLayer />;
     default: return null;
   }
 }
@@ -1273,6 +1444,16 @@ export function Canvas2D() {
         const coeffs = decomposeVector(decompTarget, basis1, basis2);
         if (!coeffs) return '⚠ e₁ 与 e₂ 共线，无法分解';
         return `p = ${f(coeffs[0], 3)}·e₁ + ${f(coeffs[1], 3)}·e₂`;
+      }
+      case 'projection': {
+        const proj = projectVec2D(vecA, vecB);
+        return `proj_b(a) = (${f(proj[0])}, ${f(proj[1])})`;
+      }
+      case 'rotation': {
+        const ra = useVectorStore.getState().rotationAngle;
+        const c = Math.cos(ra), s = Math.sin(ra);
+        const rot: Vec2D = [vecA[0]*c - vecA[1]*s, vecA[0]*s + vecA[1]*c];
+        return `a' = (${f(rot[0])}, ${f(rot[1])})  θ = ${f(toDeg(ra), 1)}°`;
       }
       default: return null;
     }

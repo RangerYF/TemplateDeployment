@@ -1,10 +1,13 @@
 import { COLORS } from '@/styles/tokens';
 import type { NDiceSumResult } from '@/engine/simulations/twoDiceSum';
 import { ChartAxes, YGrid, ChartTitle } from '@/utils/svgChartUtils';
+import { TrialDataTable } from './TrialDataTable';
 
-const VW = 900, VH = 500;
-const ML = 68, MT = 44, MR = 100, MB = 52;
+const VW = 1140, VH = 540;
+const ML = 68, MT = 44, MR = 280, MB = 52;
 const PW = VW - ML - MR, PH = VH - MT - MB;
+const TABLE_X = ML + PW + 16;
+const TABLE_W = MR - 32;
 
 export function TwoDiceSumRenderer({ result, displayN }: { result: NDiceSumResult; displayN?: number }) {
   const totalN = result.trials.length;
@@ -60,12 +63,30 @@ export function TwoDiceSumRenderer({ result, displayN }: { result: NDiceSumResul
         );
       })}
 
-      {/* Legend */}
-      <rect x={VW - MR + 8} y={MT + 8} width={14} height={10} rx={2} fill={COLORS.primary} vectorEffect="non-scaling-stroke" />
-      <text x={VW - MR + 26} y={MT + 17} fontSize={11} fill={COLORS.textSecondary}>观测频率</text>
-      <rect x={VW - MR + 8} y={MT + 28} width={14} height={10} rx={2} fill="none" stroke={COLORS.error} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
-      <text x={VW - MR + 26} y={MT + 37} fontSize={11} fill={COLORS.textSecondary}>理论概率</text>
-      <text x={VW - MR + 8} y={MT + 58} fontSize={11} fill={COLORS.textMuted}>E={expectedSum.toFixed(1)}</text>
+      {/* Right-side experiment data table */}
+      <TrialDataTable
+        x={TABLE_X}
+        y={MT}
+        width={TABLE_W}
+        title="实验数据表（按点数和）"
+        totalObserved={displayedN}
+        rowHeight={18}
+        rows={frequencies.map((freq, i) => ({
+          label: `点数和 ${result.minSum + i}`,
+          count: Math.round(freq * displayedN),
+          freq,
+          theoreticalProb: result.theoreticalProbs[i],
+        }))}
+      />
+
+      {/* Legend - below table */}
+      <g transform={`translate(${TABLE_X}, ${MT + 200 + (numBars * 18)})`}>
+        <rect x={0} y={0} width={14} height={10} rx={2} fill={COLORS.primary} vectorEffect="non-scaling-stroke" />
+        <text x={20} y={9} fontSize={11} fill={COLORS.textSecondary}>观测频率</text>
+        <rect x={80} y={0} width={14} height={10} rx={2} fill="none" stroke={COLORS.error} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+        <text x={100} y={9} fontSize={11} fill={COLORS.textSecondary}>理论概率</text>
+        <text x={0} y={28} fontSize={11} fill={COLORS.textMuted}>期望 E = {expectedSum.toFixed(1)}</text>
+      </g>
     </svg>
   );
 }

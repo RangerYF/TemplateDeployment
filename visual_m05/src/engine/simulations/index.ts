@@ -12,3 +12,7 @@ export * from './linearRegression';
 export * from './lawOfLargeNumbers';
 export * from './stemLeaf';
 export * from './hypergeometricDist';
+export * from './pieChart';
+export * from './lineChart';
+export * from './tournamentMatch';
+export * from './boxSwapBalls';

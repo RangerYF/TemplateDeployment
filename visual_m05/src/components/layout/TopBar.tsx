@@ -25,7 +25,10 @@ export function TopBar() {
     } else {
       const sim = createSimulation(newType, DEFAULT_PARAMS[newType]);
       // For deterministic simulations, auto-run
-      const deterministicTypes: SimulationType[] = ['histogram', 'binomialDist', 'normalDist', 'linearRegression'];
+      const deterministicTypes: SimulationType[] = [
+        'histogram', 'binomialDist', 'normalDist', 'linearRegression',
+        'pieChart', 'lineChart',
+      ];
       if (deterministicTypes.includes(newType)) {
         const cmd = new RunSimulationCommand(sim.id, newType, sim.params);
         useHistoryStore.getState().execute(cmd);

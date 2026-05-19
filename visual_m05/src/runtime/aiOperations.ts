@@ -8,20 +8,29 @@ import { buildPartialResult, getTrialDisplay, isAnimatable, runOneTrial, type An
 import {
   DEFAULT_DATA_SPEC,
   DEFAULT_PARAMS,
+  DEFAULT_REGRESSION_DATA_SPEC,
   HISTOGRAM_DATASETS,
   REGRESSION_DATASETS,
   SIMULATION_LIST,
+  type BallDrawParams,
   type BinomialDistParams,
+  type BoxSwapBallsParams,
   type DataPrecision,
   type DataSpec,
   type HistogramParams,
   type HypergeometricDistParams,
   type LinearRegressionParams,
+  type LineChartParams,
   type NormalDistParams,
+  type PieChartParams,
+  type RegressionDataSpec,
   type SimulationParams,
   type SimulationType,
   type StemLeafParams,
+  type TournamentEventId,
+  type TournamentMatchParams,
 } from '@/types/simulation';
+import { TOURNAMENT_EVENTS } from '@/engine/simulations/tournamentMatch';
 
 export interface M05BridgeOperationResult {
   ok: boolean;
@@ -242,13 +251,17 @@ function mergeParams(type: SimulationType, current: SimulationParams | undefined
       const redCount = positiveInteger(next.redCount, 'redCount', 1, 1000);
       const whiteCount = positiveInteger(next.whiteCount, 'whiteCount', 1, 1000);
       const drawCount = positiveInteger(next.drawCount, 'drawCount', 1, redCount + whiteCount);
+      const defaultBallDraw = DEFAULT_PARAMS.ballDraw as BallDrawParams;
       return {
+        scenarioId: asString(next.scenarioId) ?? defaultBallDraw.scenarioId,
+        targetLabel: asString(next.targetLabel) ?? defaultBallDraw.targetLabel,
+        otherLabel: asString(next.otherLabel) ?? defaultBallDraw.otherLabel,
         redCount,
         whiteCount,
         drawCount,
         replace: Boolean(next.replace),
         n: positiveInteger(next.n, 'n'),
-      };
+      } satisfies BallDrawParams;
     }
     case 'monteCarloPi':
       return {
@@ -310,8 +323,11 @@ function mergeParams(type: SimulationType, current: SimulationParams | undefined
     case 'linearRegression': {
       const datasetId = asString(next.datasetId);
       if (!datasetId || !REGRESSION_DATASET_IDS.has(datasetId)) throw new Error(`未知回归数据集 ${datasetId ?? ''}`);
+      const baseSpec = (base.dataSpec as RegressionDataSpec | undefined) ?? { ...DEFAULT_REGRESSION_DATA_SPEC };
+      const dataSpec: RegressionDataSpec = { ...baseSpec, presetId: datasetId === 'REG-CUSTOM' ? baseSpec.presetId : datasetId };
       return {
         datasetId,
+        dataSpec,
         showResiduals: Boolean(next.showResiduals),
       } satisfies LinearRegressionParams;
     }
@@ -325,6 +341,46 @@ function mergeParams(type: SimulationType, current: SimulationParams | undefined
         maxN: positiveInteger(next.maxN, 'maxN'),
         numCurves: positiveInteger(next.numCurves, 'numCurves', 1, 20),
       };
+    }
+    case 'pieChart': {
+      const currentSpec = (base.dataSpec as DataSpec | undefined) ?? DEFAULT_DATA_SPEC;
+      const dataSpec = 'dataSpec' in patch ? normalizeDataSpec(currentSpec, patch.dataSpec) : currentSpec;
+      return {
+        dataSpec,
+        binCount: positiveInteger(next.binCount, 'binCount', 2, 10),
+        sortByValue: Boolean(next.sortByValue),
+      } satisfies PieChartParams;
+    }
+    case 'lineChart': {
+      const currentSpec = (base.dataSpec as DataSpec | undefined) ?? DEFAULT_DATA_SPEC;
+      const dataSpec = 'dataSpec' in patch ? normalizeDataSpec(currentSpec, patch.dataSpec) : currentSpec;
+      return {
+        dataSpec,
+        showTrend: Boolean(next.showTrend),
+        showMarkers: Boolean(next.showMarkers),
+      } satisfies LineChartParams;
+    }
+    case 'tournamentMatch': {
+      const trackedRaw = Array.isArray(next.trackedEvents) ? next.trackedEvents : [];
+      const validIds = new Set(TOURNAMENT_EVENTS.map((event) => event.id));
+      const trackedEvents = trackedRaw
+        .filter((item): item is string => typeof item === 'string')
+        .filter((id) => validIds.has(id as TournamentEventId)) as TournamentEventId[];
+      return {
+        pAB: probability(next.pAB, 'pAB'),
+        pAC: probability(next.pAC, 'pAC'),
+        pBC: probability(next.pBC, 'pBC'),
+        n: positiveInteger(next.n, 'n'),
+        trackedEvents,
+      } satisfies TournamentMatchParams;
+    }
+    case 'boxSwapBalls': {
+      return {
+        initBlack: positiveInteger(next.initBlack, 'initBlack', 1, 5),
+        initRed: positiveInteger(next.initRed, 'initRed', 1, 8),
+        operations: positiveInteger(next.operations, 'operations', 1, 30),
+        n: positiveInteger(next.n, 'n'),
+      } satisfies BoxSwapBallsParams;
     }
   }
 }

@@ -7,14 +7,18 @@ export interface DemoToolSnapshot {
   step: number;
   pendingStartPoint: { x: number; y: number } | null;
   pendingVec1Id: string | null;
+  pendingMarkerIds: string[];
+  showAllCoords: boolean;
 }
 
 interface DemoToolStoreState {
   activeTool: DemoTool;
   opKind: DemoOpKind | null;
-  step: number;  // 0 / 1 多步骤进度
-  pendingStartPoint: { x: number; y: number } | null;  // createVector 第一步临时起点
-  pendingVec1Id: string | null;  // vectorOp 第一步选中向量
+  step: number;
+  pendingStartPoint: { x: number; y: number } | null;
+  pendingVec1Id: string | null;
+  pendingMarkerIds: string[];
+  showAllCoords: boolean;
 
   setTool(tool: DemoTool): void;
   setOpKind(kind: DemoOpKind | null): void;
@@ -22,6 +26,9 @@ interface DemoToolStoreState {
   resetTool(): void;
   setPendingStart(pt: { x: number; y: number } | null): void;
   setPendingVec1(id: string | null): void;
+  pushPendingMarker(id: string): void;
+  popPendingMarker(): void;
+  toggleShowAllCoords(): void;
   getSnapshot(): DemoToolSnapshot;
   loadSnapshot(snapshot?: Partial<DemoToolSnapshot>): void;
 }
@@ -32,13 +39,15 @@ export const useDemoToolStore = create<DemoToolStoreState>()((set) => ({
   step: 0,
   pendingStartPoint: null,
   pendingVec1Id: null,
+  pendingMarkerIds: [],
+  showAllCoords: false,
 
   setTool(tool) {
-    set({ activeTool: tool, step: 0, pendingStartPoint: null, pendingVec1Id: null });
+    set({ activeTool: tool, step: 0, pendingStartPoint: null, pendingVec1Id: null, pendingMarkerIds: [] });
   },
 
   setOpKind(kind) {
-    set({ opKind: kind, step: 0, pendingStartPoint: null, pendingVec1Id: null });
+    set({ opKind: kind, step: 0, pendingStartPoint: null, pendingVec1Id: null, pendingMarkerIds: [] });
   },
 
   nextStep() {
@@ -46,7 +55,7 @@ export const useDemoToolStore = create<DemoToolStoreState>()((set) => ({
   },
 
   resetTool() {
-    set({ step: 0, pendingStartPoint: null, pendingVec1Id: null });
+    set({ step: 0, pendingStartPoint: null, pendingVec1Id: null, pendingMarkerIds: [] });
   },
 
   setPendingStart(pt) {
@@ -57,6 +66,18 @@ export const useDemoToolStore = create<DemoToolStoreState>()((set) => ({
     set({ pendingVec1Id: id });
   },
 
+  pushPendingMarker(id) {
+    set((s) => ({ pendingMarkerIds: [...s.pendingMarkerIds, id] }));
+  },
+
+  popPendingMarker() {
+    set((s) => ({ pendingMarkerIds: s.pendingMarkerIds.slice(0, -1) }));
+  },
+
+  toggleShowAllCoords() {
+    set((s) => ({ showAllCoords: !s.showAllCoords }));
+  },
+
   getSnapshot(): DemoToolSnapshot {
     const state: DemoToolStoreState = useDemoToolStore.getState();
     return {
@@ -65,6 +86,8 @@ export const useDemoToolStore = create<DemoToolStoreState>()((set) => ({
       step: state.step,
       pendingStartPoint: state.pendingStartPoint,
       pendingVec1Id: state.pendingVec1Id,
+      pendingMarkerIds: [...state.pendingMarkerIds],
+      showAllCoords: state.showAllCoords,
     };
   },
 
@@ -75,6 +98,8 @@ export const useDemoToolStore = create<DemoToolStoreState>()((set) => ({
       step: snapshot?.step ?? 0,
       pendingStartPoint: snapshot?.pendingStartPoint ?? null,
       pendingVec1Id: snapshot?.pendingVec1Id ?? null,
+      pendingMarkerIds: snapshot?.pendingMarkerIds ?? [],
+      showAllCoords: snapshot?.showAllCoords ?? false,
     });
   },
 }));

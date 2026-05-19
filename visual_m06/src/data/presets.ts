@@ -431,7 +431,7 @@ export const SPACE3D_PRESETS: PresetData[] = [
 export const CROSS_PRODUCT_PRESETS: PresetData[] = [
   {
     id: 'VEC-062-A',
-    name: 'i×j=k',
+    name: '右手定则示例情形一',
     operation: 'crossProduct',
     vecA3: [1, 0, 0],
     vecB3: [0, 1, 0],
@@ -444,7 +444,7 @@ export const CROSS_PRODUCT_PRESETS: PresetData[] = [
   },
   {
     id: 'VEC-062-B',
-    name: 'j×k=i',
+    name: '右手定则示例情形二',
     operation: 'crossProduct',
     vecA3: [0, 1, 0],
     vecB3: [0, 0, 1],
@@ -468,7 +468,7 @@ export const CROSS_PRODUCT_PRESETS: PresetData[] = [
   },
   {
     id: 'VEC-062-D',
-    name: '一般情形',
+    name: '一般的叉积运算',
     operation: 'crossProduct',
     vecA3: [1, 2, 3],
     vecB3: [4, 5, 6],

@@ -60,6 +60,12 @@ interface VectorStoreState {
   // 极化恒等式显示
   showPolarization: boolean;
 
+  // 旋转角度（弧度）
+  rotationAngle: number;
+
+  // 3D 参考系旋转（四元数 [x, y, z, w]）
+  sceneRotation: [number, number, number, number];
+
   // ─── Actions ───
   setOperation(op: OperationType): void;
   setVecA(v: Vec2D): void;
@@ -88,6 +94,9 @@ interface VectorStoreState {
   setUnitCircleAngle(rad: number): void;
   setUnitCirclePlaying(playing: boolean): void;
   togglePolarization(): void;
+  setRotationAngle(rad: number): void;
+  setSceneRotation(q: [number, number, number, number]): void;
+  resetSceneRotation(): void;
 
   // ─── 快照（供 LoadPresetCommand 撤销使用）───
   getSnapshot(): VectorSnapshot;
@@ -119,6 +128,8 @@ export interface VectorSnapshot {
   unitCircleAngle?: number;
   unitCirclePlaying?: boolean;
   showPolarization?: boolean;
+  rotationAngle?: number;
+  sceneRotation?: [number, number, number, number];
 }
 
 export const useVectorStore = create<VectorStoreState>()((set, get) => ({
@@ -160,6 +171,8 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
   unitCircleAngle: 0,
   unitCirclePlaying: false,
   showPolarization: false,
+  rotationAngle: Math.PI / 4,
+  sceneRotation: [0, 0, 0, 1],
 
   // ─── Actions ───
 
@@ -301,6 +314,18 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
     set((s) => ({ showPolarization: !s.showPolarization }));
   },
 
+  setRotationAngle(rad) {
+    set({ rotationAngle: rad });
+  },
+
+  setSceneRotation(q) {
+    set({ sceneRotation: q });
+  },
+
+  resetSceneRotation() {
+    set({ sceneRotation: [0, 0, 0, 1] });
+  },
+
   getSnapshot(): VectorSnapshot {
     const s = get();
     return {
@@ -328,6 +353,8 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       unitCircleAngle: s.unitCircleAngle,
       unitCirclePlaying: s.unitCirclePlaying,
       showPolarization: s.showPolarization,
+      rotationAngle: s.rotationAngle,
+      sceneRotation: [...s.sceneRotation] as [number, number, number, number],
     };
   },
 
@@ -357,6 +384,8 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       unitCircleAngle: snap.unitCircleAngle ?? 0,
       unitCirclePlaying: snap.unitCirclePlaying ?? false,
       showPolarization: snap.showPolarization ?? false,
+      rotationAngle: snap.rotationAngle ?? Math.PI / 4,
+      sceneRotation: snap.sceneRotation ?? [0, 0, 0, 1],
     });
   },
 }));

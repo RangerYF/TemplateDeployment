@@ -4,8 +4,7 @@ export type SimulationCategory =
   | 'geometric'
   | 'statistics'
   | 'distribution'
-  | 'regression'
-  | 'lawOfLargeNumbers';
+  | 'regression';
 
 export type SimulationType =
   | 'coinFlip'
@@ -17,11 +16,15 @@ export type SimulationType =
   | 'buffonsNeedle'
   | 'histogram'
   | 'stemLeaf'
+  | 'pieChart'
+  | 'lineChart'
   | 'binomialDist'
   | 'normalDist'
   | 'hypergeometricDist'
   | 'linearRegression'
-  | 'lawOfLargeNumbers';
+  | 'lawOfLargeNumbers'
+  | 'tournamentMatch'
+  | 'boxSwapBalls';
 
 export interface SimulationReplayMetadata {
   mode: 'seeded';
@@ -53,11 +56,36 @@ export const DEFAULT_DATA_SPEC: DataSpec = {
   customText: '',
 };
 
+export interface RegressionDataSpec {
+  mode: 'preset' | 'manual';
+  presetId: string;
+  xLabel: string;
+  yLabel: string;
+  customText: string;  // each row: x,y or x y
+}
+
+export const DEFAULT_REGRESSION_DATA_SPEC: RegressionDataSpec = {
+  mode: 'preset',
+  presetId: 'REG-01',
+  xLabel: 'x',
+  yLabel: 'y',
+  customText: '',
+};
+
 // Params for each simulation
 export interface CoinFlipParams { n: number; speed: number; }
 export interface DiceRollParams { n: number; diceCount: number; event: 'all' | 'odd' | 'even' | 'gte'; gteValue: number; }
 export interface TwoDiceSumParams { n: number; diceCount: number; }
-export interface BallDrawParams { redCount: number; whiteCount: number; drawCount: number; replace: boolean; n: number; }
+export interface BallDrawParams {
+  scenarioId: string;
+  targetLabel: string;
+  otherLabel: string;
+  redCount: number;
+  whiteCount: number;
+  drawCount: number;
+  replace: boolean;
+  n: number;
+}
 export interface MonteCarloPiParams { n: number; speed: number; }
 export interface MeetingProblemParams { T: number; t: number; n: number; }
 export interface BuffonsNeedleParams { needleLength: number; lineSpacing: number; n: number; }
@@ -74,8 +102,53 @@ export interface StemLeafParams {
 export interface BinomialDistParams { n: number; p: number; showMode: 'bar' | 'line'; }
 export interface HypergeometricDistParams { N: number; M: number; n: number; showCdf: boolean; }
 export interface NormalDistParams { mu: number; sigma: number; showSigmaRegions: boolean; }
-export interface LinearRegressionParams { datasetId: string; showResiduals: boolean; }
+export interface LinearRegressionParams {
+  datasetId: string;
+  dataSpec: RegressionDataSpec;
+  showResiduals: boolean;
+}
 export interface LawOfLargeNumbersParams { scenario: 'coinFlip' | 'diceRoll' | 'ballDraw'; maxN: number; numCurves: number; }
+
+export interface PieChartParams {
+  dataSpec: DataSpec;
+  binCount: number;
+  sortByValue: boolean;
+}
+
+export interface LineChartParams {
+  dataSpec: DataSpec;
+  showTrend: boolean;
+  showMarkers: boolean;
+}
+
+export type TournamentEventId =
+  | 'champion_A'
+  | 'champion_B'
+  | 'champion_C'
+  | 'A_wins_4_straight'
+  | 'B_wins_4_straight'
+  | 'games_eq_3'
+  | 'games_eq_4'
+  | 'games_eq_5'
+  | 'games_eq_6'
+  | 'games_eq_7'
+  | 'games_le_5'
+  | 'games_ge_5';
+
+export interface TournamentMatchParams {
+  pAB: number;     // 甲胜乙的概率（默认 0.5）
+  pAC: number;     // 甲胜丙的概率
+  pBC: number;     // 乙胜丙的概率
+  n: number;
+  trackedEvents: TournamentEventId[];
+}
+
+export interface BoxSwapBallsParams {
+  initBlack: number;   // 每盒初始黑球数
+  initRed: number;     // 每盒初始红球数
+  operations: number;  // 操作次数 n
+  n: number;           // 模拟轮数
+}
 
 // Union of all params
 export type SimulationParams =
@@ -88,11 +161,15 @@ export type SimulationParams =
   | BuffonsNeedleParams
   | HistogramParams
   | StemLeafParams
+  | PieChartParams
+  | LineChartParams
   | BinomialDistParams
   | HypergeometricDistParams
   | NormalDistParams
   | LinearRegressionParams
-  | LawOfLargeNumbersParams;
+  | LawOfLargeNumbersParams
+  | TournamentMatchParams
+  | BoxSwapBallsParams;
 
 // Simulation result data
 export interface SimulationResult {
@@ -120,6 +197,26 @@ export interface RegressionDataset {
   description: string;
 }
 
+export interface ResolvedRegressionData {
+  sourceName: string;
+  description: string;
+  xLabel: string;
+  yLabel: string;
+  points: Array<{ x: number; y: number }>;
+}
+
+export interface BallDrawScenarioPreset {
+  id: string;
+  name: string;
+  description: string;
+  targetLabel: string;
+  otherLabel: string;
+  redCount: number;
+  whiteCount: number;
+  drawCount: number;
+  replace: boolean;
+}
+
 // Simulation metadata
 export interface SimulationMeta {
   type: SimulationType;
@@ -135,7 +232,16 @@ export const DEFAULT_PARAMS: Record<SimulationType, SimulationParams> = {
   coinFlip: { n: 100, speed: 2 } satisfies CoinFlipParams,
   diceRoll: { n: 100, diceCount: 1, event: 'all', gteValue: 5 } satisfies DiceRollParams,
   twoDiceSum: { n: 200, diceCount: 2 } satisfies TwoDiceSumParams,
-  ballDraw: { redCount: 3, whiteCount: 5, drawCount: 2, replace: false, n: 1000 } satisfies BallDrawParams,
+  ballDraw: {
+    scenarioId: 'BALL-01',
+    targetLabel: '次品',
+    otherLabel: '合格品',
+    redCount: 4,
+    whiteCount: 16,
+    drawCount: 5,
+    replace: false,
+    n: 1000,
+  } satisfies BallDrawParams,
   monteCarloPi: { n: 1000, speed: 2 } satisfies MonteCarloPiParams,
   meetingProblem: { T: 60, t: 15, n: 500 } satisfies MeetingProblemParams,
   buffonsNeedle: { needleLength: 1, lineSpacing: 2, n: 500 } satisfies BuffonsNeedleParams,
@@ -152,8 +258,35 @@ export const DEFAULT_PARAMS: Record<SimulationType, SimulationParams> = {
   binomialDist: { n: 10, p: 0.5, showMode: 'bar' } satisfies BinomialDistParams,
   hypergeometricDist: { N: 20, M: 8, n: 5, showCdf: false } satisfies HypergeometricDistParams,
   normalDist: { mu: 0, sigma: 1, showSigmaRegions: true } satisfies NormalDistParams,
-  linearRegression: { datasetId: 'REG-01', showResiduals: false } satisfies LinearRegressionParams,
+  linearRegression: {
+    datasetId: 'REG-01',
+    dataSpec: { ...DEFAULT_REGRESSION_DATA_SPEC },
+    showResiduals: false,
+  } satisfies LinearRegressionParams,
   lawOfLargeNumbers: { scenario: 'coinFlip', maxN: 1000, numCurves: 3 } satisfies LawOfLargeNumbersParams,
+  pieChart: {
+    dataSpec: { mode: 'preset', presetId: 'DS-01', filterMin: null, filterMax: null, precision: 0, customText: '' },
+    binCount: 5,
+    sortByValue: false,
+  } satisfies PieChartParams,
+  lineChart: {
+    dataSpec: { mode: 'preset', presetId: 'DS-04', filterMin: null, filterMax: null, precision: 0, customText: '' },
+    showTrend: true,
+    showMarkers: false,
+  } satisfies LineChartParams,
+  tournamentMatch: {
+    pAB: 0.5,
+    pAC: 0.5,
+    pBC: 0.5,
+    n: 1000,
+    trackedEvents: ['champion_A', 'champion_B', 'champion_C', 'A_wins_4_straight', 'games_eq_5'],
+  } satisfies TournamentMatchParams,
+  boxSwapBalls: {
+    initBlack: 1,
+    initRed: 2,
+    operations: 4,
+    n: 1000,
+  } satisfies BoxSwapBallsParams,
 };
 
 // ─── Simulation List ───
@@ -247,15 +380,36 @@ export const SIMULATION_LIST: SimulationMeta[] = [
     type: 'linearRegression',
     category: 'regression',
     label: '线性回归',
-    description: '对预设数据集进行一元线性回归分析，计算回归方程和相关系数 r。',
+    description: '对预设或教师自定义的二维数据做一元线性回归，自动计算回归方程并分析线性相关强弱。',
     defaultParams: DEFAULT_PARAMS.linearRegression,
   },
   {
-    type: 'lawOfLargeNumbers',
-    category: 'lawOfLargeNumbers',
-    label: '大数定律',
-    description: '随着试验次数增加，频率收敛到概率的过程，直观展示大数定律。',
-    defaultParams: DEFAULT_PARAMS.lawOfLargeNumbers,
+    type: 'pieChart',
+    category: 'statistics',
+    label: '扇形统计图',
+    description: '将连续数据按区间分组（或按类别）后绘制扇形统计图，直观比较各区间占总体的比例。',
+    defaultParams: DEFAULT_PARAMS.pieChart,
+  },
+  {
+    type: 'lineChart',
+    category: 'statistics',
+    label: '折线统计图',
+    description: '以折线展示数据随次序的变化趋势，可叠加均值参考线与最小二乘趋势线。',
+    defaultParams: DEFAULT_PARAMS.lineChart,
+  },
+  {
+    type: 'tournamentMatch',
+    category: 'classical',
+    label: '三人羽毛球赛',
+    description: '模拟"累计负两场被淘汰、负者下场轮空"的三人轮空赛制（2020新高考Ⅰ卷题型），可自定义胜率并跟踪自选事件。',
+    defaultParams: DEFAULT_PARAMS.tournamentMatch,
+  },
+  {
+    type: 'boxSwapBalls',
+    category: 'classical',
+    label: '双盒互换球',
+    description: '甲乙两盒各装若干黑球与红球，每次从两盒各取一球互换。统计 n 次操作后甲盒黑球数的分布。',
+    defaultParams: DEFAULT_PARAMS.boxSwapBalls,
   },
 ];
 
@@ -271,7 +425,7 @@ export const SIMULATION_GROUPS: SimulationGroup[] = [
   {
     label: '古典概型',
     category: 'classical',
-    types: ['coinFlip', 'diceRoll', 'twoDiceSum', 'ballDraw'],
+    types: ['coinFlip', 'diceRoll', 'twoDiceSum', 'ballDraw', 'tournamentMatch', 'boxSwapBalls'],
   },
   {
     label: '几何概型',
@@ -281,7 +435,7 @@ export const SIMULATION_GROUPS: SimulationGroup[] = [
   {
     label: '统计',
     category: 'statistics',
-    types: ['histogram', 'stemLeaf'],
+    types: ['histogram', 'stemLeaf', 'pieChart', 'lineChart'],
   },
   {
     label: '概率分布',
@@ -292,11 +446,6 @@ export const SIMULATION_GROUPS: SimulationGroup[] = [
     label: '回归分析',
     category: 'regression',
     types: ['linearRegression'],
-  },
-  {
-    label: '大数定律',
-    category: 'lawOfLargeNumbers',
-    types: ['lawOfLargeNumbers'],
   },
 ];
 
@@ -392,4 +541,161 @@ export const REGRESSION_DATASETS: RegressionDataset[] = [
     points: [{x:155,y:45},{x:158,y:48},{x:160,y:52},{x:162,y:54},{x:165,y:57},{x:167,y:60},{x:168,y:62},{x:170,y:65},{x:172,y:68},{x:173,y:70},{x:175,y:72},{x:177,y:75},{x:178,y:78},{x:180,y:80},{x:182,y:83},{x:183,y:86},{x:185,y:89},{x:187,y:92},{x:188,y:95},{x:190,y:98}],
     description: '正相关(r≈0.80)',
   },
+  {
+    id: 'REG-CUSTOM',
+    name: '教师自定义数据',
+    xLabel: 'x',
+    yLabel: 'y',
+    points: [],
+    description: '教师在增强面板中输入的二维数据点',
+  },
 ];
+
+function parseRegressionLine(line: string): { x: number; y: number } | null {
+  const values = line
+    .split(/[,\s，；;|]+/)
+    .map(segment => Number.parseFloat(segment.trim()))
+    .filter(value => Number.isFinite(value));
+
+  if (values.length < 2) return null;
+  return { x: values[0], y: values[1] };
+}
+
+export function parseRegressionPoints(text: string): Array<{ x: number; y: number }> {
+  const normalized = text.trim();
+  if (!normalized) return [];
+
+  const lines = normalized
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  if (lines.length > 1) {
+    return lines
+      .map(parseRegressionLine)
+      .filter((pair): pair is { x: number; y: number } => pair !== null);
+  }
+
+  const values = normalized
+    .split(/[,\s，；;|]+/)
+    .map(segment => Number.parseFloat(segment.trim()))
+    .filter(value => Number.isFinite(value));
+
+  const points: Array<{ x: number; y: number }> = [];
+  for (let index = 0; index + 1 < values.length; index += 2) {
+    points.push({ x: values[index], y: values[index + 1] });
+  }
+  return points;
+}
+
+export function regressionPointsToText(points: Array<{ x: number; y: number }>): string {
+  return points.map(point => `${point.x}, ${point.y}`).join('\n');
+}
+
+function sanitizeRegressionLabel(value: string, fallback: string): string {
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
+
+export function resolveRegressionData(spec: RegressionDataSpec): ResolvedRegressionData {
+  if (spec.mode === 'preset') {
+    const preset = REGRESSION_DATASETS.find(dataset => dataset.id === spec.presetId) ?? REGRESSION_DATASETS[0];
+    return {
+      sourceName: preset.name,
+      description: preset.description,
+      xLabel: preset.xLabel,
+      yLabel: preset.yLabel,
+      points: preset.points.map(point => ({ ...point })),
+    };
+  }
+
+  return {
+    sourceName: '教师自定义数据',
+    description: '手动输入的二维散点数据',
+    xLabel: sanitizeRegressionLabel(spec.xLabel, 'x'),
+    yLabel: sanitizeRegressionLabel(spec.yLabel, 'y'),
+    points: parseRegressionPoints(spec.customText),
+  };
+}
+
+export function syncCustomRegressionDataset(spec: RegressionDataSpec): void {
+  const custom = REGRESSION_DATASETS.find(dataset => dataset.id === 'REG-CUSTOM');
+  if (!custom) return;
+
+  const resolved = resolveRegressionData({ ...spec, mode: 'manual' });
+  custom.xLabel = resolved.xLabel;
+  custom.yLabel = resolved.yLabel;
+  custom.points = resolved.points.map(point => ({ ...point }));
+  custom.description = `教师自定义数据（${resolved.points.length} 个点）`;
+}
+
+export const BALL_DRAW_SCENARIOS: BallDrawScenarioPreset[] = [
+  {
+    id: 'BALL-01',
+    name: '质检抽样',
+    description: '从 20 件产品中随机抽取 5 件检查，其中 4 件次品。适合讲无放回抽样与超几何分布。',
+    targetLabel: '次品',
+    otherLabel: '合格品',
+    redCount: 4,
+    whiteCount: 16,
+    drawCount: 5,
+    replace: false,
+  },
+  {
+    id: 'BALL-02',
+    name: '班级抽签',
+    description: '12 张签中有 3 张中奖签，一次抽 2 张且不放回。适合讲组合计数与超几何分布。',
+    targetLabel: '中奖签',
+    otherLabel: '普通签',
+    redCount: 3,
+    whiteCount: 9,
+    drawCount: 2,
+    replace: false,
+  },
+  {
+    id: 'BALL-03',
+    name: '复位抽奖',
+    description: '袋中 10 个球里有 2 个中奖球，每次摸出后放回，连续摸 5 次。适合讲独立重复试验与二项分布。',
+    targetLabel: '中奖球',
+    otherLabel: '普通球',
+    redCount: 2,
+    whiteCount: 8,
+    drawCount: 5,
+    replace: true,
+  },
+  {
+    id: 'BALL-04',
+    name: '课堂示范球袋',
+    description: '教师自定义红白球参数的通用球袋场景，便于现场替换为班级数据。',
+    targetLabel: '红球',
+    otherLabel: '白球',
+    redCount: 3,
+    whiteCount: 5,
+    drawCount: 2,
+    replace: false,
+  },
+];
+
+export function getBallDrawScenario(id: string): BallDrawScenarioPreset | undefined {
+  return BALL_DRAW_SCENARIOS.find(scenario => scenario.id === id);
+}
+
+export function applyBallDrawScenario(params: BallDrawParams, scenarioId: string): BallDrawParams {
+  const scenario = getBallDrawScenario(scenarioId);
+  if (!scenario) return params;
+
+  return {
+    ...params,
+    scenarioId: scenario.id,
+    targetLabel: scenario.targetLabel,
+    otherLabel: scenario.otherLabel,
+    redCount: scenario.redCount,
+    whiteCount: scenario.whiteCount,
+    drawCount: scenario.drawCount,
+    replace: scenario.replace,
+  };
+}
+
+export function getBallDrawDistributionName(replace: boolean): string {
+  return replace ? '二项分布 B(n, p)' : '超几何分布 H(N, M, n)';
+}

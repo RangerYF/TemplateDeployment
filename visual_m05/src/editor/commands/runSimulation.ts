@@ -1,5 +1,5 @@
 import type { Command } from './types';
-import type { SimulationParams, SimulationResult, SimulationType } from '../../types/simulation';
+import type { SimulationResult, SimulationType } from '../../types/simulation';
 import { runSimulationWithParams } from '../../engine/simulationRunner';
 import { useSimulationStore } from '../store/simulationStore';
 
@@ -12,7 +12,7 @@ export class RunSimulationCommand implements Command {
   constructor(
     private simId: string,
     private simType: SimulationType,
-    private params: SimulationParams,
+    private params: unknown,
   ) {
     this.label = `运行模拟: ${simType}`;
     const sim = useSimulationStore.getState().simulations[simId];
@@ -21,7 +21,7 @@ export class RunSimulationCommand implements Command {
 
   execute(): void {
     if (!this.newResult) {
-      this.newResult = runSimulationWithParams(this.simType, this.params);
+      this.newResult = runSimulationWithParams(this.simType, this.params as never);
     }
     useSimulationStore.getState().setResult(this.simId, this.newResult);
   }

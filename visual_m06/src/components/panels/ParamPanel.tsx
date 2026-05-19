@@ -6,26 +6,16 @@ import { OPERATION_META } from '@/editor/entities/types';
 import { getPresetsByOperation as getPresets } from '@/data/presets';
 import {
   add2D, sub2D, scale2D, dot2D, mag2D, angle2D, projectVec2D, decomposeVector,
-  add3D, cross3D, mag3D, angle3D, dot3D, toDeg, evalSqrtExpr,
+  add3D, cross3D, mag3D, angle3D, dot3D, toDeg, evalSqrtExpr, fmtApprox, fmtSmart,
 } from '@/engine/vectorMath';
 import { useFmt } from '@/hooks/useFmt';
 import { Settings, ChevronDown, ChevronRight, Lightbulb, Grid3X3, Eye, Play, Pause, Camera } from 'lucide-react';
 import { useState, useRef, useCallback } from 'react';
 
 
-/** 尝试将数值逆向显示为常见根号表达式 */
+/** 尝试将数值逆向显示为精确表达式（根号/π/分数） */
 function numToExpr(n: number): string {
-  const abs = Math.abs(n);
-  const sign = n < 0 ? '-' : '';
-  if (Math.abs(abs - Math.SQRT2) < 0.001) return `${sign}√2`;
-  if (Math.abs(abs - Math.sqrt(3)) < 0.001) return `${sign}√3`;
-  if (Math.abs(abs - Math.SQRT1_2) < 0.001) return `${sign}√2/2`;
-  if (Math.abs(abs - Math.sqrt(3) / 2) < 0.001) return `${sign}√3/2`;
-  // 整数或简单小数直接显示
-  if (Number.isInteger(n)) return String(n);
-  // 保留合理精度
-  const s = n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
-  return s;
+  return fmtSmart(n, 4);
 }
 
 // ─── 表达式输入框（支持 √() 自由输入） ───
@@ -255,8 +245,12 @@ function Divider() {
 function View3DControls() {
   const showPerspective = useVectorStore((s) => s.showPerspective);
   const show3DGrid = useVectorStore((s) => s.show3DGrid);
+  const sceneRotation = useVectorStore((s) => s.sceneRotation);
   const togglePerspective = useVectorStore((s) => s.togglePerspective);
   const toggle3DGrid = useVectorStore((s) => s.toggle3DGrid);
+  const resetSceneRotation = useVectorStore((s) => s.resetSceneRotation);
+
+  const isRotated = sceneRotation[0] !== 0 || sceneRotation[1] !== 0 || sceneRotation[2] !== 0 || sceneRotation[3] !== 1;
 
   return (
     <div className="space-y-1.5">
@@ -273,6 +267,22 @@ function View3DControls() {
         <input type="checkbox" checked={show3DGrid} onChange={toggle3DGrid} style={{ accentColor: COLORS.primary }} />
         <span style={{ fontSize: 14, color: COLORS.textSecondary }}>地面网格</span>
       </label>
+      <button
+        onClick={resetSceneRotation}
+        style={{
+          width: '100%',
+          padding: '4px 0',
+          fontSize: 14,
+          fontWeight: 600,
+          border: `1px solid ${isRotated ? COLORS.primary : COLORS.border}`,
+          borderRadius: RADIUS.sm,
+          background: isRotated ? COLORS.primary : 'transparent',
+          color: isRotated ? '#fff' : COLORS.textSecondary,
+          cursor: 'pointer',
+        }}
+      >
+        重置坐标系
+      </button>
     </div>
   );
 }
@@ -287,7 +297,6 @@ function ConceptParams() {
   const setUnitCirclePlaying = useVectorStore((s) => s.setUnitCirclePlaying);
   const setUnitCircleAngle = useVectorStore((s) => s.setUnitCircleAngle);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
 
   const magVal = mag2D(vecA);
   const dirDeg = toDeg(Math.atan2(vecA[1], vecA[0]));
@@ -301,8 +310,8 @@ function ConceptParams() {
     <div className="space-y-3">
       <Vec2DEditor label="向量 a" color={COLORS.vecA} value={vecA} onChange={handleChangeA} />
       <Divider />
-      <ResultBlock label="|a| =" value={f(magVal, 3)} color={COLORS.vecA} />
-      <ResultBlock label="方向角 =" value={`${f(dirDeg, 1)}°`} />
+      <ResultBlock label="|a| =" value={fmtApprox(magVal, 3)} color={COLORS.vecA} />
+      <ResultBlock label="方向角 =" value={`${fmtSmart(dirDeg, 1)}°`} />
 
       {/* 单位向量动画控制 */}
       {isUnitMode && (
@@ -365,7 +374,7 @@ function CoordinateParams() {
       <Divider />
       <ResultBlock label="x 分量 =" value={f(vecA[0])} color={COLORS.basis1} />
       <ResultBlock label="y 分量 =" value={f(vecA[1])} color={COLORS.basis2} />
-      <ResultBlock label="|a| =" value={`√(${f(vecA[0])}² + ${f(vecA[1])}²) = ${f(magVal, 3)}`} color={COLORS.vecA} />
+      <ResultBlock label="|a| =" value={`√(${f(vecA[0])}² + ${f(vecA[1])}²) = ${fmtApprox(magVal, 3)}`} color={COLORS.vecA} />
       <div style={{ fontSize: 14, color: COLORS.textMuted, lineHeight: 1.7, padding: '4px 8px', background: COLORS.bgMuted, borderRadius: RADIUS.sm }}>
         坐标 = 终点坐标 − 起点坐标（起点为原点时即终点坐标）
       </div>
@@ -382,7 +391,7 @@ function ParallelogramParams() {
   const setVecB = useVectorStore((s) => s.setVecB);
   const playParallelogramAnim = useVectorStore((s) => s.playParallelogramAnim);
   const { execute } = useHistoryStore();
-  const { f, fv2 } = useFmt();
+  const { fv2 } = useFmt();
 
   const sum = add2D(vecA, vecB);
 
@@ -398,7 +407,7 @@ function ParallelogramParams() {
       <Vec2DEditor label="向量 b" color={COLORS.vecB} value={vecB} onChange={handleChangeB} />
       <Divider />
       <ResultBlock label="a + b =" value={fv2(sum)} color={COLORS.vecResult} />
-      <ResultBlock label="|a + b| =" value={f(mag2D(sum))} color={COLORS.vecResult} />
+      <ResultBlock label="|a + b| =" value={fmtApprox(mag2D(sum))} color={COLORS.vecResult} />
       <Divider />
       {/* 动画播放按钮 */}
       <button
@@ -436,7 +445,7 @@ function TriangleParams() {
   const addChainVec = useVectorStore((s) => s.addChainVec);
   const removeChainVec = useVectorStore((s) => s.removeChainVec);
   const { execute } = useHistoryStore();
-  const { f, fv2 } = useFmt();
+  const { fv2 } = useFmt();
 
   // 全链 = [vecA, vecB, ...chainVecs]
   const allVecs: Vec2D[] = [vecA, vecB, ...chainVecs];
@@ -490,7 +499,7 @@ function TriangleParams() {
       </button>
       <Divider />
       <ResultBlock label="总和 =" value={fv2(sum)} color={COLORS.vecResult} />
-      <ResultBlock label="|总和| =" value={f(mag2D(sum))} color={COLORS.vecResult} />
+      <ResultBlock label="|总和| =" value={fmtApprox(mag2D(sum))} color={COLORS.vecResult} />
       <div style={{ fontSize: 14, color: COLORS.textMuted }}>
         共 {n} 个向量首尾相接
       </div>
@@ -510,7 +519,7 @@ function SubtractionParams() {
   const setVecA = useVectorStore((s) => s.setVecA);
   const setVecB = useVectorStore((s) => s.setVecB);
   const { execute } = useHistoryStore();
-  const { f, fv2 } = useFmt();
+  const { fv2 } = useFmt();
 
   const diff = sub2D(vecA, vecB);
   const handleChangeA = (v: Vec2D) => execute(new UpdateVec2DCommand('修改向量 a', vecA, v, setVecA));
@@ -522,10 +531,18 @@ function SubtractionParams() {
       <Vec2DEditor label="向量 b" color={COLORS.vecB} value={vecB} onChange={handleChangeB} />
       <Divider />
       <ResultBlock label="a - b =" value={fv2(diff)} color={COLORS.vecResult} />
-      <ResultBlock label="|a - b| =" value={f(mag2D(diff))} color={COLORS.vecResult} />
+      <ResultBlock label="|a - b| =" value={fmtApprox(mag2D(diff))} color={COLORS.vecResult} />
+      <Divider />
+      {/* B5: a+(-b) 对比展示 */}
+      <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textSecondary }}>等价理解</div>
+      <div style={{ fontSize: 14, color: COLORS.textMuted, lineHeight: 1.7, padding: '6px 8px', background: COLORS.bgMuted, borderRadius: RADIUS.sm }}>
+        <div>a − b = a + (−b)</div>
+        <div style={{ marginTop: 4 }}>−b = {fv2(scale2D(vecB, -1))}</div>
+        <div>a + (−b) = {fv2(add2D(vecA, scale2D(vecB, -1)))} = {fv2(diff)}</div>
+      </div>
       <Divider />
       <TeachingPoints points={[
-        'a - b = a + (-b)',
+        'a - b = a + (-b)：减去 b 等于加上 b 的反向量',
         '共起点，由 b 终点指向 a 终点',
         '坐标：对应坐标相减',
       ]} />
@@ -539,7 +556,7 @@ function ScalarParams() {
   const setVecA = useVectorStore((s) => s.setVecA);
   const setScalarK = useVectorStore((s) => s.setScalarK);
   const { execute } = useHistoryStore();
-  const { f, fv2 } = useFmt();
+  const { fv2 } = useFmt();
 
   const scaled = scale2D(vecA, scalarK);
   const handleChangeA = (v: Vec2D) => execute(new UpdateVec2DCommand('修改向量 a', vecA, v, setVecA));
@@ -568,7 +585,8 @@ function ScalarParams() {
       </div>
       <Divider />
       <ResultBlock label="k·a =" value={fv2(scaled)} color={scalarK >= 0 ? COLORS.vecResult : COLORS.vecScalar} />
-      <ResultBlock label="|k·a| =" value={f(mag2D(scaled))} />
+      <ResultBlock label="|k·a| =" value={fmtApprox(mag2D(scaled))} />
+      <ResultBlock label="k =" value={fmtSmart(scalarK)} />
       <Divider />
       <TeachingPoints points={[
         'k > 0：同向，模变为 k 倍',
@@ -633,7 +651,7 @@ function DotProductParams() {
       <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textSecondary, marginTop: 4 }}>投影法</div>
       <ResultBlock label="投影标量 =" value={`|a|cosθ = ${f(projLen)}`} color={COLORS.basis1} />
       <ResultBlock label="投影向量 =" value={fv2(projVec)} color={COLORS.basis1} />
-      <ResultBlock label="a·b =" value={`|b|×投影 = ${f(mag2D(vecB))}×${f(projLen)} = ${f(dotVal)}`} />
+      <ResultBlock label="a·b =" value={`|b|×投影 = ${fmtApprox(mag2D(vecB))}×${fmtSmart(projLen)} = ${fmtSmart(dotVal)}`} />
 
       {/* 计算方法三：极化恒等式 */}
       {showPolarization && (
@@ -705,6 +723,70 @@ function DotProductParams() {
         '求夹角：cosθ = a·b / (|a||b|)',
         '投影标量 = |a|cosθ = a·b / |b|',
       ]} />
+    </div>
+  );
+}
+
+function ProjectionParams() {
+  const vecA = useVectorStore((s) => s.vecA);
+  const vecB = useVectorStore((s) => s.vecB);
+  const setVecA = useVectorStore((s) => s.setVecA);
+  const setVecB = useVectorStore((s) => s.setVecB);
+  const { execute } = useHistoryStore();
+  const { fv2 } = useFmt();
+
+  const projVec = projectVec2D(vecA, vecB);
+  const projLen = dot2D(vecA, vecB) / mag2D(vecB);
+
+  const handleChangeA = (v: Vec2D) => execute(new UpdateVec2DCommand('修改向量 a', vecA, v, setVecA));
+  const handleChangeB = (v: Vec2D) => execute(new UpdateVec2DCommand('修改向量 b', vecB, v, setVecB));
+
+  return (
+    <div className="space-y-3">
+      <Vec2DEditor label="向量 a" color={COLORS.vecA} value={vecA} onChange={handleChangeA} />
+      <Vec2DEditor label="b（投影方向）" color={COLORS.vecB} value={vecB} onChange={handleChangeB} />
+      <Divider />
+      <ResultBlock label="proj_b(a) =" value={fv2(projVec)} color={COLORS.basis1} />
+      <ResultBlock label="投影长度 =" value={fmtApprox(projLen, 3)} />
+      <ResultBlock label="公式 =" value="(a·b/|b|²)·b" />
+    </div>
+  );
+}
+
+function RotationParams() {
+  const vecA = useVectorStore((s) => s.vecA);
+  const rotAngle = useVectorStore((s) => s.rotationAngle);
+  const setVecA = useVectorStore((s) => s.setVecA);
+  const setRotationAngle = useVectorStore((s) => s.setRotationAngle);
+  const { execute } = useHistoryStore();
+  const { f, fv2 } = useFmt();
+
+  const cosA = Math.cos(rotAngle);
+  const sinA = Math.sin(rotAngle);
+  const rotated: Vec2D = [vecA[0] * cosA - vecA[1] * sinA, vecA[0] * sinA + vecA[1] * cosA];
+  const degAngle = toDeg(rotAngle);
+
+  const handleChangeA = (v: Vec2D) => execute(new UpdateVec2DCommand('修改向量 a', vecA, v, setVecA));
+
+  return (
+    <div className="space-y-3">
+      <Vec2DEditor label="向量 a" color={COLORS.vecA} value={vecA} onChange={handleChangeA} />
+      <Divider />
+      <div className="flex items-center gap-2">
+        <span style={{ fontSize: 14, color: COLORS.textMuted }}>旋转角 θ</span>
+        <input type="range" min={-180} max={180} step={1}
+          value={Math.round(degAngle)}
+          onChange={(e) => setRotationAngle(parseFloat(e.target.value) * Math.PI / 180)}
+          style={{ flex: 1, accentColor: COLORS.primary }} />
+        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.text, minWidth: 50, textAlign: 'right' }}>
+          {f(degAngle, 1)}°
+        </span>
+      </div>
+      <ExprInput label="θ(°)" value={degAngle}
+        onChange={(v) => setRotationAngle(v * Math.PI / 180)}
+        min={-360} max={360} />
+      <Divider />
+      <ResultBlock label="a' =" value={fv2(rotated)} color={COLORS.vecResult} />
     </div>
   );
 }
@@ -784,8 +866,8 @@ function Space3DParams() {
       <ResultBlock label="a + b =" value={fv3(sum)} color={COLORS.vecResult} />
       <ResultBlock label="a · b =" value={f(dotVal)} />
       <ResultBlock label="夹角 θ =" value={`${f(toDeg(angleRad))}°`} />
-      <ResultBlock label="|a| =" value={f(mag3D(vecA3))} color={COLORS.vecA} />
-      <ResultBlock label="|b| =" value={f(mag3D(vecB3))} color={COLORS.vecB} />
+      <ResultBlock label="|a| =" value={fmtApprox(mag3D(vecA3))} color={COLORS.vecA} />
+      <ResultBlock label="|b| =" value={fmtApprox(mag3D(vecB3))} color={COLORS.vecB} />
       {perpendicular && (
         <div style={{ fontSize: 14, color: COLORS.success, fontWeight: 600, padding: '4px 8px', background: COLORS.successLight, borderRadius: RADIUS.sm }}>
           ✓ a ⊥ b（垂直）
@@ -913,6 +995,8 @@ function OperationParams({ operation }: { operation: OperationType }) {
     case 'subtraction': return <SubtractionParams />;
     case 'scalar': return <ScalarParams />;
     case 'dotProduct': return <DotProductParams />;
+    case 'projection': return <ProjectionParams />;
+    case 'rotation': return <RotationParams />;
     case 'decomposition': return <DecompositionParams />;
     case 'space3D': return <Space3DParams />;
     case 'crossProduct': return <CrossProductParams />;

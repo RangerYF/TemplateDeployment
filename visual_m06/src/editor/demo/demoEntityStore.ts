@@ -1,5 +1,9 @@
 import { create } from 'zustand';
-import type { DemoEntity, DemoPoint, DemoVector, DemoVecOp, DemoBinding, DemoSnapshot } from './demoTypes';
+import type {
+  DemoEntity, DemoPoint, DemoVector, DemoVecOp, DemoBinding, DemoSnapshot,
+  DemoMarker, DemoSegment, DemoCircle, DemoText, DemoAngleMark, DemoDistanceMark,
+  DemoLine, DemoRay, DemoPolygon, DemoSlider,
+} from './demoTypes';
 
 // ─── Store 接口 ───
 
@@ -11,7 +15,12 @@ interface DemoEntityStoreState {
   // ─── CRUD ───
   addEntity(entity: DemoEntity): void;
   removeEntity(id: string): void;
-  updateEntity(id: string, patch: Partial<DemoPoint> | Partial<DemoVector> | Partial<DemoVecOp>): void;
+  updateEntity(id: string, patch:
+    | Partial<DemoPoint> | Partial<DemoVector> | Partial<DemoVecOp>
+    | Partial<DemoMarker> | Partial<DemoSegment> | Partial<DemoCircle>
+    | Partial<DemoText> | Partial<DemoAngleMark> | Partial<DemoDistanceMark>
+    | Partial<DemoLine> | Partial<DemoRay> | Partial<DemoPolygon> | Partial<DemoSlider>
+  ): void;
 
   // ─── 绑定 ───
   addBinding(b: DemoBinding): void;

@@ -1,4 +1,5 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState, Suspense, Component } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
@@ -6,6 +7,7 @@ import { useVectorStore } from '@/editor';
 import type { Vec3D } from '@/editor/entities/types';
 import { add3D, cross3D, dot3D, mag3D, angle3D, toDeg } from '@/engine/vectorMath';
 import { useFmt } from '@/hooks/useFmt';
+import { useRefFrameDrag } from '@/hooks/useRefFrameDrag';
 import { COLORS, RADIUS } from '@/styles/tokens';
 
 // ─── 3D 向量箭头组件 ───
@@ -50,6 +52,7 @@ function Arrow3D({ from = [0, 0, 0], to, color, label, opacity = 1 }: Arrow3DPro
       <primitive object={arrowHelper} />
       <Html
         position={[midX + 0.15, midY + 0.15, midZ + 0.15]}
+        sprite
         style={{ pointerEvents: 'none' }}
       >
         <div
@@ -88,7 +91,7 @@ function CoordAxes() {
         return (
           <group key={label}>
             <primitive object={helper} />
-            <Html position={[to[0] + 0.2, to[1] + 0.1, to[2] + 0.1]} style={{ pointerEvents: 'none' }}>
+            <Html position={[to[0] + 0.2, to[1] + 0.1, to[2] + 0.1]} sprite style={{ pointerEvents: 'none' }}>
               <div style={{ color, fontWeight: 700, fontSize: 18, fontFamily: 'Inter, sans-serif' }}>{label}</div>
             </Html>
           </group>
@@ -321,6 +324,118 @@ function Geometry3DScene() {
   );
 }
 
+// ─── WebGL 检测 ───
+
+function detectWebGL(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
+
+// ─── 错误边界 ───
+
+interface ErrorBoundaryState { hasError: boolean; error: string }
+
+class Canvas3DErrorBoundary extends Component<
+  { children: ReactNode },
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { hasError: false, error: '' };
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error: error.message };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Canvas3D error:', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          width: '100%', height: '100%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', gap: 12,
+          background: COLORS.bgPage, color: COLORS.text,
+          fontFamily: 'Inter, sans-serif',
+        }}>
+          <div style={{ fontSize: 40 }}>⚠</div>
+          <div style={{ fontSize: 16, fontWeight: 600 }}>3D 渲染出错</div>
+          <div style={{ fontSize: 14, color: COLORS.textMuted, maxWidth: 320, textAlign: 'center' }}>
+            {this.state.error || '三维画布初始化失败，请刷新页面重试'}
+          </div>
+          <button
+            onClick={() => this.setState({ hasError: false, error: '' })}
+            style={{
+              marginTop: 8, padding: '6px 18px',
+              border: `1px solid ${COLORS.primary}`,
+              borderRadius: RADIUS.sm,
+              background: 'transparent',
+              color: COLORS.primary,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            重试
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── 参考系旋转包裹 ───
+
+function RotatableScene({ children }: { children: ReactNode }) {
+  const sceneRotation = useVectorStore((s) => s.sceneRotation);
+  const q = useMemo(
+    () => new THREE.Quaternion(sceneRotation[0], sceneRotation[1], sceneRotation[2], sceneRotation[3]),
+    [sceneRotation],
+  );
+  return <group quaternion={q}>{children}</group>;
+}
+
+// ─── 加载占位 ───
+
+function LoadingPlaceholder() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: COLORS.bgPage, color: COLORS.textMuted,
+      fontFamily: 'Inter, sans-serif', fontSize: 16,
+    }}>
+      正在加载 3D 场景...
+    </div>
+  );
+}
+
+// ─── WebGL 不支持占位 ───
+
+function NoWebGLFallback() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', gap: 12,
+      background: COLORS.bgPage, color: COLORS.text,
+      fontFamily: 'Inter, sans-serif',
+    }}>
+      <div style={{ fontSize: 40 }}>🖥</div>
+      <div style={{ fontSize: 16, fontWeight: 600 }}>浏览器不支持 WebGL</div>
+      <div style={{ fontSize: 14, color: COLORS.textMuted, maxWidth: 320, textAlign: 'center' }}>
+        3D 向量可视化需要 WebGL 支持。请使用 Chrome、Firefox 或 Edge 最新版本，或检查浏览器硬件加速设置。
+      </div>
+    </div>
+  );
+}
+
 // ─── 主 Canvas3D 组件 ───
 
 export function Canvas3D() {
@@ -328,33 +443,68 @@ export function Canvas3D() {
   const showPerspective = useVectorStore((s) => s.showPerspective);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
+  const [ready, setReady] = useState(false);
+  const refFrameDrag = useRefFrameDrag();
+
+  const webglSupported = useMemo(() => detectWebGL(), []);
+
+  if (!webglSupported) return <NoWebGLFallback />;
 
   return (
-    <div className="w-full h-full" style={{ background: COLORS.bgPage }}>
-      <Canvas
-        key={showPerspective ? 'perspective' : 'orthographic'}
-        orthographic={!showPerspective}
-        camera={showPerspective
-          ? { position: [4, 3, 4] as [number, number, number], fov: 50 }
-          : { position: [4, 3, 4] as [number, number, number], zoom: 80 }
-        }
-        style={{ width: '100%', height: '100%' }}
-      >
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[5, 5, 5]} intensity={0.6} />
+    <div
+      className="w-full h-full"
+      style={{ background: COLORS.bgPage }}
+      {...refFrameDrag}
+    >
+      <Canvas3DErrorBoundary>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <Canvas
+            key={showPerspective ? 'perspective' : 'orthographic'}
+            orthographic={!showPerspective}
+            camera={showPerspective
+              ? { position: [4, 3, 4] as [number, number, number], fov: 50 }
+              : { position: [4, 3, 4] as [number, number, number], zoom: 80 }
+            }
+            style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity 0.3s' }}
+            onCreated={() => setReady(true)}
+          >
+            <ambientLight intensity={0.7} />
+            <directionalLight position={[5, 5, 5]} intensity={0.6} />
 
-        {operation === 'space3D' && <Space3DScene />}
-        {operation === 'crossProduct' && <CrossProductScene />}
-        {operation === 'geometry3D' && <Geometry3DScene />}
+            <RotatableScene>
+              {operation === 'space3D' && <Space3DScene />}
+              {operation === 'crossProduct' && <CrossProductScene />}
+              {operation === 'geometry3D' && <Geometry3DScene />}
+            </RotatableScene>
 
-        <OrbitControls
-          ref={controlsRef}
-          target={[0, 0, 0]}
-          enablePan
-          enableZoom
-          enableRotate
-        />
-      </Canvas>
+            <OrbitControls
+              ref={controlsRef}
+              target={[0, 0, 0]}
+              enablePan
+              enableZoom
+              enableRotate
+              mouseButtons={{
+                LEFT: THREE.MOUSE.ROTATE,
+                MIDDLE: THREE.MOUSE.PAN,
+                RIGHT: undefined as unknown as THREE.MOUSE,
+              }}
+            />
+          </Canvas>
+        </Suspense>
+      </Canvas3DErrorBoundary>
+
+      {/* 加载前的占位文字 */}
+      {!ready && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: COLORS.textMuted, fontSize: 16,
+          fontFamily: 'Inter, sans-serif',
+          pointerEvents: 'none',
+        }}>
+          正在初始化 3D 渲染...
+        </div>
+      )}
 
       {/* 操作提示 */}
       <div
@@ -367,7 +517,7 @@ export function Canvas3D() {
           pointerEvents: 'none',
         }}
       >
-        左键旋转 | 滚轮缩放 | 中键平移
+        左键旋转 | 滚轮缩放 | 中键平移 | 右键旋转坐标系
         {!showPerspective && ' | 正交投影'}
       </div>
     </div>

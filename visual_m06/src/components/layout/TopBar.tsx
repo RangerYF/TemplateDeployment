@@ -13,11 +13,11 @@ const OPERATION_GROUPS: { label: string; ops: OperationType[] }[] = [
   },
   {
     label: '基本运算',
-    ops: ['parallelogram', 'triangle', 'subtraction', 'scalar'],
+    ops: ['parallelogram', 'triangle', 'subtraction', 'scalar', 'rotation'],
   },
   {
     label: '数量积',
-    ops: ['dotProduct'],
+    ops: ['dotProduct', 'projection'],
   },
   {
     label: '分解',

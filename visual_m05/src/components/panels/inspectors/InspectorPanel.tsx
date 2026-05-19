@@ -18,6 +18,10 @@ import { HypergeometricDistInspector } from './HypergeometricDistInspector';
 import { NormalDistInspector } from './NormalDistInspector';
 import { LinearRegressionInspector } from './LinearRegressionInspector';
 import { LawOfLargeNumbersInspector } from './LawOfLargeNumbersInspector';
+import { PieChartInspector } from './PieChartInspector';
+import { LineChartInspector } from './LineChartInspector';
+import { TournamentMatchInspector } from './TournamentMatchInspector';
+import { BoxSwapBallsInspector } from './BoxSwapBallsInspector';
 import type {
   SimulationType,
   CoinFlipParams,
@@ -34,6 +38,10 @@ import type {
   NormalDistParams,
   LinearRegressionParams,
   LawOfLargeNumbersParams,
+  PieChartParams,
+  LineChartParams,
+  TournamentMatchParams,
+  BoxSwapBallsParams,
 } from '@/types/simulation';
 
 /** Collapsible parameter meaning descriptions (replaces old SimDescription) */
@@ -120,6 +128,14 @@ export function InspectorPanel() {
         return <LinearRegressionInspector simId={sim.id} params={sim.params as LinearRegressionParams} />;
       case 'lawOfLargeNumbers':
         return <LawOfLargeNumbersInspector simId={sim.id} params={sim.params as LawOfLargeNumbersParams} />;
+      case 'pieChart':
+        return <PieChartInspector simId={sim.id} params={sim.params as PieChartParams} />;
+      case 'lineChart':
+        return <LineChartInspector simId={sim.id} params={sim.params as LineChartParams} />;
+      case 'tournamentMatch':
+        return <TournamentMatchInspector simId={sim.id} params={sim.params as TournamentMatchParams} />;
+      case 'boxSwapBalls':
+        return <BoxSwapBallsInspector simId={sim.id} params={sim.params as BoxSwapBallsParams} />;
       default:
         return null;
     }

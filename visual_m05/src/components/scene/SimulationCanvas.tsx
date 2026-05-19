@@ -22,6 +22,10 @@ import type {
   LinearRegressionResult,
   LawOfLargeNumbersResult,
   StemLeafResult,
+  PieChartResult,
+  LineChartResult,
+  TournamentMatchResult,
+  BoxSwapBallsResult,
 } from '@/engine/simulations';
 import type {
   BallDrawParams,
@@ -32,6 +36,8 @@ import type {
   NormalDistParams,
   LinearRegressionParams,
   LawOfLargeNumbersParams,
+  PieChartParams,
+  LineChartParams,
 } from '@/types/simulation';
 import {
   CoinFlipRenderer,
@@ -48,6 +54,10 @@ import {
   LinearRegressionRenderer,
   LawOfLargeNumbersRenderer,
   StemLeafRenderer,
+  PieChartRenderer,
+  LineChartRenderer,
+  TournamentMatchRenderer,
+  BoxSwapBallsRenderer,
 } from './renderers';
 import { SingleStepAnimation } from './SingleStepAnimation';
 import { useAnimationEngine } from '@/hooks/useAnimationEngine';
@@ -182,6 +192,31 @@ function renderSimulation(sim: SimulationEntity, displayN?: number) {
       const p = sim.params as LawOfLargeNumbersParams;
       return <LawOfLargeNumbersRenderer result={result.data as LawOfLargeNumbersResult} scenario={p.scenario} />;
     }
+    case 'pieChart': {
+      const p = sim.params as PieChartParams;
+      const sourceName = p.dataSpec.mode === 'manual'
+        ? '自定义数据'
+        : (HISTOGRAM_DATASETS.find(d => d.id === p.dataSpec.presetId)?.name ?? '数据集');
+      return <PieChartRenderer result={result.data as PieChartResult} datasetName={sourceName} />;
+    }
+    case 'lineChart': {
+      const p = sim.params as LineChartParams;
+      const sourceName = p.dataSpec.mode === 'manual'
+        ? '自定义数据'
+        : (HISTOGRAM_DATASETS.find(d => d.id === p.dataSpec.presetId)?.name ?? '数据集');
+      return (
+        <LineChartRenderer
+          result={result.data as LineChartResult}
+          datasetName={sourceName}
+          showTrend={p.showTrend}
+          showMarkers={p.showMarkers}
+        />
+      );
+    }
+    case 'tournamentMatch':
+      return <TournamentMatchRenderer result={result.data as TournamentMatchResult} />;
+    case 'boxSwapBalls':
+      return <BoxSwapBallsRenderer result={result.data as BoxSwapBallsResult} />;
     default:
       return null;
   }

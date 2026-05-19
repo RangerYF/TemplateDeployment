@@ -12,3 +12,7 @@ export { LinearRegressionRenderer } from './LinearRegressionRenderer';
 export { LawOfLargeNumbersRenderer } from './LawOfLargeNumbersRenderer';
 export { StemLeafRenderer } from './StemLeafRenderer';
 export { HypergeometricDistRenderer } from './HypergeometricDistRenderer';
+export { PieChartRenderer } from './PieChartRenderer';
+export { LineChartRenderer } from './LineChartRenderer';
+export { TournamentMatchRenderer } from './TournamentMatchRenderer';
+export { BoxSwapBallsRenderer } from './BoxSwapBallsRenderer';

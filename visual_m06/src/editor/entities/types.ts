@@ -17,6 +17,8 @@ export type OperationType =
   | 'space3D'        // VEC-061 空间向量基本运算
   | 'crossProduct'   // VEC-062 叉积（向量积）
   | 'geometry3D'    // VEC-071 立体几何应用
+  | 'projection'   // VEC-042 向量投影
+  | 'rotation'     // VEC-043 向量旋转
   | 'demoStage';    // 演示台：自由向量创建与运算
 
 // ─── 当前维度 ───
@@ -57,7 +59,7 @@ export const OPERATION_META: Record<OperationType, OperationMeta> = {
   parallelogram: {
     id: 'parallelogram',
     label: '平行四边形法则',
-    shortLabel: 'a+b',
+    shortLabel: '加法',
     dimension: '2D',
     category: '基本运算',
     vecIds: ['a', 'b'],
@@ -66,7 +68,7 @@ export const OPERATION_META: Record<OperationType, OperationMeta> = {
   triangle: {
     id: 'triangle',
     label: '三角形法则',
-    shortLabel: '首尾相接',
+    shortLabel: '三角形法则',
     dimension: '2D',
     category: '基本运算',
     vecIds: ['a', 'b'],
@@ -75,7 +77,7 @@ export const OPERATION_META: Record<OperationType, OperationMeta> = {
   subtraction: {
     id: 'subtraction',
     label: '向量减法',
-    shortLabel: 'a−b',
+    shortLabel: '减法',
     dimension: '2D',
     category: '基本运算',
     vecIds: ['a', 'b'],
@@ -84,7 +86,7 @@ export const OPERATION_META: Record<OperationType, OperationMeta> = {
   scalar: {
     id: 'scalar',
     label: '数乘向量',
-    shortLabel: 'k·a',
+    shortLabel: '数乘',
     dimension: '2D',
     category: '基本运算',
     vecIds: ['a'],
@@ -134,6 +136,24 @@ export const OPERATION_META: Record<OperationType, OperationMeta> = {
     category: '空间向量',
     vecIds: ['a3', 'b3'],
     description: 'VEC-071：向量在立体几何中的应用——法向量、对角线、体积计算',
+  },
+  projection: {
+    id: 'projection',
+    label: '向量投影',
+    shortLabel: '投影',
+    dimension: '2D',
+    category: '数量积',
+    vecIds: ['a', 'b'],
+    description: 'VEC-042：a 在 b 方向上的投影向量与投影长度',
+  },
+  rotation: {
+    id: 'rotation',
+    label: '向量旋转',
+    shortLabel: '旋转',
+    dimension: '2D',
+    category: '基本运算',
+    vecIds: ['a'],
+    description: 'VEC-043：将向量绕原点旋转指定角度',
   },
   demoStage: {
     id: 'demoStage',

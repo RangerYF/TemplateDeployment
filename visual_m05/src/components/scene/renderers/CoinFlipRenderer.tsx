@@ -1,10 +1,13 @@
 import { COLORS } from '@/styles/tokens';
 import type { CoinFlipResult } from '@/engine/simulations/coinFlip';
 import { px, py, toPolylinePoints, ChartAxes, DashedHLine, ChartTitle } from '@/utils/svgChartUtils';
+import { TrialDataTable } from './TrialDataTable';
 
-const VW = 800, VH = 580;
-const ML = 68, MR = 80;
+const VW = 1020, VH = 580;
+const ML = 68, MR = 250;  // 右侧留 250 给数据表
 const PW = VW - ML - MR;
+const TABLE_X = ML + PW + 12;
+const TABLE_W = MR - 24;
 
 // Top section
 const T1_MT = 40, T1_H = 220;
@@ -106,6 +109,19 @@ export function CoinFlipRenderer({ result, displayN }: { result: CoinFlipResult;
       {points.length > 0 && (
         <polyline points={points} fill="none" stroke={COLORS.primary} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
       )}
+
+      {/* Right-side experiment data table */}
+      <TrialDataTable
+        x={TABLE_X}
+        y={T1_MT}
+        width={TABLE_W}
+        title="实验数据表"
+        totalObserved={displayedN}
+        rows={[
+          { label: '正面 (H)', count: heads, freq: hFreq, theoreticalProb: 0.5, color: COLORS.primary },
+          { label: '反面 (T)', count: displayedN - heads, freq: tFreq, theoreticalProb: 0.5, color: COLORS.info },
+        ]}
+      />
     </svg>
   );
 }

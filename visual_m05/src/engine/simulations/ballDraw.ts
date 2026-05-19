@@ -4,7 +4,12 @@ export interface BallDrawResult {
   trials: number[]; // number of red balls drawn each trial
   frequencies: number[]; // frequencies for each possible outcome
   theoreticalProbs: number[]; // theoretical probabilities
+  minPossible?: number;
   maxPossible: number;
+  successProb?: number;
+  expectedValue?: number;
+  variance?: number;
+  stdDev?: number;
 }
 
 function combination(n: number, k: number): number {
@@ -26,7 +31,8 @@ export function runBallDraw(
   rng: RandomSource = Math.random,
 ): BallDrawResult {
   const total = redCount + whiteCount;
-  const maxRed = Math.min(drawCount, redCount);
+  const minRed = replace ? 0 : Math.max(0, drawCount - whiteCount);
+  const maxRed = replace ? drawCount : Math.min(drawCount, redCount);
   const trials: number[] = [];
   const counts = new Array(maxRed + 1).fill(0);
 
@@ -51,12 +57,12 @@ export function runBallDraw(
   }
 
   // Theoretical probabilities
+  const successProb = total > 0 ? redCount / total : 0;
   let theoreticalProbs: number[];
   if (replace) {
     // Binomial
-    const p = redCount / total;
     theoreticalProbs = Array.from({ length: maxRed + 1 }, (_, k) =>
-      combination(drawCount, k) * Math.pow(p, k) * Math.pow(1 - p, drawCount - k)
+      combination(drawCount, k) * Math.pow(successProb, k) * Math.pow(1 - successProb, drawCount - k)
     );
   } else {
     // Hypergeometric
@@ -65,10 +71,22 @@ export function runBallDraw(
     );
   }
 
+  const expectedValue = drawCount * successProb;
+  const variance = replace
+    ? drawCount * successProb * (1 - successProb)
+    : total > 1
+      ? drawCount * successProb * (1 - successProb) * ((total - drawCount) / (total - 1))
+      : 0;
+
   return {
     trials,
     frequencies: counts.map(c => c / n),
     theoreticalProbs,
+    minPossible: minRed,
     maxPossible: maxRed,
+    successProb,
+    expectedValue,
+    variance,
+    stdDev: Math.sqrt(Math.max(variance, 0)),
   };
 }
