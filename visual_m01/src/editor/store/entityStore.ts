@@ -18,6 +18,7 @@ interface EntityStoreState {
   getActiveGeometry(): Entity<'geometry'> | undefined;
   getCoordinateSystem(): Entity<'coordinateSystem'> | undefined;
   getCircumSphere(): Entity<'circumSphere'> | undefined;
+  getInSphere(): Entity<'inSphere'> | undefined;
   getEntitiesByType<T extends EntityType>(type: T): Entity<T>[];
   getBuiltInEntities(geometryId: string): Entity[];
   getRelatedEntities(geometryId: string): Entity[];
@@ -201,6 +202,12 @@ export const useEntityStore = create<EntityStoreState>()((set, get) => ({
     return Object.values(get().entities).find(
       (e) => e.type === 'circumSphere'
     ) as Entity<'circumSphere'> | undefined;
+  },
+
+  getInSphere(): Entity<'inSphere'> | undefined {
+    return Object.values(get().entities).find(
+      (e) => e.type === 'inSphere'
+    ) as Entity<'inSphere'> | undefined;
   },
 
   getEntitiesByType<T extends EntityType>(type: T): Entity<T>[] {

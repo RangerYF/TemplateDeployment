@@ -10,6 +10,7 @@ import { computePointPosition } from '@/components/scene/renderers/usePointPosit
 import { getBuilderResult } from '../builderCache';
 import { transientDragState } from '../store/dragState';
 
+
 /**
  * SelectTool — 默认工具
  * 职责：选中实体、拖拽移动 Point、Delete 删除
@@ -97,10 +98,12 @@ export const selectTool: Tool = {
       // 选中命中的实体
       useSelectionStore.getState().select(event.hitEntityId);
 
-      // 如果命中的是 Point Entity → 进入拖拽预备
+      // 如果命中的是 Point Entity → 进入拖拽预备（内置顶点不可拖拽）
       if (event.hitEntityType === 'point') {
         const entity = useEntityStore.getState().getEntity(event.hitEntityId);
-        if (entity && entity.type === 'point') {
+        const isBuiltIn = (entity?.properties as PointProperties)?.builtIn;
+        const canDrag = entity && entity.type === 'point' && !isBuiltIn;
+        if (canDrag) {
           dragPointId = event.hitEntityId;
           dragBeforeState = (entity.properties as PointProperties).positionOverride;
           isDragging = false;

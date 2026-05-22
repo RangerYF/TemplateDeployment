@@ -19,6 +19,8 @@ const PRESET_COLORS = [
   { label: '绿', value: '#22c55e' },
   { label: '紫', value: '#a855f7' },
   { label: '橙', value: '#f97316' },
+  { label: '粉', value: '#ec4899' },
+  { label: '青', value: '#06b6d4' },
 ];
 
 function SegmentInspector({ entity }: { entity: Entity }) {
@@ -166,38 +168,36 @@ function SegmentInspector({ entity }: { entity: Entity }) {
         )}
       </div>
 
-      {/* 样式编辑（仅用户线段） */}
-      {!builtIn && (
-        <div className="space-y-2">
-          {/* 颜色 */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm" style={{ color: COLORS.textMuted }}>颜色</span>
-            {PRESET_COLORS.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => handleColorChange(c.value)}
-                className="w-5 h-5 rounded-full border-2"
-                style={{
-                  backgroundColor: c.value,
-                  borderColor: style.color === c.value ? COLORS.primary : 'transparent',
-                }}
-                title={c.label}
-              />
-            ))}
-          </div>
-
-          {/* 虚实线 */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={style.dashed}
-              onChange={handleDashedToggle}
-              className="rounded"
+      {/* 样式编辑 */}
+      <div className="space-y-2">
+        {/* 颜色 */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>颜色</span>
+          {PRESET_COLORS.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => handleColorChange(c.value)}
+              className="w-5 h-5 rounded-full border-2"
+              style={{
+                backgroundColor: c.value,
+                borderColor: style.color === c.value ? COLORS.primary : 'transparent',
+              }}
+              title={c.label}
             />
-            <span className="text-sm" style={{ color: COLORS.textMuted }}>虚线</span>
-          </label>
+          ))}
         </div>
-      )}
+
+        {/* 虚实线 */}
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={style.dashed}
+            onChange={handleDashedToggle}
+            className="rounded"
+          />
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>虚线</span>
+        </label>
+      </div>
     </div>
   );
 }

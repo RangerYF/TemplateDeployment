@@ -47,7 +47,10 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
       // 收集所有有 entityId 的命中（排除 locked 实体）
       const entities = useEntityStore.getState().entities;
       const entityHits = intersections.filter((h) => {
-        const eid = h.object?.userData?.entityId;
+        const ud = h.object?.userData;
+        if (!ud) return false;
+        if (ud.isSnapPoint) return true;
+        const eid = ud.entityId;
         if (!eid) return false;
         const e = entities[eid];
         return e && !e.locked;

@@ -1,4 +1,5 @@
 import type { CalculationResult, SymbolicValue } from '../types';
+import { add } from '../symbolic';
 
 /**
  * 正棱柱计算器
@@ -83,14 +84,23 @@ function buildN3(
     { label: '计算结果', latex: `V = ${volLatex} \\approx ${fmt2(volNum)}` },
   ];
 
+  let totalArea: SymbolicValue;
+  if (isNiceInt(a2) && isNiceInt(lateralNum)) {
+    const lateralSym: SymbolicValue = { latex: fmt(Math.round(lateralNum)), numeric: lateralNum };
+    const twoBaseSym = sqrt3Frac(Math.round(a2), 2);
+    totalArea = add(lateralSym, twoBaseSym);
+  } else {
+    totalArea = { latex: fmt2(totalNum), numeric: totalNum };
+  }
+
   const surfaceSteps = [
     { label: '底面积', latex: `S_{底} = ${baseLatex}` },
     { label: '侧面积', latex: `S_{侧} = 3 \\times ${fmt(a)} \\times ${fmt(h)} = ${fmt(lateralNum)}` },
-    { label: '总表面积', latex: `S = S_{侧} + 2S_{底} = ${fmt(lateralNum)} + 2 \\times ${baseLatex} \\approx ${fmt2(totalNum)}` },
-    { label: '计算结果', latex: `S \\approx ${fmt2(totalNum)}` },
+    { label: '总表面积', latex: `S = ${fmt(lateralNum)} + 2 \\times ${baseLatex} = ${totalArea.latex}` },
+    { label: '计算结果', latex: `S = ${totalArea.latex} \\approx ${fmt2(totalNum)}` },
   ];
 
-  return { volume, totalArea: { latex: fmt2(totalNum), numeric: totalNum } as SymbolicValue, volumeSteps, surfaceSteps };
+  return { volume, totalArea, volumeSteps, surfaceSteps };
 }
 
 // ─── n=4：正四棱柱 ───
@@ -158,14 +168,23 @@ function buildN6(
     { label: '计算结果', latex: `V = ${volLatex} \\approx ${fmt2(volNum)}` },
   ];
 
+  let totalArea: SymbolicValue;
+  if (isNiceInt(a2) && isNiceInt(lateralNum)) {
+    const lateralSym: SymbolicValue = { latex: fmt(Math.round(lateralNum)), numeric: lateralNum };
+    const twoBaseSym = sqrt3Frac(3 * Math.round(a2), 1);
+    totalArea = add(lateralSym, twoBaseSym);
+  } else {
+    totalArea = { latex: fmt2(totalNum), numeric: totalNum };
+  }
+
   const surfaceSteps = [
     { label: '底面积', latex: `S_{底} = ${baseLatex}` },
     { label: '侧面积', latex: `S_{侧} = 6 \\times ${fmt(a)} \\times ${fmt(h)} = ${fmt(lateralNum)}` },
-    { label: '总表面积', latex: `S = ${fmt(lateralNum)} + 2 \\times ${baseLatex} \\approx ${fmt2(totalNum)}` },
-    { label: '计算结果', latex: `S \\approx ${fmt2(totalNum)}` },
+    { label: '总表面积', latex: `S = ${fmt(lateralNum)} + 2 \\times ${baseLatex} = ${totalArea.latex}` },
+    { label: '计算结果', latex: `S = ${totalArea.latex} \\approx ${fmt2(totalNum)}` },
   ];
 
-  return { volume, totalArea: { latex: fmt2(totalNum), numeric: totalNum } as SymbolicValue, volumeSteps, surfaceSteps };
+  return { volume, totalArea, volumeSteps, surfaceSteps };
 }
 
 // ─── 通用 n 棱柱 ───
@@ -192,6 +211,31 @@ function buildGeneric(
   ];
 
   return { volume, totalArea, volumeSteps, surfaceSteps };
+}
+
+function sqrt3Frac(coeff: number, den: number): SymbolicValue {
+  const g = gcd(Math.abs(coeff), Math.abs(den));
+  const n = coeff / g;
+  const d = den / g;
+  let latex: string;
+  if (d === 1) {
+    latex = n === 1 ? '\\sqrt{3}' : `${n}\\sqrt{3}`;
+  } else {
+    const numPart = n === 1 ? '\\sqrt{3}' : `${n}\\sqrt{3}`;
+    latex = `\\dfrac{${numPart}}{${d}}`;
+  }
+  return { latex, numeric: (coeff / den) * Math.sqrt(3) };
+}
+
+function isNiceInt(n: number): boolean {
+  return Math.abs(n - Math.round(n)) < 1e-9;
+}
+
+function gcd(a: number, b: number): number {
+  a = Math.round(Math.abs(a));
+  b = Math.round(Math.abs(b));
+  while (b) { [a, b] = [b, a % b]; }
+  return a || 1;
 }
 
 function fmt(n: number): string {

@@ -50,6 +50,22 @@ export interface CircumscribedSphere {
   radiusLatex: string;
 }
 
+/** 内切球 */
+export interface InscribedSphere {
+  center: Vec3;
+  radius: number;
+  radiusLatex: string;
+}
+
+/** 旁切球（单个面对应的） */
+export interface EscribedSphereItem {
+  faceIndex: number;
+  faceLabel: string;
+  center: Vec3;
+  radius: number;
+  radiusLatex: string;
+}
+
 /** 外接圆 */
 export interface CircumscribedCircle {
   center: Vec3;

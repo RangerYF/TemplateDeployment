@@ -6,7 +6,7 @@ import type {
   GeometryProperties,
   CoordinateSystemProperties,
 } from '@/editor/entities/types';
-import { useEntityStore } from '@/editor/store';
+import { useEntityStore, useToolStore } from '@/editor/store';
 import { useBuilderResult } from '@/editor/builderCache';
 import { buildCoordinateSystem, buildCoordinateSystemFromAxes } from '@/engine/math/coordinates';
 import { computePointPosition } from './usePointPosition';
@@ -23,6 +23,7 @@ function CoordSystemRenderer({ entity }: { entity: Entity }) {
   const csProps = csEntity.properties as CoordinateSystemProperties;
   const { originPointId, geometryId } = csProps;
 
+  const isReselecting = useToolStore((s) => s.activeToolId === 'coordSystem');
   const entitiesMap = useEntityStore((s) => s.entities);
 
   const pointEntity = useMemo(() => {
@@ -117,7 +118,7 @@ function CoordSystemRenderer({ entity }: { entity: Entity }) {
     });
   }, [coordSystem]);
 
-  if (!coordSystem) return null;
+  if (!coordSystem || isReselecting) return null;
 
   return (
     <group>

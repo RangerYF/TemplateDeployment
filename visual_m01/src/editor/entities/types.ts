@@ -24,7 +24,9 @@ export type EntityType =
   | 'face'
   | 'coordinateSystem'
   | 'circumSphere'
+  | 'inSphere'
   | 'circumCircle'
+  | 'exSphere'
   | 'angleMeasurement'
   | 'distanceMeasurement';
 
@@ -78,6 +80,7 @@ export interface FaceProperties {
   pointIds: string[];
   source: FaceSource;
   style?: { color: string; opacity: number };
+  showPlane?: boolean;
 }
 
 export interface CoordinateSystemProperties {
@@ -95,9 +98,18 @@ export interface CircumSphereProperties {
   geometryId: string;
 }
 
+export interface InSphereProperties {
+  geometryId: string;
+}
+
 export interface CircumCircleProperties {
   pointIds: [string, string, string];
   geometryId: string;
+}
+
+export interface ExSphereProperties {
+  geometryId: string;
+  faceIndex: number;
 }
 
 // ─── 角度度量 ───
@@ -143,7 +155,9 @@ export interface EntityPropertiesMap {
   face: FaceProperties;
   coordinateSystem: CoordinateSystemProperties;
   circumSphere: CircumSphereProperties;
+  inSphere: InSphereProperties;
   circumCircle: CircumCircleProperties;
+  exSphere: ExSphereProperties;
   angleMeasurement: AngleMeasurementProperties;
   distanceMeasurement: DistanceMeasurementProperties;
 }
@@ -186,8 +200,16 @@ export function isCircumSphereEntity(e: Entity): e is Entity<'circumSphere'> {
   return e.type === 'circumSphere';
 }
 
+export function isInSphereEntity(e: Entity): e is Entity<'inSphere'> {
+  return e.type === 'inSphere';
+}
+
 export function isCircumCircleEntity(e: Entity): e is Entity<'circumCircle'> {
   return e.type === 'circumCircle';
+}
+
+export function isExSphereEntity(e: Entity): e is Entity<'exSphere'> {
+  return e.type === 'exSphere';
 }
 
 export function isAngleMeasurementEntity(e: Entity): e is Entity<'angleMeasurement'> {

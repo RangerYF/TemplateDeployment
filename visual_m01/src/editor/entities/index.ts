@@ -11,6 +11,7 @@ export type {
   FaceSource,
   CoordinateSystemProperties,
   CircumSphereProperties,
+  InSphereProperties,
   CircumCircleProperties,
 } from './types';
 
@@ -21,5 +22,6 @@ export {
   isFaceEntity,
   isCoordinateSystemEntity,
   isCircumSphereEntity,
+  isInSphereEntity,
   isCircumCircleEntity,
 } from './types';

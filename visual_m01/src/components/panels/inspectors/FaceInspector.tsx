@@ -3,6 +3,7 @@ import type { Entity, PointProperties, FaceProperties } from '@/editor/entities/
 import { useEntityStore, useHistoryStore, UpdatePropertiesCommand } from '@/editor';
 import { useBuilderResult } from '@/editor/builderCache';
 import { computePointPosition } from '@/components/scene/renderers/usePointPosition';
+import { Switch } from '@/components/ui/switch';
 import { COLORS } from '@/styles/tokens';
 import { registerInspector } from './registry';
 import { InspectorHeader } from './InspectorCommon';
@@ -160,6 +161,26 @@ function FaceInspector({ entity }: { entity: Entity }) {
       {/* 截面详情 */}
       {source.type === 'crossSection' && (
         <CrossSectionDetail source={source} pointLabels={pointLabels} />
+      )}
+
+      {/* 显示完整平面（仅截面） */}
+      {source.type === 'crossSection' && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>显示完整平面</span>
+          <Switch
+            checked={!!faceEntity.properties.showPlane}
+            onCheckedChange={(checked) => {
+              useHistoryStore.getState().execute(
+                new UpdatePropertiesCommand<'face'>(
+                  faceEntity.id,
+                  { showPlane: faceEntity.properties.showPlane },
+                  { showPlane: checked },
+                  '切换截面完整平面',
+                ),
+              );
+            }}
+          />
+        </div>
       )}
 
       {/* 外观设置 */}

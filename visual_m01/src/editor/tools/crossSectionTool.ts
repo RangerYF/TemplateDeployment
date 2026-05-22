@@ -3,6 +3,8 @@ import type { PointProperties } from '../entities/types';
 import { useEntityStore } from '../store/entityStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { useToolStore } from '../store/toolStore';
+import { useHistoryStore } from '../store/historyStore';
+import { CreateEntityCommand } from '../commands/createEntity';
 import { createCrossSectionFromPoints } from '../crossSectionHelper';
 import { useNotificationStore } from '@/components/scene/notificationStore';
 
@@ -26,28 +28,22 @@ export const crossSectionTool: Tool = {
   },
 
   onPointerDown(event: ToolPointerEvent) {
-    if (!event.hitEntityId || event.hitEntityType !== 'point') return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ud = (event.intersection as any)?.object?.userData;
 
-    // 不重复选同一个点
-    if (definingPointIds.includes(event.hitEntityId)) return;
-
-    definingPointIds.push(event.hitEntityId);
-    useSelectionStore.getState().addToSelection(event.hitEntityId);
-
-    if (definingPointIds.length >= 3) {
-      // 尝试计算截面
-      const result = tryCreateCrossSection();
-      // 无论成功与否，重置定义点
-      definingPointIds = [];
-      if (result.success) {
-        // 创建成功，切回选择工具
-        useSelectionStore.getState().clear();
-        useToolStore.getState().setActiveTool('select');
-      } else {
-        useSelectionStore.getState().clear();
-        useNotificationStore.getState().show(result.message);
-      }
+    if (ud?.isSnapPoint) {
+      const { geometryId, edgeStart, edgeEnd, t } = ud.snapData as {
+        geometryId: string; edgeStart: number; edgeEnd: number; t: number;
+      };
+      const pointId = getOrCreateEdgePoint(geometryId, edgeStart, edgeEnd, t);
+      if (!pointId || definingPointIds.includes(pointId)) return;
+      addDefiningPoint(pointId);
+      return;
     }
+
+    if (!event.hitEntityId || event.hitEntityType !== 'point') return;
+    if (definingPointIds.includes(event.hitEntityId)) return;
+    addDefiningPoint(event.hitEntityId);
   },
 
   onKeyDown(event: KeyboardEvent) {
@@ -74,6 +70,53 @@ export const crossSectionTool: Tool = {
     return null;
   },
 };
+
+function addDefiningPoint(pointId: string) {
+  definingPointIds.push(pointId);
+  useSelectionStore.getState().addToSelection(pointId);
+
+  if (definingPointIds.length >= 3) {
+    const result = tryCreateCrossSection();
+    definingPointIds = [];
+    if (result.success) {
+      useSelectionStore.getState().clear();
+      useToolStore.getState().setActiveTool('select');
+    } else {
+      useSelectionStore.getState().clear();
+      useNotificationStore.getState().show(result.message);
+    }
+  }
+}
+
+function getOrCreateEdgePoint(geometryId: string, edgeStart: number, edgeEnd: number, t: number): string | null {
+  const store = useEntityStore.getState();
+  const existing = store.findPointOnEdge(geometryId, edgeStart, edgeEnd, t);
+  if (existing) return existing.id;
+
+  const label = nextAvailableLabel(store);
+  const cmd = new CreateEntityCommand('point', {
+    builtIn: false,
+    geometryId,
+    constraint: { type: 'edge' as const, edgeStart, edgeEnd, t },
+    label,
+  });
+  useHistoryStore.getState().execute(cmd);
+  return cmd.getCreatedId();
+}
+
+function nextAvailableLabel(store: ReturnType<typeof useEntityStore.getState>): string {
+  const entities = store.entities;
+  const used = new Set<string>();
+  for (const e of Object.values(entities)) {
+    if (e.type === 'point') {
+      used.add((e.properties as PointProperties).label);
+    }
+  }
+  for (let i = 1; ; i++) {
+    const label = `P${i}`;
+    if (!used.has(label)) return label;
+  }
+}
 
 /**
  * 尝试从当前定义点计算截面并创建（委托给 crossSectionHelper）

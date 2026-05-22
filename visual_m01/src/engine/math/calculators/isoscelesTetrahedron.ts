@@ -22,17 +22,39 @@ export function calculateIsoscelesTetrahedron(params: Record<string, number>): C
   const product = factor1 * factor2 * factor3;
   const volume = (Math.sqrt(2) / 12) * Math.sqrt(Math.max(0, product));
 
-  // 每个面三边为 p, q, r
-  // 海伦公式：面积 = √(s(s-p)(s-q)(s-r))
+  // 每个面三边为 p, q, r — 海伦公式
   const s = (p + q + r) / 2;
-  const faceArea = Math.sqrt(Math.max(0, s * (s - p) * (s - q) * (s - r)));
+  const heronProduct = s * (s - p) * (s - q) * (s - r);
+  const faceArea = Math.sqrt(Math.max(0, heronProduct));
   const surfaceArea = 4 * faceArea;
 
-  // 精确值
+  // ── 符号表达 ──
+
+  // 体积精确值
   const volProduct = Math.max(0, product);
-  const volLatex = product > 0
-    ? `\\dfrac{\\sqrt{2}}{12} \\times ${sqrt(volProduct).latex}`
+  const volRounded = Math.round(volProduct);
+  const volExact = volProduct > 0 && isNiceInt(volProduct);
+  const volLatex = volProduct > 0
+    ? (volExact
+      ? `\\dfrac{\\sqrt{2}}{12} \\times ${sqrt(volRounded).latex}`
+      : fmt2(volume))
     : '0';
+
+  // 表面积精确值
+  const heronR = Math.max(0, heronProduct);
+  const heronExact = isNiceInt(heronR);
+
+  let faceLatex: string;
+  let totalLatex: string;
+  if (heronExact) {
+    faceLatex = sqrt(Math.round(heronR)).latex;
+    totalLatex = sqrt(Math.round(heronR) * 16).latex;
+  } else {
+    faceLatex = fmt2(faceArea);
+    totalLatex = fmt2(surfaceArea);
+  }
+
+  const eq = heronExact ? '=' : '\\approx';
 
   return {
     volume: {
@@ -52,12 +74,12 @@ export function calculateIsoscelesTetrahedron(params: Record<string, number>): C
         },
         {
           label: '计算结果',
-          latex: `V \\approx ${fmt2(volume)}`,
+          latex: `V = ${volLatex} \\approx ${fmt2(volume)}`,
         },
       ],
     },
     surfaceArea: {
-      value: { latex: `${fmt2(surfaceArea)}`, numeric: surfaceArea },
+      value: { latex: totalLatex, numeric: surfaceArea },
       steps: [
         {
           label: '每个面三边',
@@ -65,19 +87,24 @@ export function calculateIsoscelesTetrahedron(params: Record<string, number>): C
         },
         {
           label: '海伦公式',
-          latex: `S_{面} = \\sqrt{s(s-p)(s-q)(s-r)},\\; s=\\frac{p+q+r}{2}=${fmt(s)}`,
+          latex: `S_{面} = \\sqrt{s(s-p)(s-q)(s-r)},\\; s=\\dfrac{p+q+r}{2}=${fmt(s)}`,
         },
         {
           label: '单面面积',
-          latex: `S_{面} \\approx ${fmt2(faceArea)}`,
+          latex: `S_{面} ${eq} ${faceLatex}`,
         },
         {
           label: '总表面积（4个全等面）',
-          latex: `S = 4 \\times ${fmt2(faceArea)} = ${fmt2(surfaceArea)}`,
+          latex: `S = 4 \\times ${faceLatex} = ${totalLatex} \\approx ${fmt2(surfaceArea)}`,
         },
       ],
     },
   };
+}
+
+function isNiceInt(n: number): boolean {
+  const r = Math.round(n);
+  return Math.abs(n - r) < 1e-9;
 }
 
 function fmt(n: number): string {

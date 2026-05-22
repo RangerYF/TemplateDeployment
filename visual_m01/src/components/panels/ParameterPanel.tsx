@@ -57,14 +57,14 @@ const PARAM_FIELDS: Record<string, ParamField[]> = {
     { key: 'height', label: '高', min: 0.5, max: 10, step: 0.1 },
   ],
   truncatedCone: [
-    { key: 'topRadius', label: '上底半径', min: 0.1, max: 5, step: 0.1 },
+    { key: 'topRadius', label: '上底半径', min: 0.01, max: 5, step: 0.01 },
     { key: 'bottomRadius', label: '下底半径', min: 0.5, max: 5, step: 0.1 },
     { key: 'height', label: '高', min: 0.5, max: 10, step: 0.1 },
   ],
   frustum: [
     { key: 'sides', label: '底面边数', min: 3, max: 8, step: 1 },
     { key: 'bottomSideLength', label: '下底边长', min: 0.5, max: 10, step: 0.1 },
-    { key: 'topSideLength', label: '上底边长', min: 0.1, max: 10, step: 0.1 },
+    { key: 'topSideLength', label: '上底边长', min: 0.01, max: 10, step: 0.01 },
     { key: 'height', label: '高', min: 0.5, max: 10, step: 0.1 },
   ],
   isoscelesTetrahedron: [

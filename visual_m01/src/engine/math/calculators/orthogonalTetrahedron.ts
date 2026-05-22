@@ -16,58 +16,74 @@ export function calculateOrthogonalTetrahedron(params: Record<string, number>): 
 
   const ab2 = ab * ab;
   const cd2 = cd * cd;
-  const d = Math.sqrt(ab2 + cd2) / 2;
-  const e2 = (ab2 + cd2) / 2; // 其余 4 条棱的平方
+  const sum2 = ab2 + cd2;
+  const d = Math.sqrt(sum2) / 2;
+  const e2 = sum2 / 2;
   const e = Math.sqrt(e2);
 
-  // 体积：用行列式法
-  // A=(-ab/2, d, 0), B=(ab/2, d, 0), C=(0, 0, -cd/2), D=(0, 0, cd/2)
-  // V = |det([AB, AC, AD])| / 6
-  // AB = (ab, 0, 0)
-  // AC = (ab/2, -d, -cd/2)
-  // AD = (ab/2, -d, cd/2)
-  // det = ab * ((-d)(cd/2) - (-cd/2)(-d)) = ab * (-d·cd/2 - d·cd/2) = ab * (-d·cd)
-  // |det| = ab·d·cd
   const volume = (ab * d * cd) / 6;
 
-  // 表面积：4 个三角形
-  // 两个面 ACB 和 ABD：底边 AB，顶点到 AB 的距离
-  // 面 ACB：A=(-ab/2,d,0), C=(0,0,-cd/2), B=(ab/2,d,0)
-  // 面 BCD：B=(ab/2,d,0), C=(0,0,-cd/2), D=(0,0,cd/2)
-  // 用棱长计算：AC=AD=BC=BD=e, AB=ab, CD=cd
-
-  // 面 ACB：三边 AC=e, CB=e, AB=ab → 等腰三角形
+  // 面 ACB / ABD：三边 e, e, ab
   const s1 = (e + e + ab) / 2;
-  const area1 = Math.sqrt(Math.max(0, s1 * (s1 - e) * (s1 - e) * (s1 - ab)));
+  const heron1 = s1 * (s1 - e) * (s1 - e) * (s1 - ab);
+  const area1 = Math.sqrt(Math.max(0, heron1));
 
-  // 面 ACD：三边 AC=e, CD=cd, AD=e → 等腰三角形
+  // 面 ACD / BCD：三边 e, e, cd
   const s2 = (e + e + cd) / 2;
-  const area2 = Math.sqrt(Math.max(0, s2 * (s2 - e) * (s2 - e) * (s2 - cd)));
+  const heron2 = s2 * (s2 - e) * (s2 - e) * (s2 - cd);
+  const area2 = Math.sqrt(Math.max(0, heron2));
 
-  // 共 4 个面：2 个底边为 AB 的 + 2 个底边为 CD 的
   const surfaceArea = 2 * area1 + 2 * area2;
 
-  const eSymbolic = sqrt(e2);
+  // ── 符号表达 ──
+  const eSymbolic = sqrt(e2 > 0 && isNiceInt(e2) ? Math.round(e2) : e2);
+  const sum2Nice = isNiceInt(sum2);
+
+  // 体积: V = ab·cd·√(ab²+cd²) / 12
+  let volLatex: string;
+  if (sum2Nice) {
+    const sqrtPart = sqrt(Math.round(sum2));
+    const coeff = ab * cd;
+    if (sqrtPart.numeric === Math.round(sqrtPart.numeric)) {
+      // √(sum2) 是整数，体积为有理数
+      const num = coeff * Math.round(sqrtPart.numeric);
+      volLatex = simplifyFrac(num, 12);
+    } else {
+      volLatex = `\\dfrac{${fmt(coeff)} \\times ${sqrtPart.latex}}{12}`;
+    }
+  } else {
+    volLatex = fmt2(volume);
+  }
+
+  // 表面积各面用 sqrt
+  const h1Nice = isNiceInt(heron1) && heron1 >= 0;
+  const h2Nice = isNiceInt(heron2) && heron2 >= 0;
+
+  const area1Latex = h1Nice ? sqrt(Math.round(Math.max(0, heron1))).latex : fmt2(area1);
+  const area2Latex = h2Nice ? sqrt(Math.round(Math.max(0, heron2))).latex : fmt2(area2);
+
+  const twoArea1Latex = h1Nice ? sqrt(Math.round(Math.max(0, heron1)) * 4).latex : fmt2(2 * area1);
+  const twoArea2Latex = h2Nice ? sqrt(Math.round(Math.max(0, heron2)) * 4).latex : fmt2(2 * area2);
 
   return {
     volume: {
-      value: { latex: fmt2(volume), numeric: volume },
+      value: { latex: volLatex, numeric: volume },
       steps: [
         {
+          label: '其余四棱等长',
+          latex: `e = \\sqrt{\\dfrac{AB^2 + CD^2}{2}} = ${eSymbolic.latex}`,
+        },
+        {
           label: '对棱间距',
-          latex: `d = \\dfrac{\\sqrt{AB^2 + CD^2}}{2} = ${fmt(d)}`,
+          latex: `d = \\dfrac{\\sqrt{AB^2 + CD^2}}{2} = \\dfrac{${sum2Nice ? sqrt(Math.round(sum2)).latex : fmt(sum2)}}{2}`,
         },
         {
           label: '体积公式',
           latex: `V = \\dfrac{AB \\times d \\times CD}{6}`,
         },
         {
-          label: '代入数值',
-          latex: `V = \\dfrac{${fmt(ab)} \\times ${fmt(d)} \\times ${fmt(cd)}}{6}`,
-        },
-        {
           label: '计算结果',
-          latex: `V \\approx ${fmt2(volume)}`,
+          latex: `V = ${volLatex} \\approx ${fmt2(volume)}`,
         },
       ],
     },
@@ -76,23 +92,42 @@ export function calculateOrthogonalTetrahedron(params: Record<string, number>): 
       steps: [
         {
           label: '其余四棱等长',
-          latex: `e = \\sqrt{\\dfrac{AB^2 + CD^2}{2}} = ${eSymbolic.latex}`,
+          latex: `e = ${eSymbolic.latex}`,
         },
         {
           label: '含 AB 的面（×2）',
-          latex: `S_1 = ${fmt2(area1)} \\times 2 = ${fmt2(2 * area1)}`,
+          latex: `S_1 = ${area1Latex} \\times 2 = ${twoArea1Latex} \\approx ${fmt2(2 * area1)}`,
         },
         {
           label: '含 CD 的面（×2）',
-          latex: `S_2 = ${fmt2(area2)} \\times 2 = ${fmt2(2 * area2)}`,
+          latex: `S_2 = ${area2Latex} \\times 2 = ${twoArea2Latex} \\approx ${fmt2(2 * area2)}`,
         },
         {
           label: '总表面积',
-          latex: `S = ${fmt2(surfaceArea)}`,
+          latex: `S = ${twoArea1Latex} + ${twoArea2Latex} \\approx ${fmt2(surfaceArea)}`,
         },
       ],
     },
   };
+}
+
+function isNiceInt(n: number): boolean {
+  return Math.abs(n - Math.round(n)) < 1e-9;
+}
+
+function simplifyFrac(num: number, den: number): string {
+  const g = gcd(Math.abs(Math.round(num)), Math.abs(Math.round(den)));
+  const n = Math.round(num) / g;
+  const d = Math.round(den) / g;
+  if (d === 1) return fmt(n);
+  return `\\dfrac{${fmt(n)}}{${fmt(d)}}`;
+}
+
+function gcd(a: number, b: number): number {
+  a = Math.round(Math.abs(a));
+  b = Math.round(Math.abs(b));
+  while (b) { [a, b] = [b, a % b]; }
+  return a || 1;
 }
 
 function fmt(n: number): string {

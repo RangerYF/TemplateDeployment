@@ -9,15 +9,24 @@ export function buildCone(params: ConeParams): SurfaceResult {
   const { radius, height } = params;
 
   // 特征点
+  const numGeneratrices = 4;
   const featurePoints = [
-    { position: [0, height, 0] as Vec3, label: 'P' }, // 顶点
-    { position: [0, 0, 0] as Vec3, label: 'O' },      // 底面圆心
+    { position: [0, height, 0] as Vec3, label: 'P' },
+    { position: [0, 0, 0] as Vec3, label: 'O' },
   ];
+
+  const BASE_LABELS = ['A', 'B', 'C', 'D'];
+  for (let i = 0; i < numGeneratrices; i++) {
+    const angle = (i * 2 * Math.PI) / numGeneratrices;
+    featurePoints.push({
+      position: [radius * Math.cos(angle), 0, radius * Math.sin(angle)] as Vec3,
+      label: BASE_LABELS[i],
+    });
+  }
 
   const lines: SurfaceLine[] = [];
 
   // 母线：4 条，均匀分布在 90° 间隔
-  const numGeneratrices = 4;
   for (let i = 0; i < numGeneratrices; i++) {
     const angle = (i * 2 * Math.PI) / numGeneratrices;
     const basePoint: Vec3 = [

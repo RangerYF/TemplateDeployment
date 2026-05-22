@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { COLORS } from '@/styles/tokens';
 import type { Entity, GeometryProperties, PointProperties, CoordinateSystemProperties } from '@/editor/entities/types';
+import { Undo2 } from 'lucide-react';
 import {
   useEntityStore,
   useHistoryStore,
@@ -165,13 +166,29 @@ function CoordPointInput({ coordEntity }: { coordEntity: Entity<'coordinateSyste
         <input type="number" value={coordZ} onChange={(e) => setCoordZ(e.target.value)} style={coordInputStyle} step="0.1" />
         <span style={{ color: COLORS.textMuted }}>)</span>
       </div>
-      <button
-        onClick={handleAdd}
-        className="w-full mt-2 px-2 py-1 rounded text-sm"
-        style={{ background: COLORS.primary, color: '#fff', border: 'none', cursor: 'pointer' }}
-      >
-        添加坐标点
-      </button>
+      <div className="flex gap-1 mt-2">
+        <button
+          onClick={handleAdd}
+          className="flex-1 px-2 py-1 rounded text-sm"
+          style={{ background: COLORS.primary, color: '#fff', border: 'none', cursor: 'pointer' }}
+        >
+          添加坐标点
+        </button>
+        <button
+          onClick={() => useHistoryStore.getState().undo()}
+          className="px-2 py-1 rounded text-sm flex items-center gap-0.5"
+          style={{
+            background: 'transparent',
+            color: COLORS.textMuted,
+            border: `1px solid ${COLORS.border}`,
+            cursor: 'pointer',
+          }}
+          title="撤回 (Ctrl+Z)"
+        >
+          <Undo2 size={13} />
+          撤回
+        </button>
+      </div>
     </div>
   );
 }

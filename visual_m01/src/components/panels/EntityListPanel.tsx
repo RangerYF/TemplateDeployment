@@ -70,8 +70,12 @@ function getEntityDisplayName(entity: Entity, entities: Record<string, Entity>):
       return '坐标系';
     case 'circumSphere':
       return '外接球';
+    case 'inSphere':
+      return '内切球';
     case 'circumCircle':
       return '外接圆';
+    case 'exSphere':
+      return '旁切球';
     default:
       return `${entity.type}#${entity.id}`;
   }
@@ -90,6 +94,8 @@ const ENTITY_GROUPS: GroupConfig[] = [
   { type: 'face', label: '面' },
   { type: 'coordinateSystem', label: '坐标系' },
   { type: 'circumSphere', label: '外接球' },
+  { type: 'inSphere', label: '内切球' },
+  { type: 'exSphere', label: '旁切球' },
   { type: 'circumCircle', label: '外接圆' },
   { type: 'angleMeasurement', label: '角度度量' },
   { type: 'distanceMeasurement', label: '距离度量' },

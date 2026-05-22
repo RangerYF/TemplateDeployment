@@ -71,14 +71,22 @@ export function sqrt(radicand: number): SymbolicValue {
 export function sqrtFrac(radicand: number, den: number): SymbolicValue {
   const { simplified, outer } = simplifyRadical(radicand);
   if (simplified === 1) {
-    // 变成普通分数 outer/den
     return frac(outer, den);
   }
-  const numeratorLatex = outer === 1
+  const g = gcd(Math.abs(outer), Math.abs(den));
+  const newOuter = outer / g;
+  const newDen = den / g;
+  if (newDen === 1) {
+    const latex = newOuter === 1
+      ? `\\sqrt{${simplified}}`
+      : `${formatNumber(newOuter)}\\sqrt{${simplified}}`;
+    return { latex, numeric: Math.sqrt(radicand) / den };
+  }
+  const numeratorLatex = newOuter === 1
     ? `\\sqrt{${simplified}}`
-    : `${formatNumber(outer)}\\sqrt{${simplified}}`;
+    : `${formatNumber(newOuter)}\\sqrt{${simplified}}`;
   return {
-    latex: `\\dfrac{${numeratorLatex}}{${formatNumber(den)}}`,
+    latex: `\\dfrac{${numeratorLatex}}{${formatNumber(newDen)}}`,
     numeric: Math.sqrt(radicand) / den,
   };
 }

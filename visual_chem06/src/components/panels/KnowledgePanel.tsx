@@ -92,7 +92,7 @@ interface InfoBulletProps {
 function InfoBullet({ icon, title, body }: InfoBulletProps) {
   return (
     <div className="rounded-2xl border px-4 py-3" style={{ borderColor: COLORS.border, background: COLORS.bgPage }}>
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: COLORS.textMuted }}>
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em]" style={{ color: COLORS.textMuted }}>
         {icon}
         <span>{title}</span>
       </div>

@@ -18,6 +18,7 @@ const FACE_SELECTED_COLOR = '#00C06B';
 const FACE_SELECTED_OPACITY = 0.25;
 const CROSS_SECTION_COLOR = '#3b82f6';
 const CROSS_SECTION_OPACITY = 0.35;
+const EXTENDED_PLANE_OPACITY = 0.12;
 
 // ─── FaceEntityRenderer ───
 
@@ -228,7 +229,68 @@ function CrossSectionFace({ entity }: { entity: Entity<'face'> }) {
         color={style.color}
         lineWidth={2}
       />
+      {props.showPlane && <ExtendedPlane positions={positions} color={style.color} />}
     </group>
+  );
+}
+
+function ExtendedPlane({ positions, color }: { positions: Vec3[]; color: string }) {
+  const planeData = useMemo(() => {
+    const len = positions.length;
+    const cx = positions.reduce((s, p) => s + p[0], 0) / len;
+    const cy = positions.reduce((s, p) => s + p[1], 0) / len;
+    const cz = positions.reduce((s, p) => s + p[2], 0) / len;
+
+    let normal = new THREE.Vector3(0, 1, 0);
+    for (let i = 0; i < len; i++) {
+      const j = (i + 1) % len;
+      const k = (i + 2) % len;
+      const v1 = new THREE.Vector3(
+        positions[j][0] - positions[i][0],
+        positions[j][1] - positions[i][1],
+        positions[j][2] - positions[i][2],
+      );
+      const v2 = new THREE.Vector3(
+        positions[k][0] - positions[i][0],
+        positions[k][1] - positions[i][1],
+        positions[k][2] - positions[i][2],
+      );
+      const n = new THREE.Vector3().crossVectors(v1, v2);
+      if (n.length() > 1e-8) {
+        normal = n.normalize();
+        break;
+      }
+    }
+
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      normal,
+    );
+
+    const maxRadius = Math.max(
+      ...positions.map((p) =>
+        Math.sqrt((p[0] - cx) ** 2 + (p[1] - cy) ** 2 + (p[2] - cz) ** 2),
+      ),
+    );
+
+    return {
+      centroid: [cx, cy, cz] as [number, number, number],
+      quaternion,
+      size: Math.max(maxRadius * 5, 15),
+    };
+  }, [positions]);
+
+  return (
+    <mesh position={planeData.centroid} quaternion={planeData.quaternion} renderOrder={-2}>
+      <planeGeometry args={[planeData.size, planeData.size]} />
+      <meshBasicMaterial
+        transparent
+        opacity={EXTENDED_PLANE_OPACITY}
+        color={color}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+      />
+    </mesh>
   );
 }
 

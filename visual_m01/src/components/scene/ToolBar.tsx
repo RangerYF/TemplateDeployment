@@ -1,3 +1,4 @@
+import { Undo2, Redo2 } from 'lucide-react';
 import {
   SelectIcon,
   DrawSegmentIcon,
@@ -8,6 +9,7 @@ import {
   DistanceIcon,
 } from '@/components/icons/ToolIcons';
 import { useToolStore } from '@/editor/store';
+import { useHistoryStore } from '@/editor/store/historyStore';
 
 const TOOLS = [
   { id: 'select', label: '选择', Icon: SelectIcon },
@@ -22,6 +24,8 @@ const TOOLS = [
 export function ToolBar() {
   const activeToolId = useToolStore((s) => s.activeToolId);
   const setActiveTool = useToolStore((s) => s.setActiveTool);
+  const canUndo = useHistoryStore((s) => s.canUndo);
+  const canRedo = useHistoryStore((s) => s.canRedo);
 
   return (
     <div
@@ -83,6 +87,72 @@ export function ToolBar() {
           </button>
         );
       })}
+
+      <div style={{ width: 1, height: 28, background: '#e5e7eb', margin: '0 4px', alignSelf: 'center' }} />
+
+      <button
+        onClick={() => useHistoryStore.getState().undo()}
+        disabled={!canUndo}
+        title="撤销 (Ctrl+Z)"
+        style={{
+          minWidth: 48,
+          padding: '4px 6px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          borderRadius: 6,
+          border: '1.5px solid transparent',
+          background: 'transparent',
+          color: '#374151',
+          opacity: canUndo ? 1 : 0.35,
+          cursor: canUndo ? 'pointer' : 'default',
+        }}
+        onMouseEnter={(e) => {
+          if (canUndo) e.currentTarget.style.background = 'rgba(243,244,246,0.95)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        <Undo2 size={18} />
+        <span style={{ fontSize: 10, lineHeight: 1, whiteSpace: 'nowrap', color: '#6b7280' }}>
+          撤销
+        </span>
+      </button>
+
+      <button
+        onClick={() => useHistoryStore.getState().redo()}
+        disabled={!canRedo}
+        title="重做 (Ctrl+Y)"
+        style={{
+          minWidth: 48,
+          padding: '4px 6px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          borderRadius: 6,
+          border: '1.5px solid transparent',
+          background: 'transparent',
+          color: '#374151',
+          opacity: canRedo ? 1 : 0.35,
+          cursor: canRedo ? 'pointer' : 'default',
+        }}
+        onMouseEnter={(e) => {
+          if (canRedo) e.currentTarget.style.background = 'rgba(243,244,246,0.95)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        <Redo2 size={18} />
+        <span style={{ fontSize: 10, lineHeight: 1, whiteSpace: 'nowrap', color: '#6b7280' }}>
+          重做
+        </span>
+      </button>
     </div>
   );
 }

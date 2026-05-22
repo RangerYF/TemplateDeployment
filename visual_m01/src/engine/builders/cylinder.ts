@@ -9,15 +9,27 @@ export function buildCylinder(params: CylinderParams): SurfaceResult {
   const { radius, height } = params;
 
   // 特征点
+  const numGeneratrices = 4;
   const featurePoints = [
-    { position: [0, 0, 0] as Vec3, label: 'O' },          // 底面圆心
-    { position: [0, height, 0] as Vec3, label: 'O₁' },    // 顶面圆心
+    { position: [0, 0, 0] as Vec3, label: 'O' },
+    { position: [0, height, 0] as Vec3, label: 'O₁' },
   ];
+
+  const BASE_LABELS = ['A', 'B', 'C', 'D'];
+  const TOP_LABELS = ['A₁', 'B₁', 'C₁', 'D₁'];
+  for (let i = 0; i < numGeneratrices; i++) {
+    const angle = (i * 2 * Math.PI) / numGeneratrices;
+    const x = radius * Math.cos(angle);
+    const z = radius * Math.sin(angle);
+    featurePoints.push(
+      { position: [x, 0, z] as Vec3, label: BASE_LABELS[i] },
+      { position: [x, height, z] as Vec3, label: TOP_LABELS[i] },
+    );
+  }
 
   const lines: SurfaceLine[] = [];
 
   // 母线：4 条，90° 均匀分布
-  const numGeneratrices = 4;
   for (let i = 0; i < numGeneratrices; i++) {
     const angle = (i * 2 * Math.PI) / numGeneratrices;
     const x = radius * Math.cos(angle);

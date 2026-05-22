@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo, useReducer } from 'react';
 import * as THREE from 'three';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -13,6 +13,7 @@ import { useNotificationStore } from './notificationStore';
 import { ModeIndicator } from './ModeIndicator';
 import { TextCommandInput } from './TextCommandInput';
 import { AnimationDriver } from './AnimationDriver';
+import { EdgeSnapOverlay } from './renderers/EdgeSnapOverlay';
 
 // 触发 renderer 自注册（side-effect import）
 import './renderers/GeometryEntityRenderer';
@@ -21,7 +22,9 @@ import './renderers/SegmentEntityRenderer';
 import './renderers/FaceEntityRenderer';
 import './renderers/CoordSystemRenderer';
 import './renderers/CircumSphereRenderer';
+import './renderers/InSphereRenderer';
 import './renderers/CircumCircleRenderer';
+import './renderers/ExSphereRenderer';
 import './renderers/AngleMeasurementRenderer';
 import './renderers/DistanceMeasurementRenderer';
 
@@ -43,9 +46,11 @@ const TYPE_ORDER: Record<string, number> = {
   point: 3,
   coordinateSystem: 4,
   circumSphere: 5,
-  circumCircle: 6,
-  angleMeasurement: 7,
-  distanceMeasurement: 8,
+  inSphere: 6,
+  exSphere: 7,
+  circumCircle: 8,
+  angleMeasurement: 9,
+  distanceMeasurement: 10,
 };
 
 function sortEntities(a: Entity, b: Entity): number {
@@ -115,6 +120,7 @@ function SceneContent() {
           <EntityRenderer key={entity.id} entity={entity} />
         ))}
       </group>
+      <EdgeSnapOverlay />
     </ToolEventDispatcher>
   );
 }
@@ -127,10 +133,25 @@ const VIEW_BUTTONS: { key: ViewKey; label: string; title: string }[] = [
   { key: 'side', label: '侧', title: '侧视图' },
 ];
 
-function ViewButtons() {
+function ViewButtons({ autoRotate, onToggleAutoRotate }: { autoRotate: boolean; onToggleAutoRotate: () => void }) {
   const handleClick = useCallback((key: ViewKey) => {
     window.dispatchEvent(new CustomEvent('camera-set-view', { detail: { viewKey: key } }));
   }, []);
+
+  const btnBase: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    border: '1px solid #d1d5db',
+    background: 'rgba(255,255,255,0.92)',
+    color: '#374151',
+    fontSize: 14,
+    cursor: 'pointer',
+    backdropFilter: 'blur(4px)',
+  };
 
   return (
     <div
@@ -148,26 +169,28 @@ function ViewButtons() {
           key={b.key}
           title={b.title}
           onClick={() => handleClick(b.key)}
-          style={{
-            width: 36,
-            height: 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 6,
-            border: '1px solid #d1d5db',
-            background: 'rgba(255,255,255,0.92)',
-            color: '#374151',
-            fontSize: 14,
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
-          }}
+          style={btnBase}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(243,244,246,0.95)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.92)'; }}
         >
           {b.label}
         </button>
       ))}
+      <button
+        title={autoRotate ? '关闭自动旋转' : '开启自动旋转'}
+        onClick={onToggleAutoRotate}
+        style={{
+          ...btnBase,
+          background: autoRotate ? 'rgba(50,213,131,0.15)' : 'rgba(255,255,255,0.92)',
+          border: autoRotate ? '1px solid #32D583' : '1px solid #d1d5db',
+          color: autoRotate ? '#32D583' : '#374151',
+          fontSize: 16,
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+      >
+        ⟳
+      </button>
     </div>
   );
 }
@@ -177,6 +200,24 @@ export function Scene3D() {
   const controlsRef = useRef<any>(null);
   const isDragging = useToolStore((s) => s.isDragging);
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
+
+  const [autoRotateEnabled, toggleAutoRotate] = useReducer((s: boolean) => !s, true);
+  const [userInteracting, setUserInteracting] = useState(false);
+  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const effectiveAutoRotate = autoRotateEnabled && !userInteracting;
+
+  const handleInteractionStart = useCallback(() => {
+    if (resumeTimer.current) { clearTimeout(resumeTimer.current); resumeTimer.current = null; }
+    setUserInteracting(true);
+  }, []);
+
+  const handleInteractionEnd = useCallback(() => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setUserInteracting(false), 2000);
+  }, []);
+
+  useEffect(() => () => { if (resumeTimer.current) clearTimeout(resumeTimer.current); }, []);
 
   // 禁用 OrbitControls 的右键平移，改用中键；配置触屏手势
   useEffect(() => {
@@ -200,6 +241,9 @@ export function Scene3D() {
       className="w-full h-full relative"
       style={{ backgroundColor: '#f8f9fa' }}
       onContextMenu={(e) => e.preventDefault()}
+      onPointerDown={handleInteractionStart}
+      onPointerUp={handleInteractionEnd}
+      onWheel={() => { handleInteractionStart(); handleInteractionEnd(); }}
     >
       <Canvas
         camera={{ position: [4, 4, 4], fov: 50 }}
@@ -217,6 +261,8 @@ export function Scene3D() {
           enablePan={!isDragging}
           enableZoom={!isDragging}
           enableRotate={!isDragging}
+          autoRotate={effectiveAutoRotate}
+          autoRotateSpeed={1.5}
         />
 
         <CameraAnimator controlsRef={controlsRef} />
@@ -232,7 +278,7 @@ export function Scene3D() {
       <TextCommandInput />
       <SceneNotification />
 
-      {containerEl && <ViewButtons />}
+      {containerEl && <ViewButtons autoRotate={autoRotateEnabled} onToggleAutoRotate={toggleAutoRotate} />}
     </div>
   );
 }

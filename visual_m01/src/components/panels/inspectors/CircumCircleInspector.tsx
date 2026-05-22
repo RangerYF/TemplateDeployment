@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import type { Entity, PointProperties } from '@/editor/entities/types';
 import { useEntityStore, useHistoryStore, useToolStore, DeleteEntityCascadeCommand } from '@/editor';
+import { computeCircumscribedCircle } from '@/engine/math/circumscribedCircle';
+import { usePointPosition } from '@/components/scene/renderers/usePointPosition';
 import { COLORS } from '@/styles/tokens';
 import { registerInspector } from './registry';
 import { InspectorHeader } from './InspectorCommon';
@@ -15,6 +18,18 @@ function CircumCircleInspector({ entity }: { entity: Entity }) {
     };
     return [getLabel(pid0), getLabel(pid1), getLabel(pid2)];
   });
+
+  const p0 = useEntityStore((s) => { const e = s.entities[pid0]; return e?.type === 'point' ? e as Entity<'point'> : undefined; });
+  const p1 = useEntityStore((s) => { const e = s.entities[pid1]; return e?.type === 'point' ? e as Entity<'point'> : undefined; });
+  const p2 = useEntityStore((s) => { const e = s.entities[pid2]; return e?.type === 'point' ? e as Entity<'point'> : undefined; });
+  const pos0 = usePointPosition(p0);
+  const pos1 = usePointPosition(p1);
+  const pos2 = usePointPosition(p2);
+
+  const circle = useMemo(() => {
+    if (!pos0 || !pos1 || !pos2) return null;
+    return computeCircumscribedCircle(pos0, pos1, pos2);
+  }, [pos0, pos1, pos2]);
 
   return (
     <div className="space-y-2">
@@ -33,6 +48,19 @@ function CircumCircleInspector({ entity }: { entity: Entity }) {
           {pointLabels[0]}, {pointLabels[1]}, {pointLabels[2]}
         </strong>
       </div>
+
+      {circle && (
+        <>
+          <div className="text-sm" style={{ color: COLORS.textMuted }}>
+            半径：<strong style={{ color: COLORS.text }}>{circle.radius.toFixed(4)}</strong>
+          </div>
+          <div className="text-sm" style={{ color: COLORS.textMuted }}>
+            圆心：<strong style={{ color: COLORS.text }}>
+              ({circle.center[0].toFixed(2)}, {circle.center[1].toFixed(2)}, {circle.center[2].toFixed(2)})
+            </strong>
+          </div>
+        </>
+      )}
 
       <button
         onClick={() => {

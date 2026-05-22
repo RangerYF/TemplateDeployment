@@ -64,8 +64,13 @@ function CircumCircleRenderer({ entity }: { entity: Entity }) {
 
   return (
     <group>
-      {/* 圆环线（内联自 CircumCircle） */}
+      {/* 圆环线 */}
       <Line points={circlePoints} color={CIRCLE_COLOR} lineWidth={2} />
+      {/* 圆心标记点 */}
+      <mesh position={circle.center}>
+        <sphereGeometry args={[0.04, 16, 16]} />
+        <meshBasicMaterial color={CIRCLE_COLOR} />
+      </mesh>
       {/* 半径值标签 */}
       <Html
         position={circle.center}

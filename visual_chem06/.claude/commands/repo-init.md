@@ -27,8 +27,6 @@
   └── suspended/
   ```
 - [ ] **复制 `VERSION-PLANNING-GUIDE.md`**：从已有项目的 `.tasks/` 下复制到新项目的 `.tasks/` 下
-- [ ] **`git init`** 并确认 author 配置为 `cjn <1229412289@qq.com>`
-
 ### 第二步：按需项
 
 - [ ] **涉及 UI 的项目**：复制 `design_guid/` 目录（EduMind 设计系统规范）

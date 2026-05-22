@@ -85,7 +85,7 @@ export const ELECTROCHEM_MODELS: ElectrochemModel[] = [
     summary: '用盐桥连接 ZnSO₄ / CuSO₄ 双液体系，展示标准高考型原电池。',
     environment: '酸性',
     layoutPreset: 'dual-bath',
-    apparatusNote: '左槽 Zn / 酸性 ZnSO₄，右槽 Cu / 酸性 CuSO₄，使用 MgSO₄ 盐桥维持两侧电中性。双液装置将两种溶液分开，是为了避免 Zn 与 Cu²⁺ 直接接触发生表面置换副反应。',
+    apparatusNote: '左槽 Zn / 酸性 ZnSO₄，右槽 Cu / 酸性 CuSO₄，使用 MgSO₄ 盐桥维持两侧电中性。双液装置将两种溶液分开，是为了避免 Zn 与 Cu²⁺ 直接接触发生表面置换副反应；若混合，会发生 Zn + Cu²⁺ → Zn²⁺ + Cu，铜直接沉积在锌表面，化学能全部转化为热而非电能，电池效率大幅下降。',
     leftChamberLabel: '酸性 ZnSO₄ 溶液',
     rightChamberLabel: '酸性 CuSO₄ 溶液',
     saltBridgeLabel: 'MgSO₄ 盐桥',
@@ -93,7 +93,7 @@ export const ELECTROCHEM_MODELS: ElectrochemModel[] = [
     sourceNote: COMMON_SOURCE,
     sourceTags: COMMON_SOURCE_TAGS,
     environmentTips: [
-      { title: '环境提示', body: '该模型中 Cu²⁺ 在 Cu 极得电子，不再是 H⁺ 放电；两槽分开是为了避免 Zn 与 Cu²⁺ 直接接触引发副反应 Zn + Cu²⁺ → Zn²⁺ + Cu，该反应会使铜沉积在锌表面，化学能转为热能而非电能。', kind: 'info' },
+      { title: '环境提示', body: '该模型中 Cu²⁺ 在 Cu 极得电子，不再是 H⁺ 放电；两槽分开是为了避免 Zn 与 Cu²⁺ 直接接触。', kind: 'info' },
       { title: '易错提醒', body: '盐桥中阳离子进入 Cu 槽、阴离子进入 Zn 槽，不是所有离子都向同一侧。', kind: 'warning' },
     ],
     scenarios: [
@@ -116,7 +116,7 @@ export const ELECTROCHEM_MODELS: ElectrochemModel[] = [
           { id: 'mg-right', label: 'Mg²⁺', kind: 'cation', channel: 'bridge-left-to-right', direction: 'left-to-right', color: FLOW.cation, count: 5, note: 'Mg²⁺ 进入 Cu 槽，补偿 Cu²⁺ 被消耗后的负电。', emphasis: true },
         ],
         keyframes: [
-          { at: 0, title: '双液装置', description: 'Zn 槽与 Cu 槽通过盐桥连接，避免 Zn 与 Cu²⁺ 直接接触。若混合，会发生表面置换副反应 Zn + Cu²⁺ → Zn²⁺ + Cu（铜直接沉积在锌表面），化学能全部转化为热而非电能，电池效率大幅下降。', focus: 'solution' },
+          { at: 0, title: '双液装置', description: 'Zn 槽与 Cu 槽通过盐桥连接，避免 Zn 与 Cu²⁺ 直接接触。', focus: 'solution' },
           { at: 0.2, title: 'Zn 极失电子', description: 'Zn 失电子进入左槽，左槽 Zn²⁺ 浓度上升。', focus: 'equation' },
           { at: 0.45, title: '电子流动', description: '电子沿外电路由 Zn 极流向 Cu 极。', focus: 'wire' },
           { at: 0.68, title: 'Cu 极析铜', description: 'Cu²⁺ 在 Cu 极得电子析出紫红色铜。', focus: 'electrode' },

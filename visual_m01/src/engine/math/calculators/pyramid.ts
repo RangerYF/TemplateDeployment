@@ -1,5 +1,5 @@
 import type { CalculationResult, SymbolicValue } from '../types';
-import { num, sqrt, frac, add } from '../symbolic';
+import { num, sqrt, sqrtFrac, frac, add } from '../symbolic';
 
 /**
  * 正 n 棱锥计算器
@@ -80,14 +80,21 @@ function buildN3(
     { label: '计算结果', latex: `V = ${volume.latex} \\approx ${fmt2(volNum)}` },
   ];
 
+  // 斜高符号表达: r = a/(2√3), slant² = h² + a²/12 = (12h²+a²)/12
+  const slantInner3 = 12 * h * h + a2;
+  const slantSym3 = sqrtFrac(3 * slantInner3, 6);
+  // 侧面积: (3a/2)×slant = a√(3a²(12h²+a²))/4
+  const lateralSym3 = sqrtFrac(3 * a2 * slantInner3, 4);
+  const totalSym3 = add(baseArea, lateralSym3);
+
   const surfaceSteps = [
     { label: '底面积', latex: `S_{底} = ${baseArea.latex}` },
-    { label: '斜高', latex: `l = \\sqrt{h^2 + r^2} \\approx ${fmt2(slantHeight)}` },
-    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 3 \\times ${fmt(a)} \\times ${fmt2(slantHeight)} \\approx ${fmt2(lateralNum)}` },
-    { label: '总表面积', latex: `S = S_{底} + S_{侧} \\approx ${fmt2(totalNum)}` },
+    { label: '斜高', latex: `l = \\sqrt{h^2 + r^2} = ${slantSym3.latex} \\approx ${fmt2(slantHeight)}` },
+    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 3 \\times ${fmt(a)} \\times l = ${lateralSym3.latex} \\approx ${fmt2(lateralNum)}` },
+    { label: '总表面积', latex: `S = ${baseArea.latex} + ${lateralSym3.latex} \\approx ${fmt2(totalNum)}` },
   ];
 
-  return { volume, totalArea: num(totalNum), volumeSteps, surfaceSteps };
+  return { volume, totalArea: totalSym3, volumeSteps, surfaceSteps };
 }
 
 // ─── n=4：正四棱锥 ───
@@ -124,8 +131,8 @@ function buildN4(
   const surfaceSteps = [
     { label: '底面积', latex: `S_{底} = ${fmt(a2)}` },
     { label: '斜高', latex: `l = \\sqrt{h^2 + (\\frac{a}{2})^2} = \\sqrt{${fmt(h2)} + ${fmt(a2 / 4)}} = ${slantSymbolic.latex}` },
-    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 4 \\times ${fmt(a)} \\times ${slantSymbolic.latex} = ${fmt2(lateralNum)}` },
-    { label: '总表面积', latex: `S = ${fmt(a2)} + ${fmt2(lateralNum)} = ${fmt2(totalNum)}` },
+    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 4 \\times ${fmt(a)} \\times ${slantSymbolic.latex} = ${lateralArea.latex} \\approx ${fmt2(lateralNum)}` },
+    { label: '总表面积', latex: `S = ${baseArea.latex} + ${lateralArea.latex} \\approx ${fmt2(totalNum)}` },
   ];
 
   return { volume, totalArea, volumeSteps, surfaceSteps };
@@ -165,14 +172,21 @@ function buildN6(
     { label: '计算结果', latex: `V = ${volume.latex} \\approx ${fmt2(volNum)}` },
   ];
 
+  // 斜高符号表达: r = a√3/2, slant² = h² + 3a²/4 = (4h²+3a²)/4
+  const slantInner6 = 4 * h * h + 3 * a2;
+  const slantSym6 = sqrtFrac(slantInner6, 2);
+  // 侧面积: 3a×slant = 3a×√(slantInner6)/2 = √(9a²×slantInner6)/2
+  const lateralSym6 = sqrtFrac(9 * a2 * slantInner6, 2);
+  const totalSym6 = add(baseArea, lateralSym6);
+
   const surfaceSteps = [
     { label: '底面积', latex: `S_{底} = ${baseArea.latex}` },
-    { label: '斜高', latex: `l = \\sqrt{h^2 + r^2} \\approx ${fmt2(slantHeight)}` },
-    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 6 \\times ${fmt(a)} \\times ${fmt2(slantHeight)} \\approx ${fmt2(lateralNum)}` },
-    { label: '总表面积', latex: `S = S_{底} + S_{侧} \\approx ${fmt2(totalNum)}` },
+    { label: '斜高', latex: `l = \\sqrt{h^2 + r^2} = ${slantSym6.latex} \\approx ${fmt2(slantHeight)}` },
+    { label: '侧面积', latex: `S_{侧} = \\dfrac{1}{2} \\times 6 \\times ${fmt(a)} \\times l = ${lateralSym6.latex} \\approx ${fmt2(lateralNum)}` },
+    { label: '总表面积', latex: `S = ${baseArea.latex} + ${lateralSym6.latex} \\approx ${fmt2(totalNum)}` },
   ];
 
-  return { volume, totalArea: num(totalNum), volumeSteps, surfaceSteps };
+  return { volume, totalArea: totalSym6, volumeSteps, surfaceSteps };
 }
 
 // ─── 通用 n 棱锥（数值近似） ───

@@ -157,6 +157,8 @@ function StraightSegmentWrapper({
 
 // ─── builtIn 棱线 ───
 
+const DEFAULT_BUILTIN_COLOR = '#000000';
+
 function BuiltInSegment({
   entity,
   startPos,
@@ -178,6 +180,8 @@ function BuiltInSegment({
 }) {
   const [hidden, setHidden] = useState(false);
   const hiddenRef = useRef(false);
+  const userStyle = entity.properties.style;
+  const hasCustomColor = userStyle.color !== DEFAULT_BUILTIN_COLOR;
 
   useFrame(({ camera }) => {
     if (!builderResult || builderResult.kind !== 'polyhedron' || startVertexIndex < 0 || endVertexIndex < 0) {
@@ -192,9 +196,11 @@ function BuiltInSegment({
   });
 
   const interacting = isSelected || isHovered;
-  const color = isSelected ? EDGE_SELECTED_COLOR : isHovered ? EDGE_HOVERED_COLOR : hidden ? HIDDEN_EDGE_COLOR : EDGE_COLOR;
+  const baseColor = hasCustomColor ? userStyle.color : EDGE_COLOR;
+  const color = isSelected ? EDGE_SELECTED_COLOR : isHovered ? EDGE_HOVERED_COLOR : hidden && !hasCustomColor ? HIDDEN_EDGE_COLOR : baseColor;
   const lineWidth = isSelected ? EDGE_SELECTED_WIDTH : isHovered ? EDGE_HOVERED_WIDTH : hidden ? HIDDEN_EDGE_WIDTH : EDGE_WIDTH;
-  const dashed = hidden && !interacting;
+  const forceDashed = userStyle.dashed;
+  const dashed = forceDashed || (hidden && !interacting);
 
   return (
     <group>
@@ -206,6 +212,8 @@ function BuiltInSegment({
         dashScale={dashed ? 10 : 1}
         dashSize={dashed ? 0.15 : 1}
         gapSize={dashed ? 0.1 : 0}
+        opacity={hidden && hasCustomColor && !interacting ? 0.4 : 1}
+        transparent={hidden && hasCustomColor && !interacting}
       />
       <SegmentHitbox entity={entity} startPos={startPos} endPos={endPos} />
       {entity.properties.label && (

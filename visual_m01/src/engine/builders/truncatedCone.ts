@@ -9,15 +9,27 @@ export function buildTruncatedCone(params: TruncatedConeParams): SurfaceResult {
   const { topRadius: r1, bottomRadius: r2, height: h } = params;
 
   // 特征点
+  const numGeneratrices = 4;
   const featurePoints = [
-    { position: [0, 0, 0] as Vec3, label: 'O' },       // 底面圆心
-    { position: [0, h, 0] as Vec3, label: 'O₁' },      // 顶面圆心
+    { position: [0, 0, 0] as Vec3, label: 'O' },
+    { position: [0, h, 0] as Vec3, label: 'O₁' },
   ];
+
+  const BASE_LABELS = ['A', 'B', 'C', 'D'];
+  const TOP_LABELS = ['A₁', 'B₁', 'C₁', 'D₁'];
+  for (let i = 0; i < numGeneratrices; i++) {
+    const angle = (i * 2 * Math.PI) / numGeneratrices;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    featurePoints.push(
+      { position: [r2 * cos, 0, r2 * sin] as Vec3, label: BASE_LABELS[i] },
+      { position: [r1 * cos, h, r1 * sin] as Vec3, label: TOP_LABELS[i] },
+    );
+  }
 
   const lines: SurfaceLine[] = [];
 
   // 母线：4 条，90° 均匀分布（从底圆到顶圆）
-  const numGeneratrices = 4;
   for (let i = 0; i < numGeneratrices; i++) {
     const angle = (i * 2 * Math.PI) / numGeneratrices;
     const cos = Math.cos(angle);
