@@ -18,8 +18,10 @@ interface Props {
 }
 
 interface TranslationTrack {
+  source: { x: number; y: number };
   entry: { x: number; y: number };
   center: { x: number; y: number };
+  leadIn: Array<{ x: number; y: number }>;
   points: Array<{ x: number; y: number }>;
 }
 
@@ -30,6 +32,7 @@ const FIELD_MARGIN_Y = 72;
 const FIELD_WIDTH = 712;
 const FIELD_HEIGHT = 462;
 const ENTRY_LINE_X = FIELD_MARGIN_X + 62;
+const SOURCE_X = FIELD_MARGIN_X + 18;
 const TRACK_COLORS = ['#E85D04', '#2563EB', '#0F766E', '#C2410C', '#7C3AED', '#0891B2', '#B45309', '#166534'];
 
 function buildTranslationTracks(options: {
@@ -45,15 +48,20 @@ function buildTranslationTracks(options: {
   const startY = centerY - totalSpan / 2;
   const signed = params.chargeSign * (params.fieldDirection === 'out' ? 1 : -1);
   const centerOffsetY = signed >= 0 ? -orbitRadius : orbitRadius;
+  const sourceColumnX = SOURCE_X;
 
   return Array.from({ length: count }, (_, index) => {
     const entryY = startY + index * entrySpacing;
+    const source = {
+      x: sourceColumnX + Math.sin((index / Math.max(count - 1, 1)) * Math.PI) * 8,
+      y: entryY + ((index - ((count - 1) / 2)) * 4.2),
+    };
     const entry = { x: ENTRY_LINE_X, y: entryY };
     const center = { x: entry.x, y: entry.y + centerOffsetY };
     const startAngle = Math.atan2(entry.y - center.y, entry.x - center.x);
     const direction = signed >= 0 ? -1 : 1;
-    const endAngle = startAngle + direction * Math.PI * 1.12;
-    const segments = 64;
+    const endAngle = startAngle + direction * Math.PI * 1.02;
+    const segments = 58;
     const points = Array.from({ length: segments + 1 }, (_, pointIndex) => {
       const t = pointIndex / segments;
       const angle = startAngle + (endAngle - startAngle) * t;
@@ -62,7 +70,19 @@ function buildTranslationTracks(options: {
         y: center.y + Math.sin(angle) * orbitRadius,
       };
     });
-    return { entry, center, points };
+    const leadIn = [
+      source,
+      {
+        x: lerp(source.x, entry.x, 0.48),
+        y: lerp(source.y, entry.y, 0.48),
+      },
+      {
+        x: lerp(source.x, entry.x, 0.82),
+        y: lerp(source.y, entry.y, 0.82),
+      },
+      entry,
+    ];
+    return { source, entry, center, leadIn, points };
   });
 }
 
@@ -146,7 +166,7 @@ export function P08TranslationCirclePage({ onBack }: Props) {
           平移圆模型
         </h1>
         <p className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-          所有粒子统一从左侧竖直边界入射，速度大小一致，只有入射点上下平移。这样课堂上更容易直接看出“等半径、整体平移”的几何结构。
+          同速度、同荷质比、同磁场下，粒子从左侧不同位置进入磁场时，会形成一组半径相同、彼此平移的圆弧轨迹。
         </p>
 
         <section className="mt-5 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
@@ -215,7 +235,7 @@ export function P08TranslationCirclePage({ onBack }: Props) {
                 主图
               </h2>
               <p className="mt-1 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-                左侧统一入射边界保留下来，让“圆是平移过去的”这一点能被第一眼看出来。每条轨迹只改变入射高度，不改变半径。
+                这里把粒子看成从左侧同一束源附近依次射入磁场。它们的速度、荷质比和磁场都相同，因此圆弧半径一致，只是整体位置发生平移。
               </p>
             </div>
             <div
@@ -238,9 +258,17 @@ export function P08TranslationCirclePage({ onBack }: Props) {
             style={{ background: '#FFFFFF' }}
           >
             <rect x={FIELD_MARGIN_X} y={FIELD_MARGIN_Y} width={FIELD_WIDTH} height={FIELD_HEIGHT} rx="10" fill="#FFFEFC" stroke="#CBD5E1" strokeWidth="1.1" />
-            <line x1={ENTRY_LINE_X} y1={FIELD_MARGIN_Y - 28} x2={ENTRY_LINE_X} y2={FIELD_MARGIN_Y + FIELD_HEIGHT + 28} stroke="#64748B" strokeWidth="2.3" strokeDasharray="8 7" />
-            <text x={ENTRY_LINE_X - 12} y={FIELD_MARGIN_Y - 38} fontSize="12" fontWeight="700" fill="#334155" textAnchor="end">
-              统一入射边界
+            <ellipse
+              cx={SOURCE_X + 6}
+              cy={FIELD_MARGIN_Y + FIELD_HEIGHT / 2}
+              rx="18"
+              ry={Math.min(74, entrySpacing * Math.max(1.1, particleCount * 0.22))}
+              fill="rgba(148, 163, 184, 0.06)"
+              stroke="rgba(148, 163, 184, 0.16)"
+              strokeDasharray="5 6"
+            />
+            <text x={SOURCE_X + 4} y={FIELD_MARGIN_Y - 28} fontSize="12" fontWeight="700" fill="#334155" textAnchor="middle">
+              左侧入射区域
             </text>
 
             {showFieldSymbols && fieldSymbols.map((point, index) => (
@@ -258,14 +286,31 @@ export function P08TranslationCirclePage({ onBack }: Props) {
               return (
                 <g key={`track-${index}`}>
                   <path
+                    d={pathFromPoints(track.leadIn)}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeOpacity="0.42"
+                    strokeDasharray="4 5"
+                  />
+                  <path
                     d={pathFromPoints(track.points)}
                     fill="none"
                     stroke={color}
-                    strokeWidth="2.8"
+                    strokeWidth="3"
                     strokeLinecap="round"
-                    opacity={0.9}
+                    opacity={0.92}
                   />
-                  <line x1={ENTRY_LINE_X - 42} y1={track.entry.y} x2={track.entry.x} y2={track.entry.y} stroke={color} strokeWidth="2.1" strokeDasharray="6 4" />
+                  <circle
+                    cx={track.source.x}
+                    cy={track.source.y}
+                    r="3.2"
+                    fill={color}
+                    fillOpacity="0.8"
+                    stroke="#FFFFFF"
+                    strokeWidth="1"
+                  />
                   {showAnimatedParticles && (
                     <circle
                       cx={movingPoint.x}
@@ -289,7 +334,7 @@ export function P08TranslationCirclePage({ onBack }: Props) {
             })}
 
             <text x={FIELD_MARGIN_X + 18} y={SVG_HEIGHT - 34} fontSize="12.5" fill="#475569">
-              课堂结论：同速度、同荷质比、同磁场下，只要从同一竖直边界不同位置入射，就会形成一组彼此平移的等半径圆弧。
+              课堂结论：同速度、同荷质比、同磁场下，粒子从左侧不同位置进入磁场时，会形成一组半径相同、彼此平移的圆弧轨迹。
             </text>
           </svg>
         </section>
@@ -397,4 +442,8 @@ function FieldSymbol({
       <circle cx={x} cy={y} r="1" />
     </g>
   );
+}
+
+function lerp(start: number, end: number, t: number): number {
+  return start + ((end - start) * t);
 }

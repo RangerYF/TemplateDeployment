@@ -189,12 +189,11 @@ export function GeometryCanvas() {
     const movablePoints: MovablePointEntity[] = [];
 
     for (const entity of entities) {
-      if (!entity.visible) continue;
-
       const isActive  = entity.id === activeEntityId;
       const drawColor = entity.color;
 
       if (entity.type === 'line') {
+        if (!entity.visible) continue;
         if (isActive) {
           ctx.save();
           ctx.shadowColor = ACTIVE_COLOR;
@@ -204,6 +203,7 @@ export function GeometryCanvas() {
         if (isActive) ctx.restore();
         lineEntities.push(entity);
       } else if (entity.type === 'implicit-curve') {
+        if (!entity.visible) continue;
         const compiled = compileImplicitCurve(entity.params);
         if (compiled) {
           const gridSize = isAnimating ? 200 : 400;
@@ -221,27 +221,30 @@ export function GeometryCanvas() {
           if (isActive) ctx.restore();
         }
       } else if (entity.type === 'movable-point') {
+        if (!entity.visible) continue;
         movablePoints.push(entity);
       } else {
         const curveOpts = isActive
           ? { lineWidth: 3.5 }
           : undefined;
 
-        if (isActive) {
-          ctx.save();
-          ctx.shadowColor = ACTIVE_COLOR;
-          ctx.shadowBlur = 10;
-        }
+        if (entity.visible) {
+          if (isActive) {
+            ctx.save();
+            ctx.shadowColor = ACTIVE_COLOR;
+            ctx.shadowBlur = 10;
+          }
 
-        const result = sampleConicEntity(entity, vp, steps);
-        if (Array.isArray(result)) {
-          renderParametricCurve(ctx, result, vp, drawColor, curveOpts);
-        } else {
-          renderParametricCurve(ctx, result.right, vp, drawColor, curveOpts);
-          renderParametricCurve(ctx, result.left,  vp, drawColor, curveOpts);
-        }
+          const result = sampleConicEntity(entity, vp, steps);
+          if (Array.isArray(result)) {
+            renderParametricCurve(ctx, result, vp, drawColor, curveOpts);
+          } else {
+            renderParametricCurve(ctx, result.right, vp, drawColor, curveOpts);
+            renderParametricCurve(ctx, result.left,  vp, drawColor, curveOpts);
+          }
 
-        if (isActive) ctx.restore();
+          if (isActive) ctx.restore();
+        }
         renderEntityDerivedElements(ctx, entity, vp, {
           showFoci:           displayOptions.showFoci,
           showDirectrices:    displayOptions.showDirectrices,
@@ -289,7 +292,7 @@ export function GeometryCanvas() {
     // 6. Optical property rays + photons
     if (opticalEnabled) {
       for (const conic of conicEntities) {
-        if (conic.type === 'ellipse' || conic.type === 'parabola') {
+        if (conic.type === 'ellipse' || conic.type === 'hyperbola' || conic.type === 'parabola') {
           const rays = computeOpticalRays(conic, opticalRayCount);
           if (rays) {
             const photons = useOpticalStore.getState().photons;

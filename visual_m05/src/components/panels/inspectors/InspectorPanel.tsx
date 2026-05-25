@@ -22,6 +22,9 @@ import { PieChartInspector } from './PieChartInspector';
 import { LineChartInspector } from './LineChartInspector';
 import { TournamentMatchInspector } from './TournamentMatchInspector';
 import { BoxSwapBallsInspector } from './BoxSwapBallsInspector';
+import { RandomWalk1DInspector } from './RandomWalk1DInspector';
+import { RandomWalk2DInspector } from './RandomWalk2DInspector';
+import { MarkovChainInspector } from './MarkovChainInspector';
 import type {
   SimulationType,
   CoinFlipParams,
@@ -42,6 +45,9 @@ import type {
   LineChartParams,
   TournamentMatchParams,
   BoxSwapBallsParams,
+  RandomWalk1DParams,
+  RandomWalk2DParams,
+  MarkovChainParams,
 } from '@/types/simulation';
 
 /** Collapsible parameter meaning descriptions (replaces old SimDescription) */
@@ -136,6 +142,12 @@ export function InspectorPanel() {
         return <TournamentMatchInspector simId={sim.id} params={sim.params as TournamentMatchParams} />;
       case 'boxSwapBalls':
         return <BoxSwapBallsInspector simId={sim.id} params={sim.params as BoxSwapBallsParams} />;
+      case 'randomWalk1D':
+        return <RandomWalk1DInspector simId={sim.id} params={sim.params as RandomWalk1DParams} />;
+      case 'randomWalk2D':
+        return <RandomWalk2DInspector simId={sim.id} params={sim.params as RandomWalk2DParams} />;
+      case 'markovChain':
+        return <MarkovChainInspector simId={sim.id} params={sim.params as MarkovChainParams} />;
       default:
         return null;
     }

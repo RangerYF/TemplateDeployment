@@ -1,5 +1,5 @@
 import type { Viewport } from '@/canvas/Viewport';
-import type { Transform, FunctionEntry } from '@/types';
+import type { Transform, FunctionEntry, FunctionDisplayDomain } from '@/types';
 import {
   evaluateAt,
   compileExpression,
@@ -16,6 +16,16 @@ export interface SamplePoint {
   readonly isValid: boolean;
   /** true → lift pen here (vertical asymptote or large discontinuity) */
   readonly isBreak: boolean;
+}
+
+function isWithinDisplayDomain(
+  mathX: number,
+  displayDomain?: FunctionDisplayDomain,
+): boolean {
+  if (!displayDomain?.enabled) return true;
+  if (displayDomain.xMin !== null && mathX < displayDomain.xMin) return false;
+  if (displayDomain.xMax !== null && mathX > displayDomain.xMax) return false;
+  return true;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -122,6 +132,7 @@ export function sampleWithTransform(
   transform: Transform,
   steps = 800,
   scope?: Record<string, unknown>,
+  displayDomain?: FunctionDisplayDomain,
 ): SamplePoint[] {
   const { a, b, h, k }           = transform;
   const { xMin, xMax, yMin, yMax, yRange } = viewport;
@@ -134,6 +145,11 @@ export function sampleWithTransform(
 
   for (let i = 0; i <= steps; i++) {
     const x      = xMin + i * dx;
+    if (!isWithinDisplayDomain(x, displayDomain)) {
+      points.push({ x, y: NaN, isValid: false, isBreak: false });
+      prevValidY = null;
+      continue;
+    }
     const xPrime = b * (x - h);           // horizontal transform
     const rawFx  = evaluateAt(expr, xPrime, scope);
     const rawY   = isFinite(rawFx) ? a * rawFx + k : rawFx; // vertical transform
@@ -176,6 +192,7 @@ export function sampleDerivativeWithDomain(
   transform:    Transform,
   steps = 800,
   scope?: Record<string, unknown>,
+  displayDomain?: FunctionDisplayDomain,
 ): SamplePoint[] {
   const { a, b, h }          = transform;
   const { xMin, xMax, yMin, yMax, yRange } = viewport;
@@ -191,6 +208,11 @@ export function sampleDerivativeWithDomain(
 
   for (let i = 0; i <= steps; i++) {
     const x      = xMin + i * dx;
+    if (!isWithinDisplayDomain(x, displayDomain)) {
+      points.push({ x, y: NaN, isValid: false, isBreak: false });
+      prevValidY = null;
+      continue;
+    }
     const xPrime = b * (x - h);  // same horizontal transform
 
     // Domain check: original must be defined here
@@ -233,6 +255,7 @@ export function sampleDerivativeWithDomain(
  * Returns null when the expression fails to parse or the result is non-finite.
  */
 export function evaluateStandard(fn: FunctionEntry, mathX: number): number | null {
+  if (!isWithinDisplayDomain(mathX, fn.displayDomain)) return null;
   const compiled = compileExpression(fn.exprStr);
   if (isParseError(compiled)) return null;
 

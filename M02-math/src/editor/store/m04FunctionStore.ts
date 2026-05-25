@@ -12,6 +12,12 @@
 import { create } from 'zustand';
 import type { ViewportState, FnType, TrigTransform, FivePointStep } from '@/types';
 
+export interface M04TrigAnalysisDisplay {
+  showZeros: boolean;
+  showSymmetryAxes: boolean;
+  showSymmetryCenters: boolean;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function _evalTrig(fnType: FnType, t: TrigTransform, x: number): number {
@@ -53,6 +59,8 @@ export interface M04FunctionStoreSnapshot {
   auxShowC1: boolean;
   auxShowC2: boolean;
   auxShowCR: boolean;
+  showAnalysis: boolean;
+  analysisDisplay: M04TrigAnalysisDisplay;
 }
 
 export interface M04FunctionState {
@@ -74,6 +82,8 @@ export interface M04FunctionState {
   auxShowC1:     boolean;   // show a·sin x
   auxShowC2:     boolean;   // show b·cos x
   auxShowCR:     boolean;   // show R·sin(x+φ)
+  showAnalysis:  boolean;
+  analysisDisplay: M04TrigAnalysisDisplay;
 
   // Actions
   setTraceX:        (x: number) => void;
@@ -89,9 +99,17 @@ export interface M04FunctionState {
   setAuxShowC1:     (v: boolean) => void;
   setAuxShowC2:     (v: boolean) => void;
   setAuxShowCR:     (v: boolean) => void;
+  setShowAnalysis:  (v: boolean) => void;
+  setAnalysisDisplay: <K extends keyof M04TrigAnalysisDisplay>(key: K, value: M04TrigAnalysisDisplay[K]) => void;
   getSnapshot:      () => M04FunctionStoreSnapshot;
   loadSnapshot:     (snapshot?: Partial<M04FunctionStoreSnapshot>) => void;
 }
+
+const DEFAULT_ANALYSIS_DISPLAY: M04TrigAnalysisDisplay = {
+  showZeros: true,
+  showSymmetryAxes: true,
+  showSymmetryCenters: true,
+};
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
@@ -112,6 +130,8 @@ export const useM04FunctionStore = create<M04FunctionState>((set, get) => ({
   auxShowC1:     true,
   auxShowC2:     true,
   auxShowCR:     true,
+  showAnalysis:  true,
+  analysisDisplay: structuredClone(DEFAULT_ANALYSIS_DISPLAY),
 
   // ── Phase 2-3 actions ────────────────────────────────────────────────────
   setTraceX: (x) => set((state) => {
@@ -143,6 +163,14 @@ export const useM04FunctionStore = create<M04FunctionState>((set, get) => ({
   setAuxShowC1:     (v)    => set({ auxShowC1: v }),
   setAuxShowC2:     (v)    => set({ auxShowC2: v }),
   setAuxShowCR:     (v)    => set({ auxShowCR: v }),
+  setShowAnalysis:  (v)    => set({ showAnalysis: v }),
+  setAnalysisDisplay: (key, value) =>
+    set((state) => ({
+      analysisDisplay: {
+        ...state.analysisDisplay,
+        [key]: value,
+      },
+    })),
 
   getSnapshot: () => {
     const state = get();
@@ -159,6 +187,8 @@ export const useM04FunctionStore = create<M04FunctionState>((set, get) => ({
       auxShowC1: state.auxShowC1,
       auxShowC2: state.auxShowC2,
       auxShowCR: state.auxShowCR,
+      showAnalysis: state.showAnalysis,
+      analysisDisplay: structuredClone(state.analysisDisplay),
     };
   },
 
@@ -177,5 +207,9 @@ export const useM04FunctionStore = create<M04FunctionState>((set, get) => ({
       auxShowC1: typeof snapshot?.auxShowC1 === 'boolean' ? snapshot.auxShowC1 : true,
       auxShowC2: typeof snapshot?.auxShowC2 === 'boolean' ? snapshot.auxShowC2 : true,
       auxShowCR: typeof snapshot?.auxShowCR === 'boolean' ? snapshot.auxShowCR : true,
+      showAnalysis: typeof snapshot?.showAnalysis === 'boolean' ? snapshot.showAnalysis : true,
+      analysisDisplay: snapshot?.analysisDisplay
+        ? structuredClone(snapshot.analysisDisplay)
+        : structuredClone(DEFAULT_ANALYSIS_DISPLAY),
     }),
 }));

@@ -8,8 +8,9 @@
  *
  * Supports:
  *   - Ellipse: F₁ → P → F₂ reflection
- *   - Parabola: parallel rays → P → F reflection
- *   - Disabled for circle/hyperbola
+ *   - Hyperbola: 指向一焦点的光线反射后，其反向延长线经过另一焦点
+ *   - Parabola: F → P → reflected rays parallel to the symmetry axis
+ *   - Disabled for circle
  *
  * Real-time: rays recompute automatically when entity params change
  * (e.g., eccentricity slider, focus drag).
@@ -34,7 +35,7 @@ export function OpticalPanel() {
   const cancelRef = useRef<(() => void) | null>(null);
   const [rays, setRays] = useState<OpticalRay[]>([]);
 
-  const supportsOptical = entity?.type === 'ellipse' || entity?.type === 'parabola';
+  const supportsOptical = entity?.type === 'ellipse' || entity?.type === 'hyperbola' || entity?.type === 'parabola';
 
   // Recompute rays when entity or rayCount changes
   useEffect(() => {
@@ -101,6 +102,7 @@ export function OpticalPanel() {
         <button
           onClick={handleToggle}
           disabled={!supportsOptical}
+          title={enabled ? '关闭反射演示' : '开启反射演示'}
           style={{
             display: 'flex', alignItems: 'center', gap: 3,
             padding: '3px 8px', borderRadius: 4,
@@ -117,7 +119,7 @@ export function OpticalPanel() {
           ) : {})}
         >
           <Zap size={10} />
-          {enabled ? 'ON' : 'OFF'}
+          {enabled ? '开启中' : '未开启'}
         </button>
       </div>
 
@@ -132,8 +134,16 @@ export function OpticalPanel() {
         <p style={{ fontSize: '10px', color: COLORS.textSecondary, marginBottom: 8 }}>
           {entity.type === 'ellipse'
             ? '椭圆反射: 从焦点 F₁ 出发的光线经反射后汇聚于 F₂'
-            : '抛物线反射: 平行于轴的光线经反射后汇聚于焦点 F'
+            : entity.type === 'hyperbola'
+              ? '双曲线反射: 从左右两个焦点发出的光线经反射后，反射线的反向延长线经过另一焦点'
+              : '抛物线反射: 从焦点 F 发出的光线经反射后平行于对称轴'
           }
+        </p>
+      )}
+
+      {entity.type === 'hyperbola' && supportsOptical && enabled && (
+        <p style={{ fontSize: '10px', color: COLORS.infoBlueDark, marginBottom: 8 }}>
+          蓝色辅助虚线用于强调“两焦点外角平分”对应的反射关系
         </p>
       )}
 

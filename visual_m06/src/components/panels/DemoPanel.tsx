@@ -22,15 +22,18 @@ import { COLORS, RADIUS } from '@/styles/tokens';
 import { mag2D, add2D, sub2D, scale2D, dot2D, fmtSurd } from '@/engine/vectorMath';
 import { evalExact, evalExactScoped, buildSliderScope } from '@/engine/exactMath';
 import { useTraceStore } from '@/editor/demo/traceStore';
+import { useConstraintStore } from '@/editor/demo/constraintStore';
 import type { Vec2D } from '@/editor/entities/types';
 import { Eye, EyeOff } from 'lucide-react';
+import { InlineLatex } from '@/components/shared/InlineLatex';
+import { toVecLatex } from '@/lib/vecLatex';
 
 // ─── PanelSection（折叠/展开，匹配 visual_template LeftPanel 样式）───
 
 function PanelSection({
   title, defaultOpen = true, children, style,
 }: {
-  title: string; defaultOpen?: boolean; children: React.ReactNode; style?: React.CSSProperties;
+  title: React.ReactNode; defaultOpen?: boolean; children: React.ReactNode; style?: React.CSSProperties;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -530,6 +533,9 @@ export function DemoPanel() {
           <SliderInspector slider={selectedEntity as DemoSlider} execute={execute} onDelete={() => select(null)} />
         )}
       </div>
+
+      {/* 约束轨迹 */}
+      <ConstraintSection />
 
       {/* 导入/导出 */}
       <PanelSection title="场景管理" defaultOpen={true} style={{ borderTop: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
@@ -1535,7 +1541,9 @@ function NoSelectionInspector({
                   onClick={() => handleToggleExpand(v.id)}
                   style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 4 }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>{v.label}</span>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>
+                    {toVecLatex(v.label) ? <InlineLatex latex={toVecLatex(v.label)!} /> : v.label}
+                  </span>
                   <span style={{ color: COLORS.textMuted, fontSize: 14 }}>
                     ({dx.toFixed(1)}, {dy.toFixed(1)}) |{m.toFixed(2)}|
                   </span>
@@ -1583,7 +1591,8 @@ function NoSelectionInspector({
               >
                 <span style={{ fontWeight: 600 }}>{opKindText(op.kind)}</span>
                 <span style={{ color: COLORS.textMuted, marginLeft: 4 }}>
-                  {l1}{l2 ? ` ${opSymbol(op.kind)} ${l2}` : ''}
+                  {toVecLatex(l1) ? <InlineLatex latex={toVecLatex(l1)!} /> : l1}
+                  {l2 ? <> {opSymbol(op.kind)} {toVecLatex(l2) ? <InlineLatex latex={toVecLatex(l2)!} /> : l2}</> : ''}
                 </span>
               </div>
             );
@@ -1795,8 +1804,11 @@ function BindingSection({
     endpoint: 'start' | 'end';
   } | null>(null);
 
-  function endpointLabel(vecLabel: string, ep: 'start' | 'end'): string {
-    return `${vecLabel} ${ep === 'start' ? '起点' : '终点'}`;
+  function endpointLabel(vecLabel: string, ep: 'start' | 'end'): React.ReactNode {
+    const latex = toVecLatex(vecLabel);
+    const suffix = ep === 'start' ? '起点' : '终点';
+    if (latex) return <><InlineLatex latex={latex} /> {suffix}</>;
+    return `${vecLabel} ${suffix}`;
   }
 
   function findVecForPoint(ptId: string): DemoVector | undefined {
@@ -2027,7 +2039,7 @@ function BindingSection({
                 border: `1px solid ${COLORS.border}`, background: COLORS.bgMuted, fontSize: 14,
               }}>
                 <span>
-                  <b>{vA?.label ?? '?'}</b> {epA} ⟷ <b>{vB?.label ?? '?'}</b> {epB}
+                  <b>{vA?.label && toVecLatex(vA.label) ? <InlineLatex latex={toVecLatex(vA.label)!} /> : (vA?.label ?? '?')}</b> {epA} ⟷ <b>{vB?.label && toVecLatex(vB.label) ? <InlineLatex latex={toVecLatex(vB.label)!} /> : (vB?.label ?? '?')}</b> {epB}
                 </span>
                 <button
                   onClick={() => handleUnbind(b)}
@@ -2357,7 +2369,7 @@ function VectorInspector({
 
   return (
     <div>
-      <PanelSection title={`向量 ${vec.label}`}>
+      <PanelSection title={toVecLatex(vec.label) ? <>向量 <InlineLatex latex={toVecLatex(vec.label)!} /></> : `向量 ${vec.label}`}>
         {comps && (
           <InfoBlock>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -2433,7 +2445,9 @@ function VectorInspector({
 
       <PanelSection title="操作">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <ActionBtn onClick={handleScale} variant="primary">创建 k·{vec.label}…</ActionBtn>
+          <ActionBtn onClick={handleScale} variant="primary">
+            创建 {toVecLatex(vec.label) ? <><InlineLatex latex={`k\\cdot ${toVecLatex(vec.label)}`} /></> : `k·${vec.label}`}…
+          </ActionBtn>
           <ActionBtn onClick={handleDelete} variant="danger">🗑 删除向量</ActionBtn>
         </div>
       </PanelSection>
@@ -2749,6 +2763,151 @@ function OpInspector({
         <ActionBtn onClick={handleDelete} variant="danger">🗑 删除运算</ActionBtn>
       </div>
     </div>
+  );
+}
+
+// ─── 约束轨迹区域 ───
+
+const CONSTRAINT_TEMPLATES = [
+  { label: '选择模板...', value: '' },
+  { label: '圆: dist(P,A) = r', value: 'dist(P,A) = 3' },
+  { label: '模长: mag(P) = r', value: 'mag(P) = 4' },
+  { label: '夹角: angle(A,P,B) = θ', value: 'angle(A,P,B) = 90' },
+  { label: '点积: dot(P,A) = k', value: 'dot(P,A) = 0' },
+  { label: '直线距离: distLine(P,A,B) = d', value: 'distLine(P,A,B) = 2' },
+];
+
+function ConstraintSection() {
+  const [input, setInput] = useState('');
+  const constraints = useConstraintStore((s) => s.constraints);
+  const addConstraint = useConstraintStore((s) => s.addConstraint);
+  const removeConstraint = useConstraintStore((s) => s.removeConstraint);
+  const updateConstraint = useConstraintStore((s) => s.updateConstraint);
+  const clearAll = useConstraintStore((s) => s.clearAll);
+  const objectiveExpr = useConstraintStore((s) => s.objectiveExpr);
+  const setObjectiveExpr = useConstraintStore((s) => s.setObjectiveExpr);
+  const objectiveExtrema = useConstraintStore((s) => s.objectiveExtrema);
+  const list = Object.values(constraints);
+
+  const handleAdd = () => {
+    const val = input.trim();
+    if (!val) return;
+    addConstraint(val);
+    setInput('');
+  };
+
+  return (
+    <PanelSection title="约束轨迹" defaultOpen={list.length > 0} style={{ borderTop: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
+      <select
+        style={{
+          width: '100%', padding: '4px 8px', fontSize: 11, marginBottom: 6,
+          border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+          background: COLORS.white, color: COLORS.textMuted, cursor: 'pointer',
+        }}
+        value=""
+        onChange={(e) => { if (e.target.value) setInput(e.target.value); }}
+      >
+        {CONSTRAINT_TEMPLATES.map((t, i) => (
+          <option key={i} value={t.value}>{t.label}</option>
+        ))}
+      </select>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+        <input
+          style={{
+            flex: 1, padding: '4px 8px', fontSize: 12,
+            border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+            background: COLORS.white, color: COLORS.text,
+          }}
+          placeholder="例: dist(P,A) = 3"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+        />
+        <button
+          style={{
+            padding: '4px 10px', fontSize: 13, cursor: 'pointer',
+            borderRadius: RADIUS.sm, border: `1px solid ${COLORS.border}`,
+            background: COLORS.primary, color: COLORS.white,
+          }}
+          onClick={handleAdd}
+        >+</button>
+      </div>
+      {list.map((c) => (
+        <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+          <div
+            style={{ width: 12, height: 12, borderRadius: '50%', background: c.color, cursor: 'pointer', flexShrink: 0 }}
+            onClick={() => {
+              const idx = DEMO_COLORS.indexOf(c.color as typeof DEMO_COLORS[number]);
+              const next = DEMO_COLORS[(idx + 1) % DEMO_COLORS.length];
+              updateConstraint(c.id, { color: next });
+            }}
+          />
+          <span
+            style={{
+              flex: 1, fontSize: 11, color: c.visible ? COLORS.text : COLORS.textMuted,
+              cursor: 'pointer', textDecoration: c.visible ? 'none' : 'line-through',
+            }}
+            onClick={() => updateConstraint(c.id, { visible: !c.visible })}
+          >
+            {c.expression}
+          </span>
+          <button
+            style={{
+              padding: '1px 5px', fontSize: 11, cursor: 'pointer',
+              border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+              background: 'transparent', color: COLORS.textMuted,
+            }}
+            onClick={() => removeConstraint(c.id)}
+          >x</button>
+        </div>
+      ))}
+      {list.length > 1 && (
+        <button
+          style={{
+            padding: '2px 8px', fontSize: 11, cursor: 'pointer',
+            border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+            background: 'transparent', color: COLORS.textMuted, marginTop: 4,
+          }}
+          onClick={clearAll}
+        >清空全部</button>
+      )}
+      <div style={{ marginTop: 6, fontSize: 10, color: COLORS.textMuted, lineHeight: 1.5 }}>
+        P 为未知点，其他字母为已知点名<br />
+        dist(P,A) mag(P) dot(P,A) cross(P,A) angle(A,P,B) distLine(P,A,B)
+      </div>
+
+      {list.length > 0 && (
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ fontSize: 11, color: COLORS.textMuted, marginBottom: 4, fontWeight: 600 }}>
+            目标函数（可选）
+          </div>
+          <input
+            style={{
+              width: '100%', padding: '4px 8px', fontSize: 12,
+              border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+              background: COLORS.white, color: COLORS.text, boxSizing: 'border-box',
+            }}
+            placeholder="例: dist(P,A)"
+            value={objectiveExpr}
+            onChange={(e) => setObjectiveExpr(e.target.value)}
+          />
+          {objectiveExtrema && (
+            <div style={{ marginTop: 4, fontSize: 11, lineHeight: 1.6 }}>
+              {objectiveExtrema.min && (
+                <div style={{ color: '#2563eb' }}>
+                  最小值: {objectiveExtrema.min.value.toFixed(3)} @ ({objectiveExtrema.min.x.toFixed(2)}, {objectiveExtrema.min.y.toFixed(2)})
+                </div>
+              )}
+              {objectiveExtrema.max && (
+                <div style={{ color: '#dc2626' }}>
+                  最大值: {objectiveExtrema.max.value.toFixed(3)} @ ({objectiveExtrema.max.x.toFixed(2)}, {objectiveExtrema.max.y.toFixed(2)})
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </PanelSection>
   );
 }
 

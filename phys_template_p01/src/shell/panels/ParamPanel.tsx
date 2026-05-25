@@ -5,21 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { COLORS } from '@/styles/tokens';
+import { COLORS, SHADOWS } from '@/styles/tokens';
+import { getP08PanelSurfaceStyle, getP08SceneTheme, toAlpha } from '@/shell/p08/p08Theme';
 
 export interface ParamPanelProps {
   schemas: ParamSchema[];
   values: ParamValues;
   onValueChange: (key: string, value: number | boolean | string) => void;
   onBack?: () => void;
+  presetId?: string;
 }
 
 /**
  * 左侧参数面板 — schema 驱动渲染
  * 根据 ParamSchema 的类型自动选择控件，并为磁场实验补充方向/电性提示。
  */
-export function ParamPanel({ schemas, values, onValueChange, onBack }: ParamPanelProps) {
+export function ParamPanel({ schemas, values, onValueChange, onBack, presetId }: ParamPanelProps) {
   const groups = groupSchemas(schemas, values);
+  const theme = presetId ? getP08SceneTheme(presetId) : null;
+  const shellStyle = presetId ? getP08PanelSurfaceStyle(presetId) : null;
 
   return (
     <aside
@@ -28,13 +32,20 @@ export function ParamPanel({ schemas, values, onValueChange, onBack }: ParamPane
         width: 260,
         minWidth: 240,
         maxWidth: 280,
-        borderRight: `1px solid ${COLORS.border}`,
+        borderRight: presetId ? 'none' : `1px solid ${COLORS.border}`,
         backgroundColor: COLORS.bg,
+        ...(shellStyle ?? {}),
       }}
     >
       <div
         className="flex items-center gap-2 px-4 py-3 text-sm font-semibold"
-        style={{ color: COLORS.text, borderBottom: `1px solid ${COLORS.border}` }}
+        style={{
+          color: COLORS.text,
+          borderBottom: `1px solid ${theme?.border ?? COLORS.border}`,
+          background: theme
+            ? `linear-gradient(180deg, ${toAlpha(theme.accent, 0.1)} 0%, rgba(255,255,255,0) 100%)`
+            : undefined,
+        }}
       >
         {onBack && (
           <button
@@ -60,7 +71,7 @@ export function ParamPanel({ schemas, values, onValueChange, onBack }: ParamPane
             {group.label && (
               <div
                 className="mb-2 px-1 text-xs font-medium"
-                style={{ color: COLORS.textSecondary }}
+                style={{ color: theme?.accentStrong ?? COLORS.textSecondary }}
               >
                 {group.label}
               </div>
@@ -94,7 +105,10 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
       const numericValue = typeof value === 'number' ? value : schema.default;
 
       return (
-        <div className="space-y-1">
+        <div
+          className="space-y-1 rounded-2xl px-2.5 py-2"
+          style={{ backgroundColor: '#FFFFFF99', boxShadow: SHADOWS.sm }}
+        >
           <div className="flex items-center justify-between">
             <Label className="text-xs">{schema.label}</Label>
             <span className="text-xs" style={{ color: COLORS.textMuted }}>
@@ -119,7 +133,10 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
 
     case 'input':
       return (
-        <div className="space-y-1">
+        <div
+          className="space-y-1 rounded-2xl px-2.5 py-2"
+          style={{ backgroundColor: '#FFFFFF99', boxShadow: SHADOWS.sm }}
+        >
           <Label className="text-xs">{schema.label}</Label>
           <div className="flex items-center gap-1">
             <Input
@@ -139,7 +156,10 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
 
     case 'toggle':
       return (
-        <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-between rounded-2xl px-2.5 py-2"
+          style={{ backgroundColor: '#FFFFFF99', boxShadow: SHADOWS.sm }}
+        >
           <Label className="text-xs">{schema.label}</Label>
           <Switch
             checked={typeof value === 'boolean' ? value : schema.default}
@@ -150,7 +170,10 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
 
     case 'select':
       return (
-        <div className="space-y-1">
+        <div
+          className="space-y-1 rounded-2xl px-2.5 py-2"
+          style={{ backgroundColor: '#FFFFFF99', boxShadow: SHADOWS.sm }}
+        >
           <Label className="text-xs">{schema.label}</Label>
           <Select
             value={typeof value === 'string' ? value : String(value ?? schema.default)}
@@ -166,7 +189,10 @@ function ParamControl({ schema, value, onChange }: ParamControlProps) {
 
     case 'button':
       return (
-        <div className="space-y-1.5">
+        <div
+          className="space-y-1.5 rounded-2xl px-2.5 py-2"
+          style={{ backgroundColor: '#FFFFFF99', boxShadow: SHADOWS.sm }}
+        >
           <Label className="text-xs">{schema.label}</Label>
           <Button
             size="sm"

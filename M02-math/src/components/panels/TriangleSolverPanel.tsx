@@ -16,12 +16,20 @@
  *  └────────────────────────────────────────┘
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTriangleSolverStore } from '@/editor/store/triangleSolverStore';
 import { solveSolveMode }         from '@/engine/triangleSolver';
 import { COLORS }                 from '@/styles/colors';
 import { btnHover, focusRing }    from '@/styles/interactionStyles';
 import type { SolveMode, Triangle } from '@/types';
+import { KaTeXRenderer } from '@/components/KaTeXRenderer';
+import { Switch } from '@/components/ui/switch';
+import {
+  parsePositiveMathInput,
+  formatTeachingAngleDeg,
+  formatExactWithApprox,
+  toKatexInline,
+} from '@/engine/triangleDisplay';
 
 // ─── Mode definitions ─────────────────────────────────────────────────────────
 
@@ -55,6 +63,13 @@ const MODE_FIELDS: Record<SolveMode, FieldDef[]> = {
   ],
 };
 
+const MODE_LABELS: Record<SolveMode, string> = {
+  SSS: '三边已知',
+  SAS: '两边及夹角已知',
+  ASA: '两角及夹边已知',
+  AAS: '两角及一边已知',
+  SSA: '两边及一对角已知',
+};
 const R2D = 180 / Math.PI;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -62,6 +77,7 @@ const R2D = 180 / Math.PI;
 function ModeTab({ mode, active, onClick }: { mode: SolveMode; active: boolean; onClick: () => void }) {
   return (
     <button
+      title={MODE_LABELS[mode]}
       onClick={onClick}
       onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = COLORS.surfaceHover; }}
       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
@@ -91,16 +107,28 @@ function FieldInput({
   const [draft, setDraft] = useState(String(value));
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
   function commit(raw: string) {
-    const n = parseFloat(raw);
-    if (isFinite(n) && n > 0) {
+    const n = parsePositiveMathInput(raw);
+    if (n !== null) {
       onChange(n);
-      setDraft(String(n));
+      setDraft(raw.trim());
       setError(null);
       return;
     }
     setDraft(String(value));
     setError(def.isAngle ? '请输入大于 0 的角度' : '请输入大于 0 的数值');
+  }
+
+  function adjustBy(delta: number) {
+    const base = parsePositiveMathInput(draft) ?? value;
+    const next = Math.max(0.1, Math.round((base + delta) * 10) / 10);
+    onChange(next);
+    setDraft(String(next));
+    setError(null);
   }
 
   return (
@@ -113,9 +141,9 @@ function FieldInput({
         </span>
         <span style={{ fontSize: 11, color: COLORS.textSecondary }}>=</span>
         <input
-          type="number"
+          type="text"
           value={draft}
-          step={def.isAngle ? 1 : 0.5}
+          inputMode="decimal"
           onChange={(e) => {
             setDraft(e.target.value);
             if (error) setError(null);
@@ -139,6 +167,24 @@ function FieldInput({
             textAlign: 'right',
           }}
         />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <button
+            type="button"
+            onClick={() => adjustBy(0.1)}
+            style={stepBtnStyle}
+            title="增加 0.1"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            onClick={() => adjustBy(-0.1)}
+            style={stepBtnStyle}
+            title="减少 0.1"
+          >
+            ▼
+          </button>
+        </div>
         {def.isAngle && <span style={{ fontSize: 11, color: COLORS.textSecondary }}>°</span>}
       </div>
       </div>
@@ -153,16 +199,16 @@ function FieldInput({
 
 function TriangleInfo({ triangle, color }: { triangle: Triangle; color: string }) {
   const rows = [
-    ['a', triangle.a.toFixed(4)],
-    ['b', triangle.b.toFixed(4)],
-    ['c', triangle.c.toFixed(4)],
-    ['A', `${(triangle.A * R2D).toFixed(2)}°`],
-    ['B', `${(triangle.B * R2D).toFixed(2)}°`],
-    ['C', `${(triangle.C * R2D).toFixed(2)}°`],
-    ['面积 S', triangle.area.toFixed(4)],
-    ['周长 L', triangle.perimeter.toFixed(4)],
-    ['外接圆 R', triangle.circumradius.toFixed(4)],
-    ['内切圆 r', triangle.inradius.toFixed(4)],
+    ['a', formatExactWithApprox(triangle.a)],
+    ['b', formatExactWithApprox(triangle.b)],
+    ['c', formatExactWithApprox(triangle.c)],
+    ['A', formatTeachingAngleDeg(triangle.A * R2D)],
+    ['B', formatTeachingAngleDeg(triangle.B * R2D)],
+    ['C', formatTeachingAngleDeg(triangle.C * R2D)],
+    ['面积 S', formatExactWithApprox(triangle.area)],
+    ['周长 L', formatExactWithApprox(triangle.perimeter)],
+    ['外接圆 R', formatExactWithApprox(triangle.circumradius)],
+    ['内切圆 r', formatExactWithApprox(triangle.inradius)],
   ];
 
   return (
@@ -179,7 +225,16 @@ function TriangleInfo({ triangle, color }: { triangle: Triangle; color: string }
           style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}
         >
           <span style={{ fontSize: 10, color: COLORS.textSecondary, fontFamily: 'monospace' }}>{k}</span>
-          <span style={{ fontSize: 10, color, fontFamily: 'monospace', fontWeight: 600 }}>{v}</span>
+          <span style={{ fontSize: 10, color, fontFamily: 'monospace', fontWeight: 600 }}>
+            {v.includes('√') || v.includes('/') ? (
+              <KaTeXRenderer
+                latex={v
+                  .split('≈')
+                  .map((part) => toKatexInline(part.trim().replace('°', '')) + (part.trim().endsWith('°') ? '^\\circ' : ''))
+                  .join('\\;\\approx\\;')}
+              />
+            ) : v}
+          </span>
         </div>
       ))}
     </div>
@@ -195,6 +250,12 @@ export function TriangleSolverPanel() {
   const setInput = useTriangleSolverStore((s) => s.setInput);
   const setResult = useTriangleSolverStore((s) => s.setResult);
   const result = useTriangleSolverStore((s) => s.result);
+  const canvasMode = useTriangleSolverStore((s) => s.canvasMode);
+  const setCanvasMode = useTriangleSolverStore((s) => s.setCanvasMode);
+  const auxiliaryOptions = useTriangleSolverStore((s) => s.auxiliaryOptions);
+  const setAuxiliaryOption = useTriangleSolverStore((s) => s.setAuxiliaryOption);
+  const rangeDemo = useTriangleSolverStore((s) => s.rangeDemo);
+  const setRangeDemo = useTriangleSolverStore((s) => s.setRangeDemo);
 
   function handleSolve() {
     const r = solveSolveMode(mode, inputs);
@@ -213,6 +274,35 @@ export function TriangleSolverPanel() {
         </span>
       </div>
 
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+        <button
+          onClick={() => setCanvasMode('solve')}
+          style={modeTabStyle(canvasMode === 'solve')}
+        >
+          解算结果
+        </button>
+        <button
+          onClick={() => setCanvasMode('range-demo')}
+          style={modeTabStyle(canvasMode === 'range-demo')}
+        >
+          范围演示
+        </button>
+      </div>
+
+      {canvasMode === 'range-demo' && (
+        <div style={{ marginBottom: 14, padding: '10px 10px 8px', borderRadius: 10, background: COLORS.surfaceAlt, border: `1px solid ${COLORS.border}` }}>
+          <p style={{ fontSize: 11, color: COLORS.textSecondary, lineHeight: 1.6, marginBottom: 8 }}>
+            用一个已知边和一个已知角，观察第三个顶点可能落在怎样的范围上。
+          </p>
+          <FieldInput def={{ key: 'sideLength', label: '边', hint: '已知边长' }} value={rangeDemo.sideLength} onChange={(v) => setRangeDemo({ sideLength: v })} />
+          <FieldInput def={{ key: 'angleDeg', label: '角', hint: '已知角（°）', isAngle: true }} value={rangeDemo.angleDeg} onChange={(v) => setRangeDemo({ angleDeg: v })} />
+          <FieldInput def={{ key: 'sampleRatio', label: '位', hint: '顶点位置比例' }} value={rangeDemo.sampleRatio} onChange={(v) => setRangeDemo({ sampleRatio: Math.max(0.1, Math.min(0.9, v)) })} />
+          <p style={{ fontSize: 10, color: COLORS.textSecondary, marginTop: 4 }}>
+            浅绿色一簇三角形表示满足条件的可能图像范围；“位”用于选择其中一个示意位置。
+          </p>
+        </div>
+      )}
+
       {/* ── Mode tabs ────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 3, marginBottom: 10 }}>
         {(['SSS', 'SAS', 'ASA', 'AAS', 'SSA'] as SolveMode[]).map((m) => (
@@ -222,7 +312,9 @@ export function TriangleSolverPanel() {
 
       {/* ── Mode hint ────────────────────────────────────────────────── */}
       <p style={{ fontSize: 10, color: COLORS.textDisabled, marginBottom: 8 }}>
-        {mode === 'SSA' ? 'SSA 可能有 0 / 1 / 2 个解' : `${mode} — 唯一解`}
+        {mode === 'SSA'
+          ? `${mode} · ${MODE_LABELS[mode]}，可能有 0 / 1 / 2 个解`
+          : `${mode} · ${MODE_LABELS[mode]}，通常为唯一解`}
       </p>
 
       {/* ── Inputs ───────────────────────────────────────────────────── */}
@@ -234,6 +326,30 @@ export function TriangleSolverPanel() {
             value={inputs[def.key] ?? 1}
             onChange={(v) => setInput(def.key, v)}
           />
+        ))}
+      </div>
+
+      <div style={{ marginBottom: 12, padding: '10px 10px 8px', borderRadius: 10, background: COLORS.surfaceAlt, border: `1px solid ${COLORS.border}` }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: COLORS.textSecondary, marginBottom: 6 }}>
+          辅助线
+        </p>
+        {[
+          ['showMedians', '中线'],
+          ['showAngleBisectors', '角平分线'],
+          ['showAltitudes', '高线'],
+          ['showPerpBisectors', '中垂线'],
+          ['showCentroid', '重心'],
+          ['showCircumcenter', '外心'],
+        ].map(([key, label]) => (
+          <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 0' }}>
+            <span style={{ fontSize: 12, color: auxiliaryOptions[key as keyof typeof auxiliaryOptions] ? COLORS.textPrimary : COLORS.textSecondary }}>
+              {label}
+            </span>
+            <Switch
+              checked={auxiliaryOptions[key as keyof typeof auxiliaryOptions]}
+              onCheckedChange={(v) => setAuxiliaryOption(key as keyof typeof auxiliaryOptions, v)}
+            />
+          </div>
         ))}
       </div>
 
@@ -295,4 +411,34 @@ export function TriangleSolverPanel() {
 
     </div>
   );
+}
+
+const stepBtnStyle: React.CSSProperties = {
+  width: 18,
+  height: 14,
+  padding: 0,
+  borderRadius: 4,
+  border: `1px solid ${COLORS.borderMuted}`,
+  background: COLORS.surface,
+  color: COLORS.textSecondary,
+  cursor: 'pointer',
+  fontSize: 9,
+  lineHeight: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+function modeTabStyle(active: boolean): React.CSSProperties {
+  return {
+    flex: 1,
+    padding: '5px 0',
+    fontSize: 11,
+    fontWeight: 700,
+    borderRadius: 9999,
+    border: `1px solid ${active ? COLORS.primary : COLORS.borderMuted}`,
+    background: active ? `${COLORS.primary}22` : 'transparent',
+    color: active ? COLORS.primary : COLORS.textSecondary,
+    cursor: active ? 'default' : 'pointer',
+  };
 }

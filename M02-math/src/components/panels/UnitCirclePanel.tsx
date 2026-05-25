@@ -126,6 +126,7 @@ export function UnitCirclePanel() {
         </span>
         <button
           onClick={() => setSnapEnabled(!snapEnabled)}
+          title="拖动时吸附到常用特殊角"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -146,7 +147,7 @@ export function UnitCirclePanel() {
           )}
         >
           <span style={{ fontSize: 8 }}>{snapEnabled ? '●' : '○'}</span>
-          吸附
+          特殊角吸附
         </button>
       </div>
 

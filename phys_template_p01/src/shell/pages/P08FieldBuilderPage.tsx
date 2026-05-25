@@ -12,6 +12,7 @@ import { FieldInfoCards } from '@/shell/panels/FieldInfoCards';
 import { InfoPanel } from '@/shell/panels/InfoPanel';
 import { P08DisplayControls } from '@/shell/panels/P08DisplayControls';
 import { P08ResultOverlay } from '@/shell/panels/P08ResultOverlay';
+import { P08StageHeader } from '@/shell/panels/P08StageHeader';
 import { TimelineBar } from '@/shell/timeline/TimelineBar';
 import { useSimulationStore } from '@/store';
 import { Label } from '@/components/ui/label';
@@ -29,6 +30,11 @@ import {
   isP08BuilderInternalEntity,
 } from '@/domains/em/builder/p08-field-builder-scene';
 import { getP08SceneSummary } from '@/shell/panels/p08SceneSummary';
+import {
+  getP08CanvasBackground,
+  getP08CanvasShellStyle,
+  getP08PageBackground,
+} from '@/shell/p08/p08Theme';
 
 interface P08FieldBuilderPageProps {
   onBack: () => void;
@@ -201,6 +207,8 @@ export function P08FieldBuilderPage({ onBack }: P08FieldBuilderPageProps) {
           <TimelineBar />
         </PanelErrorBoundary>
       )}
+      pageStyle={getP08PageBackground(P08_FIELD_BUILDER_SCENE_ID)}
+      topRowStyle={{ padding: 14, gap: 14 }}
     />
   );
 }
@@ -674,7 +682,13 @@ function P08FieldBuilderCanvas({
 
   return (
     <div
-      style={{ position: 'relative', flex: 1, display: 'flex', overflow: 'hidden' }}
+      style={{
+        position: 'relative',
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        ...getP08CanvasShellStyle(sceneId),
+      }}
       onClick={handleCanvasClick}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -683,7 +697,11 @@ function P08FieldBuilderCanvas({
       onMouseLeave={handleMouseUp}
       onContextMenu={(event) => event.preventDefault()}
     >
-      <CanvasContainer onContextReady={onContextReady} />
+      <CanvasContainer
+        onContextReady={onContextReady}
+        backgroundStyle={getP08CanvasBackground(sceneId, viewport)}
+      />
+      <P08StageHeader presetId={sceneId} viewport={viewport} />
       <P08DisplayControls presetId={sceneId} />
       <FieldInfoCards entities={entities} presetId={sceneId} />
       <P08ResultOverlay presetId={sceneId} />

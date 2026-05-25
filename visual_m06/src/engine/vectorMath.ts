@@ -213,7 +213,7 @@ const DENOMS = [1, 2, 3, 4, 5, 6, 8, 10, 12];
 const A_RANGE = 20;
 const TOL = 1e-6;
 
-interface SurdForm {
+export interface SurdForm {
   a: number;       // 整数部分（可为 0）
   bNum: number;    // √c 的系数分子（可为负）
   bDen: number;    // √c 的系数分母（≥1）
@@ -405,6 +405,60 @@ export function isExactDisplay(n: number): boolean {
 export function fmtApprox(n: number, dp = 2): string {
   if (isExactDisplay(n)) return fmtSurd(n, dp);
   return `≈ ${fmt(n, dp)}`;
+}
+
+// ─── LaTeX 格式化 ───
+
+export function surdToLatex(s: SurdForm): string {
+  if (s.bNum === 0 || s.c === 0) return String(s.a);
+  const absBNum = Math.abs(s.bNum);
+  let sqrtPart: string;
+  if (s.bDen === 1) {
+    sqrtPart = absBNum === 1 ? `\\sqrt{${s.c}}` : `${absBNum}\\sqrt{${s.c}}`;
+  } else {
+    const num = absBNum === 1 ? `\\sqrt{${s.c}}` : `${absBNum}\\sqrt{${s.c}}`;
+    sqrtPart = `\\frac{${num}}{${s.bDen}}`;
+  }
+  const sign = s.bNum > 0;
+  if (s.a === 0) return sign ? sqrtPart : `-${sqrtPart}`;
+  return sign ? `${s.a}+${sqrtPart}` : `${s.a}-${sqrtPart}`;
+}
+
+export function fmtSurdLatex(n: number, dp = 2): string {
+  const s = detectSurd(n);
+  if (s) return surdToLatex(s);
+  return fmt(n, dp);
+}
+
+export function fmtPiLatex(k: number, denom: number): string {
+  const sign = k < 0 ? '-' : '';
+  const absK = Math.abs(k);
+  const numStr = absK === 1 ? '\\pi' : `${absK}\\pi`;
+  if (denom === 1) return `${sign}${numStr}`;
+  return `${sign}\\frac{${absK === 1 ? '' : absK}\\pi}{${denom}}`;
+}
+
+export function fmtFractionLatex(num: number, den: number): string {
+  if (den === 1) return String(num);
+  return `\\frac{${num}}{${den}}`;
+}
+
+export function fmtSmartLatex(n: number, dp = 2): string {
+  if (Math.abs(n) < 1e-10) return '0';
+  const rounded = Math.round(n);
+  if (Math.abs(n - rounded) < 1e-10) return String(rounded);
+  const pi = detectPiFraction(n);
+  if (pi) return fmtPiLatex(pi.k, pi.denom);
+  const surd = detectSurd(n);
+  if (surd) return surdToLatex(surd);
+  const frac = toFraction(n, 100);
+  if (frac) return fmtFractionLatex(frac[0], frac[1]);
+  return fmt(n, dp);
+}
+
+export function fmtApproxLatex(n: number, dp = 2): string {
+  if (isExactDisplay(n)) return `= ${fmtSurdLatex(n, dp)}`;
+  return `\\approx ${fmt(n, dp)}`;
 }
 
 // ─── 几何交点计算（用于吸附功能）───

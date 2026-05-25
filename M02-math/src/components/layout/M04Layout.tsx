@@ -17,12 +17,13 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Undo2, Redo2 } from 'lucide-react';
+import { Eye, EyeOff, Undo2, Redo2 } from 'lucide-react';
 import { UnitCircleCanvas }       from '@/components/UnitCircleCanvas';
 import { FunctionGraphCanvas }    from '@/components/FunctionGraphCanvas';
 import { TriangleCanvas }         from '@/components/TriangleCanvas';
 import { UnitCirclePanel }        from '@/components/panels/UnitCirclePanel';
 import { TrigTransformPanel }     from '@/components/panels/TrigTransformPanel';
+import { TrigAnalysisPanel }      from '@/components/panels/TrigAnalysisPanel';
 import { FivePointPanel }         from '@/components/panels/FivePointPanel';
 import { AuxiliaryPanel }         from '@/components/panels/AuxiliaryPanel';
 import { TriangleSolverPanel }    from '@/components/panels/TriangleSolverPanel';
@@ -42,6 +43,7 @@ export function M04Layout() {
   const syncY   = useSyncLineStore((s) => s.syncY);
   const dragStateRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const [graphWidth, setGraphWidth] = useState(460);
+  const [showUnitCircle, setShowUnitCircle] = useState(true);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -123,6 +125,17 @@ export function M04Layout() {
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
+          {appMode === 'trig' && (
+            <button
+              onClick={() => setShowUnitCircle((v) => !v)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-eduMind-textPlaceholder hover:text-eduMind-text hover:bg-eduMind-bgMuted transition-colors"
+              title={showUnitCircle ? '隐藏单位圆' : '显示单位圆'}
+              style={{ fontSize: '11px', fontWeight: 600 }}
+            >
+              {showUnitCircle ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showUnitCircle ? '隐藏单位圆' : '显示单位圆'}
+            </button>
+          )}
           <button
             onClick={undo}
             disabled={!canUndo}
@@ -148,53 +161,57 @@ export function M04Layout() {
         {appMode === 'trig' ? (
           <>
             {/* Unit circle canvas — fills remaining horizontal space */}
-            <div className="flex-1 overflow-hidden">
-              <UnitCircleCanvas />
-            </div>
+            {showUnitCircle && (
+              <div className="flex-1 overflow-hidden">
+                <UnitCircleCanvas />
+              </div>
+            )}
 
             {/* ── Sync divider ───────────────────────────────────────────── */}
-            <div
-              onPointerDown={handleDividerPointerDown}
-              title="拖动调整左右视图宽度"
-              style={{
-                width: 9,
-                flexShrink: 0,
-                background: 'transparent',
-                position: 'relative',
-                overflow: 'visible',
-                zIndex: 10,
-                cursor: 'col-resize',
-              }}
-            >
+            {showUnitCircle && (
               <div
+                onPointerDown={handleDividerPointerDown}
+                title="拖动调整左右视图宽度"
                 style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 4,
-                  width: 1,
-                  background: COLORS.border,
+                  width: 9,
+                  flexShrink: 0,
+                  background: 'transparent',
+                  position: 'relative',
+                  overflow: 'visible',
+                  zIndex: 10,
+                  cursor: 'col-resize',
                 }}
-              />
-              {syncY !== null && (
+              >
                 <div
                   style={{
                     position: 'absolute',
-                    top:  syncY - 5,
-                    left: 0,
-                    width:  9,
-                    height: 9,
-                    borderRadius: '50%',
-                    background:  COLORS.primary,
-                    boxShadow:   `0 0 8px rgba(50,213,131,0.7)`,
-                    pointerEvents: 'none',
+                    top: 0,
+                    bottom: 0,
+                    left: 4,
+                    width: 1,
+                    background: COLORS.border,
                   }}
                 />
-              )}
-            </div>
+                {syncY !== null && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top:  syncY - 5,
+                      left: 0,
+                      width:  9,
+                      height: 9,
+                      borderRadius: '50%',
+                      background:  COLORS.primary,
+                      boxShadow:   `0 0 8px rgba(50,213,131,0.7)`,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+              </div>
+            )}
 
             {/* Function graph canvas */}
-            <div style={{ width: graphWidth, flexShrink: 0, overflow: 'hidden' }}>
+            <div style={{ width: showUnitCircle ? graphWidth : 'calc(100% - 280px)', flexShrink: 0, overflow: 'hidden' }}>
               <FunctionGraphCanvas />
             </div>
 
@@ -202,6 +219,7 @@ export function M04Layout() {
             <aside className="w-[280px] shrink-0 bg-white border-l border-eduMind-border flex flex-col overflow-y-auto">
               <UnitCirclePanel />
               <TrigTransformPanel />
+              <TrigAnalysisPanel />
               <FivePointPanel />
               <AuxiliaryPanel />
               <SpecialValuesTable />

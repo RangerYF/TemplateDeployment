@@ -11,21 +11,31 @@ import { useInteractionStore } from '@/editor/store/interactionStore';
 import type { HoveredPoint, IntersectionHover } from '@/editor/store/interactionStore';
 import { useAnimationStore } from '@/editor/store/animationStore';
 import { useCanvasToolStore, type CanvasMode } from '@/editor/store/canvasToolStore';
+import { useAnimationTrajectoryStore } from '@/editor/store/animationTrajectoryStore';
 import { renderAxis } from '@/canvas/renderers/axisRenderer';
 import { renderCurve } from '@/canvas/renderers/curveRenderer';
 import { renderDynamic } from '@/canvas/renderers/dynamicRenderer';
 import { renderTangent } from '@/canvas/renderers/tangentRenderer';
 import { renderFeaturePoints, renderSegmentEndpoints } from '@/canvas/renderers/featurePointRenderer';
+import { renderIntersections } from '@/canvas/renderers/intersectionRenderer';
+import { getVerticalAsymptoteXValues, renderFunctionAsymptotes } from '@/canvas/renderers/functionAsymptoteRenderer';
 import { hiDpiClear } from '@/editor/tools/canvasUtils';
 import { compileExpression, isParseError, compileDerivative } from '@/engine/expressionEngine';
 import { buildFunctionScope, getKnownFunctionNames } from '@/engine/compositionEngine';
 import { sampleWithTransform, sampleDerivativeWithDomain, evaluateStandard, getNumericalDerivative } from '@/engine/sampler';
 import { evaluatePiecewiseRange } from '@/engine/piecewiseEvaluator';
 import { findAllIntersections } from '@/engine/functionIntersection';
+import { analyzeInverseFunction } from '@/engine/inverseFunction';
 import type { FunctionIntersection } from '@/engine/functionIntersection';
 import type { SamplePoint } from '@/engine/sampler';
 import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
-import { FUNCTION_COLORS, DEFAULT_TRANSFORM, type FunctionEntry } from '@/types';
+import {
+  FUNCTION_COLORS,
+  DEFAULT_TRANSFORM,
+  DEFAULT_FUNCTION_DISPLAY_DOMAIN,
+  DEFAULT_INVERSE_FUNCTION_DISPLAY,
+  type FunctionEntry,
+} from '@/types';
 import { COLORS } from '@/styles/colors';
 import { createId } from '@/lib/id';
 
@@ -46,6 +56,21 @@ const SNAP_PX = 20;
 const INTERSECT_SNAP_PX = 10;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function maskNearVerticalAsymptotes(
+  points: SamplePoint[],
+  asymptoteXs: number[],
+  viewport: Viewport,
+): SamplePoint[] {
+  if (asymptoteXs.length === 0) return points;
+  const exclusionRadius = (viewport.xMax - viewport.xMin) / 600;
+
+  return points.map((pt) => {
+    if (!pt.isValid) return pt;
+    const tooClose = asymptoteXs.some((x0) => Math.abs(pt.x - x0) < exclusionRadius);
+    return tooClose ? { ...pt, isValid: false, isBreak: false } : pt;
+  });
+}
 
 function buildToolEvent(
   e: MouseEvent | WheelEvent,
@@ -68,7 +93,7 @@ function renderOneCurve(
   allFunctions: FunctionEntry[],
   vp: Viewport,
   steps: number,
-  styleOpts?: { lineWidth?: number; alpha?: number; glow?: boolean; colorOverride?: string },
+  styleOpts?: { lineWidth?: number; lineDash?: number[]; alpha?: number; glow?: boolean; colorOverride?: string },
 ): number {
   const color = styleOpts?.colorOverride ?? fn.color;
   let pointCount = 0;
@@ -96,11 +121,41 @@ function renderOneCurve(
     const scope    = { ...paramScope, ...fnScope };
     const hasScope = Object.keys(scope).length > 0;
 
-    const pts = sampleWithTransform(compiled, vp, fn.transform, steps, hasScope ? scope : undefined);
-    pointCount = pts.length;
-    renderCurve(ctx, pts, vp, color, styleOpts);
+    const pts = sampleWithTransform(
+      compiled,
+      vp,
+      fn.transform,
+      steps,
+      hasScope ? scope : undefined,
+      fn.displayDomain,
+    );
+    const asymptoteXs = getVerticalAsymptoteXValues(fn, vp);
+    const maskedPts = maskNearVerticalAsymptotes(pts, asymptoteXs, vp);
+    pointCount = maskedPts.length;
+    renderCurve(ctx, maskedPts, vp, color, {
+      ...styleOpts,
+      lineDash: fn.lineStyle === 'dashed' ? [8, 6] : styleOpts?.lineDash,
+    });
   }
   return pointCount;
+}
+
+function renderMirrorLine(ctx: CanvasRenderingContext2D, vp: Viewport): void {
+  const x0 = Math.max(vp.xMin, vp.yMin);
+  const x1 = Math.min(vp.xMax, vp.yMax);
+  const [cx0, cy0] = vp.toCanvas(x0, x0);
+  const [cx1, cy1] = vp.toCanvas(x1, x1);
+
+  ctx.save();
+  ctx.setLineDash([8, 6]);
+  ctx.strokeStyle = COLORS.infoBlue;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx0, cy0);
+  ctx.lineTo(cx1, cy1);
+  ctx.stroke();
+  ctx.restore();
 }
 
 // ─── Floating panel state ────────────────────────────────────────────────────
@@ -171,6 +226,7 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
   const features         = useFunctionStore((s) => s.features);
   const isAnimating      = useAnimationStore((s) => s.isAnyAnimating);
   const canvasMode       = useCanvasToolStore((s) => s.mode);
+  const trajectoryFrames = useAnimationTrajectoryStore((s) => s.frames);
 
   // ── Init editor once ───────────────────────────────────────────────────
   useEffect(() => {
@@ -296,11 +352,23 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     try {
       ctx.save();
 
-      // All curves render in a uniform dark colour; the active one gets primary highlight
-      const CURVE_COLOR    = '#6B7280';   // neutral gray (distinct from axis #374151)
-      const ACTIVE_COLOR   = COLORS.primary;
+      if (trajectoryFrames.length > 0) {
+        trajectoryFrames.forEach((frame) => {
+          renderCurve(ctx, frame.points, vp, frame.color, {
+            alpha: 0.42,
+            lineWidth: 2,
+            lineDash: frame.lineStyle === 'dashed' ? [8, 6] : [],
+          });
+        });
+      }
 
-      // Render inactive curves first (dark), then the active curve on top (primary + glow)
+      for (const fn of functions) {
+        if (!fn.visible || !fn.inverseDisplay.showMirrorLine) continue;
+        renderMirrorLine(ctx, vp);
+        break;
+      }
+
+      // Render inactive curves first, then the active curve on top with stronger emphasis.
       const activeId = useFunctionStore.getState().activeFunctionId;
       let activeFn: FunctionEntry | null = null;
       let totalPointsRendered = 0;
@@ -309,14 +377,30 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       for (const fn of functions) {
         if (!fn.visible) continue;
         if (fn.id === activeId) { activeFn = fn; continue; }
-        const pts = renderOneCurve(ctx, fn, functions, vp, steps, { colorOverride: CURVE_COLOR });
+        const pts = renderOneCurve(ctx, fn, functions, vp, steps);
         totalPointsRendered += pts;
       }
-      // Active curve: primary colour + glow highlight
+      // Active curve: preserve its own colour but add glow + thicker stroke
       if (activeFn) {
-        const pts = renderOneCurve(ctx, activeFn, functions, vp, steps, { lineWidth: 3, glow: true, colorOverride: ACTIVE_COLOR });
+        const pts = renderOneCurve(ctx, activeFn, functions, vp, steps, { lineWidth: 3, glow: true });
         totalPointsRendered += pts;
         console.log(`[Canvas] active "${activeFn.label}" rendered ${pts} pts`);
+      }
+
+      for (const fn of functions) {
+        if (!fn.visible || !fn.inverseDisplay.showInverseCurve) continue;
+        const inverse = analyzeInverseFunction(fn, functions, viewport, cssW, cssH, steps);
+        renderCurve(ctx, inverse.reflectedPoints, vp, fn.color, {
+          lineWidth: fn.id === activeId ? 3 : 2,
+          alpha: inverse.isApproximatelyInjective ? 0.9 : 0.55,
+          lineDash: inverse.isApproximatelyInjective ? [10, 0] : [7, 6],
+        });
+      }
+
+      if (features.showAsymptotes) {
+        for (const fn of functions) {
+          renderFunctionAsymptotes(ctx, fn, vp);
+        }
       }
 
       // T6.1 — derivative curves
@@ -340,15 +424,24 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
           const derivPoints = sampleDerivativeWithDomain(
             compiled, derivedCompiled, vp, fn.transform, steps,
             hasScope ? derivScope : undefined,
+            fn.displayDomain,
           );
           const isActiveDerivative = fn.id === activeId;
-          const derivColor = isActiveDerivative ? ACTIVE_COLOR : CURVE_COLOR;
-          renderCurve(ctx, derivPoints, vp, derivColor, { alpha: 0.5, lineDash: [5, 4], lineWidth: 1.5 });
+          const derivColor = COLORS.derivativeCurve;
+          renderCurve(ctx, derivPoints, vp, derivColor, {
+            alpha: isActiveDerivative ? 0.95 : 0.85,
+            lineDash: [10, 6],
+            lineWidth: isActiveDerivative ? 2.6 : 2.2,
+          });
         }
       }
 
       if (features.showFeaturePoints) {
         renderFeaturePoints(ctx, functions, vp);
+      }
+
+      if (features.showIntersections) {
+        renderIntersections(ctx, intersectionsRef.current, functions, vp);
       }
 
       ctx.restore();
@@ -374,7 +467,7 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
     }
     useInteractionStore.getState().setHoveredPoint(null);
     useInteractionStore.getState().setHoveredIntersection(null);
-  }, [functions, activeFunctionId, viewport, features.showGrid, features.showAxisLabels, features.showDerivative, features.showFeaturePoints, canvasSize, isAnimating]);
+  }, [functions, activeFunctionId, viewport, features.showGrid, features.showAxisLabels, features.showDerivative, features.showFeaturePoints, features.showIntersections, features.showAsymptotes, canvasSize, isAnimating, trajectoryFrames]);
 
   // ── T6.4: Tangent line on dynamic layer ────────────────────────────────
   useEffect(() => {
@@ -583,6 +676,27 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       scheduleRaf();
     };
 
+    const updateTangentHover = (canvasX: number) => {
+      const vp = getLiveVp();
+      const [mathX] = vp.toMath(canvasX, 0);
+      const store = useFunctionStore.getState();
+      const activeFn = store.functions.find((f) => f.id === store.activeFunctionId);
+      if (!activeFn || activeFn.mode !== 'standard' || !activeFn.visible) {
+        store.setTangentPoint(null, 0, null);
+        return;
+      }
+
+      const mathY = evaluateStandard(activeFn, mathX);
+      if (mathY === null) {
+        store.setTangentPoint(null, 0, null);
+        return;
+      }
+
+      const slope = getNumericalDerivative(activeFn, mathX);
+      store.setTangentPoint(mathX, mathY, slope);
+      scheduleRaf();
+    };
+
     // ── Event handlers ──────────────────────────────────────────────────
 
     // Track pointer-down position to distinguish click from drag (for pin feature)
@@ -628,15 +742,20 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       const vp = getLiveVp();
       editorRef.current?.dispatchPointerMove(buildToolEvent(e, canvas, vp));
 
+      const rect = canvas.getBoundingClientRect();
+      const canvasX = e.clientX - rect.left;
+      const canvasY = e.clientY - rect.top;
+      const showTangentNow = useFunctionStore.getState().features.showTangent;
+
+      if (!isDraggingRef.current && showTangentNow) {
+        updateTangentHover(canvasX);
+      }
+
       // Snap only when not panning/zooming and tangent mode is off
       // Enable snap in pan-zoom, select, and pin-point modes
       const currentMode = useCanvasToolStore.getState().mode;
       const snapModes = ['pan-zoom', 'select', 'pin-point'];
-      const showTangentNow = useFunctionStore.getState().features.showTangent;
       if (!isDraggingRef.current && !showTangentNow && snapModes.includes(currentMode)) {
-        const rect    = canvas.getBoundingClientRect();
-        const canvasX = e.clientX - rect.left;
-        const canvasY = e.clientY - rect.top;
         updateSnap(canvasX, canvasY);
       }
     };
@@ -679,7 +798,16 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
           }
         } else {
           // pan-zoom / select mode: click to select + open inspector
-          if (downHoveredPoint?.isVisible) {
+          if (downHoveredIntersection) {
+            useInteractionStore.getState().togglePinnedIntersection({
+              mathX: downHoveredIntersection.mathX,
+              mathY: downHoveredIntersection.mathY,
+              fnId1: downHoveredIntersection.fnId1,
+              fnId2: downHoveredIntersection.fnId2,
+            });
+            useFunctionStore.getState().setActiveFunctionId(downHoveredIntersection.fnId1);
+            setInspector(null);
+          } else if (downHoveredPoint?.isVisible) {
             useFunctionStore.getState().setActiveFunctionId(downHoveredPoint.functionId);
             setInspector({
               x: e.clientX - rect2.left,
@@ -687,15 +815,6 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
               functionId: downHoveredPoint.functionId,
               mathX: downHoveredPoint.mathX,
               mathY: downHoveredPoint.mathY,
-            });
-          } else if (downHoveredIntersection) {
-            useFunctionStore.getState().setActiveFunctionId(downHoveredIntersection.fnId1);
-            setInspector({
-              x: e.clientX - rect2.left,
-              y: e.clientY - rect2.top,
-              functionId: downHoveredIntersection.fnId1,
-              mathX: downHoveredIntersection.mathX,
-              mathY: downHoveredIntersection.mathY,
             });
           } else {
             // Click on empty canvas: deselect active function
@@ -715,6 +834,9 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       isDraggingRef.current = false;
       useInteractionStore.getState().setHoveredPoint(null);
       useInteractionStore.getState().setHoveredIntersection(null);
+      if (useFunctionStore.getState().features.showTangent) {
+        useFunctionStore.getState().setTangentPoint(null, 0, null);
+      }
       scheduleRaf();
     };
 
@@ -907,14 +1029,17 @@ export const FunctionCanvas = forwardRef<FunctionCanvasHandle>(function Function
       exprStr,
       segments:    [],
       color:       parent?.color ?? (FUNCTION_COLORS[count % FUNCTION_COLORS.length] as string),
+      lineStyle:   parent?.lineStyle ?? 'solid',
       visible:     true,
       transform:   { ...DEFAULT_TRANSFORM },
+      displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+      inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
       templateId:  null,
       namedParams: [],
     };
 
     editorInstance?.execute(new AddFunctionCommand(entry));
-    store.setActiveFunctionId(entry.id);
+    if (parent) store.setActiveFunctionId(parent.id);
     setCtxMenu(null);
   }, [ctxMenu]);
 

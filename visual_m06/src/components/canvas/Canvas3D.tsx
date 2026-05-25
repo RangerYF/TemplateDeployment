@@ -9,6 +9,8 @@ import { add3D, cross3D, dot3D, mag3D, angle3D, toDeg } from '@/engine/vectorMat
 import { useFmt } from '@/hooks/useFmt';
 import { useRefFrameDrag } from '@/hooks/useRefFrameDrag';
 import { COLORS, RADIUS } from '@/styles/tokens';
+import { toVecLatex } from '@/lib/vecLatex';
+import { InlineLatex } from '@/components/shared/InlineLatex';
 
 // ─── 3D 向量箭头组件 ───
 
@@ -60,12 +62,12 @@ function Arrow3D({ from = [0, 0, 0], to, color, label, opacity = 1 }: Arrow3DPro
             color,
             fontWeight: 700,
             fontSize: 18,
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: "Inter, 'PingFang SC', sans-serif",
             textShadow: '0 0 4px #fff, 0 0 8px #fff',
             whiteSpace: 'nowrap',
           }}
         >
-          {label}
+          {toVecLatex(label) ? <InlineLatex latex={toVecLatex(label)!} /> : label}
         </div>
       </Html>
     </group>

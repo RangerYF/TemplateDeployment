@@ -94,44 +94,27 @@ export function ScenarioPanel() {
                   if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
-                {/* ID 标签 */}
                 <div
                   style={{
                     fontSize: 14,
-                    color: isActive ? COLORS.primary : COLORS.textMuted,
                     fontWeight: 600,
-                    letterSpacing: '0.04em',
-                    marginBottom: 2,
-                  }}
-                >
-                  {preset.id}
-                </div>
-
-                {/* 名称 */}
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? COLORS.text : COLORS.textSecondary,
+                    color: isActive ? COLORS.primary : COLORS.text,
                     lineHeight: 1.4,
                   }}
                 >
                   {preset.name}
                 </div>
 
-                {/* 教学要点（折叠显示） */}
-                {isActive && (
-                  <div
-                    style={{
-                      fontSize: 14,
-                      color: COLORS.textMuted,
-                      marginTop: 4,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {preset.teachingPoint}
-                  </div>
-                )}
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: COLORS.textMuted,
+                    marginTop: 2,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {preset.teachingPoint}
+                </div>
               </button>
             );
           })

@@ -56,6 +56,7 @@ import { P13DoubleRodDrivenPage } from './pages/P13DoubleRodDrivenPage';
 import { P13VerticalRailRodPage } from './pages/P13VerticalRailRodPage';
 import { P08DisplayControls } from './panels/P08DisplayControls';
 import { P08ResultOverlay } from './panels/P08ResultOverlay';
+import { P08StageHeader } from './panels/P08StageHeader';
 import {
   WireBFieldCanvasOverlay,
   WireBFieldControlPanel,
@@ -96,6 +97,15 @@ import {
   getLoopCameraState,
 } from '@/domains/em/logic/loop-current-3d';
 import { SOLENOID_BFIELD_PRESET_ID } from '@/domains/em/logic/solenoid-teaching';
+import {
+  getPotentialSurfacePanelBounds,
+  getPotentialSurfaceResetButtonBounds,
+} from '@/domains/em/viewports/potential-surface-renderer';
+import {
+  getP08CanvasBackground,
+  getP08CanvasShellStyle,
+  getP08PageBackground,
+} from './p08/p08Theme';
 
 const P08_ROTATION_CIRCLE_PRESET_ID = 'P02-EMF038-rotation-circle';
 const P08_ELECTRIC_OSCILLATION_PRESET_ID = 'P02-EMF011-efield-acceleration';
@@ -998,6 +1008,7 @@ function SimulatorView({ presetId, onBack }: SimulatorViewProps) {
             values={paramValues}
             onValueChange={handleParamChange}
             onBack={onBack}
+            presetId={isTeachingScene ? undefined : presetId}
           />
         </PanelErrorBoundary>
       )}
@@ -1022,6 +1033,8 @@ function SimulatorView({ presetId, onBack }: SimulatorViewProps) {
           <TimelineBar />
         </PanelErrorBoundary>
       ) : null}
+      pageStyle={!isTeachingScene && P08_PRESET_IDS.has(presetId) ? getP08PageBackground(presetId) : undefined}
+      topRowStyle={!isTeachingScene && P08_PRESET_IDS.has(presetId) ? { padding: 14, gap: 14 } : undefined}
     />
   );
 }
@@ -1039,10 +1052,17 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
   const entities = useSimulationStore((s) => s.simulationState.scene.entities);
   const paramValues = useSimulationStore((s) => s.paramValues);
   const placePotentialProbe = useSimulationStore((s) => s.placePotentialProbe);
+  const setPotentialProbe = useSimulationStore((s) => s.setPotentialProbe);
+  const potentialProbeA = useSimulationStore((s) => s.potentialProbeA);
+  const potentialProbeB = useSimulationStore((s) => s.potentialProbeB);
+  const activePotentialProbe = useSimulationStore((s) => s.activePotentialProbe);
+  const setActivePotentialProbe = useSimulationStore((s) => s.setActivePotentialProbe);
+  const setElectrostaticSurface3D = useSimulationStore((s) => s.setElectrostaticSurface3D);
+  const resetElectrostaticSurface3D = useSimulationStore((s) => s.resetElectrostaticSurface3D);
   const [popup, setPopup] = useState<{ entity: Entity; x: number; y: number } | null>(null);
   const [isLoopOrbiting, setIsLoopOrbiting] = useState(false);
   const dragRef = useRef<{
-    mode: 'none' | 'pan' | 'entity' | 'loop-orbit';
+    mode: 'none' | 'pan' | 'entity' | 'loop-orbit' | 'surface-3d' | 'probe';
     lastX: number;
     lastY: number;
     entityId: string | null;
@@ -1051,6 +1071,9 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     suppressClick: boolean;
     orbitYaw: number;
     orbitPitch: number;
+    surfaceYaw: number;
+    surfacePitch: number;
+    probeLabel: 'A' | 'B' | null;
   }>({
     mode: 'none',
     lastX: 0,
@@ -1061,6 +1084,9 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     suppressClick: false,
     orbitYaw: 0,
     orbitPitch: 0,
+    surfaceYaw: 0,
+    surfacePitch: 0,
+    probeLabel: null,
   });
 
   const isCircuit = viewport === 'circuit';
@@ -1082,6 +1108,31 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     Array.from(entities.values()).some((entity) => entity.type === 'particle-emitter');
   const supportsPotentialMeasurement = isP08Scene && canDragPointCharges;
 
+  const getProbeHitLabel = useCallback((container: HTMLElement, clientX: number, clientY: number): 'A' | 'B' | null => {
+    if (!supportsPotentialMeasurement) return null;
+    const rect = container.getBoundingClientRect();
+    const screenX = clientX - rect.left;
+    const screenY = clientY - rect.top;
+    const transform = {
+      scale: transformRef.current.scale,
+      origin: { x: transformRef.current.originX, y: transformRef.current.originY },
+    };
+
+    const candidates = [
+      potentialProbeA ? { label: 'A' as const, point: potentialProbeA } : null,
+      potentialProbeB ? { label: 'B' as const, point: potentialProbeB } : null,
+    ].filter(Boolean) as Array<{ label: 'A' | 'B'; point: { x: number; y: number } }>;
+
+    for (const candidate of candidates) {
+      const px = transform.origin.x + (candidate.point.x * transform.scale);
+      const py = transform.origin.y - (candidate.point.y * transform.scale);
+      if (Math.hypot(px - screenX, py - screenY) <= 14) {
+        return candidate.label;
+      }
+    }
+    return null;
+  }, [potentialProbeA, potentialProbeB, supportsPotentialMeasurement, transformRef]);
+
   useEffect(() => {
     if (!isTeachingScene) return;
     setPopup(null);
@@ -1096,6 +1147,31 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
 
   // 滚轮缩放
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (supportsPotentialMeasurement && target.tagName === 'CANVAS') {
+      const panelBounds = getPotentialSurfacePanelBounds(target as HTMLCanvasElement, {
+        avoidBottomLeftLegend: useSimulationStore.getState().showPotentialMap,
+      });
+      if (panelBounds) {
+        const rect = target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const insidePanel =
+          x >= panelBounds.x &&
+          x <= panelBounds.x + panelBounds.width &&
+          y >= panelBounds.y &&
+          y <= panelBounds.y + panelBounds.height;
+        if (insidePanel) {
+          e.preventDefault();
+          const current = useSimulationStore.getState().electrostaticSurface3D;
+          setElectrostaticSurface3D({
+            zoom: Math.max(0.7, Math.min(1.8, current.zoom * (e.deltaY > 0 ? 0.92 : 1.08))),
+          });
+          return;
+        }
+      }
+    }
+
     e.preventDefault();
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.max(30, Math.min(2500, transformRef.current.scale * factor));
@@ -1108,7 +1184,7 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     transformRef.current.originX = mx - (mx - transformRef.current.originX) * ratio;
     transformRef.current.originY = my - (my - transformRef.current.originY) * ratio;
     transformRef.current.scale = newScale;
-  }, [transformRef]);
+  }, [setElectrostaticSurface3D, supportsPotentialMeasurement, transformRef]);
 
   const getWorldPoint = useCallback((container: HTMLElement, clientX: number, clientY: number) => {
     const rect = container.getBoundingClientRect();
@@ -1121,6 +1197,48 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
+    const canvasTarget = target.tagName === 'CANVAS' ? target as HTMLCanvasElement : null;
+
+    if (e.button === 0 && canvasTarget && supportsPotentialMeasurement) {
+      const panelBounds = getPotentialSurfacePanelBounds(canvasTarget, {
+        avoidBottomLeftLegend: useSimulationStore.getState().showPotentialMap,
+      });
+      if (panelBounds) {
+        const rect = canvasTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const resetBounds = getPotentialSurfaceResetButtonBounds(panelBounds);
+        const inReset =
+          x >= resetBounds.x &&
+          x <= resetBounds.x + resetBounds.width &&
+          y >= resetBounds.y &&
+          y <= resetBounds.y + resetBounds.height;
+        if (inReset) {
+          resetElectrostaticSurface3D();
+          return;
+        }
+
+        const inSurfacePanel =
+          x >= panelBounds.x &&
+          x <= panelBounds.x + panelBounds.width &&
+          y >= panelBounds.y &&
+          y <= panelBounds.y + panelBounds.height;
+        if (inSurfacePanel) {
+          const surface = useSimulationStore.getState().electrostaticSurface3D;
+          dragRef.current = {
+            ...dragRef.current,
+            mode: 'surface-3d',
+            lastX: e.clientX,
+            lastY: e.clientY,
+            suppressClick: false,
+            surfaceYaw: surface.yawDeg,
+            surfacePitch: surface.pitchDeg,
+            probeLabel: null,
+          };
+          return;
+        }
+      }
+    }
 
     if (e.button === 0 && canRotateLoopView) {
       if (target.tagName !== 'CANVAS') return;
@@ -1154,6 +1272,20 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
 
     if (e.button !== 0) return;
     if (target.tagName !== 'CANVAS') return;
+
+    const probeHit = getProbeHitLabel(e.currentTarget, e.clientX, e.clientY);
+    if (probeHit) {
+      setActivePotentialProbe(probeHit);
+      dragRef.current = {
+        ...dragRef.current,
+        mode: 'probe',
+        lastX: e.clientX,
+        lastY: e.clientY,
+        suppressClick: false,
+        probeLabel: probeHit,
+      };
+      return;
+    }
     if (!canDragPointCharges && !canDragParticleEmitters) return;
 
     const worldPoint = getWorldPoint(e.currentTarget, e.clientX, e.clientY);
@@ -1181,10 +1313,13 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
         suppressClick: false,
         orbitYaw: dragRef.current.orbitYaw,
         orbitPitch: dragRef.current.orbitPitch,
+        surfaceYaw: dragRef.current.surfaceYaw,
+        surfacePitch: dragRef.current.surfacePitch,
+        probeLabel: null,
       };
       return;
     }
-  }, [canDragParticleEmitters, canDragPointCharges, canRotateLoopView, entities, getWorldPoint, transformRef]);
+  }, [canDragParticleEmitters, canDragPointCharges, canRotateLoopView, entities, getProbeHitLabel, getWorldPoint, resetElectrostaticSurface3D, setActivePotentialProbe, supportsPotentialMeasurement, transformRef]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (dragRef.current.mode === 'none') return;
@@ -1214,6 +1349,26 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
       return;
     }
 
+    if (dragRef.current.mode === 'surface-3d') {
+      dragRef.current.surfaceYaw += dx * 0.42;
+      dragRef.current.surfacePitch = Math.max(-15, Math.min(70, dragRef.current.surfacePitch - (dy * 0.24)));
+      setElectrostaticSurface3D({
+        yawDeg: dragRef.current.surfaceYaw,
+        pitchDeg: dragRef.current.surfacePitch,
+      });
+      dragRef.current.lastX = e.clientX;
+      dragRef.current.lastY = e.clientY;
+      return;
+    }
+
+    if (dragRef.current.mode === 'probe' && dragRef.current.probeLabel) {
+      const worldPoint = getWorldPoint(e.currentTarget, e.clientX, e.clientY);
+      setPotentialProbe(dragRef.current.probeLabel, worldPoint);
+      dragRef.current.lastX = e.clientX;
+      dragRef.current.lastY = e.clientY;
+      return;
+    }
+
     if (dragRef.current.mode === 'entity' && dragRef.current.entityId) {
       const worldPoint = getWorldPoint(e.currentTarget, e.clientX, e.clientY);
       simulator.updateEntityPosition(dragRef.current.entityId, {
@@ -1224,7 +1379,7 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
       dragRef.current.lastX = e.clientX;
       dragRef.current.lastY = e.clientY;
     }
-  }, [getWorldPoint, transformRef]);
+  }, [getWorldPoint, setElectrostaticSurface3D, setPotentialProbe, transformRef]);
 
   const handleMouseUp = useCallback(() => {
     if (dragRef.current.mode === 'loop-orbit') {
@@ -1234,9 +1389,13 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     }
 
     setIsLoopOrbiting(false);
+    if (dragRef.current.mode === 'probe') {
+      setActivePotentialProbe(null);
+    }
     dragRef.current.mode = 'none';
     dragRef.current.entityId = null;
-  }, []);
+    dragRef.current.probeLabel = null;
+  }, [setActivePotentialProbe]);
 
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (dragRef.current.suppressClick) {
@@ -1247,6 +1406,23 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
     setPopup(null);
     const target = e.target as HTMLElement;
     if (target.tagName !== 'CANVAS') return;
+
+    if (supportsPotentialMeasurement) {
+      const panelBounds = getPotentialSurfacePanelBounds(target as HTMLCanvasElement, {
+        avoidBottomLeftLegend: useSimulationStore.getState().showPotentialMap,
+      });
+      if (panelBounds) {
+        const rect = target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const inSurfacePanel =
+          x >= panelBounds.x &&
+          x <= panelBounds.x + panelBounds.width &&
+          y >= panelBounds.y &&
+          y <= panelBounds.y + panelBounds.height;
+        if (inSurfacePanel) return;
+      }
+    }
 
     const tf = {
       scale: transformRef.current.scale,
@@ -1279,7 +1455,15 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
         flex: 1,
         display: 'flex',
         overflow: 'hidden',
-        cursor: canRotateLoopView ? (isLoopOrbiting ? 'grabbing' : 'grab') : 'default',
+        cursor:
+          dragRef.current.mode === 'surface-3d' || dragRef.current.mode === 'probe'
+            ? 'grabbing'
+            : canRotateLoopView
+              ? (isLoopOrbiting ? 'grabbing' : 'grab')
+              : activePotentialProbe
+                ? 'grab'
+                : 'default',
+        ...(isP08Scene ? getP08CanvasShellStyle(presetId) : {}),
       }}
       onClick={handleCanvasClick}
       onWheel={handleWheel}
@@ -1294,8 +1478,9 @@ function SimulatorCanvas({ presetId, onContextReady, transformRef }: {
         backgroundStyle={isLoopTeachingScene ? {
           background:
             'radial-gradient(circle at 50% 18%, rgba(255,255,255,0.98) 0%, rgba(244,247,242,0.96) 36%, rgba(231,237,230,0.92) 100%)',
-        } : undefined}
+        } : isP08Scene ? getP08CanvasBackground(presetId, viewport) : undefined}
       />
+      {isP08Scene && <P08StageHeader presetId={presetId} viewport={viewport} />}
       {isCircuit && (
         <button
           onClick={(e) => { e.stopPropagation(); setInfoDensity(isRealistic ? 'standard' : 'detailed'); }}

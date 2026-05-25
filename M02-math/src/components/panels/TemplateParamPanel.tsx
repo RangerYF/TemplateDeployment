@@ -9,6 +9,19 @@ import type { FunctionParam } from '@/types';
 import { COLORS } from '@/styles/colors';
 import { focusRing } from '@/styles/interactionStyles';
 
+function inferDecimals(step?: number): number | null {
+  if (!step || !Number.isFinite(step)) return null;
+  const text = String(step);
+  const dotIndex = text.indexOf('.');
+  return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
+}
+
+function formatParamValue(value: number, step?: number): string {
+  const decimals = inferDecimals(step);
+  if (decimals === null) return String(value);
+  return value.toFixed(decimals);
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function TemplateParamPanel() {
@@ -32,7 +45,10 @@ export function TemplateParamPanel() {
       return;
     }
     setDrafts(
-      Object.fromEntries(fn.namedParams.map((p) => [p.name, String(p.value)])),
+      Object.fromEntries(fn.namedParams.map((p) => {
+        const spec = fn.templateId ? getTemplate(fn.templateId)?.defaultParams.find((item) => item.name === p.name) : null;
+        return [p.name, formatParamValue(p.value, spec?.step)];
+      })),
     );
   }, [activeFunctionId]);
 
@@ -70,7 +86,8 @@ export function TemplateParamPanel() {
     // Live update store (no command — mid-drag)
     useFunctionStore.getState().updateFunction(fnId, buildUpdate(paramName, value));
     // Sync draft string
-    setDrafts((d) => ({ ...d, [paramName]: String(value) }));
+    const spec = template?.defaultParams.find((p) => p.name === paramName);
+    setDrafts((d) => ({ ...d, [paramName]: formatParamValue(value, spec?.step) }));
   };
 
   const handleSliderCommit = (paramName: string, value: number) => {
@@ -113,7 +130,8 @@ export function TemplateParamPanel() {
     if (isNaN(parsed)) {
       // Revert draft to current store value
       const current = namedParams.find((p) => p.name === paramName);
-      setDrafts((d) => ({ ...d, [paramName]: String(current?.value ?? 0) }));
+      const spec = template?.defaultParams.find((p) => p.name === paramName);
+      setDrafts((d) => ({ ...d, [paramName]: formatParamValue(current?.value ?? 0, spec?.step) }));
       return;
     }
 
@@ -134,7 +152,8 @@ export function TemplateParamPanel() {
       ),
     );
 
-    setDrafts((d) => ({ ...d, [paramName]: String(parsed) }));
+    const spec = template?.defaultParams.find((p) => p.name === paramName);
+    setDrafts((d) => ({ ...d, [paramName]: formatParamValue(parsed, spec?.step) }));
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent, paramName: string) => {
@@ -142,7 +161,8 @@ export function TemplateParamPanel() {
       (e.target as HTMLInputElement).blur();
     } else if (e.key === 'Escape') {
       const current = namedParams.find((p) => p.name === paramName);
-      setDrafts((d) => ({ ...d, [paramName]: String(current?.value ?? 0) }));
+      const spec = template?.defaultParams.find((p) => p.name === paramName);
+      setDrafts((d) => ({ ...d, [paramName]: formatParamValue(current?.value ?? 0, spec?.step) }));
       (e.target as HTMLInputElement).blur();
     }
   };
@@ -168,7 +188,7 @@ export function TemplateParamPanel() {
       {/* Param rows */}
       {namedParams.map((param) => {
         const spec  = template?.defaultParams.find((p) => p.name === param.name);
-        const draft = drafts[param.name] ?? String(param.value);
+        const draft = drafts[param.name] ?? formatParamValue(param.value, spec?.step);
 
         return (
           <div key={param.name} style={{ marginBottom: param.hint ? '4px' : '10px' }}>

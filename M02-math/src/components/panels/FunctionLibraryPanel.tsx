@@ -9,7 +9,13 @@ import { useFunctionStore } from '@/editor/store/functionStore';
 import { executeM02Command } from '@/editor/commands/m02Execute';
 import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
 import { FUNCTION_TEMPLATES } from '@/engine/functionTemplates';
-import { FUNCTION_COLORS, DEFAULT_TRANSFORM, type FunctionEntry } from '@/types';
+import {
+  FUNCTION_COLORS,
+  DEFAULT_TRANSFORM,
+  DEFAULT_FUNCTION_DISPLAY_DOMAIN,
+  DEFAULT_INVERSE_FUNCTION_DISPLAY,
+  type FunctionEntry,
+} from '@/types';
 import { COLORS } from '@/styles/colors';
 import { createId } from '@/lib/id';
 
@@ -53,8 +59,11 @@ export function FunctionLibraryPanel({
       exprStr,
       segments:    [],
       color,
+      lineStyle:   'solid',
       visible:     true,
       transform:   { ...DEFAULT_TRANSFORM },
+      displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+      inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
       templateId,
       namedParams,
     };
@@ -69,6 +78,12 @@ export function FunctionLibraryPanel({
 
   return (
     <div style={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+      <span
+        style={{ fontSize: 11, fontWeight: 600, color: COLORS.textSecondary, marginRight: 2 }}
+        title="从模板或自定义公式新建函数"
+      >
+        添加函数
+      </span>
       {FUNCTION_TEMPLATES.map((tmpl) => (
         <button
           key={tmpl.id}

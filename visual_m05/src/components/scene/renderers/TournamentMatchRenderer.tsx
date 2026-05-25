@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { COLORS } from '@/styles/tokens';
-import type { TournamentMatchResult, TournamentRound, Player } from '@/engine/simulations/tournamentMatch';
+import type { TournamentMatchResult, TournamentRound, Player, TournamentEventStat } from '@/engine/simulations/tournamentMatch';
+import { KatexInline } from '@/components/ui/KatexInline';
 
 const VW = 920, VH = 580;
 
@@ -46,6 +48,9 @@ function computeLaneStates(rounds: TournamentRound[]): Record<Player, PlayerStat
 }
 
 export function TournamentMatchRenderer({ result }: { result: TournamentMatchResult }) {
+  // 推导浮层状态 (v0.4 反馈 #8)
+  const [expandedEvent, setExpandedEvent] = useState<TournamentEventStat | null>(null);
+
   // ─── Top: sample tournament swim-lane chart (first trial) ───
   const sampleRounds = result.sampleRounds;
   const sampleChampion = result.trials.length > 0 ? result.trials[0].champion : null;
@@ -81,6 +86,7 @@ export function TournamentMatchRenderer({ result }: { result: TournamentMatchRes
   const maxGamesFreq = Math.max(0.01, ...gamesEntries.map(e => e.freq));
 
   return (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
     <svg width="100%" height="100%" viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="xMidYMid meet">
       <rect width={VW} height={VH} fill={COLORS.bg} />
 
@@ -326,25 +332,40 @@ export function TournamentMatchRenderer({ result }: { result: TournamentMatchRes
         追踪事件频率 vs 理论
       </text>
       {result.events.slice(0, 6).map((ev, i) => {
-        const y = EVENTS_Y + 32 + i * 32;
-        const maxBarW = EVENTS_W - 130;
+        const ROW_H = 38;
+        const y = EVENTS_Y + 30 + i * ROW_H;
+        const maxBarW = EVENTS_W - 140;
         const obsW = maxBarW * ev.freq;
         const theorW = ev.theoreticalProb !== undefined ? maxBarW * ev.theoreticalProb : 0;
         return (
           <g key={ev.id}>
             <text x={EVENTS_X + 12} y={y + 4} fontSize={11} fill={COLORS.text}>{ev.label}</text>
+            {/* 推导按钮 📖 */}
+            {ev.derivation && (
+              <g style={{ cursor: 'pointer' }} onClick={() => setExpandedEvent(ev)}>
+                <rect x={EVENTS_X + EVENTS_W - 30} y={y - 6} width={22} height={14} rx={3}
+                  fill={COLORS.primaryLight} stroke={COLORS.primary} strokeWidth={0.8} />
+                <text x={EVENTS_X + EVENTS_W - 19} y={y + 4} textAnchor="middle" fontSize={9} fontWeight={600} fill={COLORS.primary}>推导</text>
+              </g>
+            )}
             <rect x={EVENTS_X + 12} y={y + 8} width={maxBarW} height={6} rx={2} fill={COLORS.bgMuted} />
             <rect x={EVENTS_X + 12} y={y + 8} width={Math.max(obsW, 1)} height={6} rx={2} fill={COLORS.primary} />
             {ev.theoreticalProb !== undefined && (
               <line x1={EVENTS_X + 12 + theorW} y1={y + 5} x2={EVENTS_X + 12 + theorW} y2={y + 17}
                 stroke={COLORS.error} strokeWidth={2} vectorEffect="non-scaling-stroke" />
             )}
-            <text x={EVENTS_X + EVENTS_W - 8} y={y + 14} textAnchor="end" fontSize={10} fill={COLORS.textSecondary}>
-              {(ev.freq * 100).toFixed(1)}%
-              {ev.theoreticalProb !== undefined && (
-                <tspan fill={COLORS.error}> · 理论 {(ev.theoreticalProb * 100).toFixed(1)}%</tspan>
-              )}
+            {/* 模拟频率（用 SVG text） */}
+            <text x={EVENTS_X + 12} y={y + 26} fontSize={9} fill={COLORS.textSecondary}>
+              模拟 {(ev.freq * 100).toFixed(1)}%
             </text>
+            {/* 理论概率分式（用 foreignObject + KaTeX） */}
+            {ev.theoreticalLatex && (
+              <foreignObject x={EVENTS_X + 80} y={y + 16} width={EVENTS_W - 110} height={20}>
+                <div style={{ fontSize: 11, color: COLORS.error, lineHeight: '14px' }}>
+                  · 理论 <KatexInline math={ev.theoreticalLatex} />
+                </div>
+              </foreignObject>
+            )}
           </g>
         );
       })}
@@ -365,5 +386,80 @@ export function TournamentMatchRenderer({ result }: { result: TournamentMatchRes
       </text>
 
     </svg>
+
+    {/* 推导浮层 (v0.4 反馈 #8) */}
+    {expandedEvent && expandedEvent.derivation && (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 20,
+        }}
+        onClick={() => setExpandedEvent(null)}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: 'min(640px, 92%)',
+            maxHeight: '88%',
+            overflowY: 'auto',
+            backgroundColor: COLORS.bg,
+            borderRadius: 12,
+            padding: '24px 28px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            border: `1px solid ${COLORS.border}`,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.text }}>
+                {expandedEvent.derivation.title}
+              </div>
+              <div style={{ fontSize: 13, color: COLORS.textMuted, marginTop: 4 }}>
+                事件：{expandedEvent.label}
+                {expandedEvent.theoreticalLatex && (
+                  <span style={{ marginLeft: 8 }}>
+                    · 理论概率 <KatexInline math={`P = ${expandedEvent.theoreticalLatex}`} />
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setExpandedEvent(null)}
+              style={{
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 22, color: COLORS.textMuted, padding: '0 8px',
+              }}
+              aria-label="关闭"
+            >×</button>
+          </div>
+          <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 16 }}>
+            {expandedEvent.derivation.steps.map((step, i) => (
+              <div key={i} style={{ margin: '14px 0', fontSize: 14, color: COLORS.text, textAlign: 'center' }}>
+                <KatexInline math={step} displayMode />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 18, fontSize: 12, color: COLORS.textMuted, textAlign: 'center' }}>
+            模拟频率 {(expandedEvent.freq * 100).toFixed(2)}% · 模拟次数 {expandedEvent.occurCount}
+          </div>
+          <div style={{ marginTop: 16, textAlign: 'right' }}>
+            <button
+              onClick={() => setExpandedEvent(null)}
+              style={{
+                padding: '6px 16px', borderRadius: 6,
+                backgroundColor: COLORS.primary, color: COLORS.white,
+                border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              }}
+            >关闭</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </div>
   );
 }

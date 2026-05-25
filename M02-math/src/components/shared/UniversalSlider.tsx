@@ -47,6 +47,10 @@ export interface UniversalSliderProps {
   displayValue?: string;
   /** Accent color (default primary green) */
   color?: string;
+  /** Optional parser for manual text input (e.g. fractions / radicals). */
+  parseInput?: (raw: string) => number | null;
+  /** Optional formatter used when entering edit mode and syncing draft. */
+  formatInputValue?: (value: number) => string;
 }
 
 function inferDecimals(step: number): number {
@@ -68,6 +72,8 @@ export function UniversalSlider({
   unit = '',
   displayValue,
   color,
+  parseInput,
+  formatInputValue,
 }: UniversalSliderProps) {
   const dp = decimals ?? inferDecimals(step);
   const [isEditing, setIsEditing] = useState(false);
@@ -77,9 +83,9 @@ export function UniversalSlider({
   // Sync draft when value changes externally while not editing
   useEffect(() => {
     if (!isEditing) {
-      setDraft(value.toFixed(dp));
+      setDraft(formatInputValue ? formatInputValue(value) : value.toFixed(dp));
     }
-  }, [value, dp, isEditing]);
+  }, [value, dp, isEditing, formatInputValue]);
 
   const handleSliderChange = useCallback(([v]: number[]) => {
     onChange(v);
@@ -92,19 +98,19 @@ export function UniversalSlider({
   // Manual input handlers
   const startEdit = useCallback(() => {
     if (disabled) return;
-    setDraft(value.toFixed(dp));
+    setDraft(formatInputValue ? formatInputValue(value) : value.toFixed(dp));
     setIsEditing(true);
     setTimeout(() => inputRef.current?.select(), 0);
-  }, [value, dp, disabled]);
+  }, [value, dp, disabled, formatInputValue]);
 
   const commitEdit = useCallback(() => {
     setIsEditing(false);
-    const parsed = parseFloat(draft);
-    if (isNaN(parsed)) return; // revert
+    const parsed = parseInput ? parseInput(draft) : parseFloat(draft);
+    if (parsed === null || Number.isNaN(parsed)) return; // revert
     const clamped = Math.max(min, Math.min(max, parsed));
     onChange(clamped);
     onCommit(clamped);
-  }, [draft, min, max, onChange, onCommit]);
+  }, [draft, min, max, onChange, onCommit, parseInput]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {

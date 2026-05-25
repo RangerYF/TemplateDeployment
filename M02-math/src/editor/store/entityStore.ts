@@ -15,6 +15,8 @@ export interface DisplayOptions {
   showAsymptotes:      boolean;
   showLabels:          boolean;
   showIntersections:   boolean;
+  /** true = 教学显示（分数/根式优先），false = 演示显示（小数优先） */
+  teachingFormat:      boolean;
   /** Render vertex points (green dots) at key conic vertices. */
   showVertices:        boolean;
   /** Render the conic's own axes of symmetry as grey dashed lines. */
@@ -77,6 +79,7 @@ const DEFAULT_DISPLAY_OPTIONS: DisplayOptions = {
   showAsymptotes:     true,
   showLabels:         true,
   showIntersections:  true,
+  teachingFormat:     true,
   showVertices:       true,
   showAxesOfSymmetry: false,
   showTangent:        false,

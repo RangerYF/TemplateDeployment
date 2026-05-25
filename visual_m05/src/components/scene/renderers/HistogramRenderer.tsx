@@ -1,6 +1,6 @@
 import { COLORS } from '@/styles/tokens';
 import type { HistogramResult } from '@/engine/simulations/histogram';
-import { px, ChartAxes, YGrid, ChartTitle, VW, VH, ML, MT, PH } from '@/utils/svgChartUtils';
+import { px, ChartAxes, YGrid, ChartTitle, VW, VH, ML, MT, PW, PH } from '@/utils/svgChartUtils';
 
 export function HistogramRenderer({ result, datasetName }: { result: HistogramResult; datasetName: string }) {
   const maxFreq = Math.max(...result.bins.map(b => b.freq)) * 1.2;
@@ -15,6 +15,18 @@ export function HistogramRenderer({ result, datasetName }: { result: HistogramRe
       <ChartTitle title={`频率直方图 — ${datasetName}`} />
       <ChartAxes xLabel="数据值" yLabel="频率/组距" />
       <YGrid yMin={0} yMax={maxFreq} format={(v) => v.toFixed(3)} />
+
+      {/* 右侧频数轴 (v0.4 反馈 #5) */}
+      <line x1={ML + PW} y1={MT} x2={ML + PW} y2={MT + PH} stroke={COLORS.borderStrong} strokeWidth={1.5} shapeRendering="crispEdges" />
+      {Array.from({ length: 6 }, (_, i) => i / 5).map(v => {
+        const y = MT + PH - v * PH;
+        return (
+          <text key={`r-${v}`} x={ML + PW + 4} y={y + 4} fontSize={10} fill={COLORS.textMuted}>
+            {Math.round(v * maxFreq * result.data.length * result.binWidth)}
+          </text>
+        );
+      })}
+      <text x={ML + PW + 4} y={MT - 6} fontSize={11} fill={COLORS.textSecondary}>频数</text>
 
       {/* Bins */}
       {result.bins.map((bin, i) => {

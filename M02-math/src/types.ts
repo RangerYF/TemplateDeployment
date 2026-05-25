@@ -34,6 +34,30 @@ export const DEFAULT_VIEWPORT: ViewportState = {
   xMin: -10, xMax: 10, yMin: -6, yMax: 6,
 };
 
+export type CurveLineStyle = 'solid' | 'dashed';
+
+export interface FunctionDisplayDomain {
+  enabled: boolean;
+  xMin: number | null;
+  xMax: number | null;
+}
+
+export const DEFAULT_FUNCTION_DISPLAY_DOMAIN: FunctionDisplayDomain = {
+  enabled: false,
+  xMin: null,
+  xMax: null,
+};
+
+export interface InverseFunctionDisplay {
+  showMirrorLine: boolean;
+  showInverseCurve: boolean;
+}
+
+export const DEFAULT_INVERSE_FUNCTION_DISPLAY: InverseFunctionDisplay = {
+  showMirrorLine: false,
+  showInverseCurve: false,
+};
+
 export interface PiecewiseSegment {
   id: string;
   exprStr: string;
@@ -52,18 +76,22 @@ export interface FunctionEntry {
   exprStr: string;
   segments: PiecewiseSegment[];
   color: string;
+  lineStyle: CurveLineStyle;
   visible: boolean;
   transform: Transform;
+  displayDomain: FunctionDisplayDomain;
+  inverseDisplay: InverseFunctionDisplay;
   /** null = user-typed custom expression; string = one of FUNCTION_TEMPLATES ids */
   templateId: string | null;
   /** Named coefficients for template functions (e.g. a, b, c for quadratic). */
   namedParams: FunctionParam[];
 }
 
-/** All function curves default to the same dark colour; selection/hover adds highlight. */
+/** Default curve palette for M02 so different functions remain visually distinguishable. */
 export const FUNCTION_COLORS: readonly string[] = [
-  '#374151', '#374151', '#374151',
-  '#374151', '#374151', '#374151',
+  '#2563EB', '#DC2626', '#059669',
+  '#D97706', '#7C3AED', '#DB2777',
+  '#0891B2', '#4B5563',
 ];
 
 // ─── M03: 解析几何 — 圆锥曲线类型系统 ────────────────────────────────────────
@@ -89,11 +117,13 @@ export interface HyperbolaParams {
 /**
  * 抛物线参数.
  *
- * orientation 'h' (default): y² = 2p(x−cx)  开口向右, p > 0
- * orientation 'v':           x² = 2p(y−cy)  开口向上, p > 0
+ * orientation 'h' (default): y² = 2p(x−cx)
+ *   p > 0 开口向右, p < 0 开口向左
+ * orientation 'v':           x² = 2p(y−cy)
+ *   p > 0 开口向上, p < 0 开口向下
  */
 export interface ParabolaParams {
-  p:            number;          // 焦参数 (p > 0)
+  p:            number;          // 焦参数 (p ≠ 0)
   cx:           number;          // 顶点 x
   cy:           number;          // 顶点 y
   orientation?: 'h' | 'v';      // default 'h'
@@ -119,6 +149,8 @@ export interface HyperbolaDerived {
   foci:        [[number, number], [number, number]];
   directrices: [number, number];                  // x = ±a²/c
   asymptotes:  [{ k: number; b: number }, { k: number; b: number }]; // y = ±(b/a)x + offset
+  transverseVertices: [[number, number], [number, number]];
+  conjugateVertices:  [[number, number], [number, number]];
 }
 
 export interface ParabolaDerived {

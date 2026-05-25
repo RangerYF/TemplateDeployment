@@ -52,7 +52,7 @@ export function BoxSwapBallsInspector({ simId, params, hideN }: Props) {
       {params.initBlack === 1 && params.initRed === 2 && (
         <div className="p-2 rounded text-xs"
           style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary, fontSize: 12 }}>
-          💡 当前为 1黑+2红 默认配置，可对照理论公式 P(B_n) = 3/5 + (2/5)·(-1/9)^n。
+          💡 当前为 1黑+2红 默认配置，可对照理论公式 P(Bₙ) = 3/5 + (2/5)·(-1/9)ⁿ。
         </div>
       )}
     </div>

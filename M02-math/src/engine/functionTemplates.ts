@@ -91,10 +91,13 @@ export const FUNCTION_TEMPLATES: FunctionTemplate[] = [
     displayExpr: 'y = a · log_b(x)',
     defaultParams: [
       { name: 'a', label: 'a', value: 1,      min: -5,  max: 5,  step: 0.1, hint: '系数' },
-      { name: 'b', label: 'b', value: Math.E, min: 1.001, max: 100, step: 0.1, hint: '底数 (默认 e=自然对数)' },
+      { name: 'b', label: 'b', value: Math.E, min: 0.1, max: 10, step: 0.01, hint: '底数 (0<b<1 或 b>1，且 b≠1)' },
     ],
     // math.js log(x, base) = log_base(x); log(x, e) = ln(x)
-    buildExpr: (v) => `(${v.a})*log(x, ${v.b})`,
+    buildExpr: (v) => {
+      const safeBase = Math.abs(v.b - 1) < 1e-9 ? 1.01 : v.b;
+      return `(${v.a})*log(x, ${safeBase})`;
+    },
   },
   {
     id: 'power',
@@ -102,9 +105,20 @@ export const FUNCTION_TEMPLATES: FunctionTemplate[] = [
     displayExpr: 'y = a·xⁿ',
     defaultParams: [
       { name: 'a', label: 'a', value: 1, min: -5,  max: 5,  step: 0.1, hint: '系数' },
-      { name: 'n', label: 'n', value: 2, min: -10, max: 10, step: 0.5, hint: '指数' },
+      { name: 'n', label: 'n', value: 2, min: -10, max: 10, step: 0.1, hint: '指数' },
     ],
     buildExpr: (v) => `(${v.a})*x^(${v.n})`,
+  },
+  {
+    id: 'gaussian',
+    label: '高斯',
+    displayExpr: 'y = a·e^(-((x-b)²)/(2c²))',
+    defaultParams: [
+      { name: 'a', label: 'a', value: 1, min: -10, max: 10, step: 0.1, hint: '振幅' },
+      { name: 'b', label: 'b', value: 0, min: -10, max: 10, step: 0.1, hint: '中心位置' },
+      { name: 'c', label: 'c', value: 1, min: 0.1, max: 10, step: 0.1, hint: '宽度（标准差）' },
+    ],
+    buildExpr: (v) => `(${v.a})*exp(-((x-(${v.b}))^2)/(2*(${v.c})^2))`,
   },
 ];
 

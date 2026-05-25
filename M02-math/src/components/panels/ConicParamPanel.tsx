@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
+import * as math from 'mathjs';
 import { useActiveConic } from '@/hooks/useActiveEntity';
 import { useParamSlider } from '@/hooks/useParamSlider';
 import { useEntityStore } from '@/editor/store/entityStore';
@@ -17,6 +18,7 @@ import {
 import { EccentricityZoneBar } from '@/components/panels/EccentricityPanel';
 import type { ConicEntity } from '@/types';
 import { isConicEntity } from '@/types';
+import { formatConicValue } from '@/engine/conicDisplay';
 
 // ─── Stale-closure-safe store helpers ─────────────────────────────────────────
 
@@ -34,10 +36,32 @@ function getParam(key: string): number {
   return (e.params as unknown as Record<string, number>)[key] ?? 0;
 }
 
+function getDerivedC(): number {
+  const e = getActiveEntity();
+  if (!e) return 0;
+  if (e.type === 'ellipse' || e.type === 'hyperbola') return e.derived.c;
+  return 0;
+}
+
+function parseConicParamInput(raw: string): number | null {
+  const text = raw.trim();
+  if (!text) return null;
+  try {
+    const normalized = text.replace(/√/g, 'sqrt');
+    const value = math.evaluate(normalized);
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Safety: clamp value to avoid division-by-zero or degenerate shapes. */
 function safeClamp(key: string, value: number, entityType: string): number {
+  if (key === 'p' && entityType === 'parabola' && Math.abs(value) < 0.05) {
+    return value < 0 ? -0.05 : 0.05;
+  }
   // Prevent b=0 or a=0 which causes division by zero in ellipse/hyperbola
-  if ((key === 'a' || key === 'b' || key === 'p' || key === 'r') && value < 0.05) {
+  if ((key === 'a' || key === 'b' || key === 'r') && value < 0.05) {
     return 0.05;
   }
   // For ellipse, ensure b < a
@@ -52,6 +76,19 @@ function liveUpdate(key: string, value: number): void {
   const store = useEntityStore.getState();
   const e     = store.entities.find((en) => en.id === store.activeEntityId);
   if (!e || !isConicEntity(e)) return;
+  if (key === 'c' && (e.type === 'ellipse' || e.type === 'hyperbola')) {
+    const a = e.params.a;
+    const safeC = Math.max(0.05, value);
+    if (e.type === 'ellipse') {
+      const cappedC = Math.min(safeC, Math.max(0.05, a - 0.05));
+      const nextB = Math.sqrt(Math.max(0.05 * 0.05, a * a - cappedC * cappedC));
+      store.updateEntity(e.id, updateEntityParams(e, { b: nextB } as never));
+      return;
+    }
+    const nextB = Math.sqrt(Math.max(0.05 * 0.05, safeC * safeC - a * a));
+    store.updateEntity(e.id, updateEntityParams(e, { b: nextB } as never));
+    return;
+  }
   const safe = safeClamp(key, value, e.type);
   store.updateEntity(e.id, updateEntityParams(e, { [key]: safe } as never));
 }
@@ -61,7 +98,20 @@ function commitParam(key: string, before: number, after: number): void {
   const store       = useEntityStore.getState();
   const afterEntity = store.entities.find((en) => en.id === store.activeEntityId);
   if (!afterEntity || !isConicEntity(afterEntity)) return;
-  const beforeEntity = updateEntityParams(afterEntity, { [key]: before } as never);
+  let beforeEntity: ConicEntity;
+  if (key === 'c' && (afterEntity.type === 'ellipse' || afterEntity.type === 'hyperbola')) {
+    const a = afterEntity.params.a;
+    if (afterEntity.type === 'ellipse') {
+      const cappedC = Math.min(Math.max(0.05, before), Math.max(0.05, a - 0.05));
+      const prevB = Math.sqrt(Math.max(0.05 * 0.05, a * a - cappedC * cappedC));
+      beforeEntity = updateEntityParams(afterEntity, { b: prevB } as never);
+    } else {
+      const prevB = Math.sqrt(Math.max(0.05 * 0.05, before * before - a * a));
+      beforeEntity = updateEntityParams(afterEntity, { b: prevB } as never);
+    }
+  } else {
+    beforeEntity = updateEntityParams(afterEntity, { [key]: before } as never);
+  }
   executeM03Command(new UpdateCurveParamCommand(afterEntity.id, beforeEntity, afterEntity));
 }
 
@@ -106,6 +156,8 @@ function handleReset(entityType: string): void {
 
 export function ConicParamPanel() {
   const entity = useActiveConic();
+  const teachingFormat = useEntityStore((s) => s.displayOptions.teachingFormat);
+  const displayMode = teachingFormat ? 'teaching' : 'decimal';
 
   // ── All slider hooks unconditionally (Rules of Hooks) ────────────────────
   const aSlider  = useParamSlider<number>({
@@ -117,6 +169,11 @@ export function ConicParamPanel() {
     getValue:     () => getParam('b'),
     onLiveUpdate: (v) => liveUpdate('b', v),
     onCommit:     (b, a) => commitParam('b', b, a),
+  });
+  const cSlider  = useParamSlider<number>({
+    getValue:     () => getDerivedC(),
+    onLiveUpdate: (v) => liveUpdate('c', v),
+    onCommit:     (b, a) => commitParam('c', b, a),
   });
   const pSlider  = useParamSlider<number>({
     getValue:     () => getParam('p'),
@@ -174,20 +231,35 @@ export function ConicParamPanel() {
       {entity.type === 'ellipse' && (() => {
         const ep = p as typeof entity.params;
         const bMax = Math.max(0.2, ep.a - 0.05);
+        const cMax = Math.max(0.05, ep.a - 0.05);
         return (
           <>
             <UniversalSlider label="a" value={ep.a} min={0.5} max={10} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => aSlider.handleChange(v)}
               onCommit={(v) => aSlider.handleCommit(v)} />
             <UniversalSlider label="b" value={ep.b} min={0.1} max={bMax} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => bSlider.handleChange(v)}
               onCommit={(v) => bSlider.handleCommit(v)} />
+            <UniversalSlider label="c" value={entity.derived.c} min={0.05} max={cMax} step={0.1}
+              color={COLORS.focusPoint}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
+              onChange={(v) => cSlider.handleChange(v)}
+              onCommit={(v) => cSlider.handleCommit(v)} />
             <UniversalSlider label="cx" value={ep.cx} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cxSlider.handleChange(v)}
               onCommit={(v) => cxSlider.handleCommit(v)} />
             <UniversalSlider label="cy" value={ep.cy} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cySlider.handleChange(v)}
               onCommit={(v) => cySlider.handleCommit(v)} />
           </>
@@ -197,20 +269,35 @@ export function ConicParamPanel() {
       {/* ── Hyperbola ─────────────────────────────────────────────────── */}
       {entity.type === 'hyperbola' && (() => {
         const hp = p as typeof entity.params;
+        const cMin = Math.sqrt(hp.a * hp.a + 0.05 * 0.05);
         return (
           <>
             <UniversalSlider label="a" value={hp.a} min={0.5} max={10} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => aSlider.handleChange(v)}
               onCommit={(v) => aSlider.handleCommit(v)} />
             <UniversalSlider label="b" value={hp.b} min={0.5} max={10} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => bSlider.handleChange(v)}
               onCommit={(v) => bSlider.handleCommit(v)} />
+            <UniversalSlider label="c" value={entity.derived.c} min={cMin} max={12} step={0.1}
+              color={COLORS.focusPoint}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
+              onChange={(v) => cSlider.handleChange(v)}
+              onCommit={(v) => cSlider.handleCommit(v)} />
             <UniversalSlider label="cx" value={hp.cx} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cxSlider.handleChange(v)}
               onCommit={(v) => cxSlider.handleCommit(v)} />
             <UniversalSlider label="cy" value={hp.cy} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cySlider.handleChange(v)}
               onCommit={(v) => cySlider.handleCommit(v)} />
           </>
@@ -243,24 +330,32 @@ export function ConicParamPanel() {
                       }}
                       {...(isActive ? {} : btnHover(COLORS.surfaceHover))}
                     >
-                      {dir === 'h' ? 'y²=2px →' : 'x²=2py ↑'}
+                      {dir === 'h' ? 'y²=2p(x−cx)' : 'x²=2p(y−cy)'}
                     </button>
                   );
                 })}
               </div>
             </div>
-            <UniversalSlider label="p" value={pp.p} min={0.1} max={10} step={0.1}
+            <UniversalSlider label="p" value={pp.p} min={-10} max={10} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => pSlider.handleChange(v)}
               onCommit={(v) => pSlider.handleCommit(v)} />
             <UniversalSlider label="cx" value={pp.cx} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cxSlider.handleChange(v)}
               onCommit={(v) => cxSlider.handleCommit(v)} />
             <UniversalSlider label="cy" value={pp.cy} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cySlider.handleChange(v)}
               onCommit={(v) => cySlider.handleCommit(v)} />
             <p style={{ fontSize: '11px', color: COLORS.textSecondary, textAlign: 'right', marginTop: '-4px', marginBottom: '4px', fontFamily: 'monospace' }}>
-              {isV ? '(x−cx)² = 2p(y−cy)' : '(y−cy)² = 2p(x−cx)'}
+              {isV
+                ? `${pp.p >= 0 ? 'p>0 向上，p<0 向下' : 'p<0 向下，p>0 向上'}`
+                : `${pp.p >= 0 ? 'p>0 向右，p<0 向左' : 'p<0 向左，p>0 向右'}`}
             </p>
           </>
         );
@@ -273,12 +368,18 @@ export function ConicParamPanel() {
           <>
             <UniversalSlider label="r" value={cp.r} min={0.1} max={10} step={0.1}
               color={entity.color}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => rSlider.handleChange(v)}
               onCommit={(v) => rSlider.handleCommit(v)} />
             <UniversalSlider label="cx" value={cp.cx} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cxSlider.handleChange(v)}
               onCommit={(v) => cxSlider.handleCommit(v)} />
             <UniversalSlider label="cy" value={cp.cy} min={-10} max={10} step={0.1}
+              parseInput={parseConicParamInput}
+              formatInputValue={(v) => formatConicValue(v, displayMode, 4)}
               onChange={(v) => cySlider.handleChange(v)}
               onCommit={(v) => cySlider.handleCommit(v)} />
           </>
@@ -351,9 +452,20 @@ function CompactEccentricity({ entity }: { entity: ConicEntity }) {
 
       <EccentricityZoneBar e={currentE} color={entity.color} />
 
+      <p style={{
+        fontSize: '10px',
+        color: COLORS.textSecondary,
+        marginTop: 4,
+        marginBottom: 0,
+        lineHeight: 1.5,
+      }}>
+        从 e = 0 到 e = 2，观察椭圆、抛物线、双曲线之间的变化
+      </p>
+
       <button
         onClick={handleAutoSweep}
         disabled={isAnimating}
+        title="自动演示离心率变化"
         style={{
           width: '100%', marginTop: 8,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
@@ -368,7 +480,7 @@ function CompactEccentricity({ entity }: { entity: ConicEntity }) {
         {...(isAnimating ? {} : btnHover(`${COLORS.primary}38`, `${COLORS.primary}22`))}
       >
         <Play size={11} />
-        自动演示
+        自动演示离心率 ▶
       </button>
     </div>
   );

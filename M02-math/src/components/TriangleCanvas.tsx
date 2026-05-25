@@ -15,6 +15,7 @@ import { renderAxis } from '@/canvas/renderers/axisRenderer';
 import { hiDpiClear } from '@/editor/tools/canvasUtils';
 import { useTriangleSolverStore } from '@/editor/store/triangleSolverStore';
 import {
+  renderRangeDemoTriangle,
   renderSingleTriangle,
   renderSSADualSolutions,
 } from '@/canvas/renderers/triangleRenderer';
@@ -38,6 +39,9 @@ export function TriangleCanvas() {
   });
 
   const result = useTriangleSolverStore((s) => s.result);
+  const canvasMode = useTriangleSolverStore((s) => s.canvasMode);
+  const auxiliaryOptions = useTriangleSolverStore((s) => s.auxiliaryOptions);
+  const rangeDemo = useTriangleSolverStore((s) => s.rangeDemo);
 
   // ── Static layer: axes + triangle ──────────────────────────────────────
   useEffect(() => {
@@ -53,6 +57,11 @@ export function TriangleCanvas() {
 
     hiDpiClear(ctx, canvas);
     renderAxis(ctx, vp, { showGrid: true });
+
+    if (canvasMode === 'range-demo') {
+      renderRangeDemoTriangle(ctx, vp, rangeDemo.sideLength, rangeDemo.angleDeg, rangeDemo.sampleRatio);
+      return;
+    }
 
     if (!result || !result.valid) {
       // Prompt text when no triangle yet
@@ -73,11 +82,11 @@ export function TriangleCanvas() {
     }
 
     if (result.case === 'unique') {
-      renderSingleTriangle(ctx, result.triangle, vp);
+      renderSingleTriangle(ctx, result.triangle, vp, undefined, auxiliaryOptions);
     } else {
-      renderSSADualSolutions(ctx, result.triangle1, result.triangle2, vp);
+      renderSSADualSolutions(ctx, result.triangle1, result.triangle2, vp, auxiliaryOptions);
     }
-  }, [result, canvasSize, staticRef]);
+  }, [result, canvasSize, staticRef, canvasMode, auxiliaryOptions, rangeDemo]);
 
   // ── Dynamic layer: kept empty (no interactive elements) ─────────────────
   useEffect(() => {

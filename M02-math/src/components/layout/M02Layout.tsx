@@ -23,6 +23,8 @@ import { FunctionListPanel } from '@/components/panels/FunctionListPanel';
 import { FunctionInputPanel } from '@/components/panels/FunctionInputPanel';
 import { TemplateParamPanel } from '@/components/panels/TemplateParamPanel';
 import { TransformPanel } from '@/components/panels/TransformPanel';
+import { FunctionStylePanel } from '@/components/panels/FunctionStylePanel';
+import { InverseFunctionPanel } from '@/components/panels/InverseFunctionPanel';
 
 import { ViewportPanel } from '@/components/panels/ViewportPanel';
 import { DerivativePanel } from '@/components/panels/DerivativePanel';
@@ -216,6 +218,10 @@ export function M02Layout() {
                   {activeMode === 'standard' ? (
                     activeTemplateId !== null ? (
                       <>
+                        <FunctionStylePanel />
+                        <Divider />
+                        <InverseFunctionPanel />
+                        <Divider />
                         <TemplateParamPanel />
                         <Divider />
                         <AnimationControlPanel canvasRef={canvasRef} />
@@ -224,6 +230,10 @@ export function M02Layout() {
                       </>
                     ) : (
                       <>
+                        <FunctionStylePanel />
+                        <Divider />
+                        <InverseFunctionPanel />
+                        <Divider />
                         <FunctionInputPanel />
                         {activeHasParams && (
                           <>
@@ -241,6 +251,8 @@ export function M02Layout() {
                   ) : (
                     <PiecewisePanel />
                   )}
+                  <Divider />
+                  <CanvasSettingsPanel showViewport={false} />
                   <Divider />
                   <ViewportPanel />
                 </>

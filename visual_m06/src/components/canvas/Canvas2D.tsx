@@ -4,10 +4,14 @@ import { UpdateVec2DCommand } from '@/editor/commands/updateVector';
 import type { Vec2D, OperationType } from '@/editor/entities/types';
 import {
   add2D, sub2D, scale2D, dot2D, mag2D, angle2D, projectVec2D,
-  decomposeVector, toDeg, cross2D, fmtSmart, fmtApprox,
+  decomposeVector, toDeg, cross2D, fmtSmart,
+  fmtApproxLatex, fmtSmartLatex,
 } from '@/engine/vectorMath';
 import { useFmt } from '@/hooks/useFmt';
 import { COLORS, RADIUS } from '@/styles/tokens';
+import { LatexRenderer } from './LatexRenderer';
+import { toVecLatex } from '@/lib/vecLatex';
+import { InlineLatex } from '@/components/shared/InlineLatex';
 
 // ─── 坐标系常量 ───
 // viewBox: "-400 -300 800 600" → 原点在中心, 1数学单位 = 50 SVG单位
@@ -44,31 +48,54 @@ interface ArrowProps {
   strokeWidth?: number;
   dashed?: boolean;
   opacity?: number;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-function Arrow({ x1, y1, x2, y2, color, markerId, strokeWidth = 2.5, dashed = false, opacity = 1 }: ArrowProps) {
+function Arrow({ x1, y1, x2, y2, color, markerId, strokeWidth = 2.5, dashed = false, opacity = 1, selected = false, onClick }: ArrowProps) {
+  const [hovered, setHovered] = useState(false);
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy);
   if (len < 3) return null;
 
-  // 缩短线段末端，给箭头留空间
   const headOffset = 8;
   const ratio = (len - headOffset) / len;
   const ex = x1 + dx * ratio;
   const ey = y1 + dy * ratio;
 
   return (
-    <line
-      x1={x1} y1={y1}
-      x2={ex} y2={ey}
-      stroke={color}
-      strokeWidth={strokeWidth}
-      strokeDasharray={dashed ? '6 4' : undefined}
-      markerEnd={`url(#${markerId})`}
-      opacity={opacity}
-      strokeLinecap="round"
-    />
+    <g>
+      {hovered && !selected && (
+        <line x1={x1} y1={y1} x2={ex} y2={ey}
+          stroke="#60A5FA" strokeWidth={strokeWidth + 4}
+          opacity={0.25} strokeLinecap="round" />
+      )}
+      {selected && (
+        <line x1={x1} y1={y1} x2={ex} y2={ey}
+          stroke={COLORS.primary} strokeWidth={strokeWidth + 4}
+          opacity={0.3} strokeLinecap="round" />
+      )}
+      <line
+        x1={x1} y1={y1}
+        x2={ex} y2={ey}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeDasharray={dashed ? '6 4' : undefined}
+        markerEnd={`url(#${markerId})`}
+        opacity={opacity}
+        strokeLinecap="round"
+      />
+      {onClick && (
+        <line x1={x1} y1={y1} x2={x2} y2={y2}
+          stroke="transparent" strokeWidth={12}
+          style={{ cursor: 'pointer' }}
+          onPointerDown={(e) => { e.stopPropagation(); onClick(); }}
+          onPointerEnter={() => setHovered(true)}
+          onPointerLeave={() => setHovered(false)}
+        />
+      )}
+    </g>
   );
 }
 
@@ -99,7 +126,7 @@ function AngleArc({ cx, cy, vec1, vec2, angleRad, radius = 30, color = COLORS.te
 
   // 判断方向（顺时针 or 逆时针）
   const crossVal = sx1 * sy2 - sy1 * sx2;
-  const sweep = crossVal > 0 ? 0 : 1;
+  const sweep = crossVal > 0 ? 1 : 0;
 
   const px1 = cx + ux1;
   const py1 = cy + uy1;
@@ -146,20 +173,29 @@ interface VecLabelProps {
   label: string;
   color: string;
   subLabel?: string;
+  latexLabel?: string;
 }
 
-function VecLabel({ sx, sy, ox, oy, label, color, subLabel }: VecLabelProps) {
+function VecLabel({ sx, sy, ox, oy, label, color, subLabel, latexLabel }: VecLabelProps) {
   const dx = sx - ox;
   const dy = sy - oy;
   const len = Math.sqrt(dx * dx + dy * dy);
   if (len < 5) return null;
 
-  // 标签偏移：向垂直方向偏移
-  const nx = -dy / len * 14;
-  const ny = dx / len * 14;
+  const nx = -dy / len * 18;
+  const ny = dx / len * 18;
 
   const tx = sx + nx + dx / len * 4;
   const ty = sy + ny + dy / len * 4;
+
+  if (latexLabel) {
+    return <LatexRenderer latex={latexLabel} x={tx - 18} y={ty - 14} fontSize={18} color={color} stroke="#fff" />;
+  }
+
+  const latex = toVecLatex(label);
+  if (latex) {
+    return <LatexRenderer latex={latex} x={tx - 18} y={ty - 14} fontSize={18} color={color} stroke="#fff" />;
+  }
 
   return (
     <text
@@ -170,7 +206,7 @@ function VecLabel({ sx, sy, ox, oy, label, color, subLabel }: VecLabelProps) {
       fontWeight={700}
       fill={color}
       fontFamily="Inter, 'PingFang SC', sans-serif"
-      style={{ userSelect: 'none' }}
+      style={{ userSelect: 'none', pointerEvents: 'none' }}
     >
       {label}
       {subLabel && <tspan fontSize={18} dy={4}>{subLabel}</tspan>}
@@ -222,12 +258,16 @@ function DragHandle({ sx, sy, color, onDrag, title }: DragHandleProps) {
 const CHAIN_COLORS_DEFS = ['#E67E22', '#8E44AD', '#27AE60', '#2980B9', '#C0392B', '#16A085', '#D35400', '#7F8C8D'];
 
 function ArrowDefs() {
+  const vecAColor = useVectorStore((s) => s.vecAColor);
+  const vecBColor = useVectorStore((s) => s.vecBColor);
+  const vecResultColor = useVectorStore((s) => s.vecResultColor);
+  const projColor = useVectorStore((s) => s.projColor);
   const markers: { id: string; color: string }[] = [
-    { id: 'arrow-a', color: COLORS.vecA },
-    { id: 'arrow-b', color: COLORS.vecB },
-    { id: 'arrow-result', color: COLORS.vecResult },
+    { id: 'arrow-a', color: vecAColor },
+    { id: 'arrow-b', color: vecBColor },
+    { id: 'arrow-result', color: vecResultColor },
     { id: 'arrow-scalar', color: COLORS.vecScalar },
-    { id: 'arrow-basis1', color: COLORS.basis1 },
+    { id: 'arrow-basis1', color: projColor },
     { id: 'arrow-basis2', color: COLORS.basis2 },
     { id: 'arrow-target', color: COLORS.decompTarget },
     { id: 'arrow-neg', color: COLORS.negVec },
@@ -292,7 +332,7 @@ function CoordGrid({ show, view }: { show: boolean; view: ViewState }) {
       })}
       {xNums.filter((x) => x !== 0).map((x) => {
         const [sx] = m2s(x, 0);
-        return <text key={`tx${x}`} x={sx} y={xLabelSvgY} textAnchor="middle"
+        return <text key={`tx${x}`} x={sx} y={xLabelSvgY + 16} textAnchor="middle"
           fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">{x}</text>;
       })}
       {yNums.filter((y) => y !== 0).map((y) => {
@@ -300,7 +340,17 @@ function CoordGrid({ show, view }: { show: boolean; view: ViewState }) {
         return <text key={`ty${y}`} x={yLabelSvgX} y={sy} textAnchor="end" dominantBaseline="middle"
           fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">{y}</text>;
       })}
-      <text x={view.x + view.w - 14} y={xLabelSvgY} fontSize={19} fontWeight={600} fill={COLORS.axis} fontFamily="Inter, sans-serif">x</text>
+      {/* X 轴箭头 */}
+      <polygon
+        points={`${view.x + view.w - 2},0 ${view.x + view.w - 12},-5 ${view.x + view.w - 12},5`}
+        fill={COLORS.axis}
+      />
+      {/* Y 轴箭头（向上） */}
+      <polygon
+        points={`0,${view.y + 2} -5,${view.y + 12} 5,${view.y + 12}`}
+        fill={COLORS.axis}
+      />
+      <text x={view.x + view.w - 14} y={xLabelSvgY + 16} fontSize={19} fontWeight={600} fill={COLORS.axis} fontFamily="Inter, sans-serif">x</text>
       <text x={yLabelSvgX + 16} y={view.y + 14} fontSize={19} fontWeight={600} fill={COLORS.axis} fontFamily="Inter, sans-serif">y</text>
     </g>
   );
@@ -313,6 +363,21 @@ function svgToMath(svgX: number, svgY: number): Vec2D {
   const mx = svgX / SCALE;
   const my = -svgY / SCALE;
   return [Math.round(mx * 2) / 2, Math.round(my * 2) / 2];
+}
+
+// ─── 向量样式 hook ───
+function useVecStyle() {
+  const selectedVecKey = useVectorStore((s) => s.selectedVecKey);
+  const setSelectedVecKey = useVectorStore((s) => s.setSelectedVecKey);
+  const vecAColor = useVectorStore((s) => s.vecAColor);
+  const vecBColor = useVectorStore((s) => s.vecBColor);
+  const vecResultColor = useVectorStore((s) => s.vecResultColor);
+  const projColor = useVectorStore((s) => s.projColor);
+  const projWidth = useVectorStore((s) => s.projWidth);
+  const vecAWidth = useVectorStore((s) => s.vecAWidth);
+  const vecBWidth = useVectorStore((s) => s.vecBWidth);
+  const vecResultWidth = useVectorStore((s) => s.vecResultWidth);
+  return { selectedVecKey, setSelectedVecKey, vecAColor, vecBColor, vecResultColor, projColor, projWidth, vecAWidth, vecBWidth, vecResultWidth };
 }
 
 // ─ 关系状态徽章（共线 / 垂直）─
@@ -342,7 +407,8 @@ function ConceptLayer() {
   const unitCirclePlaying = useVectorStore((s) => s.unitCirclePlaying);
   const setUnitCircleAngle = useVectorStore((s) => s.setUnitCircleAngle);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
+  const { fl } = useFmt();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
 
   // 自由向量起点（可独立拖拽）
@@ -411,18 +477,16 @@ function ConceptLayer() {
         <>
           <circle cx={0} cy={0} r={SCALE} fill="none" stroke={COLORS.primary} strokeWidth={1.2}
             strokeDasharray="6 3" opacity={0.4} />
-          <text x={SCALE + 6} y={-6} fontSize={18} fill={COLORS.primary} fontFamily="Inter, sans-serif" opacity={0.6}>
-            r=1
-          </text>
+          <LatexRenderer latex="r=1" x={SCALE + 6} y={-18} fontSize={18} color={COLORS.primary} opacity={0.6} />
         </>
       )}
 
       {/* 自由向量（可拖拽平移） */}
-      <Arrow x1={fox} y1={foy} x2={fex} y2={fey} color={COLORS.vecA} markerId="arrow-a" strokeWidth={2} opacity={0.55} dashed />
-      <VecLabel sx={fex} sy={fey} ox={fox} oy={foy} label="自由向量" color={COLORS.vecA} />
+      <Arrow x1={fox} y1={foy} x2={fex} y2={fey} color={vs.vecAColor} markerId="arrow-a" strokeWidth={2} opacity={0.55} dashed />
 
       {/* 主向量 */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" strokeWidth={3} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 起点 O */}
       <circle cx={0} cy={0} r={5} fill={COLORS.vecA} />
@@ -432,29 +496,26 @@ function ConceptLayer() {
       <text x={ax + 8} y={ay - 8} fontSize={19} fontWeight={700} fill={COLORS.vecA} fontFamily="Inter, sans-serif">A</text>
 
       {/* 模长标注 */}
-      <text x={(ax) / 2 + 12} y={(ay) / 2 - 10} fontSize={18} fontWeight={600} fill={COLORS.vecA} fontFamily="Inter, sans-serif">
-        |a|={fmtApprox(magVal)}
-      </text>
+      <LatexRenderer latex={`|\\vec{a}| ${fmtApproxLatex(magVal)}`}
+        x={(ax) / 2 + 12} y={(ay) / 2 - 22} fontSize={18} color={COLORS.vecA} stroke="#fff" />
 
       {/* 信息框 */}
-      <rect x={VB_X + 8} y={VB_Y + 8} width={320} height={isUnitMode ? 100 : 68} rx={6}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={360} height={isUnitMode ? 108 : 74} rx={6}
         fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-      <text x={VB_X + 18} y={VB_Y + 32} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
-        向量 a = ({f(vecA[0])}, {f(vecA[1])})
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 56} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        |a| = {fmtApprox(magVal, 3)}，方向角 α ≈ {f(dirDeg, 1)}°
-      </text>
+      <LatexRenderer latex={`\\text{向量 }\\vec{a} = (${fl(vecA[0])},\\, ${fl(vecA[1])})`}
+        x={VB_X + 14} y={VB_Y + 12} fontSize={18} color={COLORS.text} width={340} />
+      <LatexRenderer latex={`|\\vec{a}| ${fmtApproxLatex(magVal, 3)}\\text{，方向角 }\\alpha \\approx ${fl(dirDeg, 1)}°`}
+        x={VB_X + 14} y={VB_Y + 40} fontSize={18} color={COLORS.textMuted} width={340} />
 
       {/* 单位向量提示 */}
       {isUnitMode && (
-        <text x={VB_X + 18} y={VB_Y + 82} fontSize={18} fill={COLORS.primary} fontFamily="Inter, sans-serif" fontWeight={600}>
-          单位向量模式：|a|=1，仅改变方向
-        </text>
+        <LatexRenderer latex="\\text{单位向量模式：}|\\vec{a}|=1\\text{，仅改变方向}"
+          x={VB_X + 14} y={VB_Y + 68} fontSize={18} color={COLORS.primary} width={340} />
       )}
 
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDrag} title={isUnitMode ? '拖拽改变方向（|a|=1）' : '拖拽改变向量 a'} />
       <DragHandle sx={fox} sy={foy} color={COLORS.vecA} onDrag={handleFreeDrag} title="拖拽移动自由向量" />
+      <VecLabel sx={fex} sy={fey} ox={fox} oy={foy} label="自由向量" color={vs.vecAColor} />
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -467,7 +528,8 @@ function CoordinateLayer() {
   const vecA = useVectorStore((s) => s.vecA);
   const setVecA = useVectorStore((s) => s.setVecA);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
+  const { fl } = useFmt();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
 
   const [ax, ay] = m2s(vecA[0], vecA[1]);
@@ -494,24 +556,15 @@ function CoordinateLayer() {
         <>
           <line x1={0} y1={0} x2={fx} y2={0}
             stroke={COLORS.basis1} strokeWidth={2} strokeDasharray="6 3" opacity={0.8} />
-          <text x={fx / 2} y={14} textAnchor="middle" fontSize={18} fontWeight={600}
-            fill={COLORS.basis1} fontFamily="Inter, sans-serif">
-            x={f(vecA[0])}
-          </text>
+          <LatexRenderer latex={`x=${fl(vecA[0])}`}
+            x={fx / 2 - 20} y={2} fontSize={18} color={COLORS.basis1} stroke="#fff" />
 
           {/* y 分量（垂直虚线） */}
           <line x1={fx} y1={0} x2={fx} y2={ay}
             stroke={COLORS.basis2} strokeWidth={2} strokeDasharray="6 3" opacity={0.8} />
-          <text
-            x={fx + (vecA[0] >= 0 ? 10 : -10)}
-            y={ay / 2}
-            textAnchor={vecA[0] >= 0 ? 'start' : 'end'}
-            dominantBaseline="middle"
-            fontSize={18} fontWeight={600}
-            fill={COLORS.basis2} fontFamily="Inter, sans-serif"
-          >
-            y={f(vecA[1])}
-          </text>
+          <LatexRenderer latex={`y=${fl(vecA[1])}`}
+            x={fx + (vecA[0] >= 0 ? 10 : -60)} y={ay / 2 - 12}
+            fontSize={18} color={COLORS.basis2} stroke="#fff" />
 
           {/* 直角标记 */}
           {Math.abs(fx) > 10 && Math.abs(ay) > 10 && (
@@ -528,20 +581,19 @@ function CoordinateLayer() {
       )}
 
       {/* 主向量 */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" strokeWidth={3} />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 信息框 */}
-      <rect x={VB_X + 8} y={VB_Y + 8} width={340} height={68} rx={6}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={380} height={74} rx={6}
         fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-      <text x={VB_X + 18} y={VB_Y + 32} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
-        a = ({f(vecA[0])}, {f(vecA[1])})
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 56} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        |a| = √({f(vecA[0])}² + {f(vecA[1])}²) = {fmtApprox(mag2D(vecA), 3)}
-      </text>
+      <LatexRenderer latex={`\\vec{a} = (${fl(vecA[0])},\\, ${fl(vecA[1])})`}
+        x={VB_X + 14} y={VB_Y + 12} fontSize={18} color={COLORS.text} width={360} />
+      <LatexRenderer latex={`|\\vec{a}| = \\sqrt{${fl(vecA[0])}^2 + ${fl(vecA[1])}^2} ${fmtApproxLatex(mag2D(vecA), 3)}`}
+        x={VB_X + 14} y={VB_Y + 40} fontSize={18} color={COLORS.textMuted} width={360} />
 
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDrag} title="拖拽改变向量" />
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -558,6 +610,7 @@ function ParallelogramLayer() {
   const setVecB = useVectorStore((s) => s.setVecB);
   const animTick = useVectorStore((s) => s.parallelogramAnimTick);
   const { execute } = useHistoryStore();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
   const prevB = useRef<Vec2D>(vecB);
 
@@ -646,26 +699,20 @@ function ParallelogramLayer() {
 
       {/* 向量 a（step 1+） */}
       {animStep >= 1 && (
-        <>
-          <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-          <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
-        </>
+        <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+          selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
       )}
 
       {/* 向量 b（step 2+） */}
       {animStep >= 2 && (
-        <>
-          <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
-          <VecLabel sx={bx} sy={by} ox={0} oy={0} label={isOpposite ? '-a' : 'b'} color={COLORS.vecB} />
-        </>
+        <Arrow x1={0} y1={0} x2={bx} y2={by} color={vs.vecBColor} markerId="arrow-b" strokeWidth={vs.vecBWidth}
+          selected={vs.selectedVecKey === 'b'} onClick={() => vs.setSelectedVecKey('b')} />
       )}
 
       {/* 和向量 a+b（step 4+） */}
       {animStep >= 4 && nonZeroSum && (
-        <>
-          <Arrow x1={0} y1={0} x2={sx} y2={sy} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
-          <VecLabel sx={sx} sy={sy} ox={0} oy={0} label="a+b" color={COLORS.vecResult} />
-        </>
+        <Arrow x1={0} y1={0} x2={sx} y2={sy} color={vs.vecResultColor} markerId="arrow-result" strokeWidth={vs.vecResultWidth}
+          selected={vs.selectedVecKey === 'result'} onClick={() => vs.setSelectedVecKey('result')} />
       )}
 
       {/* 拖拽控制点 */}
@@ -673,6 +720,11 @@ function ParallelogramLayer() {
         onDrag={handleDragA} title="拖拽改变向量 a" />
       <DragHandle sx={bx} sy={by} color={COLORS.vecB}
         onDrag={handleDragB} title="拖拽改变向量 b" />
+
+      {/* 标签层（在控制点之上） */}
+      {animStep >= 1 && <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />}
+      {animStep >= 2 && <VecLabel sx={bx} sy={by} ox={0} oy={0} label={isOpposite ? '-a' : 'b'} color={vs.vecBColor} />}
+      {animStep >= 4 && nonZeroSum && <VecLabel sx={sx} sy={sy} ox={0} oy={0} label="a+b" color={vs.vecResultColor} />}
 
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={() => { commitA(); commitB(); }} style={{ pointerEvents: 'none' }} />
@@ -695,6 +747,7 @@ function TriangleLayer() {
   const setVecB = useVectorStore((s) => s.setVecB);
   const setChainVec = useVectorStore((s) => s.setChainVec);
   const { execute } = useHistoryStore();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
   const prevB = useRef<Vec2D>(vecB);
 
@@ -740,31 +793,27 @@ function TriangleLayer() {
 
   return (
     <g>
-      {/* 渲染每条链向量（标签在中点，避免端点重合） */}
+      {/* 渲染每条链向量 */}
       {allVecs.map((_, i) => {
         const [ox, oy] = m2s(endpoints[i][0], endpoints[i][1]);
         const [ex, ey] = m2s(endpoints[i + 1][0], endpoints[i + 1][1]);
-        const mx = (ox + ex) / 2, my = (oy + ey) / 2;
-        const color = chainColor(i);
-        const label = chainLabel(i);
+        const color = i === 0 ? vs.vecAColor : i === 1 ? vs.vecBColor : chainColor(i);
+        const vecKey = i === 0 ? 'a' as const : i === 1 ? 'b' as const : null;
         return (
-          <g key={i}>
-            <Arrow x1={ox} y1={oy} x2={ex} y2={ey} color={color} markerId={i === 0 ? 'arrow-a' : i === 1 ? 'arrow-b' : `arrow-chain-${i}`} />
-            <VecLabel sx={mx} sy={my} ox={ox} oy={oy} label={label} color={color} />
-          </g>
+          <Arrow key={i} x1={ox} y1={oy} x2={ex} y2={ey} color={color}
+            markerId={i === 0 ? 'arrow-a' : i === 1 ? 'arrow-b' : `arrow-chain-${i}`}
+            strokeWidth={i === 0 ? vs.vecAWidth : i === 1 ? vs.vecBWidth : 2.5}
+            selected={vecKey !== null && vs.selectedVecKey === vecKey}
+            onClick={vecKey ? () => vs.setSelectedVecKey(vecKey) : undefined} />
         );
       })}
 
-      {/* 总和向量（标签在中点） */}
+      {/* 总和向量 */}
       {(Math.abs(sum[0]) > 0.01 || Math.abs(sum[1]) > 0.01) && (() => {
         const [sx, sy] = m2s(sum[0], sum[1]);
-        const midX = sx / 2, midY = sy / 2;
-        const sumLabel = n === 2 ? 'a+b' : '总和';
         return (
-          <>
-            <Arrow x1={0} y1={0} x2={sx} y2={sy} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
-            <VecLabel sx={midX} sy={midY} ox={0} oy={0} label={sumLabel} color={COLORS.vecResult} />
-          </>
+          <Arrow x1={0} y1={0} x2={sx} y2={sy} color={vs.vecResultColor} markerId="arrow-result" strokeWidth={vs.vecResultWidth}
+            selected={vs.selectedVecKey === 'result'} onClick={() => vs.setSelectedVecKey('result')} />
         );
       })()}
 
@@ -777,6 +826,21 @@ function TriangleLayer() {
         if (i === 1) return <DragHandle key={i} sx={ex} sy={ey} color={color} onDrag={handleDragB} title={`拖拽向量 ${label}`} />;
         return <DragHandle key={i} sx={ex} sy={ey} color={color} onDrag={(x, y) => handleDragChain(i, x, y)} title={`拖拽向量 ${label}`} />;
       })}
+
+      {/* 标签层（在控制点之上） */}
+      {allVecs.map((_, i) => {
+        const [ox, oy] = m2s(endpoints[i][0], endpoints[i][1]);
+        const [ex, ey] = m2s(endpoints[i + 1][0], endpoints[i + 1][1]);
+        const mx = (ox + ex) / 2, my = (oy + ey) / 2;
+        const color = i === 0 ? vs.vecAColor : i === 1 ? vs.vecBColor : chainColor(i);
+        return <VecLabel key={`label-${i}`} sx={mx} sy={my} ox={ox} oy={oy} label={chainLabel(i)} color={color} />;
+      })}
+      {(Math.abs(sum[0]) > 0.01 || Math.abs(sum[1]) > 0.01) && (() => {
+        const [sx, sy] = m2s(sum[0], sum[1]);
+        const midX = sx / 2, midY = sy / 2;
+        const sumLabel = n === 2 ? 'a+b' : '总和';
+        return <VecLabel sx={midX} sy={midY} ox={0} oy={0} label={sumLabel} color={vs.vecResultColor} />;
+      })()}
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={() => { commitA(); commitB(); }} style={{ pointerEvents: 'none' }} />
     </g>
@@ -791,6 +855,7 @@ function SubtractionLayer() {
   const setVecA = useVectorStore((s) => s.setVecA);
   const setVecB = useVectorStore((s) => s.setVecB);
   const { execute } = useHistoryStore();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
   const prevB = useRef<Vec2D>(vecB);
 
@@ -822,28 +887,29 @@ function SubtractionLayer() {
   return (
     <g>
       {/* 向量 a */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 向量 b */}
-      <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
-      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
+      <Arrow x1={0} y1={0} x2={bx} y2={by} color={vs.vecBColor} markerId="arrow-b" strokeWidth={vs.vecBWidth}
+        selected={vs.selectedVecKey === 'b'} onClick={() => vs.setSelectedVecKey('b')} />
 
       {/* -b（虚线提示，从原点） */}
       <Arrow x1={0} y1={0} x2={nbx} y2={nby} color={COLORS.negVec} markerId="arrow-neg" dashed opacity={0.6} />
-      <text x={nbx + 4} y={nby - 4} fontSize={18} fill={COLORS.negVec} fontFamily="Inter, sans-serif" opacity={0.8}>-b</text>
 
       {/* a+(-b) 首尾相接：-b 从 a 终点出发 */}
       <Arrow x1={ax} y1={ay} x2={rnx} y2={rny} color={COLORS.negVec} markerId="arrow-neg" dashed opacity={0.5} />
-      <text x={(ax + rnx) / 2 + 8} y={(ay + rny) / 2 - 6} fontSize={16} fill={COLORS.negVec} fontFamily="Inter, sans-serif" opacity={0.7}>-b</text>
+
+      {/* a 的平移：从 -b 终点指向 a+(-b) 终点 */}
+      <Arrow x1={nbx} y1={nby} x2={rnx} y2={rny}
+        color={vs.vecAColor} markerId="arrow-a" dashed opacity={0.5} />
 
       {/* 差向量：从 b 终点指向 a 终点 */}
-      <Arrow x1={bx} y1={by} x2={ax} y2={ay} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
-      <VecLabel sx={ax} sy={ay} ox={bx} oy={by} label="a-b" color={COLORS.vecResult} />
+      <Arrow x1={bx} y1={by} x2={ax} y2={ay} color={vs.vecResultColor} markerId="arrow-result" strokeWidth={vs.vecResultWidth}
+        selected={vs.selectedVecKey === 'result'} onClick={() => vs.setSelectedVecKey('result')} />
 
       {/* a+(-b) 结果向量 */}
       <Arrow x1={0} y1={0} x2={rnx} y2={rny} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={2} dashed opacity={0.7} />
-      <text x={rnx + 8} y={rny - 4} fontSize={16} fill={COLORS.vecResult} fontFamily="Inter, sans-serif" fontWeight={600} opacity={0.8}>a+(-b)</text>
 
       {/* 关系徽章 */}
       {isPerp && <RelationBadge sx={ax} sy={ay} kind="perp" />}
@@ -852,6 +918,15 @@ function SubtractionLayer() {
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
       <DragHandle sx={bx} sy={by} color={COLORS.vecB} onDrag={handleDragB} title="拖拽改变向量 b" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
+      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={vs.vecBColor} />
+      <LatexRenderer latex="-\\vec{b}" x={nbx + 4} y={nby - 16} fontSize={18} color={COLORS.negVec} opacity={0.8} stroke="#fff" />
+      <LatexRenderer latex="-\\vec{b}" x={(ax + rnx) / 2 + 8} y={(ay + rny) / 2 - 18} fontSize={16} color={COLORS.negVec} opacity={0.7} stroke="#fff" />
+      <VecLabel sx={(nbx + rnx) / 2} sy={(nby + rny) / 2} ox={nbx} oy={nby} label="a" color={vs.vecAColor} />
+      <VecLabel sx={(bx + ax) / 2} sy={(by + ay) / 2} ox={bx} oy={by} label="a-b" color={vs.vecResultColor} />
+      <VecLabel sx={rnx / 2} sy={rny / 2} ox={0} oy={0} label="a+(-b)" color={COLORS.vecResult} />
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -865,13 +940,12 @@ function ScalarLayer() {
   const scalarK = useVectorStore((s) => s.scalarK);
   const setVecA = useVectorStore((s) => s.setVecA);
   const { execute } = useHistoryStore();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
 
   const scaled = scale2D(vecA, scalarK);
   const [ax, ay] = m2s(vecA[0], vecA[1]);
   const [kax, kay] = m2s(scaled[0], scaled[1]);
-
-  const resultColor = scalarK >= 0 ? COLORS.vecResult : COLORS.vecScalar;
 
   const handleDragA = useCallback((svgX: number, svgY: number) => setVecA(svgToMath(svgX, svgY)), [setVecA]);
   const commit = useCallback(() => {
@@ -884,15 +958,13 @@ function ScalarLayer() {
   return (
     <g>
       {/* 原始向量 a */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 数乘结果 k·a */}
       {(Math.abs(scaled[0]) > 0.01 || Math.abs(scaled[1]) > 0.01) && (
-        <>
-          <Arrow x1={0} y1={0} x2={kax} y2={kay} color={resultColor} markerId={scalarK >= 0 ? 'arrow-result' : 'arrow-scalar'} strokeWidth={3} />
-          <VecLabel sx={kax} sy={kay} ox={0} oy={0} label={`${fmtSmart(scalarK)}·a`} color={resultColor} />
-        </>
+        <Arrow x1={0} y1={0} x2={kax} y2={kay} color={vs.vecResultColor} markerId={scalarK >= 0 ? 'arrow-result' : 'arrow-scalar'} strokeWidth={vs.vecResultWidth}
+          selected={vs.selectedVecKey === 'result'} onClick={() => vs.setSelectedVecKey('result')} />
       )}
       {Math.abs(scalarK) < 0.01 && (
         <circle cx={0} cy={0} r={6} fill={COLORS.vecResult} opacity={0.8}>
@@ -902,6 +974,13 @@ function ScalarLayer() {
 
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
+      {(Math.abs(scaled[0]) > 0.01 || Math.abs(scaled[1]) > 0.01) && (
+        <VecLabel sx={kax} sy={kay} ox={0} oy={0} label={`${fmtSmart(scalarK)}·a`}
+          latexLabel={`${fmtSmartLatex(scalarK)}\\cdot\\vec{a}`} color={vs.vecResultColor} />
+      )}
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -919,7 +998,8 @@ function DotProductLayer() {
   const setVecA = useVectorStore((s) => s.setVecA);
   const setVecB = useVectorStore((s) => s.setVecB);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
+  const { fl } = useFmt();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
   const prevB = useRef<Vec2D>(vecB);
 
@@ -954,12 +1034,12 @@ function DotProductLayer() {
   return (
     <g>
       {/* 向量 a */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 向量 b */}
-      <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
-      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
+      <Arrow x1={0} y1={0} x2={bx} y2={by} color={vs.vecBColor} markerId="arrow-b" strokeWidth={vs.vecBWidth}
+        selected={vs.selectedVecKey === 'b'} onClick={() => vs.setSelectedVecKey('b')} />
 
       {/* 投影线段 */}
       {showProjection && mag2D(vecB) > 0.1 && (
@@ -1016,29 +1096,23 @@ function DotProductLayer() {
               <>
                 <Arrow x1={0} y1={0} x2={spx} y2={spy}
                   color={COLORS.primary} markerId="arrow-target" strokeWidth={2} dashed opacity={0.6} />
-                <text x={spx + 6} y={spy - 6} fontSize={18} fontWeight={600}
-                  fill={COLORS.primary} fontFamily="Inter, sans-serif" opacity={0.8}>
-                  a+b |{f(mag2D(sumVec))}|
-                </text>
+                <LatexRenderer latex={`\\vec{a}+\\vec{b}\\;|${fl(mag2D(sumVec))}|`}
+                  x={spx + 6} y={spy - 18} fontSize={18} color={COLORS.primary} opacity={0.8} stroke="#fff" />
 
                 <Arrow x1={0} y1={0} x2={dpx} y2={dpy}
                   color={COLORS.vecScalar} markerId="arrow-scalar" strokeWidth={2} dashed opacity={0.6} />
-                <text x={dpx + 6} y={dpy - 6} fontSize={18} fontWeight={600}
-                  fill={COLORS.vecScalar} fontFamily="Inter, sans-serif" opacity={0.8}>
-                  a-b |{f(mag2D(diffVec))}|
-                </text>
+                <LatexRenderer latex={`\\vec{a}-\\vec{b}\\;|${fl(mag2D(diffVec))}|`}
+                  x={dpx + 6} y={dpy - 18} fontSize={18} color={COLORS.vecScalar} opacity={0.8} stroke="#fff" />
 
                 {/* 极化恒等式公式框 */}
-                <rect x={VB_X + VB_W - 320} y={VB_Y + 8} width={310} height={62} rx={6}
+                <rect x={VB_X + VB_W - 340} y={VB_Y + 8} width={330} height={68} rx={6}
                   fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-                <text x={VB_X + VB_W - 310} y={VB_Y + 32} fontSize={18} fontWeight={600}
-                  fill={COLORS.text} fontFamily="Inter, sans-serif">
-                  极化恒等式：a·b = (|a+b|²−|a−b|²)/4
-                </text>
-                <text x={VB_X + VB_W - 310} y={VB_Y + 56} fontSize={18}
-                  fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-                  = ({f(mag2D(sumVec) ** 2)} − {f(mag2D(diffVec) ** 2)}) / 4 = {f(dotVal)}
-                </text>
+                <LatexRenderer
+                  latex="\\text{极化恒等式：}\\vec{a}\\cdot\\vec{b} = \\frac{|\\vec{a}+\\vec{b}|^2 - |\\vec{a}-\\vec{b}|^2}{4}"
+                  x={VB_X + VB_W - 334} y={VB_Y + 10} fontSize={16} color={COLORS.text} width={320} />
+                <LatexRenderer
+                  latex={`= \\frac{${fl(mag2D(sumVec) ** 2)} - ${fl(mag2D(diffVec) ** 2)}}{4} = ${fl(dotVal)}`}
+                  x={VB_X + VB_W - 334} y={VB_Y + 38} fontSize={16} color={COLORS.textMuted} width={320} />
               </>
             );
           })()}
@@ -1052,6 +1126,11 @@ function DotProductLayer() {
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
       <DragHandle sx={bx} sy={by} color={COLORS.vecB} onDrag={handleDragB} title="拖拽改变向量 b" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
+      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={vs.vecBColor} />
+
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -1114,10 +1193,7 @@ function DecompositionLayer() {
     <g>
       {/* 基底向量 */}
       <Arrow x1={0} y1={0} x2={e1x} y2={e1y} color={COLORS.basis1} markerId="arrow-basis1" />
-      <VecLabel sx={e1x} sy={e1y} ox={0} oy={0} label="e₁" color={COLORS.basis1} />
-
       <Arrow x1={0} y1={0} x2={e2x} y2={e2y} color={COLORS.basis2} markerId="arrow-basis2" />
-      <VecLabel sx={e2x} sy={e2y} ox={0} oy={0} label="e₂" color={COLORS.basis2} />
 
       {/* 分解平行四边形 */}
       {coeffs && showDecompParallel && !isCollinear && (
@@ -1133,12 +1209,16 @@ function DecompositionLayer() {
 
       {/* 目标向量 */}
       <Arrow x1={0} y1={0} x2={tx} y2={ty} color={COLORS.decompTarget} markerId="arrow-target" strokeWidth={3} />
-      <VecLabel sx={tx} sy={ty} ox={0} oy={0} label="p" color={COLORS.decompTarget} />
 
       {/* 控制点 */}
       <DragHandle sx={tx} sy={ty} color={COLORS.decompTarget} onDrag={handleDragTarget} title="拖拽改变目标向量 p" />
       <DragHandle sx={e1x} sy={e1y} color={COLORS.basis1} onDrag={handleDragB1} title="拖拽改变基底 e₁" />
       <DragHandle sx={e2x} sy={e2y} color={COLORS.basis2} onDrag={handleDragB2} title="拖拽改变基底 e₂" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={e1x} sy={e1y} ox={0} oy={0} label="e₁" color={COLORS.basis1} />
+      <VecLabel sx={e2x} sy={e2y} ox={0} oy={0} label="e₂" color={COLORS.basis2} />
+      <VecLabel sx={tx} sy={ty} ox={0} oy={0} label="p" color={COLORS.decompTarget} />
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -1154,6 +1234,7 @@ function ProjectionLayer() {
   const setVecA = useVectorStore((s) => s.setVecA);
   const setVecB = useVectorStore((s) => s.setVecB);
   const { execute } = useHistoryStore();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
   const prevB = useRef<Vec2D>(vecB);
 
@@ -1168,7 +1249,6 @@ function ProjectionLayer() {
 
   const handleDragA = useCallback((svgX: number, svgY: number) => setVecA(svgToMath(svgX, svgY)), [setVecA]);
   const handleDragB = useCallback((svgX: number, svgY: number) => setVecB(svgToMath(svgX, svgY)), [setVecB]);
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const commit = useCallback(() => {
     if (prevA.current[0] !== vecA[0] || prevA.current[1] !== vecA[1]) {
       execute(new UpdateVec2DCommand('移动向量 a', prevA.current, vecA, setVecA));
@@ -1183,21 +1263,21 @@ function ProjectionLayer() {
   return (
     <g>
       {/* 向量 b（投影方向） */}
-      <Arrow x1={0} y1={0} x2={bx} y2={by} color={COLORS.vecB} markerId="arrow-b" />
-      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={COLORS.vecB} />
+      <Arrow x1={0} y1={0} x2={bx} y2={by} color={vs.vecBColor} markerId="arrow-b" strokeWidth={vs.vecBWidth}
+        selected={vs.selectedVecKey === 'b'} onClick={() => vs.setSelectedVecKey('b')} />
 
       {/* 向量 a */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 投影虚线（a 终点到投影点） */}
       <line x1={perpX} y1={perpY} x2={px} y2={py}
         stroke={COLORS.vecA} strokeWidth={1.5} strokeDasharray="5 3" opacity={0.6} />
 
       {/* 投影向量 */}
-      <Arrow x1={0} y1={0} x2={px} y2={py} color={COLORS.basis1} markerId="arrow-basis1" strokeWidth={3} />
-      <VecLabel sx={px} sy={py} ox={0} oy={0} label="proj" color={COLORS.basis1} />
-      <circle cx={px} cy={py} r={5} fill={COLORS.basis1} stroke="white" strokeWidth={1.5} />
+      <Arrow x1={0} y1={0} x2={px} y2={py} color={vs.projColor} markerId="arrow-basis1" strokeWidth={vs.projWidth}
+        selected={vs.selectedVecKey === 'proj'} onClick={() => vs.setSelectedVecKey('proj')} />
+      <circle cx={px} cy={py} r={5} fill={vs.projColor} stroke="white" strokeWidth={1.5} />
 
       {/* 直角标记 */}
       {Math.abs(px) > 5 && (() => {
@@ -1208,26 +1288,32 @@ function ProjectionLayer() {
         return (
           <polyline
             points={`${px + ppx},${py + ppy} ${px + ppx + ubx},${py + ppy + uby} ${px + ubx},${py + uby}`}
-            fill="none" stroke={COLORS.basis1} strokeWidth={1.5} opacity={0.7} />
+            fill="none" stroke={vs.projColor} strokeWidth={1.5} opacity={0.7} />
         );
       })()}
 
       {/* HUD */}
-      <rect x={VB_X + 8} y={VB_Y + 8} width={320} height={88} rx={6}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={400} height={96} rx={6}
         fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-      <text x={VB_X + 18} y={VB_Y + 30} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
-        投影向量 proj_b(a) = (a·b/|b|²)·b
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 54} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        投影长度 = a·b/|b| = {fmtApprox(projLen, 3)}
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 78} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        |proj| = {fmtApprox(mag2D(projVec), 3)}，|垂直分量| = {fmtApprox(mag2D(perpVec), 3)}
-      </text>
+      <LatexRenderer
+        latex="\\text{投影向量 }\\text{proj}_{\\vec{b}}(\\vec{a}) = \\frac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|^2}\\cdot\\vec{b}"
+        x={VB_X + 14} y={VB_Y + 10} fontSize={16} color={COLORS.text} width={380} />
+      <LatexRenderer
+        latex={`\\text{投影长度} = \\frac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|} ${fmtApproxLatex(projLen, 3)}`}
+        x={VB_X + 14} y={VB_Y + 38} fontSize={16} color={COLORS.textMuted} width={380} />
+      <LatexRenderer
+        latex={`|\\text{proj}| ${fmtApproxLatex(mag2D(projVec), 3)}\\text{，}|\\text{垂直分量}| ${fmtApproxLatex(mag2D(perpVec), 3)}`}
+        x={VB_X + 14} y={VB_Y + 66} fontSize={16} color={COLORS.textMuted} width={380} />
 
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
       <DragHandle sx={bx} sy={by} color={COLORS.vecB} onDrag={handleDragB} title="拖拽改变向量 b" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={vs.vecBColor} />
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
+      <VecLabel sx={px} sy={py} ox={0} oy={0} label="proj" color={vs.projColor} />
+
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -1241,7 +1327,8 @@ function RotationLayer() {
   const rotAngle = useVectorStore((s) => s.rotationAngle);
   const setVecA = useVectorStore((s) => s.setVecA);
   const { execute } = useHistoryStore();
-  const { f } = useFmt();
+  const { fl } = useFmt();
+  const vs = useVecStyle();
   const prevA = useRef<Vec2D>(vecA);
 
   const cosA = Math.cos(rotAngle);
@@ -1283,28 +1370,33 @@ function RotationLayer() {
       )}
 
       {/* 原始向量 a */}
-      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={COLORS.vecA} markerId="arrow-a" />
-      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={COLORS.vecA} />
+      <Arrow x1={0} y1={0} x2={ax} y2={ay} color={vs.vecAColor} markerId="arrow-a" strokeWidth={vs.vecAWidth}
+        selected={vs.selectedVecKey === 'a'} onClick={() => vs.setSelectedVecKey('a')} />
 
       {/* 旋转后向量 a' */}
-      <Arrow x1={0} y1={0} x2={rx} y2={ry} color={COLORS.vecResult} markerId="arrow-result" strokeWidth={3} />
-      <VecLabel sx={rx} sy={ry} ox={0} oy={0} label="a'" color={COLORS.vecResult} />
+      <Arrow x1={0} y1={0} x2={rx} y2={ry} color={vs.vecResultColor} markerId="arrow-result" strokeWidth={vs.vecResultWidth}
+        selected={vs.selectedVecKey === 'result'} onClick={() => vs.setSelectedVecKey('result')} />
 
       {/* HUD */}
-      <rect x={VB_X + 8} y={VB_Y + 8} width={340} height={88} rx={6}
+      <rect x={VB_X + 8} y={VB_Y + 8} width={380} height={96} rx={6}
         fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-      <text x={VB_X + 18} y={VB_Y + 30} fontSize={18} fontWeight={700} fill={COLORS.text} fontFamily="Inter, sans-serif">
-        旋转角 θ = {f(degAngle, 1)}°（{fmtApprox(rotAngle, 3)} rad）
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 54} fontSize={18} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">
-        a = ({f(vecA[0])}, {f(vecA[1])})
-      </text>
-      <text x={VB_X + 18} y={VB_Y + 78} fontSize={18} fill={COLORS.vecResult} fontWeight={600} fontFamily="Inter, sans-serif">
-        a' = ({f(rotated[0])}, {f(rotated[1])})
-      </text>
+      <LatexRenderer
+        latex={`\\text{旋转角 }\\theta = ${fl(degAngle, 1)}°\\;(${fl(rotAngle, 3)}\\text{ rad})`}
+        x={VB_X + 14} y={VB_Y + 10} fontSize={16} color={COLORS.text} width={360} />
+      <LatexRenderer
+        latex={`\\vec{a} = (${fl(vecA[0])},\\, ${fl(vecA[1])})`}
+        x={VB_X + 14} y={VB_Y + 38} fontSize={16} color={COLORS.textMuted} width={360} />
+      <LatexRenderer
+        latex={`\\vec{a}' = (${fl(rotated[0])},\\, ${fl(rotated[1])})`}
+        x={VB_X + 14} y={VB_Y + 66} fontSize={16} color={COLORS.vecResult} width={360} />
 
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
+
+      {/* 标签层（在控制点之上） */}
+      <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
+      <VecLabel sx={rx} sy={ry} ox={0} oy={0} label="a'" color={vs.vecResultColor} />
+
       <rect x={VB_X} y={VB_Y} width={VB_W} height={VB_H} fill="transparent"
         onPointerUp={commit} style={{ pointerEvents: 'none' }} />
     </g>
@@ -1336,7 +1428,7 @@ export function Canvas2D() {
   const showGrid = useVectorStore((s) => s.showGrid);
   const angleUnit = useVectorStore((s) => s.angleUnit);
   const svgRef = useRef<SVGSVGElement>(null);
-  const { f } = useFmt();
+  const { fl } = useFmt();
 
   const scalarK = useVectorStore((s) => s.scalarK);
   const vecA = useVectorStore((s) => s.vecA);
@@ -1405,12 +1497,16 @@ export function Canvas2D() {
     }
   }, []);
 
-  const handlePointerUp = useCallback((_e: React.PointerEvent) => {
+  const setSelectedVecKey = useVectorStore((s) => s.setSelectedVecKey);
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (panRef.current) {
+      if (!panRef.current.moved && (e.target as Element).tagName === 'svg') {
+        setSelectedVecKey(null);
+      }
       panRef.current = null;
       setIsPanning(false);
     }
-  }, []);
+  }, [setSelectedVecKey]);
 
   // 切换运算时重置视口（通过 key 机制实现，见下方 Canvas2DWrapper）
 
@@ -1420,44 +1516,42 @@ export function Canvas2D() {
       case 'parallelogram':
       case 'triangle': {
         const sum = add2D(vecA, vecB);
-        return `a+b = (${f(sum[0])}, ${f(sum[1])})`;
+        return `\\vec{a}+\\vec{b} = (${fl(sum[0])},\\, ${fl(sum[1])})`;
       }
       case 'subtraction': {
         const diff = sub2D(vecA, vecB);
-        return `a−b = (${f(diff[0])}, ${f(diff[1])})`;
+        return `\\vec{a}-\\vec{b} = (${fl(diff[0])},\\, ${fl(diff[1])})`;
       }
       case 'scalar': {
         const scaled = scale2D(vecA, scalarK);
-        return `${f(scalarK)}a = (${f(scaled[0])}, ${f(scaled[1])})  |${f(scalarK)}a| = ${f(mag2D(scaled))}`;
+        return `${fmtSmartLatex(scalarK)}\\vec{a} = (${fl(scaled[0])},\\, ${fl(scaled[1])})\\quad |${fmtSmartLatex(scalarK)}\\vec{a}| = ${fl(mag2D(scaled))}`;
       }
       case 'dotProduct': {
         const d = dot2D(vecA, vecB);
         const rad = angle2D(vecA, vecB);
         const val = angleUnit === 'deg' ? toDeg(rad) : rad;
-        const unit = angleUnit === 'deg' ? '°' : ' rad';
-        return `a·b = ${f(d)}  θ ≈ ${f(val, angleUnit === 'deg' ? 1 : 3)}${unit}`;
+        const unit = angleUnit === 'deg' ? '°' : '\\text{ rad}';
+        return `\\vec{a}\\cdot\\vec{b} = ${fl(d)}\\quad \\theta \\approx ${fl(val, angleUnit === 'deg' ? 1 : 3)}${unit}`;
       }
       case 'decomposition': {
         const decompTarget = useVectorStore.getState().decompTarget;
         const basis1 = useVectorStore.getState().basis1;
         const basis2 = useVectorStore.getState().basis2;
         const coeffs = decomposeVector(decompTarget, basis1, basis2);
-        if (!coeffs) return '⚠ e₁ 与 e₂ 共线，无法分解';
-        return `p = ${f(coeffs[0], 3)}·e₁ + ${f(coeffs[1], 3)}·e₂`;
+        if (!coeffs) return '\\text{⚠ }\\vec{e}_1\\text{ 与 }\\vec{e}_2\\text{ 共线，无法分解}';
+        return `\\vec{p} = ${fl(coeffs[0], 3)}\\cdot\\vec{e}_1 + ${fl(coeffs[1], 3)}\\cdot\\vec{e}_2`;
       }
-      case 'projection': {
-        const proj = projectVec2D(vecA, vecB);
-        return `proj_b(a) = (${f(proj[0])}, ${f(proj[1])})`;
-      }
+      case 'projection':
+        return null;
       case 'rotation': {
         const ra = useVectorStore.getState().rotationAngle;
-        const c = Math.cos(ra), s = Math.sin(ra);
-        const rot: Vec2D = [vecA[0]*c - vecA[1]*s, vecA[0]*s + vecA[1]*c];
-        return `a' = (${f(rot[0])}, ${f(rot[1])})  θ = ${f(toDeg(ra), 1)}°`;
+        const c = Math.cos(ra), sn = Math.sin(ra);
+        const rot: Vec2D = [vecA[0]*c - vecA[1]*sn, vecA[0]*sn + vecA[1]*c];
+        return `\\vec{a}' = (${fl(rot[0])},\\, ${fl(rot[1])})\\quad \\theta = ${fl(toDeg(ra), 1)}°`;
       }
       default: return null;
     }
-  }, [operation, vecA, vecB, scalarK, angleUnit, f]);
+  }, [operation, vecA, vecB, scalarK, angleUnit, fl]);
 
   const cursor = isPanning ? 'grabbing' : 'default';
 
@@ -1496,7 +1590,7 @@ export function Canvas2D() {
             pointerEvents: 'none',
           }}
         >
-          {resultFormula}
+          <InlineLatex latex={resultFormula} />
         </div>
       )}
 

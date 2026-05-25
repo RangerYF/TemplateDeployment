@@ -39,6 +39,18 @@ export function BallDrawRenderer({ result, replace, displayN }: { result: BallDr
       <ChartAxes ml={ML} mt={MT} mr={MR} vw={VW} vh={VH} xLabel="取到红球数" yLabel="频率 / 概率" />
       <YGrid yMin={0} yMax={maxY} ml={ML} mt={MT} mr={MR} vw={VW} vh={VH} format={(v) => v.toFixed(3)} />
 
+      {/* 右侧频数轴 (v0.4 反馈 #5) */}
+      <line x1={ML + PW} y1={MT} x2={ML + PW} y2={MT + PH} stroke={COLORS.borderStrong} strokeWidth={1.5} shapeRendering="crispEdges" />
+      {Array.from({ length: 6 }, (_, i) => i / 5).map(v => {
+        const y = MT + PH - v * PH;
+        return (
+          <text key={`r-${v}`} x={ML + PW + 3} y={y + 3} fontSize={9} fill={COLORS.textMuted}>
+            {Math.round(v * maxY * displayedN)}
+          </text>
+        );
+      })}
+      <text x={ML + PW + 3} y={MT - 6} fontSize={10} fill={COLORS.textSecondary}>频数</text>
+
       {frequencies.map((obsFreq, k) => {
         const theorProb = result.theoreticalProbs[k];
         const bx1 = ML + k * groupW + gap;

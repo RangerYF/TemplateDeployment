@@ -149,26 +149,6 @@ export function P08FieldMagnetHome({
               </div>
             </div>
 
-            <div
-              className="rounded-2xl border px-4 py-3"
-              style={{
-                backgroundColor: COLORS.bg,
-                borderColor: COLORS.border,
-              }}
-            >
-              <div className="text-xs font-medium" style={{ color: COLORS.textSecondary }}>
-                当前状态
-              </div>
-              <div
-                className="mt-1 text-base font-semibold"
-                style={{ color: COLORS.text }}
-              >
-                核心能力已可验收
-              </div>
-              <div className="text-xs" style={{ color: COLORS.textMuted }}>
-                未完成项已单独标注，不与已交付能力混报
-              </div>
-            </div>
           </div>
         </div>
       </header>

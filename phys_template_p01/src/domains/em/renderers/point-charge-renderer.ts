@@ -12,6 +12,18 @@ const pointChargeRenderer: EntityRenderer = (entity, _result, ctx) => {
   if (isInactiveDynamicPointCharge(entity)) return;
 
   const { coordinateTransform } = ctx;
+  const viewportPrimary = useSimulationStore.getState().viewportState.primary;
+  if (viewportPrimary === 'field') {
+    const state = useSimulationStore.getState().simulationState;
+    const isElectrostaticFieldScene = isStaticElectrostaticScene(
+      state.scene.entities.values(),
+      state.timeline.duration,
+    );
+    if (isElectrostaticFieldScene) {
+      return;
+    }
+  }
+
   const { position } = entity.transform;
   const radius = (entity.properties.radius as number) ?? 0.15;
   const charge = (entity.properties.charge as number) ?? 1e-6;

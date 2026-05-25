@@ -29,10 +29,14 @@ import {
   pointToLineDistance, clampToRegion,
 } from '@/engine/vectorMath';
 import { LatexRenderer } from './LatexRenderer';
+import { toVecLatex } from '@/lib/vecLatex';
+import { InlineLatex } from '@/components/shared/InlineLatex';
 import { useMotionEngine } from '@/hooks/useMotionEngine';
 import { useSliderBinding } from '@/hooks/useSliderBinding';
 import { useAnimationStore } from '@/editor/demo/animationStore';
 import { useTraceStore } from '@/editor/demo/traceStore';
+import { useConstraintStore } from '@/editor/demo/constraintStore';
+import type { ConstraintContext } from '@/engine/constraintParser';
 import type { Vec2D } from '@/editor/entities/types';
 
 // ─── 坐标系常量 ───
@@ -410,6 +414,16 @@ function CoordGrid({ view }: { view: ViewState }) {
         return <text key={`ty${y}`} x={yLabelSvgX} y={sy} textAnchor="end" dominantBaseline="middle"
           fontSize={14} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">{y}</text>;
       })}
+      {/* X 轴箭头 */}
+      <polygon
+        points={`${view.x + view.w - 2},0 ${view.x + view.w - 12},-5 ${view.x + view.w - 12},5`}
+        fill={COLORS.axis}
+      />
+      {/* Y 轴箭头（向上） */}
+      <polygon
+        points={`0,${view.y + 2} -5,${view.y + 12} 5,${view.y + 12}`}
+        fill={COLORS.axis}
+      />
       <text x={view.x + view.w - 14} y={xLabelSvgY} fontSize={15} fontWeight={600} fill={COLORS.text} fontFamily="Inter, sans-serif">x</text>
       <text x={yLabelSvgX + 16} y={view.y + 14} fontSize={15} fontWeight={600} fill={COLORS.text} fontFamily="Inter, sans-serif">y</text>
     </g>
@@ -449,6 +463,19 @@ export function CanvasDemo() {
   useSliderBinding();
   const svgRef = useRef<SVGSVGElement>(null);
   const entities = useDemoEntityStore((s) => s.entities);
+
+  // 约束轨迹：当实体位置变化时重新求解
+  const constraintCount = useConstraintStore((s) => Object.keys(s.constraints).length);
+  useEffect(() => {
+    if (constraintCount === 0) return;
+    const ctx: ConstraintContext = { points: {} };
+    for (const e of Object.values(entities)) {
+      if ((e.type === 'demoMarker' || e.type === 'demoPoint') && 'label' in e && e.label) {
+        ctx.points[e.label] = { x: (e as { x: number }).x, y: (e as { y: number }).y };
+      }
+    }
+    useConstraintStore.getState().solveAll(ctx);
+  }, [entities, constraintCount]);
   const { selectedId, hoveredId, select, setHovered } = useDemoSelectionStore();
   const { activeTool, opKind, step, pendingStartPoint, pendingVec1Id, pendingMarkerIds,
     nextStep, resetTool, setPendingStart, setPendingVec1, pushPendingMarker, popPendingMarker,
@@ -1926,9 +1953,6 @@ export function CanvasDemo() {
     const isHovered = hoveredId === vec.id;
     const isPending = pendingVec1Id === vec.id;
     const cidx = colorIndex(vec.color);
-    const dx = sx2 - sx1, dy = sy2 - sy1, len = Math.hypot(dx, dy);
-    const lx = len > 0 ? sx2 - dy / len * 14 + dx / len * 4 : sx2;
-    const ly = len > 0 ? sy2 + dx / len * 14 + dy / len * 4 : sy2;
     // 约束轨迹可视化
     const hasCircleConstraint = (vec.constraint === 'fixedStart' || vec.constraint === 'fixedEnd') && vec.constraintLength;
     const anchorSvg = hasCircleConstraint
@@ -1975,19 +1999,33 @@ export function CanvasDemo() {
           onPointerUp={handlePointerUp}
         />
         <ArrowLine x1={sx1} y1={sy1} x2={sx2} y2={sy2} color={vec.color} markerId={`demo-arrow-${cidx}`} />
-        {vec.showLabel && len > 5 && (
-          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-            fontSize={14} fontWeight={700} fill={vec.color}
-            fontFamily="Inter, 'PingFang SC', sans-serif" style={{ userSelect: 'none', pointerEvents: 'none' }}>
-            {vec.label}
-          </text>
-        )}
         {/* 约束标记：固定端显示锚点 */}
         {hasConstraint && anchorSvg && (
           <circle cx={anchorSvg[0]} cy={anchorSvg[1]} r={4}
             fill={vec.color} stroke={COLORS.white} strokeWidth={1.5} />
         )}
       </g>
+    );
+  }
+
+  // ─── 渲染向量标签（独立层，显示在所有箭头之上） ───
+  function renderVecLabel(vec: DemoVector) {
+    const sp = entities[vec.startId] as DemoPoint | undefined;
+    const ep = entities[vec.endId] as DemoPoint | undefined;
+    if (!sp || !ep || !vec.showLabel) return null;
+    const [sx1, sy1] = m2s(sp.x, sp.y);
+    const [sx2, sy2] = m2s(ep.x, ep.y);
+    const dx = sx2 - sx1, dy = sy2 - sy1, len = Math.hypot(dx, dy);
+    if (len <= 5) return null;
+    const lx = len > 0 ? sx2 - dy / len * 20 + dx / len * 6 : sx2;
+    const ly = len > 0 ? sy2 + dx / len * 20 + dy / len * 6 : sy2;
+    return (
+      <LatexRenderer key={`label-${vec.id}`}
+        latex={`\\vec{${vec.label}}`}
+        x={lx - 18} y={ly - 14}
+        fontSize={16} color={vec.color} opacity={1}
+        stroke="#fff"
+      />
     );
   }
 
@@ -2025,11 +2063,6 @@ export function CanvasDemo() {
     const opIdx = ops.indexOf(op);
     const cidx = (opIdx + 3) % DEMO_COLORS.length;
     const color = DEMO_COLORS[cidx];
-    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
-    const lx = len > 0 ? x2 - dy / len * 14 + dx / len * 4 : x2;
-    const ly = len > 0 ? y2 + dx / len * 14 + dy / len * 4 : y2;
-    const label = resolveOpLabel(op.id, entities);
-
     const isSelected = selectedId === op.id;
     const isHovered = hoveredId === op.id;
     const isPending = pendingVec1Id === op.id;
@@ -2051,14 +2084,54 @@ export function CanvasDemo() {
         />
         <ArrowLine x1={x1} y1={y1} x2={x2} y2={y2} color={color} markerId={`demo-arrow-${cidx}`}
           strokeWidth={op.kind === 'scale' ? 2.5 : 3} dashed />
-        {len > 5 && (
-          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-            fontSize={14} fontWeight={600} fill={color}
-            fontFamily="Inter, sans-serif" style={{ userSelect: 'none', pointerEvents: 'none' }}>
-            {label}
-          </text>
-        )}
       </g>
+    );
+  }
+
+  // ─── 渲染运算标签（独立层） ───
+  function renderOpLabel(op: DemoVecOp) {
+    if (op.kind === 'dotProduct') return null;
+    const res = resolveVec(op.id, entities);
+    if (!res) return null;
+    const origin = resolveOpOrigin(op, entities);
+    const [x1, y1] = m2s(origin.x, origin.y);
+    const [x2, y2] = m2s(origin.x + res[0], origin.y + res[1]);
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+    if (len <= 5) return null;
+    const lx = len > 0 ? x2 - dy / len * 14 + dx / len * 4 : x2;
+    const ly = len > 0 ? y2 + dx / len * 14 + dy / len * 4 : y2;
+    const opIdx = ops.indexOf(op);
+    const cidx = (opIdx + 3) % DEMO_COLORS.length;
+    const color = DEMO_COLORS[cidx];
+
+    if (op.kind === 'projection' && op.vec2Id) {
+      const v1 = resolveVec(op.vec1Id, entities);
+      const v2 = resolveVec(op.vec2Id, entities);
+      const l1 = resolveOpLabel(op.vec1Id, entities);
+      const l2 = resolveOpLabel(op.vec2Id, entities);
+      if (v1 && v2) {
+        const m2 = dot2D(v2, v2);
+        const k = m2 > 1e-12 ? dot2D(v1, v2) / m2 : 0;
+        const kStr = Number.isInteger(k) ? String(k) : k.toFixed(2);
+        const l1Latex = toVecLatex(l1) ?? l1;
+        const l2Latex = toVecLatex(l2) ?? l2;
+        const projLatex = `\\text{proj}(${l1Latex},${l2Latex})=${kStr}\\cdot ${l2Latex}`;
+        return <LatexRenderer key={`label-${op.id}`} latex={projLatex} x={lx - 18} y={ly - 14} fontSize={14} color={color} stroke="#fff" width={220} />;
+      }
+    }
+
+    const label = resolveOpLabel(op.id, entities);
+    const latex = toVecLatex(label);
+    if (latex) {
+      return <LatexRenderer key={`label-${op.id}`} latex={latex} x={lx - 18} y={ly - 14} fontSize={14} color={color} stroke="#fff" />;
+    }
+    return (
+      <text key={`label-${op.id}`} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
+        fontSize={14} fontWeight={600} fill={color}
+        stroke="#fff" strokeWidth={3} paintOrder="stroke"
+        fontFamily="Inter, sans-serif" style={{ userSelect: 'none', pointerEvents: 'none' }}>
+        {label}
+      </text>
     );
   }
 
@@ -2548,6 +2621,8 @@ export function CanvasDemo() {
   // ─── 运算结果 HUD（HTML overlay，左上角显示所有运算公式）───
   const opHuds = ops.map((op) => {
     const label = resolveOpLabel(op.id, entities);
+    const labelLatex = toVecLatex(label);
+    const labelNode = labelLatex ? <InlineLatex latex={labelLatex} /> : label;
 
     if (op.kind === 'dotProduct') {
       const v1 = resolveVec(op.vec1Id, entities);
@@ -2557,16 +2632,19 @@ export function CanvasDemo() {
       const angleVal = toDeg(angle2D(v1, v2));
       return (
         <div key={op.id} style={opHudStyle}>
-          {label} = {dotVal.toFixed(2)} &nbsp;(&theta;&asymp;{angleVal.toFixed(1)}&deg;)
+          {labelNode} = {dotVal.toFixed(2)} &nbsp;(&theta;&asymp;{angleVal.toFixed(1)}&deg;)
         </div>
       );
     }
 
     const res = resolveVec(op.id, entities);
     if (!res) return null;
+
+    if (op.kind === 'projection') return null;
+
     return (
       <div key={op.id} style={opHudStyle}>
-        {label} = ({res[0].toFixed(2)}, {res[1].toFixed(2)})
+        {labelNode} = ({res[0].toFixed(2)}, {res[1].toFixed(2)})
       </div>
     );
   });
@@ -2618,6 +2696,7 @@ export function CanvasDemo() {
       >
         <DemoArrowDefs colors={[...DEMO_COLORS]} />
         <CoordGrid view={view} />
+        <LocusConstraintLayer />
         <LocusLayer points={points} />
         <TraceLayer entities={entities} />
 
@@ -2636,6 +2715,10 @@ export function CanvasDemo() {
 
         {markers.map((mk) => renderMarker(mk))}
         {points.map((p) => renderEndPoint(p))}
+
+        {/* 标签层（在端点圆之上，避免被遮挡） */}
+        {vectors.map((v) => renderVecLabel(v))}
+        {ops.map((op) => renderOpLabel(op))}
 
         {texts.map((t) => renderText(t))}
         {sliders.map((s) => renderSlider(s))}
@@ -3412,6 +3495,52 @@ function StatusBar() {
     }}>
       {msg}
     </div>
+  );
+}
+
+function LocusConstraintLayer() {
+  const constraints = useConstraintStore((s) => s.constraints);
+  const objectiveExtrema = useConstraintStore((s) => s.objectiveExtrema);
+  const items = useMemo(() =>
+    Object.values(constraints).filter((c) => c.visible && c.segments.length > 0),
+    [constraints],
+  );
+  if (items.length === 0) return null;
+  return (
+    <g className="constraint-locus-layer">
+      {items.map((c) => {
+        const d = c.segments.map(([x1, y1, x2, y2]) => {
+          const [sx1, sy1] = m2s(x1, y1);
+          const [sx2, sy2] = m2s(x2, y2);
+          return `M${sx1},${sy1}L${sx2},${sy2}`;
+        }).join(' ');
+        return <path key={c.id} d={d} fill="none" stroke={c.color} strokeWidth={2} opacity={0.7} />;
+      })}
+      {objectiveExtrema?.min && (() => {
+        const [sx, sy] = m2s(objectiveExtrema.min!.x, objectiveExtrema.min!.y);
+        return (
+          <g key="obj-min">
+            <circle cx={sx} cy={sy} r={5} fill="#2563eb" stroke="#fff" strokeWidth={1.5} />
+            <text x={sx + 8} y={sy - 6} fontSize={11} fill="#2563eb" fontWeight={600}
+              style={{ textShadow: '0 0 3px #fff, 0 0 3px #fff' }}>
+              min={objectiveExtrema.min!.value.toFixed(2)}
+            </text>
+          </g>
+        );
+      })()}
+      {objectiveExtrema?.max && (() => {
+        const [sx, sy] = m2s(objectiveExtrema.max!.x, objectiveExtrema.max!.y);
+        return (
+          <g key="obj-max">
+            <circle cx={sx} cy={sy} r={5} fill="#dc2626" stroke="#fff" strokeWidth={1.5} />
+            <text x={sx + 8} y={sy - 6} fontSize={11} fill="#dc2626" fontWeight={600}
+              style={{ textShadow: '0 0 3px #fff, 0 0 3px #fff' }}>
+              max={objectiveExtrema.max!.value.toFixed(2)}
+            </text>
+          </g>
+        );
+      })()}
+    </g>
   );
 }
 

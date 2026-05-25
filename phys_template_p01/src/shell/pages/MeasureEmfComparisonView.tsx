@@ -2,9 +2,11 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 import {
   buildMeasureEmfResistanceSamples,
+  buildMeasureEmfSliderSamples,
   calculateMeasureEmfPoint,
   fitMeasureEmfPoints,
-  resolveMeasureEmfResistance,
+  resolveMeasureEmfDividerSegments,
+  resolveMeasureEmfSeriesResistance,
   type MeasureEmfCompareParams,
   type MeasureEmfFit,
   type MeasureEmfMode,
@@ -88,31 +90,37 @@ export function MeasureEmfComparisonView({ onBack }: Props) {
   const [activeTab, setActiveTab] = useState<MeasureEmfViewTab>('chart');
 
   const sampleRecords = useMemo<Record<MeasureEmfMode, SampleRecord[]>>(() => {
-    const resistances = buildMeasureEmfResistanceSamples(params.maxResistance, params.sampleCount ?? 8);
+    const seriesResistances = buildMeasureEmfResistanceSamples(params.maxResistance, params.sampleCount ?? 8);
+    const sliderSamples = buildMeasureEmfSliderSamples(params.sampleCount ?? 8);
+    const dividerSegments = resolveMeasureEmfDividerSegments(params);
     return {
-      variable: resistances.map((resistance, index) => ({
+      variable: seriesResistances.map((resistance, index) => ({
         id: `variable-${index}`,
         resistance,
         point: calculateMeasureEmfPoint('variable', params, resistance),
       })),
-      divider: resistances.map((resistance, index) => ({
+      divider: sliderSamples.map((sliderRatio, index) => ({
         id: `divider-${index}`,
-        resistance,
-        point: calculateMeasureEmfPoint('divider', params, resistance),
+        resistance: dividerSegments.totalResistance,
+        point: calculateMeasureEmfPoint('divider', params, sliderRatio),
       })),
     };
   }, [params]);
 
   const activeMode: MeasureEmfMode = activeTab === 'chart' ? 'variable' : activeTab;
   const currentResistance = useMemo(
-    () => resolveMeasureEmfResistance(params),
+    () => resolveMeasureEmfSeriesResistance(params),
+    [params],
+  );
+  const dividerSegments = useMemo(
+    () => resolveMeasureEmfDividerSegments(params),
     [params],
   );
 
   const currentPoints = useMemo<Record<MeasureEmfMode, MeasureEmfPoint>>(() => ({
     variable: calculateMeasureEmfPoint('variable', params, currentResistance),
-    divider: calculateMeasureEmfPoint('divider', params, currentResistance),
-  }), [currentResistance, params]);
+    divider: calculateMeasureEmfPoint('divider', params, dividerSegments.sliderRatio),
+  }), [currentResistance, dividerSegments, params]);
 
   const fitted = useMemo<Record<MeasureEmfMode, MeasureEmfFit | null>>(() => ({
     variable: fitMeasureEmfPoints(sampleRecords.variable.map((item) => item.point)),
@@ -185,7 +193,9 @@ export function MeasureEmfComparisonView({ onBack }: Props) {
               className="mt-2 rounded-lg px-3 py-2 text-[11px]"
               style={{ backgroundColor: pageStyle.blockSoft, color: pageStyle.secondary, lineHeight: 1.7 }}
             >
-              当前滑变总阻值：<strong style={{ color: pageStyle.text }}>{formatResistance(currentResistance, 2)}</strong>
+              {activeMode === 'divider'
+                ? <>当前滑变总阻值：<strong style={{ color: pageStyle.text }}>{formatResistance(dividerSegments.totalResistance, 2)}</strong>，上段 {formatResistance(dividerSegments.upperResistance, 2)}，下段 {formatResistance(dividerSegments.lowerResistance, 2)}</>
+                : <>当前接入电阻：<strong style={{ color: pageStyle.text }}>{formatResistance(currentResistance, 2)}</strong></>}
             </div>
           </PanelSection>
 
@@ -207,11 +217,11 @@ export function MeasureEmfComparisonView({ onBack }: Props) {
             >
               {activeTab === 'chart' ? (
                 <div className="grid gap-5 lg:grid-cols-2">
-                  <MeasureCircuitDiagram mode="variable" />
-                  <MeasureCircuitDiagram mode="divider" />
+                  <MeasureCircuitDiagram mode="variable" sliderRatio={params.sliderRatio} />
+                  <MeasureCircuitDiagram mode="divider" sliderRatio={params.sliderRatio} />
                 </div>
               ) : (
-                <MeasureCircuitDiagram mode={activeMode} />
+                <MeasureCircuitDiagram mode={activeMode} sliderRatio={params.sliderRatio} />
               )}
             </PanelCard>
 
@@ -244,7 +254,10 @@ export function MeasureEmfComparisonView({ onBack }: Props) {
                 rows={activeTab === 'chart'
                   ? [
                     { label: '当前方案', value: '图像对比' },
-                    { label: '当前 R滑', value: formatResistance(currentResistance, 2) },
+                    { label: '限流当前接入电阻', value: formatResistance(currentResistance, 2) },
+                    { label: '分压滑变总阻值', value: formatResistance(dividerSegments.totalResistance, 2) },
+                    { label: '分压上段电阻', value: formatResistance(dividerSegments.upperResistance, 2) },
+                    { label: '分压下段电阻', value: formatResistance(dividerSegments.lowerResistance, 2) },
                     { label: '限流当前 I', value: formatCurrent(currentPoints.variable.I, 3) },
                     { label: '限流当前 U', value: formatVoltage(currentPoints.variable.U, 3) },
                     { label: '分压当前 I', value: formatCurrent(currentPoints.divider.I, 3) },
@@ -296,8 +309,10 @@ export function MeasureEmfComparisonView({ onBack }: Props) {
 
 function MeasureCircuitDiagram({
   mode,
+  sliderRatio,
 }: {
   mode: MeasureEmfMode;
+  sliderRatio: number;
 }) {
   const stroke = '#111111';
   const accent = MODE_META[mode].color;
@@ -326,7 +341,7 @@ function MeasureCircuitDiagram({
             <path d="M360 32 V180 H428" />
             <path d="M514 180 H566" />
           </g>
-          <DividerRheostatSymbol x={286} y={52} width={120} height={48} />
+          <DividerRheostatSymbol x={286} y={52} width={120} height={48} sliderRatio={sliderRatio} />
           <FixedResistorSymbol x={428} y={168} width={86} height={24} />
           <VoltmeterBranch x1={56} yTop={68} yBottom={256} meterCx={176} meterCy={218} />
         </>
@@ -336,7 +351,7 @@ function MeasureCircuitDiagram({
             <path d="M232 68 H286" />
             <path d="M336 32 H566 V256" />
           </g>
-          <SeriesRheostatSymbol x={286} y={52} width={120} height={48} />
+          <SeriesRheostatSymbol x={286} y={52} width={120} height={48} sliderRatio={sliderRatio} />
           <VoltmeterBranch x1={56} yTop={68} yBottom={256} meterCx={176} meterCy={218} />
         </>
       )}
@@ -744,20 +759,23 @@ function SeriesRheostatSymbol({
   y,
   width,
   height,
+  sliderRatio,
 }: {
   x: number;
   y: number;
   width: number;
   height: number;
+  sliderRatio: number;
 }) {
+  const tapX = x + 8 + (width - 16) * Math.max(0.01, Math.min(sliderRatio, 1));
   return (
     <>
       <rect x={x} y={y} width={width} height={height} rx="8" fill="#FFFFFF" stroke="#111111" strokeWidth="2.2" />
       <circle cx={x + 8} cy={y + height / 2} r="2.6" fill="#111111" />
       <circle cx={x + width - 8} cy={y + height / 2} r="2.6" fill="#111111" />
-      <circle cx={x + width * 0.42} cy={y + height / 2} r="2.6" fill="#111111" />
-      <line x1={x + width * 0.68} y1={y + 8} x2={x + width * 0.38} y2={y + height - 6} stroke="#111111" strokeWidth="2" />
-      <polygon points={`${x + width * 0.68},${y + 8} ${x + width * 0.62},${y + 17} ${x + width * 0.73},${y + 15}`} fill="#111111" />
+      <circle cx={tapX} cy={y + height / 2} r="2.6" fill="#111111" />
+      <line x1={tapX + 18} y1={y + 8} x2={tapX - 18} y2={y + height - 6} stroke="#111111" strokeWidth="2" />
+      <polygon points={`${tapX + 18},${y + 8} ${tapX + 12},${y + 17} ${tapX + 23},${y + 15}`} fill="#111111" />
     </>
   );
 }
@@ -767,21 +785,24 @@ function DividerRheostatSymbol({
   y,
   width,
   height,
+  sliderRatio,
 }: {
   x: number;
   y: number;
   width: number;
   height: number;
+  sliderRatio: number;
 }) {
+  const tapX = x + 8 + (width - 16) * Math.max(0.01, Math.min(sliderRatio, 0.99));
   return (
     <>
       <rect x={x} y={y} width={width} height={height} rx="8" fill="#FFFFFF" stroke="#111111" strokeWidth="2.2" />
       <circle cx={x + 8} cy={y + height / 2} r="2.6" fill="#111111" />
       <circle cx={x + width - 8} cy={y + height / 2} r="2.6" fill="#111111" />
-      <circle cx={x + width * 0.62} cy={y + height / 2} r="2.6" fill="#111111" />
-      <line x1={x + width * 0.72} y1={y + 8} x2={x + width * 0.54} y2={y + height - 6} stroke="#111111" strokeWidth="2" />
-      <polygon points={`${x + width * 0.72},${y + 8} ${x + width * 0.66},${y + 17} ${x + width * 0.77},${y + 15}`} fill="#111111" />
-      <line x1={x + width * 0.62} y1={y + height / 2} x2={x + width * 0.62} y2={y - 20} stroke="#111111" strokeWidth="2" />
+      <circle cx={tapX} cy={y + height / 2} r="2.6" fill="#111111" />
+      <line x1={tapX} y1={y + height / 2} x2={tapX} y2={y - 20} stroke="#111111" strokeWidth="2" />
+      <line x1={tapX + 14} y1={y + 8} x2={tapX - 14} y2={y + height - 6} stroke="#111111" strokeWidth="2" />
+      <polygon points={`${tapX + 14},${y + 8} ${tapX + 8},${y + 17} ${tapX + 19},${y + 15}`} fill="#111111" />
     </>
   );
 }

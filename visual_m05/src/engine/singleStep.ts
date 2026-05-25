@@ -19,14 +19,16 @@ import type {
 } from '../types/simulation';
 
 export type AnimatableType = 'coinFlip' | 'diceRoll' | 'twoDiceSum' | 'ballDraw' | 'meetingProblem';
-export type MultiAnimatableType = 'monteCarloPi' | 'buffonsNeedle';
+export type MultiAnimatableType = 'monteCarloPi' | 'buffonsNeedle' | 'randomWalk1D' | 'randomWalk2D' | 'markovChain';
 
 export function isAnimatable(type: SimulationType): type is AnimatableType {
   return type === 'coinFlip' || type === 'diceRoll' || type === 'twoDiceSum' || type === 'ballDraw' || type === 'meetingProblem';
 }
 
 export function isMultiAnimatable(type: SimulationType): type is MultiAnimatableType {
-  return type === 'monteCarloPi' || type === 'buffonsNeedle';
+  return type === 'monteCarloPi' || type === 'buffonsNeedle'
+    || type === 'randomWalk1D' || type === 'randomWalk2D'
+    || type === 'markovChain';
 }
 
 /** Run one trial and return the raw trial value to push to accumulated list */

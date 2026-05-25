@@ -12,6 +12,7 @@
  */
 
 import type { Triangle, SolveMode, SolveResult } from '@/types';
+import { formatTeachingErrorValue } from '@/engine/triangleDisplay';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -119,7 +120,7 @@ function solveSSA(inputs: Record<string, number>): SolveResult {
   const h = b * Math.sin(A);
 
   if (a < h - 1e-9)
-    return { valid: false, reason: `无解（a=${a.toFixed(3)} < h=b·sinA=${h.toFixed(3)}）` };
+    return { valid: false, reason: `无解（a=${formatTeachingErrorValue(a)} < h=b·sinA=${formatTeachingErrorValue(h)}）` };
 
   // Right-triangle degenerate case
   if (Math.abs(a - h) < 1e-9 && A < Math.PI / 2) {

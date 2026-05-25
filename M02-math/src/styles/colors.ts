@@ -54,6 +54,7 @@ export const COLORS = {
   infoBlueBg:       '#EFF6FF',   // 信息蓝浅底
   infoBlueBorder:   '#BFDBFE',   // 信息蓝边框
   infoBlueDark:     '#1D4ED8',   // 信息蓝深色文本
+  derivativeCurve:  '#E11D48',   // 导函数曲线 — 高对比玫红
 } as const;
 
 export type ColorKey = keyof typeof COLORS;

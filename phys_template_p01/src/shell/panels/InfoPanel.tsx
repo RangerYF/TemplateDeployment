@@ -29,6 +29,7 @@ import {
   type P08SceneSummary,
   type PotentialMeasurementSummary,
 } from './p08SceneSummary';
+import { getP08PanelSurfaceStyle, getP08SceneTheme, toAlpha } from '@/shell/p08/p08Theme';
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
@@ -121,6 +122,8 @@ export function InfoPanel({ presetId }: { presetId?: string }) {
     hasAccelDiagram ||
     hasMagneticModule ||
     hasPointChargeField;
+  const theme = p08Summary.isP08 ? getP08SceneTheme(presetId) : null;
+  const shellStyle = p08Summary.isP08 ? getP08PanelSurfaceStyle(presetId) : null;
 
   return (
     <aside
@@ -129,13 +132,20 @@ export function InfoPanel({ presetId }: { presetId?: string }) {
         width: 300,
         minWidth: 280,
         maxWidth: 320,
-        borderLeft: `1px solid ${COLORS.border}`,
+        borderLeft: p08Summary.isP08 ? 'none' : `1px solid ${COLORS.border}`,
         backgroundColor: COLORS.bg,
+        ...(shellStyle ?? {}),
       }}
     >
       <div
         className="px-4 py-3 text-sm font-semibold"
-        style={{ color: COLORS.text, borderBottom: `1px solid ${COLORS.border}` }}
+        style={{
+          color: COLORS.text,
+          borderBottom: `1px solid ${theme?.border ?? COLORS.border}`,
+          background: theme
+            ? `linear-gradient(180deg, ${toAlpha(theme.accent, 0.1)} 0%, rgba(255,255,255,0) 100%)`
+            : undefined,
+        }}
       >
         物理信息
       </div>

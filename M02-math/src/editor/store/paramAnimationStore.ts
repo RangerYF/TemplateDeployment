@@ -20,6 +20,7 @@ export interface ParamAnimationStoreSnapshot {
   easing: EasingName;
   loop: boolean;
   recordEnabled: boolean;
+  showTrajectory: boolean;
   playState: PlayState;
 }
 
@@ -29,6 +30,7 @@ export interface ParamAnimationState {
   easing: EasingName;
   loop: boolean;
   recordEnabled: boolean;
+  showTrajectory: boolean;
   playState: PlayState;
 
   setParams: (params: AnimParam[]) => void;
@@ -37,6 +39,7 @@ export interface ParamAnimationState {
   setEasing: (name: EasingName) => void;
   setLoop: (v: boolean) => void;
   setRecordEnabled: (v: boolean) => void;
+  setShowTrajectory: (v: boolean) => void;
   setPlayState: (s: PlayState) => void;
   reset: () => void;
   getSnapshot: () => ParamAnimationStoreSnapshot;
@@ -51,6 +54,7 @@ export const useParamAnimationStore = create<ParamAnimationState>((set, get) => 
   easing: 'easeInOut',
   loop: false,
   recordEnabled: false,
+  showTrajectory: false,
   playState: 'idle',
 
   setParams: (params) => set({ params }),
@@ -62,6 +66,7 @@ export const useParamAnimationStore = create<ParamAnimationState>((set, get) => 
   setEasing: (easing) => set({ easing }),
   setLoop: (loop) => set({ loop }),
   setRecordEnabled: (recordEnabled) => set({ recordEnabled }),
+  setShowTrajectory: (showTrajectory) => set({ showTrajectory }),
   setPlayState: (playState) => set({ playState }),
   reset: () =>
     set({
@@ -70,6 +75,7 @@ export const useParamAnimationStore = create<ParamAnimationState>((set, get) => 
       easing: 'easeInOut',
       loop: false,
       recordEnabled: false,
+      showTrajectory: false,
       playState: 'idle',
     }),
 
@@ -81,6 +87,7 @@ export const useParamAnimationStore = create<ParamAnimationState>((set, get) => 
       easing: state.easing,
       loop: state.loop,
       recordEnabled: state.recordEnabled,
+      showTrajectory: state.showTrajectory,
       playState: state.playState,
     };
   },
@@ -92,6 +99,7 @@ export const useParamAnimationStore = create<ParamAnimationState>((set, get) => 
       easing: snapshot?.easing ?? 'easeInOut',
       loop: typeof snapshot?.loop === 'boolean' ? snapshot.loop : false,
       recordEnabled: typeof snapshot?.recordEnabled === 'boolean' ? snapshot.recordEnabled : false,
+      showTrajectory: typeof snapshot?.showTrajectory === 'boolean' ? snapshot.showTrajectory : false,
       playState: snapshot?.playState ?? 'idle',
     }),
 }));

@@ -99,7 +99,7 @@ export function BoxSwapBallsRenderer({ result }: { result: BoxSwapBallsResult })
                   <line x1={innerX} y1={theoryY} x2={innerX + innerW} y2={theoryY}
                     stroke={COLORS.error} strokeWidth={1.5} strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />
                   <text x={innerX + innerW - 4} y={theoryY - 4} textAnchor="end" fontSize={10} fill={COLORS.error}>
-                    P(B_n)≈{theory.toFixed(4)}
+                    P(B<tspan fontSize={9} dy={2}>n</tspan><tspan dy={-2}>)≈{theory.toFixed(4)}</tspan>
                   </text>
                 </>
               );
@@ -118,7 +118,13 @@ export function BoxSwapBallsRenderer({ result }: { result: BoxSwapBallsResult })
                     {(freq * 100).toFixed(1)}%
                   </text>
                   <text x={bx + barW / 2} y={innerY + innerH + 14} textAnchor="middle" fontSize={11} fill={COLORS.textSecondary}>
-                    {k === 0 ? `A_n (0黑)` : k === result.initBlack ? `B_n (${k}黑)` : k === maxK ? `C_n (${k}黑)` : `${k}黑`}
+                    {k === 0 ? (
+                      <>A<tspan fontSize={10} dy={3}>n</tspan><tspan dy={-3}> (0黑)</tspan></>
+                    ) : k === result.initBlack ? (
+                      <>B<tspan fontSize={10} dy={3}>n</tspan><tspan dy={-3}> ({k}黑)</tspan></>
+                    ) : k === maxK ? (
+                      <>C<tspan fontSize={10} dy={3}>n</tspan><tspan dy={-3}> ({k}黑)</tspan></>
+                    ) : `${k}黑`}
                   </text>
                 </g>
               );
@@ -191,7 +197,7 @@ export function BoxSwapBallsRenderer({ result }: { result: BoxSwapBallsResult })
       {/* Footer */}
       {result.theoreticalProbBn !== undefined && (
         <text x={VW / 2} y={VH - 4} textAnchor="middle" fontSize={11} fill={COLORS.textMuted}>
-          理论公式：P(B_n) = 3/5 + (2/5)·(-1/9)^n（仅适用 1黑+2红 配置）
+          理论公式：P(B<tspan fontSize={10} dy={3}>n</tspan><tspan dy={-3}>) = 3/5 + (2/5)·(-1/9)</tspan><tspan fontSize={10} dy={-3}>n</tspan><tspan dy={3}>（仅适用 1黑+2红 配置）</tspan>
         </text>
       )}
     </svg>

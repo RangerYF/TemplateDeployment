@@ -66,6 +66,17 @@ interface VectorStoreState {
   // 3D 参考系旋转（四元数 [x, y, z, w]）
   sceneRotation: [number, number, number, number];
 
+  // 向量选中 & 样式
+  selectedVecKey: 'a' | 'b' | 'result' | 'proj' | null;
+  vecAColor: string;
+  vecBColor: string;
+  vecResultColor: string;
+  projColor: string;
+  projWidth: number;
+  vecAWidth: number;
+  vecBWidth: number;
+  vecResultWidth: number;
+
   // ─── Actions ───
   setOperation(op: OperationType): void;
   setVecA(v: Vec2D): void;
@@ -97,6 +108,15 @@ interface VectorStoreState {
   setRotationAngle(rad: number): void;
   setSceneRotation(q: [number, number, number, number]): void;
   resetSceneRotation(): void;
+  setSelectedVecKey(key: 'a' | 'b' | 'result' | 'proj' | null): void;
+  setVecAColor(c: string): void;
+  setVecBColor(c: string): void;
+  setVecResultColor(c: string): void;
+  setProjColor(c: string): void;
+  setProjWidth(w: number): void;
+  setVecAWidth(w: number): void;
+  setVecBWidth(w: number): void;
+  setVecResultWidth(w: number): void;
 
   // ─── 快照（供 LoadPresetCommand 撤销使用）───
   getSnapshot(): VectorSnapshot;
@@ -130,6 +150,14 @@ export interface VectorSnapshot {
   showPolarization?: boolean;
   rotationAngle?: number;
   sceneRotation?: [number, number, number, number];
+  vecAColor?: string;
+  vecBColor?: string;
+  vecResultColor?: string;
+  projColor?: string;
+  projWidth?: number;
+  vecAWidth?: number;
+  vecBWidth?: number;
+  vecResultWidth?: number;
 }
 
 export const useVectorStore = create<VectorStoreState>()((set, get) => ({
@@ -173,6 +201,16 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
   showPolarization: false,
   rotationAngle: Math.PI / 4,
   sceneRotation: [0, 0, 0, 1],
+
+  selectedVecKey: null,
+  vecAColor: '#8C8C8C',
+  vecBColor: '#8C8C8C',
+  vecResultColor: '#FFD700',
+  projColor: '#2196F3',
+  projWidth: 3,
+  vecAWidth: 2.5,
+  vecBWidth: 2.5,
+  vecResultWidth: 3,
 
   // ─── Actions ───
 
@@ -326,6 +364,16 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
     set({ sceneRotation: [0, 0, 0, 1] });
   },
 
+  setSelectedVecKey(key) { set({ selectedVecKey: key }); },
+  setVecAColor(c) { set({ vecAColor: c }); },
+  setVecBColor(c) { set({ vecBColor: c }); },
+  setVecResultColor(c) { set({ vecResultColor: c }); },
+  setProjColor(c) { set({ projColor: c }); },
+  setProjWidth(w) { set({ projWidth: w }); },
+  setVecAWidth(w) { set({ vecAWidth: w }); },
+  setVecBWidth(w) { set({ vecBWidth: w }); },
+  setVecResultWidth(w) { set({ vecResultWidth: w }); },
+
   getSnapshot(): VectorSnapshot {
     const s = get();
     return {
@@ -355,6 +403,14 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       showPolarization: s.showPolarization,
       rotationAngle: s.rotationAngle,
       sceneRotation: [...s.sceneRotation] as [number, number, number, number],
+      vecAColor: s.vecAColor,
+      vecBColor: s.vecBColor,
+      vecResultColor: s.vecResultColor,
+      projColor: s.projColor,
+      projWidth: s.projWidth,
+      vecAWidth: s.vecAWidth,
+      vecBWidth: s.vecBWidth,
+      vecResultWidth: s.vecResultWidth,
     };
   },
 
@@ -386,6 +442,14 @@ export const useVectorStore = create<VectorStoreState>()((set, get) => ({
       showPolarization: snap.showPolarization ?? false,
       rotationAngle: snap.rotationAngle ?? Math.PI / 4,
       sceneRotation: snap.sceneRotation ?? [0, 0, 0, 1],
+      vecAColor: snap.vecAColor ?? '#8C8C8C',
+      vecBColor: snap.vecBColor ?? '#8C8C8C',
+      vecResultColor: snap.vecResultColor ?? '#FFD700',
+      projColor: snap.projColor ?? '#2196F3',
+      projWidth: snap.projWidth ?? 3,
+      vecAWidth: snap.vecAWidth ?? 2.5,
+      vecBWidth: snap.vecBWidth ?? 2.5,
+      vecResultWidth: snap.vecResultWidth ?? 3,
     });
   },
 }));

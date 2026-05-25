@@ -38,6 +38,12 @@ export function M03Layout() {
   const activeEntity   = entities.find((e) => e.id === activeEntityId);
   const activeType     = activeEntity?.type;
   const hasSelection   = activeEntityId !== null;
+  const activeToolHint =
+    activeTool === 'point-on-curve'
+      ? '当前：曲上取点，点击曲线可观察切线、法线和焦点弦'
+      : activeTool === 'movable-point'
+        ? '当前：放置动点，点击曲线可添加可拖动的点'
+        : '当前：平移缩放，可拖动画布或滚轮缩放';
 
   const [leftOpen, setLeftOpen]   = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
@@ -87,6 +93,9 @@ export function M03Layout() {
 
         {/* ── Tools ──────────────────────────────────────────────────────── */}
         <div className="ml-auto flex items-center gap-1.5">
+          <span className="hidden xl:inline text-[11px] text-eduMind-textPlaceholder mr-2">
+            {activeToolHint}
+          </span>
           {/* Pan/Snap toggle */}
           <ToolButton
             active={activeTool === 'point-on-curve'}

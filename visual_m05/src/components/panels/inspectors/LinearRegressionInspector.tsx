@@ -9,12 +9,32 @@ import {
   resolveRegressionData,
   syncCustomRegressionDataset,
 } from '@/types/simulation';
-import type { LinearRegressionParams, RegressionDataSpec } from '@/types/simulation';
+import type { LinearRegressionParams, RegressionDataSpec, RegressionModelType } from '@/types/simulation';
+
+const MODEL_OPTIONS: Array<{ value: RegressionModelType; label: string; hint: string }> = [
+  { value: 'linear', label: '线性 y = a + bx', hint: '一次直线（最常用）' },
+  { value: 'exponential', label: '指数 y = a·e^(bx)', hint: '要求 y > 0' },
+  { value: 'power', label: '幂函数 y = a·x^b', hint: '要求 x > 0 且 y > 0' },
+  { value: 'log', label: '对数 y = a + b·ln(x)', hint: '要求 x > 0' },
+  { value: 'quadratic', label: '二次 y = ax² + bx + c', hint: '至少 3 个点' },
+  { value: 'reciprocal', label: '倒数 y = a + b/x', hint: '要求 x ≠ 0' },
+];
 
 interface Props {
   simId: string;
   params: LinearRegressionParams;
 }
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  fontSize: 13,
+  padding: '6px 8px',
+  border: `1px solid ${COLORS.border}`,
+  borderRadius: 6,
+  backgroundColor: COLORS.bg,
+  color: COLORS.text,
+  boxSizing: 'border-box',
+};
 
 export function LinearRegressionInspector({ simId, params }: Props) {
   const updateParams = useSimulationStore(s => s.updateParams);
@@ -79,19 +99,39 @@ export function LinearRegressionInspector({ simId, params }: Props) {
     });
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    fontSize: 13,
-    padding: '6px 8px',
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 6,
-    backgroundColor: COLORS.bg,
-    color: COLORS.text,
-    boxSizing: 'border-box',
-  };
+  const currentModel = MODEL_OPTIONS.find(m => m.value === (params.modelType ?? 'linear'));
 
   return (
     <div className="flex flex-col gap-4">
+      {/* 回归模型类型选择 (v0.4 反馈 #10) */}
+      <div>
+        <div className="mb-1.5" style={{ fontSize: 14, color: COLORS.textSecondary }}>
+          回归模型
+          {params.autoRecommend && <span style={{ color: COLORS.primary, marginLeft: 6, fontSize: 12 }}>· 自动推荐已开启</span>}
+        </div>
+        <select
+          value={params.modelType ?? 'linear'}
+          onChange={e => updateRegression({ ...params, modelType: e.target.value as RegressionModelType })}
+          disabled={params.autoRecommend}
+          style={{ ...inputStyle, opacity: params.autoRecommend ? 0.5 : 1 }}
+        >
+          {MODEL_OPTIONS.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
+        </select>
+        {currentModel && (
+          <div className="mt-1" style={{ fontSize: 12, color: COLORS.textMuted }}>{currentModel.hint}</div>
+        )}
+      </div>
+
+      <label className="flex items-center justify-between gap-2 cursor-pointer">
+        <span style={{ fontSize: 14, color: COLORS.textSecondary }}>自动推荐最佳模型</span>
+        <Switch
+          checked={params.autoRecommend ?? false}
+          onCheckedChange={v => updateRegression({ ...params, autoRecommend: v })}
+        />
+      </label>
+
       {/* 模式切换：预设数据集 / 教师输入 */}
       <div>
         <div className="mb-1.5" style={{ fontSize: 14, color: COLORS.textSecondary }}>数据来源</div>

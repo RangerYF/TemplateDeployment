@@ -18,6 +18,7 @@ export interface MeasureEmfWorkingState {
   terminalVoltage: number;
   outputVoltage: number;
   outputCurrent: number;
+  sliderRatio?: number;
   externalBranchResistance?: number;
   upperResistance?: number;
   lowerResistance?: number;
@@ -68,26 +69,59 @@ export function buildMeasureEmfResistanceSamples(maxResistance: number, sampleCo
   return result;
 }
 
-export function resolveMeasureEmfResistance(params: Pick<MeasureEmfCompareParams, 'maxResistance' | 'sliderRatio'>): number {
+export function buildMeasureEmfSliderSamples(sampleCount: number): number[] {
+  const count = Math.max(2, Math.round(sampleCount));
+  const lower = 0.08;
+  const upper = 0.95;
+  const result: number[] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const t = count === 1 ? 0 : index / (count - 1);
+    result.push(lower + (upper - lower) * t);
+  }
+
+  return result;
+}
+
+export function resolveMeasureEmfSeriesResistance(params: Pick<MeasureEmfCompareParams, 'maxResistance' | 'sliderRatio'>): number {
   return Math.max(
     0.5,
     Math.max(params.maxResistance, 1) * clamp(params.sliderRatio, 0.01, 1),
   );
 }
 
+export function resolveMeasureEmfDividerSegments(
+  params: Pick<MeasureEmfCompareParams, 'maxResistance' | 'sliderRatio'>,
+): {
+  totalResistance: number;
+  sliderRatio: number;
+  upperResistance: number;
+  lowerResistance: number;
+} {
+  const totalResistance = Math.max(params.maxResistance, 1);
+  const sliderRatio = clamp(params.sliderRatio, 0.01, 0.99);
+
+  return {
+    totalResistance,
+    sliderRatio,
+    upperResistance: totalResistance * (1 - sliderRatio),
+    lowerResistance: totalResistance * sliderRatio,
+  };
+}
+
 export function calculateMeasureEmfPoint(
   mode: MeasureEmfMode,
   params: MeasureEmfCompareParams,
-  resistance: number,
+  controlValue: number,
 ): MeasureEmfPoint {
   const emf = Math.max(params.emf, 0);
   const r = Math.max(params.internalResistance, 0);
   const rA = Math.max(params.ammeterResistance, 0);
   const rV = Math.max(params.voltmeterResistance, 1e-6);
-  const rheostatResistance = Math.max(resistance, 1e-6);
 
   if (mode === 'divider') {
-    const sliderRatio = clamp(params.sliderRatio, 0.01, 1);
+    const sliderRatio = clamp(controlValue, 0.01, 0.99);
+    const rheostatResistance = Math.max(params.maxResistance, 1e-6);
     const R_upper = rheostatResistance * (1 - sliderRatio);
     const R_lower = rheostatResistance * sliderRatio;
     const R_loadExternal = Math.max(params.loadResistance, 1e-6);
@@ -107,6 +141,7 @@ export function calculateMeasureEmfPoint(
       I: measuredCurrent,
       U: terminalVoltage,
       state: {
+        sliderRatio,
         totalCurrent,
         measuredCurrent,
         measuredVoltage: terminalVoltage,
@@ -121,6 +156,7 @@ export function calculateMeasureEmfPoint(
     };
   }
 
+  const rheostatResistance = Math.max(controlValue, 1e-6);
   const R_main = rA + rheostatResistance;
   const R_parallel = parallelResistanceMany([R_main, rV]);
   const R_total = R_parallel + r;
@@ -133,6 +169,7 @@ export function calculateMeasureEmfPoint(
     I: measuredCurrent,
     U: terminalVoltage,
     state: {
+      sliderRatio: clamp(params.sliderRatio, 0.01, 1),
       totalCurrent,
       measuredCurrent,
       measuredVoltage: terminalVoltage,

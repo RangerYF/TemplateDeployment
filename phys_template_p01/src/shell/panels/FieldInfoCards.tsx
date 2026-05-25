@@ -1,36 +1,37 @@
 import { useState } from 'react';
 import type { Entity } from '@/core/types';
 import { useSimulationStore } from '@/store';
-import { COLORS, RADIUS, SHADOWS } from '@/styles/tokens';
+import { COLORS, RADIUS } from '@/styles/tokens';
 import { isStaticElectrostaticScene } from '@/domains/em/logic/static-electrostatic-scene';
 import { getP08SceneSummary } from './p08SceneSummary';
+import { getP08FloatingCardStyle, getP08SceneTheme, toAlpha } from '@/shell/p08/p08Theme';
 
 function InfoCard({
   title,
   children,
   defaultOpen = true,
+  presetId,
 }: {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  presetId: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const theme = getP08SceneTheme(presetId);
 
   return (
     <div
       onClick={(event) => event.stopPropagation()}
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.96)',
-        border: `1px solid ${COLORS.border}`,
-        borderRadius: RADIUS.sm,
-        boxShadow: SHADOWS.sm,
+        ...getP08FloatingCardStyle(presetId),
+        borderRadius: RADIUS.card,
         overflow: 'hidden',
         minWidth: 260,
         maxWidth: 320,
         maxHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backdropFilter: 'blur(8px)',
       }}
     >
       <button
@@ -40,23 +41,34 @@ function InfoCard({
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '8px 12px',
+          padding: '10px 13px',
           border: 'none',
           background: 'none',
           cursor: 'pointer',
           color: COLORS.text,
           fontSize: 12,
           fontWeight: 600,
-          borderBottom: open ? `1px solid ${COLORS.border}` : 'none',
+          borderBottom: open ? `1px solid ${theme.border}` : 'none',
           flexShrink: 0,
         }}
       >
-        <span>{title}</span>
-        <span style={{ color: COLORS.textMuted, fontSize: 10 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: RADIUS.full,
+              backgroundColor: theme.accent,
+              boxShadow: `0 0 0 5px ${toAlpha(theme.accent, 0.14)}`,
+            }}
+          />
+          {title}
+        </span>
+        <span style={{ color: theme.accentStrong, fontSize: 10 }}>
           {open ? '▲ 收起' : '▼ 展开'}
         </span>
       </button>
-      {open && <div style={{ padding: 12, overflowY: 'auto' }}>{children}</div>}
+      {open && <div style={{ padding: 13, overflowY: 'auto' }}>{children}</div>}
     </div>
   );
 }
@@ -99,7 +111,7 @@ export function FieldInfoCards({
         pointerEvents: 'auto',
       }}
     >
-      <InfoCard title="课堂提示">
+      <InfoCard title="课堂提示" presetId={presetId}>
         <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.primary }}>
           {summary.moduleTitle ?? 'P-08'}
         </div>

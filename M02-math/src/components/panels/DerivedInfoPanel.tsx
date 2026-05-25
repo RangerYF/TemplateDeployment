@@ -4,27 +4,32 @@ import { COLORS } from '@/styles/colors';
 import { classifyCircleLine } from '@/canvas/renderers/circleLineRenderer';
 import type { CircleLineRelation } from '@/canvas/renderers/circleLineRenderer';
 import type { LineEntity } from '@/types';
+import {
+  formatAsymptoteConic,
+  formatPointConic,
+  formatSignedConicValue,
+  formatSquareTermConic,
+  formatConicValue,
+} from '@/engine/conicDisplay';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Format a number with 4 decimal places, always showing sign. */
 function fmtSigned(n: number): string {
-  return (n >= 0 ? '+' : '') + n.toFixed(4);
+  const mode = useEntityStore.getState().displayOptions.teachingFormat ? 'teaching' : 'decimal';
+  return formatSignedConicValue(n, mode);
 }
 
 /** Format a coordinate pair, e.g. "(−4.0000, 0.0000)". */
 function fmtPoint(x: number, y: number): string {
-  return `(${x.toFixed(4)}, ${y.toFixed(4)})`;
+  const mode = useEntityStore.getState().displayOptions.teachingFormat ? 'teaching' : 'decimal';
+  return formatPointConic(x, y, mode);
 }
 
 /** Build a human-readable asymptote equation from stored slope/intercept. */
 function fmtAsymptote(k: number, b: number): string {
-  const sign     = k >= 0 ? '' : '−';
-  const absK     = Math.abs(k).toFixed(4);
-  const bAbs     = Math.abs(b).toFixed(4);
-  const bSign    = b >= 0 ? ' + ' : ' − ';
-  if (b === 0) return `y = ${sign}${absK}x`;
-  return `y = ${sign}${absK}x${bSign}${bAbs}`;
+  const mode = useEntityStore.getState().displayOptions.teachingFormat ? 'teaching' : 'decimal';
+  return formatAsymptoteConic(k, b, mode);
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -64,6 +69,8 @@ function Row({ label, value, color }: { label: string; value: string; color?: st
 
 export function DerivedInfoPanel() {
   const entity = useActiveConic();
+  const teachingFormat = useEntityStore((s) => s.displayOptions.teachingFormat);
+  const displayMode = teachingFormat ? 'teaching' : 'decimal';
 
   if (!entity) {
     return (
@@ -88,39 +95,39 @@ export function DerivedInfoPanel() {
       <p style={{ fontSize: '12px', color: COLORS.textSecondary, marginBottom: '12px', fontFamily: 'monospace', fontWeight: 600 }}>
         {entity.type === 'ellipse' && (() => {
           const { a, b, cx, cy } = entity.params;
-          const a2 = (a * a).toFixed(2).replace(/\.?0+$/, '');
-          const b2 = (b * b).toFixed(2).replace(/\.?0+$/, '');
-          const ox = cx !== 0 ? ` \u2212 ${Math.abs(cx).toFixed(2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
-          const oy = cy !== 0 ? ` \u2212 ${Math.abs(cy).toFixed(2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
+          const a2 = formatSquareTermConic(a, displayMode);
+          const b2 = formatSquareTermConic(b, displayMode);
+          const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
+          const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
           return `${xTerm}/${a2} + ${yTerm}/${b2} = 1`;
         })()}
         {entity.type === 'hyperbola' && (() => {
           const { a, b, cx, cy } = entity.params;
-          const a2 = (a * a).toFixed(2).replace(/\.?0+$/, '');
-          const b2 = (b * b).toFixed(2).replace(/\.?0+$/, '');
-          const ox = cx !== 0 ? ` \u2212 ${Math.abs(cx).toFixed(2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
-          const oy = cy !== 0 ? ` \u2212 ${Math.abs(cy).toFixed(2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
+          const a2 = formatSquareTermConic(a, displayMode);
+          const b2 = formatSquareTermConic(b, displayMode);
+          const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
+          const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
           return `${xTerm}/${a2} \u2212 ${yTerm}/${b2} = 1`;
         })()}
         {entity.type === 'parabola' && (() => {
           const { p, cx, cy } = entity.params;
-          const p2 = (2 * p).toFixed(2).replace(/\.?0+$/, '');
+          const p2 = formatConicValue(2 * p, displayMode, 2);
           const isV = entity.derived.orientation === 'v';
-          const ox = cx !== 0 ? ` \u2212 ${Math.abs(cx).toFixed(2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
-          const oy = cy !== 0 ? ` \u2212 ${Math.abs(cy).toFixed(2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
+          const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
+          const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
           return isV ? `${xTerm} = ${p2}y` : `${yTerm} = ${p2}x`;
         })()}
         {entity.type === 'circle' && (() => {
           const { r, cx, cy } = entity.params;
-          const r2 = (r * r).toFixed(2).replace(/\.?0+$/, '');
-          const ox = cx !== 0 ? ` \u2212 ${Math.abs(cx).toFixed(2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
-          const oy = cy !== 0 ? ` \u2212 ${Math.abs(cy).toFixed(2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
+          const r2 = formatSquareTermConic(r, displayMode);
+          const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
+          const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
           return `${xTerm} + ${yTerm} = ${r2}`;
@@ -131,8 +138,19 @@ export function DerivedInfoPanel() {
       {entity.type === 'ellipse' && (() => {
         const d = entity.derived;
         const latus = (2 * entity.params.b * entity.params.b / entity.params.a);
+        const { a, b, cx, cy } = entity.params;
         return (
           <>
+            <Section title="顶点">
+              <Row label="长轴右顶点" value={fmtPoint(cx + a, cy)}
+                color={COLORS.primary} />
+              <Row label="长轴左顶点" value={fmtPoint(cx - a, cy)}
+                color={COLORS.primary} />
+              <Row label="短轴上顶点" value={fmtPoint(cx, cy + b)}
+                color={COLORS.infoBlueDark} />
+              <Row label="短轴下顶点" value={fmtPoint(cx, cy - b)}
+                color={COLORS.infoBlueDark} />
+            </Section>
             <Section title="焦点">
               <Row label="F₁" value={fmtPoint(d.foci[0][0], d.foci[0][1])}
                 color={COLORS.focusPoint} />
@@ -140,9 +158,9 @@ export function DerivedInfoPanel() {
                 color={COLORS.focusPoint} />
             </Section>
             <Section title="离心率 / 焦距">
-              <Row label="e = c/a" value={d.e.toFixed(6)} />
-              <Row label="c = √(a²−b²)" value={d.c.toFixed(6)} />
-              <Row label="通径 2b²/a" value={latus.toFixed(6)} />
+              <Row label="e = c/a" value={formatConicValue(d.e, displayMode, 6)} />
+              <Row label="c = √(a²−b²)" value={formatConicValue(d.c, displayMode, 6)} />
+              <Row label="通径 2b²/a" value={formatConicValue(latus, displayMode, 6)} />
             </Section>
             <Section title="准线">
               <Row label="x₁ =" value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
@@ -158,6 +176,16 @@ export function DerivedInfoPanel() {
         const latus = (2 * entity.params.b * entity.params.b / entity.params.a);
         return (
           <>
+            <Section title="轴端点">
+              <Row label="实轴左端点" value={fmtPoint(d.transverseVertices[0][0], d.transverseVertices[0][1])}
+                color={COLORS.primary} />
+              <Row label="实轴右端点" value={fmtPoint(d.transverseVertices[1][0], d.transverseVertices[1][1])}
+                color={COLORS.primary} />
+              <Row label="虚轴下端点" value={fmtPoint(d.conjugateVertices[0][0], d.conjugateVertices[0][1])}
+                color={COLORS.infoBlueDark} />
+              <Row label="虚轴上端点" value={fmtPoint(d.conjugateVertices[1][0], d.conjugateVertices[1][1])}
+                color={COLORS.infoBlueDark} />
+            </Section>
             <Section title="焦点">
               <Row label="F₁" value={fmtPoint(d.foci[0][0], d.foci[0][1])}
                 color={COLORS.focusPoint} />
@@ -165,9 +193,9 @@ export function DerivedInfoPanel() {
                 color={COLORS.focusPoint} />
             </Section>
             <Section title="离心率 / 焦距">
-              <Row label="e = c/a" value={d.e.toFixed(6)} />
-              <Row label="c = √(a²+b²)" value={d.c.toFixed(6)} />
-              <Row label="通径 2b²/a" value={latus.toFixed(6)} />
+              <Row label="e = c/a" value={formatConicValue(d.e, displayMode, 6)} />
+              <Row label="c = √(a²+b²)" value={formatConicValue(d.c, displayMode, 6)} />
+              <Row label="通径 2b²/a" value={formatConicValue(latus, displayMode, 6)} />
             </Section>
             <Section title="准线">
               <Row label="x₁ =" value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
@@ -198,8 +226,9 @@ export function DerivedInfoPanel() {
               <Row label={isV ? 'y =' : 'x ='} value={fmtSigned(d.directrix)} color={COLORS.directrix} />
             </Section>
             <Section title="焦准距">
-              <Row label="p/2 =" value={(p / 2).toFixed(6)} />
-              <Row label="通径 2p =" value={(2 * p).toFixed(6)} />
+              <Row label="p/2 =" value={formatConicValue(p / 2, displayMode, 6)} />
+              <Row label="通径 2p =" value={formatConicValue(2 * p, displayMode, 6)} />
+              <Row label="开口方向" value={isV ? (p >= 0 ? '向上' : '向下') : (p >= 0 ? '向右' : '向左')} />
             </Section>
           </>
         );
@@ -212,11 +241,11 @@ export function DerivedInfoPanel() {
           <>
             <Section title="几何量">
               <Row label="圆心" value={fmtPoint(d.center[0], d.center[1])} />
-              <Row label="半径 r =" value={entity.params.r.toFixed(6)} />
+              <Row label="半径 r =" value={formatConicValue(entity.params.r, displayMode, 6)} />
             </Section>
             <Section title="面积 / 周长">
-              <Row label="S = πr²" value={d.area.toFixed(6)} />
-              <Row label="C = 2πr" value={d.circumference.toFixed(6)} />
+              <Row label="S = πr²" value={formatConicValue(d.area, displayMode, 6)} />
+              <Row label="C = 2πr" value={formatConicValue(d.circumference, displayMode, 6)} />
             </Section>
           </>
         );

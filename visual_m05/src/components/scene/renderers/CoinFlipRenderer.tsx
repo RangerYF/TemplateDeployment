@@ -4,10 +4,10 @@ import { px, py, toPolylinePoints, ChartAxes, DashedHLine, ChartTitle } from '@/
 import { TrialDataTable } from './TrialDataTable';
 
 const VW = 1020, VH = 580;
-const ML = 68, MR = 250;  // 右侧留 250 给数据表
+const ML = 50, MR = 270;  // ML 缩小让"频率"标签靠近 Y 轴；MR 加大给频数轴+数据表更多空间
 const PW = VW - ML - MR;
-const TABLE_X = ML + PW + 12;
-const TABLE_W = MR - 24;
+const TABLE_X = ML + PW + 32;  // 数据表起点右移，避免被频数刻度撞
+const TABLE_W = VW - TABLE_X - 12;
 
 // Top section
 const T1_MT = 40, T1_H = 220;
@@ -45,7 +45,12 @@ export function CoinFlipRenderer({ result, displayN }: { result: CoinFlipResult;
 
       {/* TOP: Bar chart */}
       <ChartTitle title={`掷硬币频率对比 (n=${displayedN})`} vw={VW} ml={ML} mr={MR} mt={T1_MT} />
-      <ChartAxes ml={ML} mt={T1_MT} mr={MR} mb={0} vw={VW} vh={T1_MT + T1_H} xLabel="结果" yLabel="频率" />
+      <ChartAxes ml={ML} mt={T1_MT} mr={MR} mb={0} vw={VW} vh={T1_MT + T1_H} xLabel="结果" />
+      {/* "频率" yLabel 贴近 Y 轴 (v0.4 反馈：左侧字向左挪) */}
+      <text
+        transform={`translate(${ML - 30}, ${T1_MT + T1_H / 2}) rotate(-90)`}
+        textAnchor="middle" fontSize={12} fill={COLORS.textSecondary}
+      >频率</text>
 
       {/* Y grid (top) */}
       {topGridLines.map((v) => {
@@ -58,9 +63,21 @@ export function CoinFlipRenderer({ result, displayN }: { result: CoinFlipResult;
         );
       })}
 
+      {/* 右侧频数轴 (v0.4 反馈 #5) */}
+      <line x1={ML + PW} y1={T1_MT} x2={ML + PW} y2={T1_MT + T1_H} stroke={COLORS.borderStrong} strokeWidth={1.5} shapeRendering="crispEdges" />
+      {topGridLines.map((v) => {
+        const y = py(v, 0, 1, T1_MT, T1_H);
+        return (
+          <text key={`r-${v}`} x={ML + PW + 3} y={y + 3} fontSize={9} fill={COLORS.textMuted}>
+            {Math.round(v * displayedN)}
+          </text>
+        );
+      })}
+      <text x={ML + PW + 3} y={T1_MT - 6} fontSize={10} fill={COLORS.textSecondary}>频数</text>
+
       {/* Theory line 0.5 */}
       <DashedHLine x1={ML} x2={ML + PW} y={py(0.5, 0, 1, T1_MT, T1_H)} color={COLORS.error} />
-      <text x={ML + PW + 4} y={py(0.5, 0, 1, T1_MT, T1_H) + 4} fontSize={11} fill={COLORS.error}>理论 0.5</text>
+      <text x={ML + PW / 2} y={py(0.5, 0, 1, T1_MT, T1_H) - 4} textAnchor="middle" fontSize={10} fill={COLORS.error}>理论 0.5</text>
 
       {/* Bars */}
       {freqs.map((freq, i) => {
@@ -81,7 +98,11 @@ export function CoinFlipRenderer({ result, displayN }: { result: CoinFlipResult;
 
       {/* BOTTOM: Running frequency */}
       <text x={ML + PW / 2} y={T2_MT - 10} textAnchor="middle" fontSize={14} fontWeight="bold" fill={COLORS.text}>频率收敛过程</text>
-      <ChartAxes ml={ML} mt={T2_MT} mr={MR} mb={0} vw={VW} vh={T2_MT + T2_H} xLabel="试验次数" yLabel="正面频率" />
+      <ChartAxes ml={ML} mt={T2_MT} mr={MR} mb={0} vw={VW} vh={T2_MT + T2_H} xLabel="试验次数" />
+      <text
+        transform={`translate(${ML - 30}, ${T2_MT + T2_H / 2}) rotate(-90)`}
+        textAnchor="middle" fontSize={12} fill={COLORS.textSecondary}
+      >正面频率</text>
 
       {/* Y grid (bottom) */}
       {[0, 0.25, 0.5, 0.75, 1.0].map((v) => {
@@ -103,7 +124,7 @@ export function CoinFlipRenderer({ result, displayN }: { result: CoinFlipResult;
 
       {/* Theory line 0.5 */}
       <DashedHLine x1={ML} x2={ML + PW} y={py(0.5, 0, 1, T2_MT, T2_H)} color={COLORS.error} />
-      <text x={ML + PW + 4} y={py(0.5, 0, 1, T2_MT, T2_H) + 4} fontSize={11} fill={COLORS.error}>p=0.5</text>
+      <text x={ML + PW / 2} y={py(0.5, 0, 1, T2_MT, T2_H) - 4} textAnchor="middle" fontSize={10} fill={COLORS.error}>p=0.5</text>
 
       {/* Running frequency line */}
       {points.length > 0 && (

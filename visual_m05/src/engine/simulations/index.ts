@@ -16,3 +16,5 @@ export * from './pieChart';
 export * from './lineChart';
 export * from './tournamentMatch';
 export * from './boxSwapBalls';
+export * from './randomWalk';
+export * from './markovChain';

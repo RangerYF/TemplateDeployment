@@ -1,7 +1,4 @@
 import { useFunctionStore } from '@/editor/store/functionStore';
-import { editorInstance } from '@/editor/core/Editor';
-import { PanZoomTool } from '@/editor/tools/PanZoomTool';
-import { TraceTool } from '@/editor/tools/TraceTool';
 import { compileExpression, isParseError, symbolicDerivativeStr } from '@/engine/expressionEngine';
 import { COLORS } from '@/styles/colors';
 import { Switch } from '@/components/ui/switch';
@@ -37,10 +34,7 @@ export function DerivativePanel() {
   const handleTangentToggle = () => {
     const next = !showTangent;
     setFeature('showTangent', next);
-    if (next) {
-      editorInstance?.activateTool(new TraceTool());
-    } else {
-      editorInstance?.activateTool(new PanZoomTool());
+    if (!next) {
       useFunctionStore.getState().setTangentPoint(null, 0, null);
     }
   };
@@ -70,10 +64,16 @@ export function DerivativePanel() {
       {/* Tangent toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0', marginTop: '6px' }}>
         <span style={{ fontSize: 13, fontWeight: 500, color: showTangent ? COLORS.textPrimary : COLORS.textSecondary }}>
-          显示切线
+          显示切线并选取切点
         </span>
         <Switch checked={showTangent} onCheckedChange={handleTangentToggle} />
       </div>
+
+      {showTangent && tangentX === null && (
+        <div style={{ marginTop: '6px', marginLeft: '24px', color: COLORS.textSecondary, fontSize: '11px', lineHeight: 1.6 }}>
+          将鼠标移到图像上，即可查看该点处的切线和斜率
+        </div>
+      )}
 
       {/* Tangent info — only when showTangent AND a point is active */}
       {showTangent && tangentX !== null && (

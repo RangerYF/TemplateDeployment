@@ -11,6 +11,7 @@ import { computePotentialAtPoint } from '@/domains/em/logic/electric-field-obser
 import { sampleMagneticFieldAtPoint } from '@/domains/em/logic/lorentz-force';
 import { isSourcePointCharge } from '@/domains/em/logic/point-charge-role';
 import { renderFieldLines } from '@/domains/em/viewports/field-lines-renderer';
+import { renderElectricField3D } from '@/domains/em/viewports/electric-field-3d-renderer';
 import { renderMagneticLines } from '@/domains/em/viewports/magnetic-lines-renderer';
 import { renderPotentialMap } from '@/domains/em/viewports/potential-map-renderer';
 import { renderPotentialSurface3D } from '@/domains/em/viewports/potential-surface-renderer';
@@ -212,17 +213,46 @@ const fieldViewportRenderer: ViewportRenderer = (data, entities, ctx) => {
 
     // 缓存同时依赖电荷状态和当前可视边界，否则首次进入/缩放后会复用旧结果。
     const cacheKey = `${buildChargeKey(pointCharges)}|${buildBoundsKey(bounds)}|${fieldLineDensity}`;
+    const useElectricField3D = pointCharges.length === 2;
+
     if (cacheKey !== cachedChargeKey) {
       cachedChargeKey = cacheKey;
-      cachedFieldLines = calculateFieldLines(pointCharges, bounds, {
-        density: fieldLineDensity,
-      });
       cachedEquipotentialLines = calculateEquipotentialLines(pointCharges, bounds, {
         density: fieldLineDensity,
       });
+      cachedFieldLines = useElectricField3D
+        ? []
+        : calculateFieldLines(pointCharges, bounds, {
+          density: fieldLineDensity,
+        });
     }
 
-    renderFieldLines(c, cachedFieldLines, cachedEquipotentialLines, coordinateTransform, {
+    if (useElectricField3D) {
+      renderElectricField3D(c, coordinateTransform, pointCharges, cachedEquipotentialLines, bounds, {
+        density: fieldLineDensity,
+        showFieldLines,
+        showEquipotentialLines,
+      });
+    } else {
+      renderFieldLines(c, cachedFieldLines, cachedEquipotentialLines, coordinateTransform, {
+        showFieldLines,
+        showEquipotentialLines,
+      });
+    }
+  } else if (!hasUniformField && pointCharges.length === 2) {
+    const canvas = ctx.canvas;
+    const dpr = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.clientWidth || canvas.width / dpr;
+    const canvasHeight = canvas.clientHeight || canvas.height / dpr;
+    const bounds = {
+      minX: -coordinateTransform.origin.x / coordinateTransform.scale,
+      maxX: (canvasWidth - coordinateTransform.origin.x) / coordinateTransform.scale,
+      minY: -(canvasHeight - coordinateTransform.origin.y) / coordinateTransform.scale,
+      maxY: coordinateTransform.origin.y / coordinateTransform.scale,
+    };
+
+    renderElectricField3D(c, coordinateTransform, pointCharges, [], bounds, {
+      density: fieldLineDensity,
       showFieldLines,
       showEquipotentialLines,
     });
@@ -484,33 +514,52 @@ function renderPotentialProbeOverlay(
     });
   }
 
-  drawPotentialProbe(canvasContext, coordinateTransform, probeA, 'A', '#0EA5E9');
-  drawPotentialProbe(canvasContext, coordinateTransform, probeB, 'B', '#F97316');
+  const activeProbe = useSimulationStore.getState().activePotentialProbe;
+  drawPotentialProbe(canvasContext, coordinateTransform, charges, probeA, 'A', '#0EA5E9', activeProbe === 'A');
+  drawPotentialProbe(canvasContext, coordinateTransform, charges, probeB, 'B', '#F97316', activeProbe === 'B');
   canvasContext.restore();
 }
 
 function drawPotentialProbe(
   canvasContext: CanvasRenderingContext2D,
   coordinateTransform: { scale: number; origin: Vec2 },
+  charges: Array<{ position: Vec2; charge: number }>,
   probe: Vec2 | null,
   label: 'A' | 'B',
   color: string,
+  isActive: boolean,
 ): void {
   if (!probe) return;
 
   const screenPoint = worldToScreen(probe, coordinateTransform);
+  const potential = computePotentialAtPoint(probe, charges);
   canvasContext.save();
+  if (isActive) {
+    canvasContext.fillStyle = `${color}1F`;
+    canvasContext.beginPath();
+    canvasContext.arc(screenPoint.x, screenPoint.y, 14, 0, Math.PI * 2);
+    canvasContext.fill();
+  }
   canvasContext.fillStyle = '#FFFFFF';
   canvasContext.strokeStyle = color;
-  canvasContext.lineWidth = 2;
+  canvasContext.lineWidth = isActive ? 3 : 2;
   canvasContext.beginPath();
   canvasContext.arc(screenPoint.x, screenPoint.y, 7, 0, Math.PI * 2);
   canvasContext.fill();
   canvasContext.stroke();
-  drawTextLabel(canvasContext, label, { x: screenPoint.x, y: screenPoint.y - 18 }, {
+  drawTextLabel(canvasContext, label, { x: screenPoint.x + 12, y: screenPoint.y - 14 }, {
     color,
     fontSize: 12,
-    align: 'center',
+    align: 'left',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    padding: 4,
+  });
+  drawTextLabel(canvasContext, formatPotentialValue(potential), { x: screenPoint.x + 12, y: screenPoint.y + 12 }, {
+    color: '#334155',
+    fontSize: 10,
+    align: 'left',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    padding: 4,
   });
   canvasContext.restore();
 }

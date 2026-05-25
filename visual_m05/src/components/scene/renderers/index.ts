@@ -16,3 +16,6 @@ export { PieChartRenderer } from './PieChartRenderer';
 export { LineChartRenderer } from './LineChartRenderer';
 export { TournamentMatchRenderer } from './TournamentMatchRenderer';
 export { BoxSwapBallsRenderer } from './BoxSwapBallsRenderer';
+export { RandomWalk1DRenderer } from './RandomWalk1DRenderer';
+export { RandomWalk2DRenderer } from './RandomWalk2DRenderer';
+export { MarkovChainRenderer } from './MarkovChainRenderer';

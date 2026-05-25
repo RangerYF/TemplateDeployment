@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useSimulationStore } from '@/store';
-import { COLORS, RADIUS, SHADOWS } from '@/styles/tokens';
+import { COLORS, RADIUS } from '@/styles/tokens';
 import { getP08SceneSummary } from './p08SceneSummary';
+import { getP08FloatingCardStyle, getP08SceneTheme, toAlpha } from '@/shell/p08/p08Theme';
 
 interface P08ResultOverlayProps {
   presetId: string;
 }
 
 export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const entities = useSimulationStore((s) => s.simulationState.scene.entities);
   const result = useSimulationStore((s) => s.simulationState.currentResult);
   const paramValues = useSimulationStore((s) => s.paramValues);
@@ -25,6 +26,7 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
   });
 
   if (!summary.isP08 || summary.metrics.length === 0) return null;
+  const theme = getP08SceneTheme(presetId);
 
   if (collapsed) {
     return (
@@ -35,25 +37,30 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
         }}
         style={{
           position: 'absolute',
-          right: 12,
-          bottom: 12,
+          right: 16,
+          bottom: 16,
           zIndex: 55,
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
-          padding: '8px 12px',
-          border: `1px solid ${COLORS.border}`,
+          gap: 8,
+          padding: '9px 12px',
           borderRadius: RADIUS.pill,
-          backgroundColor: 'rgba(255, 255, 255, 0.96)',
           color: COLORS.text,
-          boxShadow: SHADOWS.md,
-          backdropFilter: 'blur(10px)',
           cursor: 'pointer',
           fontSize: 12,
-          fontWeight: 600,
+          fontWeight: 700,
+          ...getP08FloatingCardStyle(presetId),
         }}
       >
-        <span style={{ color: COLORS.primary }}>▲</span>
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: RADIUS.full,
+            backgroundColor: theme.accent,
+            boxShadow: `0 0 0 5px ${toAlpha(theme.accent, 0.12)}`,
+          }}
+        />
         实时结果
       </button>
     );
@@ -64,23 +71,20 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
       onClick={(event) => event.stopPropagation()}
       style={{
         position: 'absolute',
-        right: 12,
-        bottom: 12,
+        right: 16,
+        bottom: 16,
         zIndex: 55,
         width: 320,
-        border: `1px solid ${COLORS.border}`,
         borderRadius: RADIUS.md,
-        backgroundColor: 'rgba(255, 255, 255, 0.96)',
-        boxShadow: SHADOWS.md,
-        backdropFilter: 'blur(10px)',
         overflow: 'hidden',
+        ...getP08FloatingCardStyle(presetId),
       }}
     >
       <div
         style={{
           padding: '12px 14px',
-          borderBottom: `1px solid ${COLORS.border}`,
-          backgroundColor: COLORS.bg,
+          borderBottom: `1px solid ${theme.border}`,
+          background: `linear-gradient(180deg, ${toAlpha(theme.accent, 0.08)} 0%, rgba(255,255,255,0) 100%)`,
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
@@ -88,7 +92,7 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
         }}
       >
         <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.primary }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: theme.accentStrong }}>
             {summary.moduleTitle ?? 'P-08'} 实时结果
           </div>
           <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: COLORS.text }}>
@@ -100,9 +104,9 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
           style={{
             border: 'none',
             background: 'none',
-            color: COLORS.textMuted,
+            color: theme.accentStrong,
             fontSize: 11,
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: 'pointer',
             padding: 0,
             flexShrink: 0,
@@ -174,7 +178,7 @@ export function P08ResultOverlay({ presetId }: P08ResultOverlayProps) {
               color: COLORS.textSecondary,
             }}
           >
-            电场线看方向，等势线看等值，电势分布看整体高低变化，立体电势图看峰谷起伏并对上电荷位置。
+            电场线看方向，等势线看等值，电势分布看整体高低变化。左下角立体电势图支持拖拽旋转、滚轮缩放和一键重置视角。
           </div>
         )}
 

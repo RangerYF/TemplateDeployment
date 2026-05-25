@@ -40,6 +40,12 @@ export interface LoopTeachingState {
   hoverSample: LoopHoverSample | null;
 }
 
+export interface ElectrostaticSurface3DState {
+  yawDeg: number;
+  pitchDeg: number;
+  zoom: number;
+}
+
 export interface SolenoidCompassProbe {
   id: string;
   x: number;
@@ -105,11 +111,17 @@ export interface SimulationStoreState {
   /** 电势差测量点 B */
   potentialProbeB: Vec2 | null;
 
+  /** 当前激活的测量点 */
+  activePotentialProbe: 'A' | 'B' | null;
+
   /** 螺线管教学工作台状态 */
   solenoidTeaching: SolenoidTeachingState;
 
   /** 圆形电流教学工作台状态 */
   loopTeaching: LoopTeachingState;
+
+  /** 静电场立体电势图交互状态 */
+  electrostaticSurface3D: ElectrostaticSurface3DState;
 }
 
 // ─── Store Actions ───
@@ -175,6 +187,12 @@ export interface SimulationStoreActions {
   /** 清空两点电势差测量点 */
   clearPotentialProbes: () => void;
 
+  /** 直接设置测量点 */
+  setPotentialProbe: (probe: 'A' | 'B', point: Vec2 | null) => void;
+
+  /** 设置当前激活的测量点 */
+  setActivePotentialProbe: (probe: 'A' | 'B' | null) => void;
+
   /** 设置螺线管显示模式 */
   setSolenoidDisplayMode: (mode: SolenoidDisplayMode) => void;
 
@@ -209,6 +227,12 @@ export interface SimulationStoreActions {
 
   /** 重置圆形电流教学工作台 */
   resetLoopTeaching: () => void;
+
+  /** 设置静电场立体电势图相机 */
+  setElectrostaticSurface3D: (camera: Partial<ElectrostaticSurface3DState>) => void;
+
+  /** 重置静电场立体电势图相机 */
+  resetElectrostaticSurface3D: () => void;
 
   /** 加载预设后初始化 store（由 PresetLoader 调用） */
   initFromPreset: (init: {
@@ -282,6 +306,14 @@ function createInitialLoopTeachingState(): LoopTeachingState {
   };
 }
 
+function createInitialElectrostaticSurface3DState(): ElectrostaticSurface3DState {
+  return {
+    yawDeg: -34,
+    pitchDeg: 28,
+    zoom: 1,
+  };
+}
+
 // ─── Store 创建 ───
 
 export const useSimulationStore = create<
@@ -300,8 +332,10 @@ export const useSimulationStore = create<
   showTrajectory: true,
   potentialProbeA: null,
   potentialProbeB: null,
+  activePotentialProbe: null,
   solenoidTeaching: createInitialSolenoidTeachingState(),
   loopTeaching: createInitialLoopTeachingState(),
+  electrostaticSurface3D: createInitialElectrostaticSurface3DState(),
 
   // ─── Actions ───
 
@@ -385,14 +419,22 @@ export const useSimulationStore = create<
   placePotentialProbe: (point) =>
     set((state) => {
       if (!state.potentialProbeA) {
-        return { potentialProbeA: { ...point }, potentialProbeB: null };
+        return {
+          potentialProbeA: { ...point },
+          potentialProbeB: null,
+          activePotentialProbe: 'A',
+        };
       }
       if (!state.potentialProbeB) {
-        return { potentialProbeB: { ...point } };
+        return {
+          potentialProbeB: { ...point },
+          activePotentialProbe: 'B',
+        };
       }
       return {
         potentialProbeA: { ...point },
         potentialProbeB: null,
+        activePotentialProbe: 'A',
       };
     }),
 
@@ -400,7 +442,24 @@ export const useSimulationStore = create<
     set({
       potentialProbeA: null,
       potentialProbeB: null,
+      activePotentialProbe: null,
     }),
+
+  setPotentialProbe: (probe, point) =>
+    set((state) => (
+      probe === 'A'
+        ? {
+          potentialProbeA: point ? { ...point } : null,
+          activePotentialProbe: point ? 'A' : state.activePotentialProbe === 'A' ? null : state.activePotentialProbe,
+        }
+        : {
+          potentialProbeB: point ? { ...point } : null,
+          activePotentialProbe: point ? 'B' : state.activePotentialProbe === 'B' ? null : state.activePotentialProbe,
+        }
+    )),
+
+  setActivePotentialProbe: (probe) =>
+    set({ activePotentialProbe: probe }),
 
   setSolenoidDisplayMode: (mode) =>
     set((state) => ({
@@ -508,6 +567,19 @@ export const useSimulationStore = create<
       loopTeaching: createInitialLoopTeachingState(),
     }),
 
+  setElectrostaticSurface3D: (camera) =>
+    set((state) => ({
+      electrostaticSurface3D: {
+        ...state.electrostaticSurface3D,
+        ...camera,
+      },
+    })),
+
+  resetElectrostaticSurface3D: () =>
+    set({
+      electrostaticSurface3D: createInitialElectrostaticSurface3DState(),
+    }),
+
   switchPrimaryViewport: (type) =>
     set({
       viewportState: {
@@ -604,7 +676,9 @@ export const useSimulationStore = create<
       showTrajectory: true,
       potentialProbeA: null,
       potentialProbeB: null,
+      activePotentialProbe: null,
       solenoidTeaching: createInitialSolenoidTeachingState(),
       loopTeaching: createInitialLoopTeachingState(),
+      electrostaticSurface3D: createInitialElectrostaticSurface3DState(),
     }),
 }));

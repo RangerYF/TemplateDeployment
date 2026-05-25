@@ -17,8 +17,11 @@ export class PanZoomTool implements Tool {
   private isDragging   = false;
   private lastCanvasX  = 0;
   private lastCanvasY  = 0;
+  private latestCanvasX = 0;
+  private latestCanvasY = 0;
   private editor: Editor | null = null;
   private readonly resetTo: PanZoomResetViewport;
+  private rafId: number | null = null;
 
   constructor(resetViewport?: PanZoomResetViewport) {
     this.resetTo = resetViewport ?? DEFAULT_RESET;
@@ -30,31 +33,69 @@ export class PanZoomTool implements Tool {
 
   onDeactivate(): void {
     this.isDragging = false;
+    this.cancelPendingFrame();
   }
 
   onPointerDown(e: ToolEvent): void {
     this.isDragging  = true;
     this.lastCanvasX = e.canvasX;
     this.lastCanvasY = e.canvasY;
+    this.latestCanvasX = e.canvasX;
+    this.latestCanvasY = e.canvasY;
   }
 
   onPointerMove(e: ToolEvent): void {
     if (!this.isDragging || !this.editor) return;
-    const vp = this.editor.getViewport();
-    // Canvas-pixel deltas → math deltas (Y axis is flipped)
-    const dMathX =  (e.canvasX - this.lastCanvasX) / vp.width  * vp.xRange;
-    const dMathY = -(e.canvasY - this.lastCanvasY) / vp.height * vp.yRange;
-    this.editor.setViewport(vp.pan(dMathX, dMathY));
-    this.lastCanvasX = e.canvasX;
-    this.lastCanvasY = e.canvasY;
+    this.latestCanvasX = e.canvasX;
+    this.latestCanvasY = e.canvasY;
+    this.schedulePanFrame();
   }
 
   onPointerUp(): void {
+    this.flushPan();
     this.isDragging = false;
   }
 
   onPointerLeave(): void {
+    this.flushPan();
     this.isDragging = false;
+  }
+
+  private cancelPendingFrame(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+
+  private schedulePanFrame(): void {
+    if (this.rafId !== null) return;
+    this.rafId = requestAnimationFrame(() => {
+      this.rafId = null;
+      this.flushPan();
+      if (
+        this.isDragging &&
+        (this.latestCanvasX !== this.lastCanvasX || this.latestCanvasY !== this.lastCanvasY)
+      ) {
+        this.schedulePanFrame();
+      }
+    });
+  }
+
+  private flushPan(): void {
+    if (!this.editor) return;
+    if (this.latestCanvasX === this.lastCanvasX && this.latestCanvasY === this.lastCanvasY) {
+      this.cancelPendingFrame();
+      return;
+    }
+
+    const vp = this.editor.getViewport();
+    // Canvas-pixel deltas → math deltas (Y axis is flipped)
+    const dMathX =  (this.latestCanvasX - this.lastCanvasX) / vp.width  * vp.xRange;
+    const dMathY = -(this.latestCanvasY - this.lastCanvasY) / vp.height * vp.yRange;
+    this.editor.setViewport(vp.pan(dMathX, dMathY));
+    this.lastCanvasX = this.latestCanvasX;
+    this.lastCanvasY = this.latestCanvasY;
   }
 
   /** Double-click smoothly animates the viewport back to the default ±10 / ±6 range. */

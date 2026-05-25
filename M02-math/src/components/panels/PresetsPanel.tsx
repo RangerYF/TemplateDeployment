@@ -76,8 +76,11 @@ export function PresetsPanel() {
 
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-      <span style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: 600, marginRight: 2 }}>
-        预设:
+      <span
+        style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: 600, marginRight: 2 }}
+        title="载入示例会替换当前图形"
+      >
+        一键示例:
       </span>
       {PRESETS.map((preset) => {
         const isActive = activeType === preset.type;
@@ -86,7 +89,7 @@ export function PresetsPanel() {
           <button
             key={preset.name}
             onClick={() => handleLoad(preset)}
-            title={`${preset.name} ${preset.equation}`}
+            title={`载入 ${preset.label}（会替换当前图形）`}
             style={{
               display:      'flex',
               alignItems:   'center',

@@ -55,7 +55,19 @@ export function DiceRollRenderer({ result, displayN }: { result: DiceRollResult;
 
       {/* Theory line */}
       <DashedHLine x1={ML} x2={ML + PW} y={theoryY} color={COLORS.error} />
-      <text x={ML + PW + 4} y={theoryY + 4} fontSize={11} fill={COLORS.error}>1/6≈{theory.toFixed(3)}</text>
+      <text x={ML - 30} y={theoryY + 4} fontSize={11} fill={COLORS.error}>1/6</text>
+
+      {/* 右侧频数轴 (v0.4 反馈 #5) */}
+      <line x1={ML + PW} y1={MT} x2={ML + PW} y2={MT + PH} stroke={COLORS.borderStrong} strokeWidth={1.5} shapeRendering="crispEdges" />
+      {Array.from({ length: 6 }, (_, i) => i / 5).map(v => {
+        const y = py(v * maxY, 0, maxY, MT, PH);
+        return (
+          <text key={`r-${v}`} x={ML + PW + 3} y={y + 3} fontSize={9} fill={COLORS.textMuted}>
+            {Math.round(v * maxY * displayedObs)}
+          </text>
+        );
+      })}
+      <text x={ML + PW + 3} y={MT - 6} fontSize={10} fill={COLORS.textSecondary}>频数</text>
 
       {/* Bars */}
       {freqs.map((freq, f) => {

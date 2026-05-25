@@ -6,6 +6,7 @@ import { type FunctionEntry } from '@/types';
 import { getTemplate, buildReadableExpr } from '@/engine/functionTemplates';
 import { COLORS } from '@/styles/colors';
 import { dangerHover, rowHover } from '@/styles/interactionStyles';
+import { useAnimationTrajectoryStore } from '@/editor/store/animationTrajectoryStore';
 
 export function FunctionListPanel() {
   const functions       = useFunctionStore((s) => s.functions);
@@ -15,6 +16,10 @@ export function FunctionListPanel() {
 
   const handleRemove = (e: React.MouseEvent, fn: FunctionEntry) => {
     e.stopPropagation();
+    const frames = useAnimationTrajectoryStore.getState().frames;
+    useAnimationTrajectoryStore.getState().setFrames(
+      frames.filter((frame) => frame.functionId !== fn.id),
+    );
     executeM02Command(new RemoveFunctionCommand(fn));
   };
 
@@ -67,10 +72,11 @@ export function FunctionListPanel() {
                 >
                   {/* Active indicator dot */}
                   <div style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: isActive ? COLORS.primary : COLORS.borderMuted,
+                    width: 10, height: 10, borderRadius: '50%',
+                    background: fn.color,
+                    border: fn.lineStyle === 'dashed' ? `2px dashed ${isActive ? COLORS.primary : COLORS.borderMuted}` : `1px solid ${isActive ? COLORS.primary : COLORS.borderMuted}`,
                     flexShrink: 0,
-                    transition: 'background 120ms',
+                    transition: 'background 120ms, border-color 120ms',
                   }} />
 
                   {/* Label + expression */}
@@ -106,12 +112,21 @@ export function FunctionListPanel() {
                     }}>
                       = {buildReadableExpr(fn.exprStr)}
                     </span>
+                    <span style={{
+                      display: 'block',
+                      fontSize: '9px',
+                      color: fn.visible ? COLORS.neutral : COLORS.textSecondary,
+                      marginTop: '2px',
+                    }}>
+                      {fn.lineStyle === 'solid' ? '实线' : '虚线'}
+                      {fn.displayDomain.enabled ? ' · 局部显示' : ''}
+                    </span>
                   </div>
 
                   {/* Visibility toggle */}
                   <button
                     onClick={(e) => handleToggleVisible(e, fn)}
-                    title={fn.visible ? '隐藏' : '显示'}
+                    title={fn.visible ? '隐藏曲线' : '显示曲线'}
                     style={{
                       background: 'transparent', border: 'none', cursor: 'pointer',
                       padding: '2px', flexShrink: 0,

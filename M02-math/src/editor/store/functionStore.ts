@@ -14,6 +14,8 @@ interface FeatureFlags {
   tangentY: number;
   tangentSlope: number | null;
   showFeaturePoints: boolean;
+  showIntersections: boolean;
+  showAsymptotes: boolean;
   showGrid: boolean;
   showAxisLabels: boolean;
 }
@@ -58,6 +60,8 @@ export const useFunctionStore = create<FunctionState>((set, get) => ({
     tangentY: 0,
     tangentSlope: null,
     showFeaturePoints: false,
+    showIntersections: false,
+    showAsymptotes: true,
     showGrid: true,
     showAxisLabels: true,
   },
@@ -156,6 +160,8 @@ export const useFunctionStore = create<FunctionState>((set, get) => ({
             tangentY: 0,
             tangentSlope: null,
             showFeaturePoints: false,
+            showIntersections: false,
+            showAsymptotes: true,
             showGrid: true,
             showAxisLabels: true,
           },

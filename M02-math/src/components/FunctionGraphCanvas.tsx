@@ -12,11 +12,10 @@
  * M04Layout can draw the divider sync marker at the correct height.
  */
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useState } from 'react';
 import { Viewport } from '@/canvas/Viewport';
 import { useDualCanvas } from '@/hooks/useDualCanvas';
 import { useM04FunctionStore } from '@/editor/store/m04FunctionStore';
-import { useUnitCircleStore } from '@/editor/store/unitCircleStore';
 import { useSyncLineStore } from '@/editor/store/syncLineStore';
 import { PanZoomTool } from '@/editor/tools/PanZoomTool';
 import { renderAxis } from '@/canvas/renderers/axisRenderer';
@@ -25,6 +24,7 @@ import { sampleTrigFunction, evalTrig } from '@/engine/trigSampler';
 import { computeFivePoints } from '@/engine/fivePointEngine';
 import { synthesizeAuxiliaryAngle } from '@/engine/auxiliaryAngleEngine';
 import { renderFivePoints } from '@/canvas/renderers/fivePointRenderer';
+import { renderTrigAnalysisOverlay } from '@/canvas/renderers/trigAnalysisRenderer';
 import { COLORS } from '@/styles/colors';
 import { LabelPlacer } from '@/canvas/renderers/labelStrategy';
 import type { FnType } from '@/types';
@@ -45,15 +45,14 @@ const FN_LABEL: Record<FnType, string> = {
 
 function buildAlignedFunctionViewport(
   fnViewport: { xMin: number; xMax: number; yMin: number; yMax: number },
-  ucViewport: { yMin: number; yMax: number },
   width: number,
   height: number,
 ): Viewport {
   return new Viewport(
     fnViewport.xMin,
     fnViewport.xMax,
-    ucViewport.yMin,
-    ucViewport.yMax,
+    fnViewport.yMin,
+    fnViewport.yMax,
     width,
     height,
   );
@@ -78,7 +77,6 @@ export function FunctionGraphCanvas() {
 
   // ── Store subscriptions ──────────────────────────────────────────────────
   const viewport      = useM04FunctionStore((s) => s.viewport);
-  const ucViewport    = useUnitCircleStore((s) => s.viewport);
   const traceX        = useM04FunctionStore((s) => s.traceX);
   const fnType        = useM04FunctionStore((s) => s.fnType);
   const transform     = useM04FunctionStore((s) => s.transform);
@@ -92,6 +90,8 @@ export function FunctionGraphCanvas() {
   const auxShowC1     = useM04FunctionStore((s) => s.auxShowC1);
   const auxShowC2     = useM04FunctionStore((s) => s.auxShowC2);
   const auxShowCR     = useM04FunctionStore((s) => s.auxShowCR);
+  const analysisDisplay = useM04FunctionStore((s) => s.analysisDisplay);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Pre-compute five-point data (memoised — only recalc when transform/fnType changes)
   const fivePoints = useMemo(
@@ -114,7 +114,6 @@ export function FunctionGraphCanvas() {
 
     const vp = buildAlignedFunctionViewport(
       viewport,
-      ucViewport,
       canvasSize.width,
       canvasSize.height,
     );
@@ -154,17 +153,17 @@ export function FunctionGraphCanvas() {
       // C1: a·sin x
       if (auxShowC1) {
         drawCurve('sin', { A: auxiliaryA, omega: 1, phi: 0, k: 0 },
-          COLORS.auxiliaryCurve1, 1.5, [5, 4]);
+          COLORS.auxiliaryCurve1, 2.2, [5, 4]);
       }
       // C2: b·cos x
       if (auxShowC2) {
         drawCurve('cos', { A: auxiliaryB, omega: 1, phi: 0, k: 0 },
-          COLORS.auxiliaryCurve2, 1.5, [5, 4]);
+          COLORS.auxiliaryCurve2, 2.2, [5, 4]);
       }
       // CR: R·sin(x + φ)
       if (auxShowCR) {
         drawCurve('sin', { A: auxResult.R, omega: 1, phi: auxResult.phi, k: 0 },
-          COLORS.primary, 2, []);
+          COLORS.primary, 3.2, []);
       }
     } else {
       // ── Normal mode: main trig curve ────────────────────────────────────
@@ -172,13 +171,13 @@ export function FunctionGraphCanvas() {
         fnType, transform,
         viewport.xMin, viewport.xMax,
         vp.yMin, vp.yMax,
-        800,
+        isDragging ? 480 : 800,
       );
 
       const color = FN_COLOR[fnType];
       ctx.save();
       ctx.strokeStyle = color;
-      ctx.lineWidth   = 2.5;
+      ctx.lineWidth   = 3.8;
       ctx.setLineDash([]);
       ctx.beginPath();
 
@@ -194,14 +193,19 @@ export function FunctionGraphCanvas() {
       // ── Reference curve: y = fn(x) with identity transform ────────────
       if (showRef) {
         drawCurve(fnType, { A: 1, omega: 1, phi: 0, k: 0 },
-          'rgba(255,255,255,0.15)', 1.5, [5, 4]);
+          'rgba(255,255,255,0.15)', 2, [5, 4]);
+      }
+
+      if (!isDragging) {
+        renderTrigAnalysisOverlay(ctx, vp, fnType, transform, analysisDisplay);
       }
 
       ctx.restore();
     }
   }, [
-    viewport, ucViewport, canvasSize, fnType, transform, showReference,
+    viewport, canvasSize, fnType, transform, showReference,
     showAuxiliary, auxiliaryA, auxiliaryB, auxShowC1, auxShowC2, auxShowCR,
+    analysisDisplay, isDragging,
     auxResult,
     staticRef,
   ]);
@@ -215,12 +219,16 @@ export function FunctionGraphCanvas() {
 
       const vp = buildAlignedFunctionViewport(
         viewport,
-        ucViewport,
         canvasSize.width,
         canvasSize.height,
       );
 
       hiDpiClear(ctx, canvas);
+
+      if (isDragging) {
+        useSyncLineStore.getState().setSyncY(null);
+        return;
+      }
 
       const traceY = evalTrig(fnType, transform, traceX);
       const color  = FN_COLOR[fnType];
@@ -335,14 +343,16 @@ export function FunctionGraphCanvas() {
     });
   }, [
     traceX, traceHistory,
-    viewport, ucViewport, canvasSize,
+    viewport, canvasSize,
     fnType, transform,
     fivePointStep, fivePoints,
-    dynamicRef, scheduleRaf,
+    dynamicRef, scheduleRaf, isDragging,
   ]);
 
   // ── Event handlers ───────────────────────────────────────────────────────
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    setIsDragging(true);
+    e.currentTarget.style.cursor = 'grabbing';
     editorRef.current?.dispatchPointerDown(buildToolEvent(e.nativeEvent as MouseEvent));
   }, [editorRef, buildToolEvent]);
 
@@ -351,10 +361,14 @@ export function FunctionGraphCanvas() {
   }, [editorRef, buildToolEvent]);
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    setIsDragging(false);
+    e.currentTarget.style.cursor = 'grab';
     editorRef.current?.dispatchPointerUp(buildToolEvent(e.nativeEvent as MouseEvent));
   }, [editorRef, buildToolEvent]);
 
-  const onPointerLeave = useCallback(() => {
+  const onPointerLeave = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    setIsDragging(false);
+    e.currentTarget.style.cursor = 'grab';
     editorRef.current?.dispatchPointerLeave();
   }, [editorRef]);
 

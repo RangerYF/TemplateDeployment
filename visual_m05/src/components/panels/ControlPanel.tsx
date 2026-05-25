@@ -48,6 +48,8 @@ export function ControlPanel() {
       return (sim.result.data as BuffonsNeedleResult).needles.length;
     } else if (sim.type === 'meetingProblem') {
       return (sim.result.data as MeetingProblemResult).points.length;
+    } else if (sim.type === 'randomWalk1D' || sim.type === 'randomWalk2D' || sim.type === 'markovChain') {
+      return (sim.params as { steps: number }).steps;
     } else {
       const data = sim.result.data as { trials?: unknown[] };
       return data?.trials?.length ?? null;

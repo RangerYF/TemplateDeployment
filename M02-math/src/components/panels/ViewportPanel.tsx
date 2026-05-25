@@ -54,8 +54,8 @@ export function ViewportPanel() {
       setError('请输入有效数字');
       return;
     }
-    if (xMin >= xMax) { setError('xMin 必须小于 xMax'); return; }
-    if (yMin >= yMax) { setError('yMin 必须小于 yMax'); return; }
+    if (xMin >= xMax) { setError('x 轴左边界必须小于右边界'); return; }
+    if (yMin >= yMax) { setError('y 轴下边界必须小于上边界'); return; }
 
     // Viewport change is not recorded in Undo history
     const current = editorInstance?.getViewport();
@@ -103,7 +103,7 @@ export function ViewportPanel() {
         {...btnHover(COLORS.surfaceHover)}
       >
         <span style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary }}>
-          视口范围
+          坐标显示范围
         </span>
         <span style={{ fontSize: '11px', color: COLORS.neutral }}>
           {collapsed ? '▸' : '▾'}
@@ -178,7 +178,7 @@ export function ViewportPanel() {
               style={actionButtonStyle}
               {...btnHover(COLORS.surfaceAlt, COLORS.surface)}
             >
-              重置视图
+              恢复默认范围
             </button>
           </div>
         </>

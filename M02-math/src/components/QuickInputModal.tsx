@@ -5,13 +5,18 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { compileExpression, isParseError } from '@/engine/expressionEngine';
+import { compileExpression, isLikelyIncompleteExpression, isParseError } from '@/engine/expressionEngine';
 import { detectAndMergeCoefficients } from '@/engine/coefficientDetector';
 import { getKnownFunctionNames } from '@/engine/compositionEngine';
 import { useFunctionStore } from '@/editor/store/functionStore';
 import { executeM02Command } from '@/editor/commands/m02Execute';
 import { AddFunctionCommand } from '@/editor/commands/AddFunctionCommand';
-import { FUNCTION_COLORS, DEFAULT_TRANSFORM } from '@/types';
+import {
+  FUNCTION_COLORS,
+  DEFAULT_TRANSFORM,
+  DEFAULT_FUNCTION_DISPLAY_DOMAIN,
+  DEFAULT_INVERSE_FUNCTION_DISPLAY,
+} from '@/types';
 import type { FunctionEntry, PiecewiseSegment } from '@/types';
 import { COLORS } from '@/styles/colors';
 import { createId } from '@/lib/id';
@@ -102,7 +107,11 @@ export function QuickInputModal({ onClose }: { onClose: () => void }) {
     const knownFns = getKnownFunctionNames(fns);
     const compiled = compileExpression(value, knownFns);
     if (isParseError(compiled)) {
-      setParseError(compiled.error);
+      if (isLikelyIncompleteExpression(value)) {
+        setParseError(null);
+      } else {
+        setParseError(compiled.error);
+      }
     } else {
       setParseError(null);
     }
@@ -138,8 +147,11 @@ export function QuickInputModal({ onClose }: { onClose: () => void }) {
         exprStr:     expr,
         segments:    [],
         color:       nextColor,
+        lineStyle:   'solid',
         visible:     true,
         transform:   { ...DEFAULT_TRANSFORM },
+        displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+        inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
         templateId:  null,
         namedParams: mergedParams,
       };
@@ -162,8 +174,11 @@ export function QuickInputModal({ onClose }: { onClose: () => void }) {
         exprStr:     entrySegments[0].exprStr,
         segments:    entrySegments,
         color:       nextColor,
+        lineStyle:   'solid',
         visible:     true,
         transform:   { ...DEFAULT_TRANSFORM },
+        displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+        inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
         templateId:  null,
         namedParams: [],
       };

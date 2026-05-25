@@ -11,6 +11,8 @@ import {
 import { useFmt } from '@/hooks/useFmt';
 import { Settings, ChevronDown, ChevronRight, Lightbulb, Grid3X3, Eye, Play, Pause, Camera } from 'lucide-react';
 import { useState, useRef, useCallback } from 'react';
+import { InlineLatex } from '@/components/shared/InlineLatex';
+import { toVecLatex } from '@/lib/vecLatex';
 
 
 /** 尝试将数值逆向显示为精确表达式（根号/π/分数） */
@@ -142,11 +144,15 @@ interface Vec2DEditorProps {
 function Vec2DEditor({ label, color, value, onChange }: Vec2DEditorProps) {
   const { f } = useFmt();
   const displayStr = `(${f(value[0])}, ${f(value[1])})`;
+  const vecMatch = label.match(/向量\s+(\S+)/);
+  const vecLatex = vecMatch ? toVecLatex(vecMatch[1]) : null;
   return (
     <div>
       <div className="flex items-center gap-1.5 mb-1.5">
         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color }} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.text }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.text }}>
+          {vecLatex ? <>向量 <InlineLatex latex={vecLatex} /></> : label}
+        </span>
         <span style={{ fontSize: 14, color: COLORS.textMuted, marginLeft: 2 }}>= {displayStr}</span>
       </div>
       <div className="flex gap-2 pl-3">
@@ -168,11 +174,15 @@ interface Vec3DEditorProps {
 
 function Vec3DEditor({ label, color, value, onChange }: Vec3DEditorProps) {
   const { fv3 } = useFmt();
+  const vecMatch = label.match(/向量\s+(\S+)/);
+  const vecLatex = vecMatch ? toVecLatex(vecMatch[1]) : null;
   return (
     <div>
       <div className="flex items-center gap-1.5 mb-1.5">
         <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color }} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.text }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.text }}>
+          {vecLatex ? <>向量 <InlineLatex latex={vecLatex} /></> : label}
+        </span>
         <span style={{ fontSize: 14, color: COLORS.textMuted, marginLeft: 2 }}>= {fv3(value)}</span>
       </div>
       <div className="flex flex-col gap-1 pl-3">
@@ -774,7 +784,7 @@ function RotationParams() {
       <Divider />
       <div className="flex items-center gap-2">
         <span style={{ fontSize: 14, color: COLORS.textMuted }}>旋转角 θ</span>
-        <input type="range" min={-180} max={180} step={1}
+        <input type="range" min={-360} max={360} step={1}
           value={Math.round(degAngle)}
           onChange={(e) => setRotationAngle(parseFloat(e.target.value) * Math.PI / 180)}
           style={{ flex: 1, accentColor: COLORS.primary }} />
@@ -784,7 +794,7 @@ function RotationParams() {
       </div>
       <ExprInput label="θ(°)" value={degAngle}
         onChange={(v) => setRotationAngle(v * Math.PI / 180)}
-        min={-360} max={360} />
+        min={-720} max={720} />
       <Divider />
       <ResultBlock label="a' =" value={fv2(rotated)} color={COLORS.vecResult} />
     </div>
@@ -928,6 +938,20 @@ function CrossProductParams() {
       <Divider />
       <View3DControls />
       <Divider />
+      <div style={{
+        background: COLORS.bgMuted, border: `1px solid ${COLORS.border}`,
+        borderRadius: RADIUS.md, padding: '10px 12px', fontSize: 13, lineHeight: 1.6,
+        color: COLORS.textSecondary,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, fontWeight: 600, color: COLORS.text }}>
+          <Lightbulb size={14} style={{ color: COLORS.warning }} />
+          什么是叉乘（向量积）？
+        </div>
+        <p style={{ margin: '0 0 4px' }}>叉乘是一种向量运算，结果是一个<b>新向量</b>（而非标量）。</p>
+        <p style={{ margin: '0 0 4px' }}><b>几何意义：</b>叉积的模等于两向量构成的平行四边形面积，方向垂直于该平面。</p>
+        <p style={{ margin: '0 0 4px' }}><b>方向判定：</b>伸出右手，四指从 a 弯向 b，拇指所指即为 a×b 的方向（右手定则）。</p>
+        <p style={{ margin: 0 }}><b>坐标公式：</b>a×b = (a₂b₃−a₃b₂, a₃b₁−a₁b₃, a₁b₂−a₂b₁)</p>
+      </div>
       <TeachingPoints points={[
         'a×b 垂直于 a 和 b 构成的平面',
         '方向由右手定则确定',
@@ -1067,6 +1091,121 @@ function GlobalUIControls() {
   );
 }
 
+// ─── 向量样式编辑器 ───
+
+const VEC_STYLE_COLORS = ['#8C8C8C', '#FF6B6B', '#4ECDC4', '#FFD700', '#9C27B0', '#2196F3', '#FF9800', '#00C06B', '#E74C3C'];
+
+function hexToHsl(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l * 100];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? ((g - b) / d + (g < b ? 6 : 0)) / 6
+    : max === g ? ((b - r) / d + 2) / 6
+    : ((r - g) / d + 4) / 6;
+  return [h * 360, s * 100, l * 100];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const s1 = s / 100, l1 = l / 100;
+  const a = s1 * Math.min(l1, 1 - l1);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const c = l1 - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * c).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function VectorStyleSection() {
+  const selectedVecKey = useVectorStore((s) => s.selectedVecKey);
+  const vecAColor = useVectorStore((s) => s.vecAColor);
+  const vecBColor = useVectorStore((s) => s.vecBColor);
+  const vecResultColor = useVectorStore((s) => s.vecResultColor);
+  const projColor = useVectorStore((s) => s.projColor);
+  const projWidth = useVectorStore((s) => s.projWidth);
+  const vecAWidth = useVectorStore((s) => s.vecAWidth);
+  const vecBWidth = useVectorStore((s) => s.vecBWidth);
+  const vecResultWidth = useVectorStore((s) => s.vecResultWidth);
+  const setVecAColor = useVectorStore((s) => s.setVecAColor);
+  const setVecBColor = useVectorStore((s) => s.setVecBColor);
+  const setVecResultColor = useVectorStore((s) => s.setVecResultColor);
+  const setProjColor = useVectorStore((s) => s.setProjColor);
+  const setProjWidth = useVectorStore((s) => s.setProjWidth);
+  const setVecAWidth = useVectorStore((s) => s.setVecAWidth);
+  const setVecBWidth = useVectorStore((s) => s.setVecBWidth);
+  const setVecResultWidth = useVectorStore((s) => s.setVecResultWidth);
+
+  if (!selectedVecKey) return null;
+
+  const colorMap: Record<string, string> = { a: vecAColor, b: vecBColor, result: vecResultColor, proj: projColor };
+  const widthMap: Record<string, number> = { a: vecAWidth, b: vecBWidth, result: vecResultWidth, proj: projWidth };
+  const setColorMap: Record<string, (c: string) => void> = { a: setVecAColor, b: setVecBColor, result: setVecResultColor, proj: setProjColor };
+  const setWidthMap: Record<string, (w: number) => void> = { a: setVecAWidth, b: setVecBWidth, result: setVecResultWidth, proj: setProjWidth };
+  const labelMap: Record<string, React.ReactNode> = {
+    a: <>向量 <InlineLatex latex="\\vec{a}" /></>,
+    b: <>向量 <InlineLatex latex="\\vec{b}" /></>,
+    result: '结果向量',
+    proj: '投影向量',
+  };
+
+  const currentColor = colorMap[selectedVecKey];
+  const currentWidth = widthMap[selectedVecKey] ?? 3;
+  const setColor = setColorMap[selectedVecKey];
+  const setWidth = setWidthMap[selectedVecKey];
+
+  const [, , currentL] = hexToHsl(currentColor);
+
+  return (
+    <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: 12 }}>
+      <div className="flex items-center gap-1.5 mb-2">
+        <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.textSecondary }}>
+          {labelMap[selectedVecKey]} 样式
+        </span>
+      </div>
+
+      {/* 色板 */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {VEC_STYLE_COLORS.map((c) => (
+          <div
+            key={c}
+            onClick={() => setColor(c)}
+            style={{
+              width: 22, height: 22, borderRadius: '50%',
+              backgroundColor: c, cursor: 'pointer',
+              border: currentColor === c ? `2px solid ${COLORS.text}` : '2px solid transparent',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 明度滑块 */}
+      <div className="flex items-center gap-2 mb-2">
+        <span style={{ fontSize: 12, color: COLORS.textMuted, minWidth: 28 }}>明暗</span>
+        <input type="range" min={15} max={85} value={Math.round(currentL)}
+          style={{ flex: 1, accentColor: currentColor }}
+          onChange={(e) => {
+            const [h, s] = hexToHsl(currentColor);
+            setColor(hslToHex(h, s, parseInt(e.target.value)));
+          }} />
+      </div>
+
+      {/* 粗细滑块 */}
+      <div className="flex items-center gap-2">
+        <span style={{ fontSize: 12, color: COLORS.textMuted, minWidth: 28 }}>粗细</span>
+        <input type="range" min={1} max={6} step={0.5} value={currentWidth}
+          style={{ flex: 1, accentColor: COLORS.primary }}
+          onChange={(e) => setWidth(parseFloat(e.target.value))} />
+        <span style={{ fontSize: 12, color: COLORS.textMuted, minWidth: 20 }}>{currentWidth}</span>
+      </div>
+    </div>
+  );
+}
+
 // ─── 主参数面板 ───
 
 export function ParamPanel() {
@@ -1118,6 +1257,8 @@ export function ParamPanel() {
             <OperationParams operation={operation} />
           </div>
         )}
+
+        <VectorStyleSection />
 
         <div
           style={{

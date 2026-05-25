@@ -188,7 +188,10 @@ export function TrigTransformPanel() {
 
       {/* ── Header + live formula ─────────────────────────────────────────── */}
       <p style={{ fontSize: 14, fontWeight: 700, color: COLORS.textPrimary, marginBottom: 6 }}>
-        变换实验室
+        三角函数变换
+      </p>
+      <p style={{ fontSize: 11, color: COLORS.textSecondary, marginBottom: 8, lineHeight: 1.5 }}>
+        A 控制振幅，ω 控制周期，φ 控制相位，k 控制上下平移
       </p>
 
       <div style={{
@@ -232,7 +235,7 @@ export function TrigTransformPanel() {
       <SliderRow
         label="φ" value={phiSlider.numericValue}
         displayValue={phiSlider.valueLabel}
-        min={phiSlider.min} max={phiSlider.max} step={phiSlider.step}
+        min={-Math.PI} max={Math.PI} step={phiSlider.step}
         color={COLORS.angleArc}
         onChange={phiSlider.handleChange}
         onCommit={phiSlider.handleCommit}

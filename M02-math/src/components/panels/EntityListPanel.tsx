@@ -51,6 +51,7 @@ const DISPLAY_OPTS: Array<[keyof DisplayOptions, string]> = [
   ['showAxesOfSymmetry',  '对称轴'],
   ['showLabels',          '方程标签'],
   ['showIntersections',   '交点 (直线)'],
+  ['teachingFormat',      '教学格式'],
   ['showTangent',         '切线 (动点)'],
   ['showNormal',          '法线 (动点)'],
   ['showFocalChord',      '焦点弦 (动点)'],
@@ -241,7 +242,7 @@ export function EntityListPanel() {
                 {/* Visibility */}
                 <button
                   onClick={(ev) => handleToggleVisible(ev, entity.id)}
-                  title={entity.visible ? '隐藏' : '显示'}
+                  title={entity.visible ? '隐藏曲线' : '显示曲线'}
                   style={{
                     background: 'transparent', border: 'none', cursor: 'pointer',
                     padding: '2px', flexShrink: 0,

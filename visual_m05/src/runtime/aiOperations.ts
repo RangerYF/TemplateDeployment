@@ -15,6 +15,9 @@ import {
   type BallDrawParams,
   type BinomialDistParams,
   type BoxSwapBallsParams,
+  type RandomWalk1DParams,
+  type RandomWalk2DParams,
+  type MarkovChainParams,
   type DataPrecision,
   type DataSpec,
   type HistogramParams,
@@ -325,10 +328,15 @@ function mergeParams(type: SimulationType, current: SimulationParams | undefined
       if (!datasetId || !REGRESSION_DATASET_IDS.has(datasetId)) throw new Error(`未知回归数据集 ${datasetId ?? ''}`);
       const baseSpec = (base.dataSpec as RegressionDataSpec | undefined) ?? { ...DEFAULT_REGRESSION_DATA_SPEC };
       const dataSpec: RegressionDataSpec = { ...baseSpec, presetId: datasetId === 'REG-CUSTOM' ? baseSpec.presetId : datasetId };
+      const validModels = ['linear', 'exponential', 'power', 'log', 'quadratic', 'reciprocal'];
+      const modelType = asString(next.modelType) ?? 'linear';
+      if (!validModels.includes(modelType)) throw new Error(`未知回归模型 ${modelType}`);
       return {
         datasetId,
         dataSpec,
         showResiduals: Boolean(next.showResiduals),
+        modelType: modelType as LinearRegressionParams['modelType'],
+        autoRecommend: Boolean(next.autoRecommend),
       } satisfies LinearRegressionParams;
     }
     case 'lawOfLargeNumbers': {
@@ -381,6 +389,41 @@ function mergeParams(type: SimulationType, current: SimulationParams | undefined
         operations: positiveInteger(next.operations, 'operations', 1, 30),
         n: positiveInteger(next.n, 'n'),
       } satisfies BoxSwapBallsParams;
+    }
+    case 'randomWalk1D': {
+      return {
+        steps: positiveInteger(next.steps, 'steps', 2, 1000),
+        pRight: probability(next.pRight, 'pRight'),
+        numPaths: positiveInteger(next.numPaths, 'numPaths', 1, 6),
+        n: positiveInteger(next.n, 'n'),
+      } satisfies RandomWalk1DParams;
+    }
+    case 'randomWalk2D': {
+      return {
+        steps: positiveInteger(next.steps, 'steps', 10, 2000),
+        numPaths: positiveInteger(next.numPaths, 'numPaths', 1, 6),
+        n: positiveInteger(next.n, 'n'),
+      } satisfies RandomWalk2DParams;
+    }
+    case 'markovChain': {
+      // 状态名 / 转移矩阵 / 初始分布 — AI 不修改时保留 base
+      const states = Array.isArray(next.states) && next.states.every(s => typeof s === 'string')
+        ? next.states as string[]
+        : (base.states as string[] | undefined) ?? ['A', 'B'];
+      const transition = Array.isArray(next.transition)
+        ? next.transition as number[][]
+        : (base.transition as number[][] | undefined) ?? [[1, 0], [0, 1]];
+      const initial = Array.isArray(next.initial)
+        ? next.initial as number[]
+        : (base.initial as number[] | undefined) ?? [1, 0];
+      return {
+        states,
+        transition,
+        initial,
+        steps: positiveInteger(next.steps, 'steps', 2, 200),
+        n: positiveInteger(next.n, 'n'),
+        showSteadyState: Boolean(next.showSteadyState ?? true),
+      } satisfies MarkovChainParams;
     }
   }
 }

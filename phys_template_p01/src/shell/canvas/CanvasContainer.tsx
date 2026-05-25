@@ -52,7 +52,11 @@ export function CanvasContainer({ onContextReady, backgroundStyle }: CanvasConta
     <div
       ref={containerRef}
       className="relative flex-1 overflow-hidden"
-      style={{ backgroundColor: '#FAFAFA', ...backgroundStyle }}
+      style={{
+        backgroundColor: '#FAFAFA',
+        borderRadius: backgroundStyle ? 28 : undefined,
+        ...backgroundStyle,
+      }}
     >
       <canvas
         ref={canvasRef}

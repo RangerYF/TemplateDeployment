@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useFunctionStore } from '@/editor/store/functionStore';
 import { editorInstance } from '@/editor/core/Editor';
 import { UpdateFunctionParamCommand } from '@/editor/commands/UpdateFunctionParamCommand';
-import { compileExpression, isParseError } from '@/engine/expressionEngine';
+import { compileExpression, isLikelyIncompleteExpression, isParseError } from '@/engine/expressionEngine';
 import { getKnownFunctionNames } from '@/engine/compositionEngine';
 import { detectAndMergeCoefficients } from '@/engine/coefficientDetector';
 import { COLORS } from '@/styles/colors';
@@ -70,7 +70,11 @@ export function FunctionInputPanel() {
     );
     const compiled = compileExpression(value, knownFns);
     if (isParseError(compiled)) {
-      setParseError(compiled.error);
+      if (isLikelyIncompleteExpression(value)) {
+        setParseError(null);
+      } else {
+        setParseError(compiled.error);
+      }
     } else {
       setParseError(null);
       // Live preview: update store directly (not recorded as Undo step)

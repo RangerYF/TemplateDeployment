@@ -3,9 +3,11 @@ import { Switch } from '@/components/ui/switch';
 import { ViewportPanel } from '@/components/panels/ViewportPanel';
 import { COLORS } from '@/styles/colors';
 
-export function CanvasSettingsPanel() {
+export function CanvasSettingsPanel({ showViewport = true }: { showViewport?: boolean }) {
   const showGrid = useFunctionStore((s) => s.features.showGrid);
   const showAxisLabels = useFunctionStore((s) => s.features.showAxisLabels);
+  const showIntersections = useFunctionStore((s) => s.features.showIntersections);
+  const showAsymptotes = useFunctionStore((s) => s.features.showAsymptotes);
   const setFeature = useFunctionStore((s) => s.setFeature);
 
   return (
@@ -25,19 +27,28 @@ export function CanvasSettingsPanel() {
           <span style={{ fontSize: '13px', color: COLORS.textSecondary }}>坐标刻度</span>
           <Switch checked={showAxisLabels} onCheckedChange={(v) => setFeature('showAxisLabels', v)} />
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '13px', color: COLORS.textSecondary }}>标注交点</span>
+          <Switch checked={showIntersections} onCheckedChange={(v) => setFeature('showIntersections', v)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '13px', color: COLORS.textSecondary }}>显示渐近线</span>
+          <Switch checked={showAsymptotes} onCheckedChange={(v) => setFeature('showAsymptotes', v)} />
+        </div>
       </div>
 
-      {/* Divider */}
-      <hr
-        style={{
-          border: 'none',
-          borderTop: `1px solid ${COLORS.border}`,
-          margin: '12px 0',
-        }}
-      />
-
-      {/* Viewport range controls */}
-      <ViewportPanel />
+      {showViewport && (
+        <>
+          <hr
+            style={{
+              border: 'none',
+              borderTop: `1px solid ${COLORS.border}`,
+              margin: '12px 0',
+            }}
+          />
+          <ViewportPanel />
+        </>
+      )}
     </div>
   );
 }

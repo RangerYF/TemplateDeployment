@@ -271,6 +271,7 @@ function renderAsymptotes(
 
 /** Green dot colour for vertex points. */
 const VERTEX_COLOR = '#22C55E';
+const CONJUGATE_VERTEX_COLOR = '#3B82F6';
 
 /**
  * Draw green solid dots at the geometric vertices of the conic, labelled V₁…Vₙ.
@@ -313,19 +314,48 @@ function renderVertices(
     }
   };
 
+  const drawColoredVertex = (
+    mathX: number,
+    mathY: number,
+    label: string,
+    color: string,
+  ) => {
+    const [px, py] = viewport.toCanvas(mathX, mathY);
+
+    ctx.beginPath();
+    ctx.arc(px, py, 8, 0, Math.PI * 2);
+    ctx.fillStyle = color + '28';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    if (showLabels) {
+      drawAnnotationLabel(ctx, label, px + 8, py - 5, color, '12px monospace');
+    }
+  };
+
   switch (entity.type) {
     case 'ellipse': {
       const { a, b, cx, cy } = entity.params;
-      drawVertex(cx + a, cy,     'V\u2081');
-      drawVertex(cx - a, cy,     'V\u2082');
-      drawVertex(cx,     cy + b, 'V\u2083');
-      drawVertex(cx,     cy - b, 'V\u2084');
+      drawColoredVertex(cx + a, cy,     'A\u2081', VERTEX_COLOR);
+      drawColoredVertex(cx - a, cy,     'A\u2082', VERTEX_COLOR);
+      drawColoredVertex(cx,     cy + b, 'B\u2081', CONJUGATE_VERTEX_COLOR);
+      drawColoredVertex(cx,     cy - b, 'B\u2082', CONJUGATE_VERTEX_COLOR);
       break;
     }
     case 'hyperbola': {
-      const { a, cx, cy } = entity.params;
-      drawVertex(cx + a, cy, 'V\u2081');
-      drawVertex(cx - a, cy, 'V\u2082');
+      const [leftReal, rightReal] = entity.derived.transverseVertices;
+      const [lowerImag, upperImag] = entity.derived.conjugateVertices;
+      drawColoredVertex(rightReal[0], rightReal[1], 'A\u2081', VERTEX_COLOR);
+      drawColoredVertex(leftReal[0], leftReal[1], 'A\u2082', VERTEX_COLOR);
+      drawColoredVertex(upperImag[0], upperImag[1], 'B\u2081', CONJUGATE_VERTEX_COLOR);
+      drawColoredVertex(lowerImag[0], lowerImag[1], 'B\u2082', CONJUGATE_VERTEX_COLOR);
       break;
     }
     case 'parabola': {

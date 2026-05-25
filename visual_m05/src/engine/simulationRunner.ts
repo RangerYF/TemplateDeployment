@@ -18,6 +18,9 @@ import {
   computeLineChart,
   runTournamentMatch,
   runBoxSwapBalls,
+  runRandomWalk1D,
+  runRandomWalk2D,
+  runMarkovChain,
 } from './simulations';
 import {
   DEFAULT_REGRESSION_DATA_SPEC,
@@ -32,6 +35,9 @@ import type {
   BallDrawParams,
   BinomialDistParams,
   BoxSwapBallsParams,
+  RandomWalk1DParams,
+  RandomWalk2DParams,
+  MarkovChainParams,
   BuffonsNeedleParams,
   CoinFlipParams,
   DiceRollParams,
@@ -39,6 +45,7 @@ import type {
   HypergeometricDistParams,
   LawOfLargeNumbersParams,
   LinearRegressionParams,
+  RegressionModelType,
   LineChartParams,
   MeetingProblemParams,
   MonteCarloPiParams,
@@ -118,15 +125,6 @@ function getEffectiveRegressionData(params: LinearRegressionParams) {
   }
 
   return resolveRegressionData(effectiveSpec);
-}
-
-function getRegressionStrengthLabel(r: number): string {
-  const absR = Math.abs(r);
-  if (absR >= 0.9) return '极强线性相关';
-  if (absR >= 0.75) return '较强线性相关';
-  if (absR >= 0.5) return '中等线性相关';
-  if (absR >= 0.3) return '较弱线性相关';
-  return '线性相关较弱';
 }
 
 function getRegressionTrendLabel(b: number): string {
@@ -212,19 +210,7 @@ function buildSimulationData(
     case 'linearRegression': {
       const p = params as LinearRegressionParams;
       const dataset = getEffectiveRegressionData(p);
-      if (dataset.points.length < 2) {
-        return {
-          points: dataset.points,
-          a: 0,
-          b: 0,
-          r: 0,
-          xMean: 0,
-          yMean: 0,
-          predictedPoints: [],
-          residuals: [],
-        };
-      }
-      return computeLinearRegression(dataset.points);
+      return computeLinearRegression(dataset.points, p.modelType ?? 'linear', p.autoRecommend ?? false);
     }
     case 'lawOfLargeNumbers': {
       const p = params as LawOfLargeNumbersParams;
@@ -245,6 +231,18 @@ function buildSimulationData(
     case 'boxSwapBalls': {
       const p = params as BoxSwapBallsParams;
       return runBoxSwapBalls(p, rng);
+    }
+    case 'randomWalk1D': {
+      const p = params as RandomWalk1DParams;
+      return runRandomWalk1D(p, rng);
+    }
+    case 'randomWalk2D': {
+      const p = params as RandomWalk2DParams;
+      return runRandomWalk2D(p, rng);
+    }
+    case 'markovChain': {
+      const p = params as MarkovChainParams;
+      return runMarkovChain(p, rng);
     }
   }
 }
@@ -404,33 +402,56 @@ function buildSimulationStats(type: SimulationType, params: SimulationParams, da
       const pointCount = dataset.points.length;
       const xValues = dataset.points.map(point => point.x);
       const hasXVariance = xValues.length >= 2 && new Set(xValues).size > 1;
-      const rmse = result.residuals.length > 0
-        ? Math.sqrt(result.residuals.reduce((sum, item) => sum + item.residual ** 2, 0) / result.residuals.length)
-        : 0;
-      const sign = result.b >= 0 ? '+' : '';
       stats['数据源'] = dataset.sourceName;
       stats['数据点数'] = pointCount;
       if (pointCount < 2) {
-        stats['模型判断'] = '至少需要 2 个数据点才能做线性回归';
+        stats['模型判断'] = '至少需要 2 个数据点才能做回归';
         break;
       }
       if (!hasXVariance) {
-        stats['模型判断'] = 'x 数据没有变化，无法确定有效回归直线';
+        stats['模型判断'] = 'x 数据没有变化，无法确定有效回归方程';
         break;
       }
-      stats['回归方程'] = `ŷ = ${result.b.toFixed(4)}x ${sign}${result.a.toFixed(4)}`;
-      stats['相关系数 r'] = result.r.toFixed(4);
-      stats['决定系数 r²'] = (result.r ** 2).toFixed(4);
-      stats['斜率 b'] = result.b.toFixed(4);
-      stats['截距 a'] = result.a.toFixed(4);
+      if (result.invalidReason) {
+        stats['模型判断'] = result.invalidReason;
+        break;
+      }
+      const MODEL_NAMES: Record<RegressionModelType, string> = {
+        linear: '线性 y = a + bx',
+        exponential: '指数 y = a·e^(bx)',
+        power: '幂函数 y = a·x^b',
+        log: '对数 y = a + b·ln(x)',
+        quadratic: '二次 y = ax² + bx + c',
+        reciprocal: '倒数 y = a + b/x',
+      };
+      const rmse = result.residuals.length > 0
+        ? Math.sqrt(result.residuals.reduce((sum, item) => sum + item.residual ** 2, 0) / result.residuals.length)
+        : 0;
+      stats['模型类型'] = MODEL_NAMES[result.modelType];
+      stats['回归方程'] = result.equation;
+      if (result.linearizedEquation) {
+        stats['线性化方程'] = result.linearizedEquation;
+      }
+      stats['决定系数 R²'] = result.r2.toFixed(4);
+      if (result.modelType === 'linear') {
+        stats['相关系数 r'] = result.r.toFixed(4);
+      } else if (result.linearizedEquation) {
+        stats['线性化后 r'] = result.r.toFixed(4);
+      }
       stats['均方根误差 RMSE'] = rmse.toFixed(4);
-      stats['趋势判断'] = getRegressionTrendLabel(result.b);
-      stats['线性强度'] = getRegressionStrengthLabel(result.r);
-      stats['模型判断'] = Math.abs(result.r) >= 0.75
-        ? '线性特征较明显，适合用一次回归直线做课堂分析'
-        : Math.abs(result.r) >= 0.5
-          ? '存在一定线性趋势，可作近似分析'
-          : '线性关系较弱，建议提醒学生该数据可能更适合非线性模型';
+      // 自动推荐结果
+      if (p.autoRecommend && result.bestModelType) {
+        stats['自动推荐最佳模型'] = MODEL_NAMES[result.bestModelType];
+      } else if (result.modelComparison && result.modelComparison.length > 0) {
+        const better = result.modelComparison
+          .filter(m => m.valid && m.r2 > result.r2 + 0.02)
+          .sort((a, b) => b.r2 - a.r2)[0];
+        if (better) {
+          stats['更优模型建议'] = `${MODEL_NAMES[better.modelType]}（R²=${better.r2.toFixed(4)}）`;
+        }
+      }
+      stats['趋势判断'] = result.modelType === 'linear' ? getRegressionTrendLabel(result.b) : '—';
+      stats['拟合强度'] = result.r2 >= 0.9 ? '拟合极好' : result.r2 >= 0.75 ? '拟合较好' : result.r2 >= 0.5 ? '拟合一般' : '拟合较差';
       break;
     }
     case 'lawOfLargeNumbers': {
@@ -495,9 +516,52 @@ function buildSimulationStats(type: SimulationType, params: SimulationParams, da
         stats[`甲盒含 ${k} 个黑球频率`] = result.distribution[k].toFixed(4);
       }
       if (result.theoreticalProbBn !== undefined) {
-        stats['P(B_n) 理论'] = result.theoreticalProbBn.toFixed(4);
-        stats['公式'] = 'P(B_n) = 3/5 + (2/5)·(-1/9)^n';
+        stats['P(Bₙ) 理论'] = result.theoreticalProbBn.toFixed(4);
+        stats['公式'] = 'P(Bₙ) = 3/5 + (2/5)·(-1/9)ⁿ';
       }
+      break;
+    }
+    case 'randomWalk1D': {
+      const p = params as RandomWalk1DParams;
+      const result = data as import('./simulations').RandomWalk1DResult;
+      stats['步数'] = p.steps;
+      stats['向右概率 p'] = p.pRight.toFixed(3);
+      stats['模拟次数'] = p.n;
+      stats['终点均值（模拟）'] = result.meanEnd.toFixed(3);
+      stats['终点期望（理论）'] = result.expectedEnd.toFixed(3);
+      stats['终点标准差（模拟）'] = result.stdEnd.toFixed(3);
+      stats['终点标准差（理论）'] = result.expectedStd.toFixed(3);
+      break;
+    }
+    case 'randomWalk2D': {
+      const p = params as RandomWalk2DParams;
+      const result = data as import('./simulations').RandomWalk2DResult;
+      stats['步数'] = p.steps;
+      stats['模拟次数'] = p.n;
+      stats['终点距离均值（模拟）'] = result.meanEndDist.toFixed(3);
+      stats['终点距离期望 √(πn/2)'] = result.expectedEndDist.toFixed(3);
+      break;
+    }
+    case 'markovChain': {
+      const p = params as MarkovChainParams;
+      const result = data as import('./simulations').MarkovChainResult;
+      stats['状态数'] = p.states.length;
+      stats['模拟轮数'] = p.n;
+      stats['演化步数'] = p.steps;
+      if (!result.valid) {
+        stats['模型判断'] = result.invalidReason ?? '参数无效';
+        break;
+      }
+      // 终点频率（每个状态）
+      for (let i = 0; i < p.states.length; i++) {
+        stats[`P(终点=${p.states[i]})`] = result.finalDistribution[i].toFixed(4);
+      }
+      // 理论稳态
+      if (result.steadyState) {
+        const steadyText = p.states.map((s, i) => `${s}=${(result.steadyState![i] * 100).toFixed(2)}%`).join('，');
+        stats['理论稳态分布'] = steadyText;
+      }
+      stats['稳态收敛'] = result.hasUniqueSteady ? '已收敛（迭代）' : '未充分收敛';
       break;
     }
   }

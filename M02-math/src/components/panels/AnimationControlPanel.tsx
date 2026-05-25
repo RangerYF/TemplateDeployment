@@ -3,6 +3,7 @@ import { useFunctionStore } from '@/editor/store/functionStore';
 import { useAnimationStore } from '@/editor/store/animationStore';
 import { useParamAnimationStore } from '@/editor/store/paramAnimationStore';
 import type { AnimParam } from '@/editor/store/paramAnimationStore';
+import { useAnimationTrajectoryStore } from '@/editor/store/animationTrajectoryStore';
 import { editorInstance } from '@/editor/core/Editor';
 import { UpdateFunctionParamCommand } from '@/editor/commands/UpdateFunctionParamCommand';
 import {
@@ -14,9 +15,14 @@ import type { AnimationControl, EasingName, MultiAnimConfig } from '@/engine/ani
 import { useCanvasRecorder } from '@/hooks/useCanvasRecorder';
 import type { FunctionCanvasHandle } from '@/components/FunctionCanvas';
 import type { Transform, FunctionParam, FunctionEntry } from '@/types';
+import { compileExpression, isParseError } from '@/engine/expressionEngine';
+import { buildFunctionScope, getKnownFunctionNames } from '@/engine/compositionEngine';
+import { sampleWithTransform } from '@/engine/sampler';
+import { Viewport } from '@/canvas/Viewport';
 import { COLORS } from '@/styles/colors';
 import { focusRing, btnHover } from '@/styles/interactionStyles';
 import { Switch } from '@/components/ui/switch';
+import { buildTemplateExpr } from '@/engine/functionTemplates';
 
 // ─── Zero-skip helper (matches TransformPanel) ──────────────────────────────
 
@@ -30,27 +36,42 @@ function skipZero(v: number, prev: number): number {
 function buildParamList(fn: FunctionEntry): AnimParam[] {
   const params: AnimParam[] = [];
 
-  // Transform params (a, b, h, k)
-  const transformKeys: (keyof Transform)[] = ['a', 'b', 'h', 'k'];
-  for (const key of transformKeys) {
-    const value = fn.transform[key];
+  // Named params
+  for (const p of fn.namedParams) {
+    let toValue = p.max ?? 10;
+    let label = p.label;
+    if (fn.templateId === 'linear') {
+      if (p.name === 'a') toValue = 2;
+      if (p.name === 'b') {
+        toValue = 3;
+        label = 'b(截距)';
+      }
+    }
     params.push({
-      key: `transform.${key}`,
-      label: key,
+      key: `named.${p.name}`,
+      label,
       enabled: false,
-      from: value,
-      to: key === 'a' || key === 'b' ? 2 : 3,
+      from: p.value,
+      to: toValue,
     });
   }
 
-  // Named params
-  for (const p of fn.namedParams) {
+  // Transform params (a, b, h, k) — keep after named params to avoid
+  // confusing template coefficient b with transform.b.
+  const transformKeys: Array<{ key: keyof Transform; label: string; to: number }> = [
+    { key: 'a', label: 'A(纵缩)', to: 2 },
+    { key: 'b', label: 'B(横缩)', to: 2 },
+    { key: 'h', label: 'H(平移)', to: 3 },
+    { key: 'k', label: 'K(平移)', to: 3 },
+  ];
+  for (const spec of transformKeys) {
+    const value = fn.transform[spec.key];
     params.push({
-      key: `named.${p.name}`,
-      label: p.label,
+      key: `transform.${spec.key}`,
+      label: spec.label,
       enabled: false,
-      from: p.value,
-      to: (p.max ?? 10),
+      from: value,
+      to: spec.to,
     });
   }
 
@@ -68,15 +89,17 @@ export function AnimationControlPanel({ canvasRef }: Props) {
   const activeFunction   = useFunctionStore((s) =>
     s.functions.find((f) => f.id === s.activeFunctionId) ?? null,
   );
+  const trajectoryCount = useAnimationTrajectoryStore((s) => s.frames.length);
 
   const {
     params, duration, easing, loop, recordEnabled, playState,
-    setParams, updateParam, setDuration, setEasing, setLoop,
+    showTrajectory, setParams, updateParam, setDuration, setEasing, setLoop, setShowTrajectory,
     setRecordEnabled,
   } = useParamAnimationStore();
 
   const controlRef = useRef<AnimationControl | null>(null);
   const beforeSnapshotRef = useRef<{ transform: Transform; namedParams: FunctionParam[] } | null>(null);
+  const trajectoryCapturePendingRef = useRef(false);
   const { startRecording, stopRecording, downloadBlob, forceCleanup } = useCanvasRecorder();
 
   // Rebuild param list when active function changes
@@ -173,6 +196,61 @@ export function AnimationControlPanel({ canvasRef }: Props) {
   const startRecordingRef = useRef(startRecording);
   startRecordingRef.current = startRecording;
 
+  const queueTrajectoryCapture = useCallback((fnId: string) => {
+    if (trajectoryCapturePendingRef.current) return;
+    trajectoryCapturePendingRef.current = true;
+
+    requestAnimationFrame(() => {
+      trajectoryCapturePendingRef.current = false;
+      if (!useParamAnimationStore.getState().showTrajectory) return;
+
+      const currentFn = useFunctionStore.getState().functions.find((f) => f.id === fnId);
+      const viewportState = useFunctionStore.getState().viewport;
+      if (!currentFn) return;
+
+      const canvas = canvasRefStable.current.current?.getStaticCanvas();
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas ? canvas.width / dpr : 800;
+      const height = canvas ? canvas.height / dpr : 600;
+
+      const knownFns = getKnownFunctionNames(useFunctionStore.getState().functions, currentFn.id);
+      const compiled = compileExpression(currentFn.exprStr, knownFns);
+      if (isParseError(compiled)) return;
+
+      const paramScope: Record<string, unknown> =
+        currentFn.templateId === null && currentFn.namedParams.length > 0
+          ? Object.fromEntries(currentFn.namedParams.map((param) => [param.name, param.value]))
+          : {};
+      const fnScope = buildFunctionScope(useFunctionStore.getState().functions, currentFn.id);
+      const scope = { ...paramScope, ...fnScope };
+
+      const vp = new Viewport(
+        viewportState.xMin,
+        viewportState.xMax,
+        viewportState.yMin,
+        viewportState.yMax,
+        width,
+        height,
+      );
+
+      const points = sampleWithTransform(
+        compiled,
+        vp,
+        currentFn.transform,
+        180,
+        Object.keys(scope).length > 0 ? scope : undefined,
+        currentFn.displayDomain,
+      );
+
+      useAnimationTrajectoryStore.getState().appendFrame({
+        functionId: currentFn.id,
+        points,
+        color: currentFn.color,
+        lineStyle: currentFn.lineStyle,
+      });
+    });
+  }, []);
+
   const startPlayback = useCallback(() => {
     const fnId = useFunctionStore.getState().activeFunctionId;
     const fn   = fnId ? useFunctionStore.getState().functions.find((f) => f.id === fnId) : null;
@@ -202,6 +280,7 @@ export function AnimationControlPanel({ canvasRef }: Props) {
 
     useParamAnimationStore.getState().setPlayState('playing');
     useAnimationStore.getState().setIsAnimating(true);
+    useAnimationTrajectoryStore.getState().clear();
 
     // Build multi-anim configs
     const configs: MultiAnimConfig[] = enabledParams.map((p) => ({
@@ -224,8 +303,16 @@ export function AnimationControlPanel({ canvasRef }: Props) {
           const newParams = latest.namedParams.map((np) =>
             np.name === paramName ? { ...np, value } : np,
           );
-          useFunctionStore.getState().updateFunction(fnId, { namedParams: newParams });
+          const exprPatch = latest.templateId
+            ? buildTemplateExpr(latest.templateId, newParams)
+            : null;
+          useFunctionStore.getState().updateFunction(fnId, {
+            namedParams: newParams,
+            ...(exprPatch ? { exprStr: exprPatch } : {}),
+          });
         }
+
+        queueTrajectoryCapture(fnId);
       },
     }));
 
@@ -237,7 +324,7 @@ export function AnimationControlPanel({ canvasRef }: Props) {
       dur,
       () => { finalize(true); },
     );
-  }, [finalize]);
+  }, [finalize, queueTrajectoryCapture]);
 
   // Keep startPlaybackRef in sync for finalize's loop restart
   startPlaybackRef.current = startPlayback;
@@ -262,6 +349,10 @@ export function AnimationControlPanel({ canvasRef }: Props) {
     finalize(false);
   }, [finalize]);
 
+  const handleClearTrajectory = useCallback(() => {
+    useAnimationTrajectoryStore.getState().clear();
+  }, []);
+
   // Cleanup on unmount or function change — also force-stop any active recording
   const forceCleanupRef = useRef(forceCleanup);
   forceCleanupRef.current = forceCleanup;
@@ -283,6 +374,12 @@ export function AnimationControlPanel({ canvasRef }: Props) {
     }
   }, [recordEnabled, playState]);
 
+  useEffect(() => {
+    if (!showTrajectory) {
+      useAnimationTrajectoryStore.getState().clear();
+    }
+  }, [showTrajectory]);
+
   if (!activeFunction || activeFunction.mode !== 'standard') return null;
 
   const enabledCount = params.filter((p) => p.enabled).length;
@@ -293,6 +390,9 @@ export function AnimationControlPanel({ canvasRef }: Props) {
       {/* Header */}
       <p style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textPrimary, margin: '0 0 8px' }}>
         参数动画
+      </p>
+      <p style={{ fontSize: '11px', color: COLORS.textSecondary, margin: '0 0 8px', lineHeight: 1.5 }}>
+        先勾选要演示的参数，再设置起始值和结束值
       </p>
 
       {/* Parameter grid */}
@@ -407,9 +507,31 @@ export function AnimationControlPanel({ canvasRef }: Props) {
           <Switch checked={loop} onCheckedChange={setLoop} disabled={playState !== 'idle'} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: recordEnabled ? COLORS.textPrimary : COLORS.textSecondary }}>录制</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: recordEnabled ? COLORS.textPrimary : COLORS.textSecondary }}>录制动画</span>
           <Switch checked={recordEnabled} onCheckedChange={setRecordEnabled} disabled={playState !== 'idle'} />
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: showTrajectory ? COLORS.textPrimary : COLORS.textSecondary }}>显示轨迹</span>
+          <Switch checked={showTrajectory} onCheckedChange={setShowTrajectory} disabled={playState !== 'idle'} />
+        </div>
+        {showTrajectory && playState === 'idle' && trajectoryCount > 0 && (
+          <button
+            onClick={handleClearTrajectory}
+            style={{
+              marginTop: 2,
+              padding: '5px 8px',
+              fontSize: '11px',
+              borderRadius: '8px',
+              border: `1px solid ${COLORS.border}`,
+              background: COLORS.surface,
+              color: COLORS.textSecondary,
+              cursor: 'pointer',
+            }}
+            {...btnHover(COLORS.surfaceAlt, COLORS.surface)}
+          >
+            清除轨迹
+          </button>
+        )}
       </div>
 
       {/* Playback controls */}

@@ -16,6 +16,23 @@ export function isParseError(v: CompiledExpression | ParseError): v is ParseErro
   return 'error' in v;
 }
 
+export function isLikelyIncompleteExpression(exprStr: string): boolean {
+  const trimmed = exprStr.trim();
+  if (!trimmed) return true;
+  if (/[+\-*/^(,.\u00d7\u00f7]$/.test(trimmed)) return true;
+
+  let balance = 0;
+  for (const ch of trimmed) {
+    if (ch === '(') balance += 1;
+    if (ch === ')') balance -= 1;
+  }
+  if (balance > 0) return true;
+
+  if (/\b(?:sin|cos|tan|csc|sec|cot|sqrt|abs|log|ln|exp)$/.test(trimmed)) return true;
+  if (/\|[^|]*$/.test(trimmed)) return true;
+  return false;
+}
+
 // ─── Implicit-multiplication preprocessor ────────────────────────────────────
 
 /**
@@ -94,6 +111,9 @@ export function preprocessExpression(expr: string, knownFns: string[] = []): str
       `${prefix}${fnPart}(${xPart})`,
     );
   }
+
+  // 8. Alias natural log forms to math.js `log(...)`: ln(x) / lnx → log(x)
+  normalized = normalized.replace(/\bln(?=\s*\()/g, 'log');
 
   return normalized;
 }

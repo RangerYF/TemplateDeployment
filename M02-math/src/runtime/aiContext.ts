@@ -11,7 +11,9 @@ type AiFunction = {
   templateId: string | null;
   visible: boolean;
   color: string;
+  lineStyle: FunctionEntry['lineStyle'];
   transform: FunctionEntry['transform'];
+  displayDomain: FunctionEntry['displayDomain'];
   namedParams: Array<{ name: string; label: string; value: number }>;
   segmentCount: number;
 };
@@ -30,6 +32,8 @@ export type M02AiContext = {
     showTangent: boolean;
     tangentX: number | null;
     showFeaturePoints: boolean;
+    showIntersections: boolean;
+    showAsymptotes: boolean;
     showGrid: boolean;
     showAxisLabels: boolean;
   };
@@ -55,7 +59,9 @@ function describeFunction(fn: FunctionEntry): AiFunction {
     templateId: fn.templateId,
     visible: fn.visible,
     color: fn.color,
+    lineStyle: fn.lineStyle,
     transform: { ...fn.transform },
+    displayDomain: { ...fn.displayDomain },
     namedParams: fn.namedParams.map((param) => ({
       name: param.name,
       label: param.label,
@@ -88,6 +94,8 @@ export function buildM02AiContext(): M02AiContext {
       showTangent: functionState.features.showTangent,
       tangentX: functionState.features.tangentX,
       showFeaturePoints: functionState.features.showFeaturePoints,
+      showIntersections: functionState.features.showIntersections,
+      showAsymptotes: functionState.features.showAsymptotes,
       showGrid: functionState.features.showGrid,
       showAxisLabels: functionState.features.showAxisLabels,
     },

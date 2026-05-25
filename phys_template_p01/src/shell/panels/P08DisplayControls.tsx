@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useSimulationStore } from '@/store';
-import { COLORS, RADIUS, SHADOWS } from '@/styles/tokens';
+import { COLORS, RADIUS } from '@/styles/tokens';
 import { getP08SceneSummary } from './p08SceneSummary';
+import { getP08FloatingCardStyle, getP08SceneTheme, toAlpha } from '@/shell/p08/p08Theme';
 
 interface P08DisplayControlsProps {
   presetId: string;
 }
 
 export function P08DisplayControls({ presetId }: P08DisplayControlsProps) {
+  const [collapsed, setCollapsed] = useState(false);
   const entities = useSimulationStore((s) => s.simulationState.scene.entities);
   const result = useSimulationStore((s) => s.simulationState.currentResult);
   const paramValues = useSimulationStore((s) => s.paramValues);
@@ -46,33 +49,94 @@ export function P08DisplayControls({ presetId }: P08DisplayControlsProps) {
   if (!hasControls) return null;
 
   const hasProbe = Boolean(potentialProbeA || potentialProbeB);
+  const theme = getP08SceneTheme(presetId);
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={(event) => {
+          event.stopPropagation();
+          setCollapsed(false);
+        }}
+        style={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 60,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '9px 12px',
+          borderRadius: RADIUS.pill,
+          color: theme.accentStrong,
+          cursor: 'pointer',
+          ...getP08FloatingCardStyle(presetId),
+        }}
+      >
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: RADIUS.full,
+            backgroundColor: theme.accent,
+            boxShadow: `0 0 0 5px ${toAlpha(theme.accent, 0.12)}`,
+          }}
+        />
+        <span style={{ fontSize: 12, fontWeight: 700 }}>显示与测量</span>
+      </button>
+    );
+  }
 
   return (
     <div
       onClick={(event) => event.stopPropagation()}
       style={{
         position: 'absolute',
-        top: 12,
-        right: 12,
+        top: 16,
+        right: 16,
         zIndex: 60,
         width: 260,
         padding: 12,
-        border: `1px solid ${COLORS.border}`,
         borderRadius: RADIUS.md,
-        backgroundColor: 'rgba(255, 255, 255, 0.96)',
-        boxShadow: SHADOWS.md,
-        backdropFilter: 'blur(8px)',
+        ...getP08FloatingCardStyle(presetId),
       }}
     >
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: COLORS.text,
-          marginBottom: 10,
-        }}
-      >
-        显示与测量
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: COLORS.text,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: RADIUS.full,
+              backgroundColor: theme.accent,
+              boxShadow: `0 0 0 5px ${toAlpha(theme.accent, 0.12)}`,
+            }}
+          />
+          显示与测量
+        </div>
+        <button
+          onClick={() => setCollapsed(true)}
+          style={{
+            border: 'none',
+            background: 'none',
+            color: theme.accentStrong,
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          收起
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -178,6 +242,16 @@ export function P08DisplayControls({ presetId }: P08DisplayControlsProps) {
               label="等势线"
               text="看同一电势值；沿线移动时电势不变。"
             />
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 10,
+              lineHeight: 1.6,
+              color: COLORS.textMuted,
+            }}
+          >
+            左下角立体电势图可拖拽旋转，滚轮缩放，右上角按钮可重置视角。
           </div>
         </div>
       )}

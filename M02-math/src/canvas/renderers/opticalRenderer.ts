@@ -11,9 +11,10 @@ import type { Photon } from '@/editor/store/opticalStore';
 
 // ─── Ray colors ──────────────────────────────────────────────────────────────
 
-const INCOMING_COLOR  = 'rgba(251, 191, 36, 0.55)';  // amber, incoming (boosted)
-const REFLECTED_COLOR = 'rgba(251, 191, 36, 0.45)';  // amber, reflected
+const INCOMING_COLOR  = 'rgba(251, 191, 36, 0.85)';  // amber, incoming
+const REFLECTED_COLOR = 'rgba(251, 191, 36, 0.80)';  // amber, reflected
 const PHOTON_GLOW     = '#FBBF24';                     // amber photon
+const GUIDE_COLOR     = 'rgba(59, 130, 246, 0.28)';   // blue, construction guide
 
 // ─── Static ray paths ────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ export function renderOpticalRays(
     ctx.moveTo(ix1, iy1);
     ctx.lineTo(ix2, iy2);
     ctx.strokeStyle = INCOMING_COLOR;
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2.4;
     ctx.setLineDash([]);
     ctx.stroke();
 
@@ -45,8 +46,8 @@ export function renderOpticalRays(
     ctx.moveTo(ox1, oy1);
     ctx.lineTo(ox2, oy2);
     ctx.strokeStyle = REFLECTED_COLOR;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 2.4;
+    ctx.setLineDash([7, 5]);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -56,6 +57,30 @@ export function renderOpticalRays(
     ctx.arc(hx, hy, 3.5, 0, 2 * Math.PI);
     ctx.fillStyle = entityColor + 'AA';
     ctx.fill();
+
+    if (ray.inGuideFocus) {
+      const [gx, gy] = viewport.toCanvas(ray.inGuideFocus[0], ray.inGuideFocus[1]);
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(gx, gy);
+      ctx.strokeStyle = GUIDE_COLOR;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (ray.outGuideFocus) {
+      const [gx, gy] = viewport.toCanvas(ray.outGuideFocus[0], ray.outGuideFocus[1]);
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(gx, gy);
+      ctx.strokeStyle = GUIDE_COLOR;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
 
   ctx.restore();
@@ -77,19 +102,19 @@ export function renderPhotons(
 
     // Outer glow
     ctx.beginPath();
-    ctx.arc(px, py, 8, 0, 2 * Math.PI);
-    ctx.fillStyle = PHOTON_GLOW + '33';
+    ctx.arc(px, py, 11, 0, 2 * Math.PI);
+    ctx.fillStyle = PHOTON_GLOW + '44';
     ctx.fill();
 
     // Inner glow
     ctx.beginPath();
-    ctx.arc(px, py, 5, 0, 2 * Math.PI);
-    ctx.fillStyle = PHOTON_GLOW + '66';
+    ctx.arc(px, py, 7, 0, 2 * Math.PI);
+    ctx.fillStyle = PHOTON_GLOW + '88';
     ctx.fill();
 
     // Core dot
     ctx.beginPath();
-    ctx.arc(px, py, 3, 0, 2 * Math.PI);
+    ctx.arc(px, py, 4.2, 0, 2 * Math.PI);
     ctx.fillStyle = PHOTON_GLOW;
     ctx.fill();
   }

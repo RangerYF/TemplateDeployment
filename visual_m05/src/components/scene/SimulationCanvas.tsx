@@ -4,7 +4,14 @@ import { useSimulationStore, useHistoryStore, useAnimationStore } from '@/editor
 import { RunSimulationCommand } from '@/editor/commands';
 import { isAnimatable, isMultiAnimatable, getTrialDisplay, buildPartialResult } from '@/engine/singleStep';
 import type { AnimatableType } from '@/engine/singleStep';
-import { SIMULATION_LIST, HISTOGRAM_DATASETS, REGRESSION_DATASETS } from '@/types/simulation';
+import {
+  SIMULATION_LIST,
+  HISTOGRAM_DATASETS,
+  REGRESSION_DATASETS,
+  regressionPointsToText,
+  syncCustomRegressionDataset,
+  resolveRegressionData,
+} from '@/types/simulation';
 import { SIM_DETAILS } from '@/data/simDetails';
 import type { SimulationEntity } from '@/editor/entities/types';
 import type {
@@ -26,6 +33,9 @@ import type {
   LineChartResult,
   TournamentMatchResult,
   BoxSwapBallsResult,
+  RandomWalk1DResult,
+  RandomWalk2DResult,
+  MarkovChainResult,
 } from '@/engine/simulations';
 import type {
   BallDrawParams,
@@ -58,6 +68,9 @@ import {
   LineChartRenderer,
   TournamentMatchRenderer,
   BoxSwapBallsRenderer,
+  RandomWalk1DRenderer,
+  RandomWalk2DRenderer,
+  MarkovChainRenderer,
 } from './renderers';
 import { SingleStepAnimation } from './SingleStepAnimation';
 import { useAnimationEngine } from '@/hooks/useAnimationEngine';
@@ -179,12 +192,43 @@ function renderSimulation(sim: SimulationEntity, displayN?: number) {
     case 'linearRegression': {
       const p = sim.params as LinearRegressionParams;
       const ds = REGRESSION_DATASETS.find(d => d.id === p.datasetId) ?? REGRESSION_DATASETS[0];
+      // 显示用 label：教师输入时优先用 dataSpec 中的 label
+      const xLabel = p.dataSpec.mode === 'manual' || p.datasetId === 'REG-CUSTOM'
+        ? (p.dataSpec.xLabel || ds.xLabel) : ds.xLabel;
+      const yLabel = p.dataSpec.mode === 'manual' || p.datasetId === 'REG-CUSTOM'
+        ? (p.dataSpec.yLabel || ds.yLabel) : ds.yLabel;
+      const handlePointsChange = (newPoints: Array<{ x: number; y: number }>) => {
+        // 自动切换到教师输入模式 + 同步 customText
+        const customText = regressionPointsToText(newPoints);
+        const nextDataSpec = {
+          ...p.dataSpec,
+          mode: 'manual' as const,
+          customText,
+        };
+        const nextParams: LinearRegressionParams = {
+          ...p,
+          datasetId: 'REG-CUSTOM',
+          dataSpec: nextDataSpec,
+        };
+        syncCustomRegressionDataset(nextDataSpec);
+        useSimulationStore.getState().updateParams(sim.id, nextParams as never);
+        // 重新跑回归（少于 2 点或 x 全等时重置）
+        const resolved = resolveRegressionData({ ...nextDataSpec, mode: 'manual' });
+        const distinctX = new Set(resolved.points.map(pt => pt.x)).size;
+        if (resolved.points.length < 2 || distinctX < 2) {
+          useSimulationStore.getState().resetResult(sim.id);
+        } else {
+          const cmd = new RunSimulationCommand(sim.id, 'linearRegression', nextParams);
+          useHistoryStore.getState().execute(cmd);
+        }
+      };
       return (
         <LinearRegressionRenderer
           result={result.data as LinearRegressionResult}
-          xLabel={ds.xLabel}
-          yLabel={ds.yLabel}
+          xLabel={xLabel}
+          yLabel={yLabel}
           showResiduals={p.showResiduals}
+          onPointsChange={handlePointsChange}
         />
       );
     }
@@ -217,6 +261,12 @@ function renderSimulation(sim: SimulationEntity, displayN?: number) {
       return <TournamentMatchRenderer result={result.data as TournamentMatchResult} />;
     case 'boxSwapBalls':
       return <BoxSwapBallsRenderer result={result.data as BoxSwapBallsResult} />;
+    case 'randomWalk1D':
+      return <RandomWalk1DRenderer result={result.data as RandomWalk1DResult} displayN={displayN} />;
+    case 'randomWalk2D':
+      return <RandomWalk2DRenderer result={result.data as RandomWalk2DResult} displayN={displayN} />;
+    case 'markovChain':
+      return <MarkovChainRenderer result={result.data as MarkovChainResult} displayN={displayN} />;
     default:
       return null;
   }
@@ -254,7 +304,10 @@ export function SimulationCanvas() {
       if (sim?.result) {
         let total: number | undefined;
         const data = sim.result.data as Record<string, unknown>;
-        if (Array.isArray(data.points)) total = data.points.length;
+        if (sim.type === 'randomWalk1D' || sim.type === 'randomWalk2D' || sim.type === 'markovChain') {
+          // 按步数动画
+          total = (sim.params as { steps: number }).steps;
+        } else if (Array.isArray(data.points)) total = data.points.length;
         else if (Array.isArray(data.needles)) total = (data.needles as unknown[]).length;
         else if (Array.isArray(data.trials)) total = (data.trials as unknown[]).length;
         if (total && total > 0) {

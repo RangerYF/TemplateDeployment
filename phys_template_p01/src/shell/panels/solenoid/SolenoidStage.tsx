@@ -5,6 +5,7 @@ import {
   clamp,
   computeSolenoidCenterField,
   getTeachingStepDescription,
+  lerp,
   sampleSolenoidField,
   sampleParticlePath,
   type TeachingStep,
@@ -47,11 +48,30 @@ interface CompassSpec {
   id: string;
 }
 
+interface SurfaceStrip {
+  id: string;
+  path: string;
+  averageDepth: number;
+  fill: string;
+  stroke: string;
+  opacity: number;
+}
+
+interface FloorGuideLine {
+  id: string;
+  path: string;
+  depth: number;
+  opacity: number;
+  width: number;
+}
+
 const OUTER_LOOP_STROKES = ['#A7C0E8', '#B8CBE7', '#C8D7EB'] as const;
 const INNER_FIELD_COLOR = '#1E66D0';
 const OUTER_FIELD_COLOR = '#9AB6DE';
 const COIL_STROKE = '#C97D35';
 const COIL_STROKE_LIGHT = '#E0A66B';
+const FLOOR_GRID_COLOR = '#B8C6DA';
+const FLOOR_AXIS_COLOR = '#93A8C8';
 
 function getViewPreset(viewMode: SolenoidViewMode): StageCamera {
   switch (viewMode) {
@@ -212,6 +232,94 @@ function buildCoilRingCenters(turns: number, length: number, teachingStep: Teach
   if (ringCount === 1) return [0];
   return Array.from({ length: ringCount }, (_, index) =>
     -length / 2 + ((length * index) / Math.max(ringCount - 1, 1)));
+}
+
+function buildCylinderSurfaceStrips(
+  length: number,
+  radius: number,
+  camera: StageCamera,
+  stageSize: StageSize,
+): SurfaceStrip[] {
+  const stripCount = 18;
+  const strips: SurfaceStrip[] = [];
+  const halfLength = length / 2;
+  const visibleStart = -Math.PI * 0.86;
+  const visibleEnd = Math.PI * 0.12;
+
+  for (let index = 0; index < stripCount; index += 1) {
+    const t0 = index / stripCount;
+    const t1 = (index + 1) / stripCount;
+    const angle0 = lerp(visibleStart, visibleEnd, t0);
+    const angle1 = lerp(visibleStart, visibleEnd, t1);
+
+    const quad = [
+      { x: -halfLength, y: radius * Math.cos(angle0), z: radius * Math.sin(angle0) },
+      { x: halfLength, y: radius * Math.cos(angle0), z: radius * Math.sin(angle0) },
+      { x: halfLength, y: radius * Math.cos(angle1), z: radius * Math.sin(angle1) },
+      { x: -halfLength, y: radius * Math.cos(angle1), z: radius * Math.sin(angle1) },
+    ];
+    const projected = quad.map((point) => projectPoint(point, camera, stageSize, length, radius));
+    const average = averageDepth(projected);
+    const highlight = 0.18 + (0.82 * Math.max(0, Math.cos(((angle0 + angle1) * 0.5) - 0.36)));
+    const copperBase = index % 2 === 0 ? { r: 201, g: 125, b: 53 } : { r: 224, g: 166, b: 107 };
+    const fillAlpha = lerp(0.26, 0.58, highlight);
+    const strokeAlpha = lerp(0.18, 0.42, highlight);
+
+    strips.push({
+      id: `surface-strip-${index}`,
+      path: buildPath(projected, true),
+      averageDepth: average,
+      fill: `rgba(${copperBase.r}, ${copperBase.g}, ${copperBase.b}, ${fillAlpha.toFixed(3)})`,
+      stroke: `rgba(132, 78, 30, ${strokeAlpha.toFixed(3)})`,
+      opacity: lerp(0.72, 1, 1 - clamp((average + radius) / Math.max(radius * 2, 1e-6), 0, 1)),
+    });
+  }
+
+  return strips.sort((left, right) => left.averageDepth - right.averageDepth);
+}
+
+function buildFloorGuideLines(
+  length: number,
+  radius: number,
+  camera: StageCamera,
+  stageSize: StageSize,
+): FloorGuideLine[] {
+  const halfLength = length * 0.82;
+  const halfWidth = radius * 2.35;
+  const zPlane = -radius * 1.45;
+  const lines: FloorGuideLine[] = [];
+
+  for (let i = -4; i <= 4; i += 1) {
+    const y = (i / 4) * halfWidth;
+    const points = [
+      { x: -halfLength, y, z: zPlane },
+      { x: halfLength, y, z: zPlane },
+    ].map((point) => projectPoint(point, camera, stageSize, length, radius));
+    lines.push({
+      id: `floor-x-${i}`,
+      path: buildPath(points),
+      depth: averageDepth(points),
+      opacity: i === 0 ? 0.42 : 0.18,
+      width: i === 0 ? 1.35 : 0.9,
+    });
+  }
+
+  for (let i = -5; i <= 5; i += 1) {
+    const x = (i / 5) * halfLength;
+    const points = [
+      { x, y: -halfWidth, z: zPlane },
+      { x, y: halfWidth, z: zPlane },
+    ].map((point) => projectPoint(point, camera, stageSize, length, radius));
+    lines.push({
+      id: `floor-y-${i}`,
+      path: buildPath(points),
+      depth: averageDepth(points),
+      opacity: i === 0 ? 0.32 : 0.14,
+      width: i === 0 ? 1.15 : 0.8,
+    });
+  }
+
+  return lines.sort((left, right) => left.depth - right.depth);
 }
 
 function buildInternalArrowLines(
@@ -414,6 +522,16 @@ export function SolenoidStage({
       })
       .sort((left, right) => left.averageDepth - right.averageDepth);
   }, [ringCenters, radius, camera.yawDeg, camera.pitchDeg, camera.zoom, stageSize, length]);
+
+  const cylinderSurfaceStrips = useMemo(
+    () => buildCylinderSurfaceStrips(length * 1.02, radius * 1.01, camera, stageSize),
+    [length, radius, camera.yawDeg, camera.pitchDeg, camera.zoom, stageSize],
+  );
+
+  const floorGuideLines = useMemo(
+    () => buildFloorGuideLines(length, radius, camera, stageSize),
+    [length, radius, camera.yawDeg, camera.pitchDeg, camera.zoom, stageSize],
+  );
 
   const projectedOuterLoops = useMemo(() => {
     const depthThreshold = viewMode === 'section' ? radius * 0.24 : radius * 0.56;
@@ -677,10 +795,11 @@ export function SolenoidStage({
           position: 'absolute',
           inset: 0,
           backgroundImage: `
-            radial-gradient(circle at 1px 1px, rgba(142,156,180,0.12) 1px, transparent 0),
-            linear-gradient(180deg, rgba(223,231,242,0.28), transparent 22%)
+            linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(246,249,253,0.18) 22%, rgba(237,242,248,0) 34%),
+            linear-gradient(120deg, rgba(214,223,236,0.26) 0%, rgba(214,223,236,0) 34%),
+            radial-gradient(circle at 1px 1px, rgba(142,156,180,0.08) 1px, transparent 0)
           `,
-          backgroundSize: '24px 24px, 100% 100%',
+          backgroundSize: '100% 100%, 100% 100%, 24px 24px',
           pointerEvents: 'none',
         }}
       />
@@ -706,7 +825,59 @@ export function SolenoidStage({
             <stop offset="50%" stopColor={`rgba(66, 133, 244, ${sectionShadeOpacity})`} />
             <stop offset="100%" stopColor={`rgba(66, 133, 244, ${sectionShadeOpacity * 0.55})`} />
           </linearGradient>
+          <filter id="solenoid-soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="8" />
+          </filter>
+          <filter id="solenoid-line-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.2" />
+          </filter>
         </defs>
+
+        <ellipse
+          cx={getStageCenter(stageSize).x}
+          cy={getStageCenter(stageSize).y + Math.max(getStageScale(stageSize, length, radius, camera) * radius * 1.72, 18)}
+          rx={Math.max(getStageScale(stageSize, length, radius, camera) * length * 0.44, 18)}
+          ry={Math.max(getStageScale(stageSize, length, radius, camera) * radius * 0.48, 12)}
+          fill="rgba(15, 23, 42, 0.08)"
+          filter="url(#solenoid-soft-shadow)"
+        />
+
+        {floorGuideLines.map((line, index) => (
+          <path
+            key={line.id}
+            d={line.path}
+            fill="none"
+            stroke={index <= 8 ? FLOOR_AXIS_COLOR : FLOOR_GRID_COLOR}
+            strokeWidth={line.width}
+            opacity={line.opacity}
+            strokeLinecap="round"
+          />
+        ))}
+
+        {cylinderSurfaceStrips.map((strip) => (
+          <path
+            key={strip.id}
+            d={strip.path}
+            fill={strip.fill}
+            stroke={strip.stroke}
+            strokeWidth={1}
+            opacity={strip.opacity}
+          />
+        ))}
+
+        {projectedOuterLoops.map((loop) => (
+          <path
+            key={`${loop.id}-glow`}
+            d={loop.path}
+            fill="none"
+            stroke={loop.color}
+            strokeWidth={loop.width * 1.85}
+            opacity={Math.min(loop.opacity * outerLoopOpacity * 0.22, 0.16)}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            filter="url(#solenoid-line-glow)"
+          />
+        ))}
 
         {projectedOuterLoops.map((loop) => (
           <path
@@ -714,8 +885,8 @@ export function SolenoidStage({
             d={loop.path}
             fill="none"
             stroke={loop.color}
-            strokeWidth={loop.width}
-            opacity={loop.opacity * outerLoopOpacity}
+            strokeWidth={loop.width * (loop.averageDepth < 0 ? 1.08 : 0.96)}
+            opacity={loop.opacity * outerLoopOpacity * (loop.averageDepth < 0 ? 1.08 : 0.92)}
             strokeLinejoin="round"
             strokeLinecap="round"
           />
@@ -729,8 +900,8 @@ export function SolenoidStage({
             x2={loop.arrowEnd?.x ?? 0}
             y2={loop.arrowEnd?.y ?? 0}
             stroke={OUTER_FIELD_COLOR}
-            strokeWidth={1.8}
-            opacity={Math.min(loop.opacity * outerLoopOpacity * 1.12, 0.7)}
+            strokeWidth={loop.averageDepth < 0 ? 2.1 : 1.6}
+            opacity={Math.min(loop.opacity * outerLoopOpacity * (loop.averageDepth < 0 ? 1.26 : 0.92), 0.76)}
             markerEnd="url(#solenoid-outer-arrow)"
           />
         ))}
@@ -764,9 +935,37 @@ export function SolenoidStage({
             d={ring.path}
             fill="none"
             stroke={index % 2 === 0 ? COIL_STROKE : COIL_STROKE_LIGHT}
-            strokeWidth={3.8}
+            strokeWidth={4.2}
             strokeLinecap="round"
             strokeLinejoin="round"
+          />
+        ))}
+
+        {projectedRings.map((ring, index) => (
+          <path
+            key={`${ring.key}-highlight`}
+            d={ring.path}
+            fill="none"
+            stroke={index % 2 === 0 ? 'rgba(255, 229, 196, 0.34)' : 'rgba(255, 241, 223, 0.24)'}
+            strokeWidth={1.3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={0.72}
+          />
+        ))}
+
+        {projectedInternalArrows.map((arrow) => (
+          <line
+            key={`${arrow.id}-glow`}
+            x1={arrow.start.x}
+            y1={arrow.start.y}
+            x2={arrow.end.x}
+            y2={arrow.end.y}
+            stroke={INNER_FIELD_COLOR}
+            strokeWidth={internalArrowStrokeWidth * 2.2}
+            opacity={internalArrowOpacity * 0.18}
+            strokeLinecap="round"
+            filter="url(#solenoid-line-glow)"
           />
         ))}
 

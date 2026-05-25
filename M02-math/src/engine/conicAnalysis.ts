@@ -49,6 +49,8 @@ export function computeHyperbolaDerived(p: HyperbolaParams): HyperbolaDerived {
       { k:  slope, b: cy - slope  * cx },   // y =  (b/a)(x - cx) + cy
       { k: -slope, b: cy + slope  * cx },   // y = -(b/a)(x - cx) + cy
     ],
+    transverseVertices: [[cx - a, cy], [cx + a, cy]],
+    conjugateVertices:  [[cx, cy - b], [cx, cy + b]],
   };
 }
 

@@ -86,7 +86,7 @@ export function renderPotentialMap(
 
   if (!potentialMapCache.canvas) return;
 
-  const overlayAlpha = options?.showFieldLines || options?.showEquipotentialLines ? 0.76 : 0.86;
+  const overlayAlpha = options?.showFieldLines || options?.showEquipotentialLines ? 0.38 : 0.48;
 
   canvasContext.save();
   const depthStrength = clamp(options?.depthStrength ?? 0, 0, 1);
@@ -284,7 +284,7 @@ function colorForNormalizedPotential(normalized: number): {
 } {
   const clamped = clampNumber(normalized, -1, 1);
   if (Math.abs(clamped) < 1e-6) {
-    return { r: 248, g: 250, b: 252, a: 0.12 };
+    return { r: 250, g: 251, b: 253, a: 0.06 };
   }
 
   if (clamped > 0) {
@@ -292,7 +292,7 @@ function colorForNormalizedPotential(normalized: number): {
       r: Math.round(lerp(255, 214, clamped)),
       g: Math.round(lerp(245, 69, clamped)),
       b: Math.round(lerp(235, 65, clamped)),
-      a: lerp(0.18, 0.92, Math.pow(clamped, 0.78)),
+      a: lerp(0.08, 0.34, Math.pow(clamped, 0.78)),
     };
   }
 
@@ -301,7 +301,7 @@ function colorForNormalizedPotential(normalized: number): {
     r: Math.round(lerp(239, 26, magnitude)),
     g: Math.round(lerp(246, 86, magnitude)),
     b: Math.round(lerp(255, 219, magnitude)),
-    a: lerp(0.18, 0.92, Math.pow(magnitude, 0.78)),
+    a: lerp(0.08, 0.34, Math.pow(magnitude, 0.78)),
   };
 }
 

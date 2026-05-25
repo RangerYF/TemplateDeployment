@@ -64,6 +64,10 @@ function makeFastEval(fn: FunctionEntry): ((x: number) => number) | null {
 
   // Return a closure that skips the compile lookup per point
   return (mathX: number): number => {
+    if (fn.displayDomain.enabled) {
+      if (fn.displayDomain.xMin !== null && mathX < fn.displayDomain.xMin) return NaN;
+      if (fn.displayDomain.xMax !== null && mathX > fn.displayDomain.xMax) return NaN;
+    }
     const xPrime = b * (mathX - h);
     const rawFx  = evaluateAt(compiled, xPrime, scope);
     if (!isFinite(rawFx)) return NaN;

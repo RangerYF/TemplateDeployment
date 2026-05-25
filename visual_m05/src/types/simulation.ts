@@ -24,7 +24,10 @@ export type SimulationType =
   | 'linearRegression'
   | 'lawOfLargeNumbers'
   | 'tournamentMatch'
-  | 'boxSwapBalls';
+  | 'boxSwapBalls'
+  | 'randomWalk1D'
+  | 'randomWalk2D'
+  | 'markovChain';
 
 export interface SimulationReplayMetadata {
   mode: 'seeded';
@@ -102,10 +105,21 @@ export interface StemLeafParams {
 export interface BinomialDistParams { n: number; p: number; showMode: 'bar' | 'line'; }
 export interface HypergeometricDistParams { N: number; M: number; n: number; showCdf: boolean; }
 export interface NormalDistParams { mu: number; sigma: number; showSigmaRegions: boolean; }
+export type RegressionModelType =
+  | 'linear'        // y = a + bx
+  | 'exponential'   // y = a·e^(bx)
+  | 'power'         // y = a·x^b
+  | 'log'           // y = a + b·ln(x)
+  | 'quadratic'     // y = ax² + bx + c
+  | 'reciprocal';   // y = a + b/x
+
 export interface LinearRegressionParams {
   datasetId: string;
   dataSpec: RegressionDataSpec;
   showResiduals: boolean;
+  modelType: RegressionModelType;
+  /** 是否启用"自动推荐最佳模型"（按 R² 选） */
+  autoRecommend: boolean;
 }
 export interface LawOfLargeNumbersParams { scenario: 'coinFlip' | 'diceRoll' | 'ballDraw'; maxN: number; numCurves: number; }
 
@@ -150,6 +164,88 @@ export interface BoxSwapBallsParams {
   n: number;           // 模拟轮数
 }
 
+export interface RandomWalk1DParams {
+  steps: number;       // 每条路径步数
+  pRight: number;      // 向右概率（0..1）
+  numPaths: number;    // 展示路径条数
+  n: number;           // 模拟次数（用于终点分布）
+}
+
+export interface RandomWalk2DParams {
+  steps: number;
+  numPaths: number;
+  n: number;
+}
+
+export interface MarkovChainParams {
+  states: string[];             // 状态名称（2-6 个）
+  transition: number[][];       // N×N 转移矩阵，每行和应为 1
+  initial: number[];            // 初始分布（长度 N，和为 1）
+  steps: number;                // 演化步数
+  n: number;                    // 模拟轮数
+  showSteadyState: boolean;     // 是否显示理论稳态分布
+}
+
+/** 预置马尔可夫链场景 */
+export interface MarkovChainPreset {
+  id: string;
+  name: string;
+  description: string;
+  states: string[];
+  transition: number[][];
+  initial: number[];
+}
+
+export const MARKOV_PRESETS: MarkovChainPreset[] = [
+  {
+    id: 'MC-WEATHER',
+    name: '天气链（晴/阴/雨）',
+    description: '经典三态天气链：今天晴明天大概率仍晴，雨天有一半概率持续',
+    states: ['晴', '阴', '雨'],
+    transition: [
+      [0.7, 0.2, 0.1],
+      [0.3, 0.4, 0.3],
+      [0.2, 0.3, 0.5],
+    ],
+    initial: [1, 0, 0],
+  },
+  {
+    id: 'MC-PASS-BALL',
+    name: '三人传球（高考典型）',
+    description: '甲乙丙三人传球，每次等概率传给其余两人之一',
+    states: ['甲', '乙', '丙'],
+    transition: [
+      [0,   0.5, 0.5],
+      [0.5, 0,   0.5],
+      [0.5, 0.5, 0],
+    ],
+    initial: [1, 0, 0],
+  },
+  {
+    id: 'MC-RAINY-MOOD',
+    name: '心情链（开心/平静/烦躁）',
+    description: '今天心情对明天心情有影响：开心-平静-烦躁三态转移',
+    states: ['开心', '平静', '烦躁'],
+    transition: [
+      [0.6, 0.3, 0.1],
+      [0.3, 0.5, 0.2],
+      [0.2, 0.4, 0.4],
+    ],
+    initial: [0.4, 0.4, 0.2],
+  },
+  {
+    id: 'MC-2STATE',
+    name: '简单二态链',
+    description: '只有两个状态的最简单马尔可夫链',
+    states: ['A', 'B'],
+    transition: [
+      [0.8, 0.2],
+      [0.5, 0.5],
+    ],
+    initial: [1, 0],
+  },
+];
+
 // Union of all params
 export type SimulationParams =
   | CoinFlipParams
@@ -169,7 +265,10 @@ export type SimulationParams =
   | LinearRegressionParams
   | LawOfLargeNumbersParams
   | TournamentMatchParams
-  | BoxSwapBallsParams;
+  | BoxSwapBallsParams
+  | RandomWalk1DParams
+  | RandomWalk2DParams
+  | MarkovChainParams;
 
 // Simulation result data
 export interface SimulationResult {
@@ -262,6 +361,8 @@ export const DEFAULT_PARAMS: Record<SimulationType, SimulationParams> = {
     datasetId: 'REG-01',
     dataSpec: { ...DEFAULT_REGRESSION_DATA_SPEC },
     showResiduals: false,
+    modelType: 'linear',
+    autoRecommend: false,
   } satisfies LinearRegressionParams,
   lawOfLargeNumbers: { scenario: 'coinFlip', maxN: 1000, numCurves: 3 } satisfies LawOfLargeNumbersParams,
   pieChart: {
@@ -287,6 +388,29 @@ export const DEFAULT_PARAMS: Record<SimulationType, SimulationParams> = {
     operations: 4,
     n: 1000,
   } satisfies BoxSwapBallsParams,
+  randomWalk1D: {
+    steps: 50,
+    pRight: 0.5,
+    numPaths: 5,
+    n: 1000,
+  } satisfies RandomWalk1DParams,
+  randomWalk2D: {
+    steps: 200,
+    numPaths: 3,
+    n: 500,
+  } satisfies RandomWalk2DParams,
+  markovChain: {
+    states: ['晴', '阴', '雨'],
+    transition: [
+      [0.7, 0.2, 0.1],
+      [0.3, 0.4, 0.3],
+      [0.2, 0.3, 0.5],
+    ],
+    initial: [1, 0, 0],
+    steps: 20,
+    n: 500,
+    showSteadyState: true,
+  } satisfies MarkovChainParams,
 };
 
 // ─── Simulation List ───
@@ -411,6 +535,27 @@ export const SIMULATION_LIST: SimulationMeta[] = [
     description: '甲乙两盒各装若干黑球与红球，每次从两盒各取一球互换。统计 n 次操作后甲盒黑球数的分布。',
     defaultParams: DEFAULT_PARAMS.boxSwapBalls,
   },
+  {
+    type: 'randomWalk1D',
+    category: 'geometric',
+    label: '一维随机游走',
+    description: '每步以概率 p 向右、1-p 向左走一步。观察 n 步后位置的分布与二项分布的对照关系。',
+    defaultParams: DEFAULT_PARAMS.randomWalk1D,
+  },
+  {
+    type: 'randomWalk2D',
+    category: 'geometric',
+    label: '二维随机游走',
+    description: '每步等概率向上/下/左/右走一步。观察终点距离的渐近行为，对照 √(πn/2) 期望。',
+    defaultParams: DEFAULT_PARAMS.randomWalk2D,
+  },
+  {
+    type: 'markovChain',
+    category: 'geometric',
+    label: '通用马尔可夫链',
+    description: '自定义状态空间 + 转移矩阵 + 初始分布，模拟链的演化并对照理论稳态分布。覆盖天气链、传球链等所有高考题型。',
+    defaultParams: DEFAULT_PARAMS.markovChain,
+  },
 ];
 
 // ─── Simulation Groups ───
@@ -430,7 +575,7 @@ export const SIMULATION_GROUPS: SimulationGroup[] = [
   {
     label: '几何概型',
     category: 'geometric',
-    types: ['monteCarloPi', 'meetingProblem', 'buffonsNeedle'],
+    types: ['monteCarloPi', 'meetingProblem', 'buffonsNeedle', 'randomWalk1D', 'randomWalk2D', 'markovChain'],
   },
   {
     label: '统计',

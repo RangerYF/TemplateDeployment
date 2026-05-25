@@ -36,13 +36,13 @@ interface ParamSpec {
 
 const PARAMS: ParamSpec[] = [
   { key: 'a', label: 'a', displayLabel: 'A', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0,
-    hint: '纵向缩放：A>1 拉高，0<A<1 压扁，A<0 关于 x 轴翻折' },
+    hint: '纵向伸缩：|A| 越大越高，A<0 时上下翻折' },
   { key: 'b', label: 'b', displayLabel: 'B', min: -20,  max: 20,  skipZ: true,  demoTo: 2.0,
-    hint: '横向缩放：|B| 越大图像越窄，B<0 关于 y 轴翻折' },
+    hint: '横向伸缩：|B| 越大越窄，B<0 时左右翻折' },
   { key: 'h', label: 'h', displayLabel: 'H', min: -100, max: 100, skipZ: false, demoTo: 3.0,
-    hint: 'f(x−h)：h>0 右移，h<0 左移' },
+    hint: 'f(x−H)：H>0 右移，H<0 左移' },
   { key: 'k', label: 'k', displayLabel: 'K', min: -100, max: 100, skipZ: false, demoTo: 2.0,
-    hint: '纵向平移：K>0 上移，K<0 下移' },
+    hint: '整体平移：K>0 上移，K<0 下移' },
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────

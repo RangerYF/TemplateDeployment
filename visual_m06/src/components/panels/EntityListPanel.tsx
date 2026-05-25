@@ -4,6 +4,8 @@ import { useHistoryStore } from '@/editor/store/historyStore';
 import { ToggleVisibilityCmd } from '@/editor/demo/demoCommands';
 import { COLORS } from '@/styles/tokens';
 import type { DemoEntity, DemoEntityType } from '@/editor/demo/demoTypes';
+import { InlineLatex } from '@/components/shared/InlineLatex';
+import { toVecLatex } from '@/lib/vecLatex';
 import { Eye, EyeOff, ChevronDown, PanelLeftClose, PanelLeft, Search, X } from 'lucide-react';
 
 function getEntityDisplayName(entity: DemoEntity, entities: Record<string, DemoEntity>): string {
@@ -79,6 +81,13 @@ function EntityRow({ entity, entities, selectedId, onSelect }: EntityRowProps) {
   const isSelected = selectedId === entity.id;
   const [hovered, setHovered] = useState(false);
   const displayName = useMemo(() => getEntityDisplayName(entity, entities), [entity, entities]);
+  const displayNode = useMemo(() => {
+    if (entity.type === 'demoVector' && entity.label) {
+      const latex = toVecLatex(entity.label);
+      if (latex) return <><InlineLatex latex={latex} /> 向量</>;
+    }
+    return displayName;
+  }, [entity, displayName]);
   const isHidden = entity.visible === false;
 
   const handleClick = useCallback(() => {
@@ -108,7 +117,7 @@ function EntityRow({ entity, entities, selectedId, onSelect }: EntityRowProps) {
       onMouseLeave={() => setHovered(false)}
     >
       <span className="flex-1 truncate" style={{ minWidth: 0 }}>
-        {displayName}
+        {displayNode}
       </span>
       {(isHidden || hovered) && (
         <button

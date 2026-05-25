@@ -9,7 +9,7 @@
  *   Reflection: R = I - 2(I·N)N  where N = normalized outward normal.
  */
 
-import type { ConicEntity, EllipseEntity, ParabolaEntity } from '@/types';
+import type { ConicEntity, EllipseEntity, HyperbolaEntity, ParabolaEntity } from '@/types';
 import { useOpticalStore } from '@/editor/store/opticalStore';
 import type { Photon } from '@/editor/store/opticalStore';
 
@@ -24,6 +24,10 @@ export interface OpticalRay {
   outEnd: [number, number];
   /** Point on the conic where reflection occurs */
   hitPoint: [number, number];
+  /** Optional focus that the incoming ray is aimed toward (hyperbola). */
+  inGuideFocus?: [number, number];
+  /** Optional focus that the reflected ray's reverse extension passes through. */
+  outGuideFocus?: [number, number];
 }
 
 // ─── Normal computation via implicit gradient ────────────────────────────────
@@ -96,7 +100,8 @@ export function computeEllipseRays(entity: EllipseEntity, rayCount: number): Opt
 }
 
 /**
- * Compute optical rays for a parabola: parallel to axis → P → F reflection.
+ * Compute optical rays for a parabola: rays emit from the focus and reflect
+ * outward parallel to the axis of symmetry.
  */
 export function computeParabolaRays(entity: ParabolaEntity, rayCount: number): OpticalRay[] {
   const { p, cx, cy, orientation = 'h' } = entity.params;
@@ -108,22 +113,22 @@ export function computeParabolaRays(entity: ParabolaEntity, rayCount: number): O
     const t = (i / (rayCount - 1) - 0.5) * 8; // parameter range [-4, 4]
 
     let px: number, py: number;
-    let inStartX: number, inStartY: number;
+    let outEndX: number, outEndY: number;
 
     if (orientation === 'v') {
       // x² = 2p(y-cy): parametric x = cx + t, y = cy + t²/(2p)
       px = cx + t;
       py = cy + (t * t) / (2 * p);
-      // Incoming ray: parallel to y-axis, from above
-      inStartX = px;
-      inStartY = py + 8; // extend upward
+      // Reflected ray: parallel to symmetry axis (vertical)
+      outEndX = px;
+      outEndY = py + 8;
     } else {
       // y² = 2p(x-cx): parametric y = cy + t, x = cx + t²/(2p)
       px = cx + (t * t) / (2 * p);
       py = cy + t;
-      // Incoming ray: parallel to x-axis, from the right
-      inStartX = px + 8; // extend to the right
-      inStartY = py;
+      // Reflected ray: parallel to symmetry axis (horizontal)
+      outEndX = px + 8;
+      outEndY = py;
     }
 
     // Normal at P
@@ -132,13 +137,68 @@ export function computeParabolaRays(entity: ParabolaEntity, rayCount: number): O
     if (gLen < 1e-10) continue;
 
     rays.push({
-      inStart: [inStartX, inStartY],
+      inStart: [fx, fy],
       inEnd: [px, py],
       outStart: [px, py],
-      outEnd: [fx, fy],
+      outEnd: [outEndX, outEndY],
       hitPoint: [px, py],
     });
   }
+
+  return rays;
+}
+
+/**
+ * Compute optical rays for a hyperbola: rays emit from each branch's nearby
+ * focus, reflect on the hyperbola, and the reflected ray's reverse extension
+ * passes through the opposite focus.
+ */
+export function computeHyperbolaRays(entity: HyperbolaEntity, rayCount: number): OpticalRay[] {
+  const { a, b, cx, cy } = entity.params;
+  const [[f1x, f1y], [f2x, f2y]] = entity.derived.foci;
+  const rays: OpticalRay[] = [];
+
+  const half = Math.max(2, Math.floor(rayCount / 2));
+  const tMin = -1.4;
+  const tMax = 1.4;
+
+  const pushBranch = (focusFrom: [number, number], focusVirtual: [number, number], branch: 'left' | 'right') => {
+    for (let i = 0; i < half; i++) {
+      const t = tMin + (i / Math.max(1, half - 1)) * (tMax - tMin);
+      const sign = branch === 'right' ? 1 : -1;
+      const px = cx + sign * a * Math.cosh(t);
+      const py = cy + b * Math.sinh(t);
+
+      const [inFx, inFy] = focusFrom;
+      const [virtualFx, virtualFy] = focusVirtual;
+      const inDx = px - inFx;
+      const inDy = py - inFy;
+      const inLen = Math.sqrt(inDx * inDx + inDy * inDy);
+      const outDx = px - virtualFx;
+      const outDy = py - virtualFy;
+      const outLen = Math.sqrt(outDx * outDx + outDy * outDy);
+      if (inLen < 1e-8 || outLen < 1e-8) continue;
+
+      const extension = 8;
+      const outEnd: [number, number] = [
+        px + (outDx / outLen) * extension,
+        py + (outDy / outLen) * extension,
+      ];
+
+      rays.push({
+        inStart: [inFx, inFy],
+        inEnd: [px, py],
+        outStart: [px, py],
+        outEnd,
+        hitPoint: [px, py],
+        inGuideFocus: [inFx, inFy],
+        outGuideFocus: [virtualFx, virtualFy],
+      });
+    }
+  };
+
+  pushBranch([f2x, f2y], [f1x, f1y], 'right');
+  pushBranch([f1x, f1y], [f2x, f2y], 'left');
 
   return rays;
 }
@@ -154,10 +214,12 @@ export function computeOpticalRays(
   switch (entity.type) {
     case 'ellipse':
       return computeEllipseRays(entity, rayCount);
+    case 'hyperbola':
+      return computeHyperbolaRays(entity, rayCount);
     case 'parabola':
       return computeParabolaRays(entity, rayCount);
     default:
-      return null; // Circles and hyperbolas: not applicable for standard reflection demo
+      return null; // Circles: not applicable for current optical demo
   }
 }
 
@@ -191,8 +253,7 @@ export function startPhotonAnimation(
     const photons: Photon[] = [];
     for (let i = 0; i < rays.length; i++) {
       const ray = rays[i];
-      const stagger = (i / rays.length) * 0.3;
-      const localT = Math.max(0, Math.min((rawT - stagger) / (1 - 0.3), 1));
+      const localT = rawT;
       if (localT <= 0) continue;
 
       let x: number, y: number;

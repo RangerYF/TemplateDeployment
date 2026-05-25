@@ -276,7 +276,7 @@ function conicParams(type: ConicType, raw: unknown): EllipseParams | HyperbolaPa
   }
   if (type === 'parabola') {
     const p = numberFromRecord(value, 'p', 2);
-    if (!(p > 0)) throw new Error('抛物线要求 p 大于 0');
+    if (!(Math.abs(p) > 1e-6)) throw new Error('抛物线要求 p 不为 0');
     const orientation = value.orientation === 'v' ? 'v' : 'h';
     return { p, cx: numberFromRecord(value, 'cx', 0), cy: numberFromRecord(value, 'cy', 0), orientation };
   }

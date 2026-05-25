@@ -32,7 +32,19 @@ const SOURCE_POINT = {
   x: FIELD_MARGIN_X + 142,
   y: FIELD_MARGIN_Y + FIELD_HEIGHT / 2,
 };
-const TRACK_COLORS = ['#DC2626', '#2563EB', '#D97706', '#0F766E', '#7C3AED', '#0891B2', '#BE185D', '#0EA5E9'];
+const FIELD_SYMBOL_SPACING = 72;
+const TRACK_COLORS = [
+  '#C2410C',
+  '#2563EB',
+  '#0F766E',
+  '#B45309',
+  '#374151',
+  '#0369A1',
+  '#166534',
+  '#9A3412',
+];
+const FORMULA_TEXT = 'R = m v / (|q| B)';
+const FORMULA_NOTE = '同一点、同切线方向下，速度越大，轨道半径越大';
 
 function buildScalingTracks(options: {
   fieldDirection: MagneticFieldDirection;
@@ -99,7 +111,9 @@ export function P08ScalingCirclePage({ onBack }: Props) {
   const [particleCount, setParticleCount] = useState(5);
   const [showFieldSymbols, setShowFieldSymbols] = useState(true);
   const [showCenters, setShowCenters] = useState(true);
+  const [showFormula, setShowFormula] = useState(true);
   const [showAnimatedParticles, setShowAnimatedParticles] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [animationPhase, setAnimationPhase] = useState(0);
 
   useEffect(() => {
@@ -132,13 +146,15 @@ export function P08ScalingCirclePage({ onBack }: Props) {
     () => buildRectFieldSymbolPositions({
       width: FIELD_WIDTH,
       height: FIELD_HEIGHT,
-      spacing: 72,
+      spacing: FIELD_SYMBOL_SPACING,
     }),
     [],
   );
   const radiusRange = tracks.length > 0
     ? `${Math.min(...tracks.map((track) => track.radiusPhysical)).toFixed(3)} ~ ${Math.max(...tracks.map((track) => track.radiusPhysical)).toFixed(3)} m`
     : '—';
+  const highlightedIndex = hoveredIndex ?? (tracks.length > 0 ? tracks.length - 1 : 0);
+  const highlighted = tracks[highlightedIndex] ?? null;
 
   return (
     <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: COLORS.bgPage }}>
@@ -197,6 +213,7 @@ export function P08ScalingCirclePage({ onBack }: Props) {
           <div className="mt-4 space-y-3">
             <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
             <ToggleRow label="显示轨道圆心" checked={showCenters} onChange={setShowCenters} />
+            <ToggleRow label="显示公式" checked={showFormula} onChange={setShowFormula} />
             <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
           </div>
         </section>
@@ -206,6 +223,7 @@ export function P08ScalingCirclePage({ onBack }: Props) {
           <div className="mt-3 space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
             <Metric label="半径范围" value={radiusRange} />
             <Metric label="共同入射特点" value="同一点、同切线方向" />
+            <Metric label="当前高亮轨迹" value={highlighted ? `R${highlightedIndex + 1} / ${highlighted.radiusPhysical.toFixed(3)} m` : '—'} />
             <Metric label="画面重点" value="速度越大，半径越大" />
           </div>
         </section>
@@ -229,18 +247,20 @@ export function P08ScalingCirclePage({ onBack }: Props) {
                 所有粒子从同一点射入，起始切线方向一致。区别只体现在速度和半径上，所以课堂上可以直接用外扩圆族讲几何关系。
               </p>
             </div>
-            <div
-              className="rounded-xl px-4 py-3"
-              style={{
-                color: '#7C2D12',
-                backgroundColor: '#FFFBEB',
-                border: '1px solid #FCD34D',
-                minWidth: 220,
-              }}
-            >
-              <div className="text-sm font-semibold">R ∝ v</div>
-              <div className="mt-1 text-[11px]" style={{ color: '#9A3412' }}>当 m、|q|、B 不变时，速度越大，轨道半径越大。</div>
-            </div>
+            {showFormula && (
+              <div
+                className="rounded-xl px-4 py-3"
+                style={{
+                  color: '#7C2D12',
+                  backgroundColor: '#FFFBEB',
+                  border: '1px solid #FCD34D',
+                  minWidth: 220,
+                }}
+              >
+                <div className="text-sm font-semibold">{FORMULA_TEXT}</div>
+                <div className="mt-1 text-[11px]" style={{ color: '#9A3412' }}>{FORMULA_NOTE}</div>
+              </div>
+            )}
           </div>
 
           <svg
@@ -248,6 +268,16 @@ export function P08ScalingCirclePage({ onBack }: Props) {
             className="h-auto w-full rounded-[12px]"
             style={{ background: '#FFFFFF' }}
           >
+            <defs>
+              <marker id="scaling-arrow-small" markerWidth="6" markerHeight="6" refX="5.2" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 z" fill="#475569" />
+              </marker>
+              <radialGradient id="scaling-sourceGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(251,186,116,0.42)" />
+                <stop offset="100%" stopColor="rgba(251,186,116,0)" />
+              </radialGradient>
+            </defs>
+
             <rect x={FIELD_MARGIN_X} y={FIELD_MARGIN_Y} width={FIELD_WIDTH} height={FIELD_HEIGHT} rx="10" fill="#FFFEFC" stroke="#CBD5E1" strokeWidth="1.1" />
 
             {showFieldSymbols && fieldSymbols.map((point, index) => (
@@ -261,22 +291,39 @@ export function P08ScalingCirclePage({ onBack }: Props) {
 
             {tracks.map((track, index) => {
               const color = TRACK_COLORS[index % TRACK_COLORS.length]!;
+              const active = index === highlightedIndex;
               const movingPoint = samplePathPoint(track.points, (animationPhase + index * 0.08) % 1);
+              const arrowPoint = samplePathPoint(track.points, 0.52);
+              const arrowNext = samplePathPoint(track.points, 0.60);
               return (
-                <g key={`scale-track-${index}`}>
+                <g
+                  key={`scale-track-${index}`}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
                   <path
                     d={pathFromPoints(track.points)}
                     fill="none"
                     stroke={color}
-                    strokeWidth={index === tracks.length - 1 ? 3 : 2.5}
+                    strokeWidth={active ? 3 : 2.4}
                     strokeLinecap="round"
-                    opacity={0.9}
+                    opacity={active ? 0.95 : 0.8}
+                  />
+                  <line
+                    x1={arrowPoint.x}
+                    y1={arrowPoint.y}
+                    x2={arrowNext.x}
+                    y2={arrowNext.y}
+                    stroke={color}
+                    strokeWidth={active ? 2.2 : 1.6}
+                    opacity={active ? 0.82 : 0.68}
+                    markerEnd="url(#scaling-arrow-small)"
                   />
                   {showAnimatedParticles && (
                     <circle
                       cx={movingPoint.x}
                       cy={movingPoint.y}
-                      r="5.1"
+                      r={active ? 5.2 : 4.2}
                       fill={color}
                       stroke="#FFFFFF"
                       strokeWidth="1.3"
@@ -297,7 +344,7 @@ export function P08ScalingCirclePage({ onBack }: Props) {
               );
             })}
 
-            <circle cx={SOURCE_POINT.x} cy={SOURCE_POINT.y} r="24" fill="rgba(251, 191, 36, 0.18)" />
+            <circle cx={SOURCE_POINT.x} cy={SOURCE_POINT.y} r="26" fill="url(#scaling-sourceGlow)" />
             <circle cx={SOURCE_POINT.x} cy={SOURCE_POINT.y} r="6.6" fill="#111827" />
             <text x={SOURCE_POINT.x + 12} y={SOURCE_POINT.y - 10} fontSize="12" fontWeight="700" fill="#1F2937">
               同一点 P
@@ -310,6 +357,11 @@ export function P08ScalingCirclePage({ onBack }: Props) {
             <text x={FIELD_MARGIN_X + 18} y={SVG_HEIGHT - 34} fontSize="12.5" fill="#475569">
               课堂结论：入射点和方向保持不变时，轨迹圆只按半径放缩；半径大小由速度决定，速度越大，圆越“外扩”。
             </text>
+            {highlighted && (
+              <text x={FIELD_MARGIN_X + 18} y={FIELD_MARGIN_Y - 16} fontSize="11.5" fill="#64748B">
+                高亮轨迹：R{highlightedIndex + 1}，半径 = {highlighted.radiusPhysical.toFixed(3)} m
+              </text>
+            )}
           </svg>
         </section>
       </main>

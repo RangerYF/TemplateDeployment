@@ -3,7 +3,7 @@ import type { Command } from '@/editor/commands/types';
 import { useFunctionStore } from '@/editor/store/functionStore';
 
 type FunctionPatch = Partial<Pick<FunctionEntry,
-  'exprStr' | 'transform' | 'color' | 'label' | 'segments' | 'mode' | 'templateId' | 'namedParams'
+  'exprStr' | 'transform' | 'color' | 'lineStyle' | 'label' | 'segments' | 'mode' | 'templateId' | 'namedParams' | 'displayDomain' | 'inverseDisplay'
 >>;
 
 export class UpdateFunctionParamCommand implements Command {

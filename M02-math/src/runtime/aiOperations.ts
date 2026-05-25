@@ -11,6 +11,8 @@ import type { Command } from '@/editor/commands/types';
 import type { EasingName } from '@/engine/animationEngine';
 import {
   DEFAULT_TRANSFORM,
+  DEFAULT_FUNCTION_DISPLAY_DOMAIN,
+  DEFAULT_INVERSE_FUNCTION_DISPLAY,
   FUNCTION_COLORS,
   type FunctionEntry,
   type FunctionParam,
@@ -244,8 +246,11 @@ function executeAddFunction(operation: AiOperation): void {
     exprStr: base.exprStr,
     segments: [],
     color: normalizeColor(operation.color, FUNCTION_COLORS[count % FUNCTION_COLORS.length] ?? '#374151'),
+    lineStyle: 'solid',
     visible: asBoolean(operation.visible) ?? true,
     transform,
+    displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+    inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
     templateId: base.templateId,
     namedParams: base.namedParams,
   };
@@ -356,8 +361,11 @@ function executeAddPiecewiseFunction(operation: AiOperation): void {
     exprStr: segments[0]?.exprStr ?? 'x',
     segments,
     color: normalizeColor(operation.color, FUNCTION_COLORS[count % FUNCTION_COLORS.length] ?? '#374151'),
+    lineStyle: 'solid',
     visible: true,
     transform: { ...DEFAULT_TRANSFORM },
+    displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+    inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
     templateId: null,
     namedParams: [],
   };
@@ -432,8 +440,11 @@ function executeAddTangentFunction(operation: AiOperation): void {
     exprStr: expression,
     segments: [],
     color: normalizeColor(operation.color, FUNCTION_COLORS[count % FUNCTION_COLORS.length] ?? '#374151'),
+    lineStyle: 'solid',
     visible: true,
     transform: { ...DEFAULT_TRANSFORM },
+    displayDomain: { ...DEFAULT_FUNCTION_DISPLAY_DOMAIN },
+    inverseDisplay: { ...DEFAULT_INVERSE_FUNCTION_DISPLAY },
     templateId: null,
     namedParams: [],
   };
