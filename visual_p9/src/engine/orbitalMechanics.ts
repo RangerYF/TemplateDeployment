@@ -158,7 +158,7 @@ export function computeCircularMetrics(params: Record<string, number>): Simulati
       { label: '近地卫星速度', value: formatNumber(nearSpeed / 1000, 'km/s'), note: `T=${formatNumber(nearPeriod / 3600, 'h')}` },
       { label: '同步卫星速度', value: formatNumber(syncSpeed / 1000, 'km/s'), note: `T=${formatNumber(syncPeriod / 3600, 'h')}` },
       { label: '高轨卫星速度', value: formatNumber(highSpeed / 1000, 'km/s'), note: `T=${formatNumber(highPeriod / 3600, 'h')}` },
-      { label: '同步轨道半径', value: formatNumber(syncRadiusM, 'm') },
+      { label: '同步轨道半径', value: formatNumber(syncRadiusM, 'm'), note: syncRadiusM > highRadiusM ? '超出当前高轨范围' : undefined },
       { label: '可调高轨半径', value: formatNumber(highRadiusM, 'm') },
     ],
   };
@@ -394,13 +394,17 @@ export function buildHohmannFrame(
   const transferAPx = (r1Px + r2Px) / 2;
   const transferCPx = (r2Px - r1Px) / 2;
   const transferBPx = Math.sqrt(r1Px * r2Px);
+  const omegaLow = Math.sqrt(mu / r1 ** 3);
+  const omegaHigh = Math.sqrt(mu / r2 ** 3);
+  const nTransfer = Math.sqrt(mu / transferAM ** 3);
   const isLowering = phase === 'transferDown';
   const ellipseAngle = isLowering ? ignitionAngle - Math.PI : ignitionAngle;
-  const phaseProgress = normalizeAngle(time * 0.18);
-  const transferMeanAnomaly = (time * 0.18) % Math.PI;
+  const lowProgress = normalizeAngle(time * omegaLow);
+  const highProgress = normalizeAngle(time * omegaHigh);
+  const transferMeanAnomaly = (time * nTransfer) % Math.PI;
   const transferEccentricAngle = solveKepler(isLowering ? Math.PI + transferMeanAnomaly : transferMeanAnomaly, transferE);
-  const currentLowAngle = ignitionAngle + phaseProgress;
-  const highAngle = ignitionAngle + Math.PI + phaseProgress;
+  const currentLowAngle = ignitionAngle + lowProgress;
+  const highAngle = ignitionAngle + Math.PI + highProgress;
   const transferLocalPoint = {
     x: -transferCPx + transferAPx * Math.cos(transferEccentricAngle),
     y: transferBPx * Math.sin(transferEccentricAngle),
@@ -618,7 +622,9 @@ export function buildBinaryFrame(params: Record<string, number>, time: number): 
   const separationPx = scaledRadiusPx(params.separationKm, 1e6, 1e10, 90, 320);
   const r1Px = Math.max(12, (m2 / total) * separationPx);
   const r2Px = Math.max(12, (m1 / total) * separationPx);
-  const theta = time * 0.45;
+  const Lm = params.separationKm * 1000;
+  const omega = Math.sqrt(CONSTANTS.gravitationalConstant * total / Lm ** 3);
+  const theta = time * omega;
   const p1 = { x: Math.cos(theta) * r1Px, y: Math.sin(theta) * r1Px };
   const p2 = { x: -Math.cos(theta) * r2Px, y: -Math.sin(theta) * r2Px };
 
@@ -647,8 +653,6 @@ export function computeChaseMetrics(params: Record<string, number>): SimulationM
   const delta = (params.initialAngleDeg * Math.PI) / 180;
   const firstMeet = delta / Math.max(omega1 - omega2, 1e-12);
   const fullCatch = (TAU + delta) / Math.max(omega1 - omega2, 1e-12);
-  const earthSpin = TAU / (24 * 3600);
-  const groundPass = TAU / Math.max(omega1 - earthSpin, 1e-12);
 
   return {
     modelId: 'CEL-031',
@@ -659,7 +663,6 @@ export function computeChaseMetrics(params: Record<string, number>): SimulationM
       { label: 'omega2', value: formatNumber(omega2, 'rad/s') },
       { label: '第一次相遇', value: formatNumber(firstMeet / 60, 'min') },
       { label: '追一圈后相遇', value: formatNumber(fullCatch / 60, 'min') },
-      { label: '星下点重合', value: formatNumber(groundPass / 60, 'min'), note: '考虑地球自转示意' },
       { label: '初始角度差', value: `${params.initialAngleDeg.toFixed(0)} deg` },
     ],
   };
@@ -673,15 +676,10 @@ export function buildChaseFrame(params: Record<string, number>, time: number): S
   const omega2 = Math.sqrt(mu / params.outerRadiusM ** 3);
   const theta1 = normalizeAngle(time * omega1);
   const theta2 = normalizeAngle((params.initialAngleDeg * Math.PI) / 180 + time * omega2);
-  const earthSpin = TAU / (24 * 3600);
-  const groundTheta = normalizeAngle(time * earthSpin);
   const p1 = { x: Math.cos(theta1) * r1Px, y: Math.sin(theta1) * r1Px };
   const p2 = { x: Math.cos(theta2) * r2Px, y: Math.sin(theta2) * r2Px };
   const meetTime = ((params.initialAngleDeg * Math.PI) / 180) / Math.max(omega1 - omega2, 1e-12);
   const meetTheta = normalizeAngle(meetTime * omega1);
-  const surfaceRadiusPx = 34;
-  const groundStation = { x: Math.cos(groundTheta) * surfaceRadiusPx, y: Math.sin(groundTheta) * surfaceRadiusPx };
-  const subSatellitePoint = { x: Math.cos(theta1) * surfaceRadiusPx, y: Math.sin(theta1) * surfaceRadiusPx };
 
   return {
     scaleLabel: `r1=${formatNumber(params.innerRadiusM, 'm')} · r2=${formatNumber(params.outerRadiusM, 'm')}`,
@@ -693,8 +691,6 @@ export function buildChaseFrame(params: Record<string, number>, time: number): S
     sectors: [],
     bodies: [
       { id: 'center', label: '中心天体', position: { x: 0, y: 0 }, radiusPx: 20, color: '#FF9800' },
-      { id: 'ground', label: '地面站', position: groundStation, radiusPx: 5, color: '#4CAF50' },
-      { id: 'subpoint', label: '当前星下点', position: subSatellitePoint, radiusPx: 4, color: '#A7F3D0' },
       { id: 'inner-sat', label: '内轨卫星', position: p1, radiusPx: 8, color: '#2196F3' },
       { id: 'outer-sat', label: '外轨卫星', position: p2, radiusPx: 8, color: '#F9D65C' },
     ],

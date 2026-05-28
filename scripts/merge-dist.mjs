@@ -11,7 +11,7 @@ mkdirSync(outDir);
 const entries = [];
 
 for (const app of manifest) {
-  const distDir = path.join(rootDir, app.path, "dist");
+  const distDir = path.join(rootDir, app.path, app.distDir || "dist");
   if (!existsSync(distDir)) {
     console.warn(`[skip] ${app.id} -> dist 不存在`);
     continue;

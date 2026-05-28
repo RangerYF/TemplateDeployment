@@ -40,20 +40,21 @@ export function IndicatorBands({ selectedIds, yMin, yMax }: IndicatorBandsProps)
               fill={`url(#${gradId})`}
               rx={2}
             />
-            {/* Label at right edge */}
+            {/* Label inside band, right-aligned */}
             <text
-              x={ML + PW + 2}
-              y={(y1 + y2) / 2 + 4}
+              x={ML + PW - 4}
+              y={y1 + 13}
+              textAnchor="end"
               fontSize={12}
               fill={ind.colors[ind.colors.length - 1]}
               fontWeight="600"
             >
               {ind.name}
             </text>
-            {/* pH range labels */}
+            {/* pH range label below name */}
             <text
               x={ML + PW - 4}
-              y={y1 + 12}
+              y={y1 + 27}
               textAnchor="end"
               fontSize={11}
               fill={ind.colors[ind.colors.length - 1]}

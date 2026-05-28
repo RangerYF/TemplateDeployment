@@ -121,7 +121,38 @@
     "subject": "physics",
     "title": "P物理沙盒",
     "path": "phys_template_p01",
-    "port": 5186
+    "port": 5186,
+    "devScript": "dev:full"
+  },
+  {
+    "id": "p04",
+    "subject": "physics",
+    "title": "电路搭建器",
+    "path": "phys_template_p01",
+    "port": 5189,
+    "buildScript": "build:p04-standalone",
+    "distDir": "dist-p04",
+    "devScript": "dev:p04-standalone"
+  },
+  {
+    "id": "p08",
+    "subject": "physics",
+    "title": "电磁场可视化",
+    "path": "phys_template_p01",
+    "port": 5190,
+    "buildScript": "build:p08-standalone",
+    "distDir": "dist-p08",
+    "devScript": "dev:p08-standalone"
+  },
+  {
+    "id": "p13",
+    "subject": "physics",
+    "title": "电磁感应",
+    "path": "phys_template_p01",
+    "port": 5196,
+    "buildScript": "build:p13-standalone",
+    "distDir": "dist-p13",
+    "devScript": "dev:p13-standalone"
   },
   {
     "id": "p03",

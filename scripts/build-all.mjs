@@ -12,7 +12,10 @@ const extraArgs = args.filter((a) => a.startsWith("--")).join(" ");
 const filter = args.find((a) => !a.startsWith("--"));
 const selected = filter ? manifest.filter((app) => app.subject === filter || app.id === filter) : manifest;
 const selectedProjects = Array.from(
-  new Map(selected.map((app) => [app.path, app])).values(),
+  new Map(selected.map((app) => {
+    const key = app.buildScript ? `${app.path}::${app.buildScript}` : app.path;
+    return [key, app];
+  })).values(),
 );
 
 if (selected.length === 0) {
@@ -40,8 +43,9 @@ async function runBuild(app) {
     throw new Error(`${app.id} 目录不存在: ${cwd}`);
   }
   const pm = detectPkgManager(cwd);
-  const cmd = runCmd(pm, "build", extraArgs);
-  console.log(`[build] ${app.id} (${pm}) -> ${cwd}`);
+  const script = app.buildScript || "build";
+  const cmd = runCmd(pm, script, extraArgs);
+  console.log(`[build] ${app.id} (${pm}) ${script} -> ${cwd}`);
   await runBuildCommand(cmd, cwd);
 }
 

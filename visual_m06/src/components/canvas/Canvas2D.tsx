@@ -112,6 +112,8 @@ interface AngleArcProps {
 function AngleArc({ cx, cy, vec1, vec2, angleRad, radius = 30, color = COLORS.textMuted }: AngleArcProps) {
   const angleUnit = useVectorStore((s) => s.angleUnit);
   const { f } = useFmt();
+
+  // SVG 坐标系下的方向角（m2s 已翻转 Y）
   const [sx1, sy1] = m2s(vec1[0], vec1[1]);
   const [sx2, sy2] = m2s(vec2[0], vec2[1]);
 
@@ -119,23 +121,27 @@ function AngleArc({ cx, cy, vec1, vec2, angleRad, radius = 30, color = COLORS.te
   const mag2 = Math.sqrt(sx2 * sx2 + sy2 * sy2);
   if (mag1 < 1 || mag2 < 1) return null;
 
-  const ux1 = sx1 / mag1 * radius;
-  const uy1 = sy1 / mag1 * radius;
-  const ux2 = sx2 / mag2 * radius;
-  const uy2 = sy2 / mag2 * radius;
+  const startAng = Math.atan2(sy1, sx1);
+  const endAng = Math.atan2(sy2, sx2);
 
-  // 判断方向（顺时针 or 逆时针）
-  const crossVal = sx1 * sy2 - sy1 * sx2;
-  const sweep = crossVal > 0 ? 1 : 0;
+  // 从 vec1 到 vec2 的角度差，归一化到 [-PI, PI]
+  let sweep = endAng - startAng;
+  while (sweep > Math.PI) sweep -= 2 * Math.PI;
+  while (sweep < -Math.PI) sweep += 2 * Math.PI;
 
-  const px1 = cx + ux1;
-  const py1 = cy + uy1;
-  const px2 = cx + ux2;
-  const py2 = cy + uy2;
+  const sweepFlag = sweep > 0 ? 1 : 0;
+  const largeArc = Math.abs(sweep) > Math.PI ? 1 : 0;
 
-  // 角度标注文字位置
-  const midX = cx + (ux1 + ux2) / 2 * 1.6;
-  const midY = cy + (uy1 + uy2) / 2 * 1.6;
+  const ax1 = cx + radius * Math.cos(startAng);
+  const ay1 = cy + radius * Math.sin(startAng);
+  const ax2 = cx + radius * Math.cos(startAng + sweep);
+  const ay2 = cy + radius * Math.sin(startAng + sweep);
+
+  // 标签位置：弧线中点方向
+  const midAng = startAng + sweep / 2;
+  const labelR = radius + 16;
+  const midX = cx + labelR * Math.cos(midAng);
+  const midY = cy + labelR * Math.sin(midAng);
 
   const displayVal = angleUnit === 'deg' ? toDeg(angleRad) : angleRad;
   const unitStr = angleUnit === 'deg' ? '°' : ' rad';
@@ -144,7 +150,7 @@ function AngleArc({ cx, cy, vec1, vec2, angleRad, radius = 30, color = COLORS.te
   return (
     <g>
       <path
-        d={`M ${px1} ${py1} A ${radius} ${radius} 0 0 ${sweep} ${px2} ${py2}`}
+        d={`M ${ax1} ${ay1} A ${radius} ${radius} 0 ${largeArc} ${sweepFlag} ${ax2} ${ay2}`}
         stroke={color}
         strokeWidth={1.5}
         fill="none"
@@ -509,7 +515,7 @@ function ConceptLayer() {
 
       {/* 单位向量提示 */}
       {isUnitMode && (
-        <LatexRenderer latex="\\text{单位向量模式：}|\\vec{a}|=1\\text{，仅改变方向}"
+        <LatexRenderer latex={`\\text{单位向量模式：}|\\vec{a}|=1\\text{，仅改变方向}`}
           x={VB_X + 14} y={VB_Y + 68} fontSize={18} color={COLORS.primary} width={340} />
       )}
 
@@ -922,8 +928,8 @@ function SubtractionLayer() {
       {/* 标签层（在控制点之上） */}
       <VecLabel sx={ax} sy={ay} ox={0} oy={0} label="a" color={vs.vecAColor} />
       <VecLabel sx={bx} sy={by} ox={0} oy={0} label="b" color={vs.vecBColor} />
-      <LatexRenderer latex="-\\vec{b}" x={nbx + 4} y={nby - 16} fontSize={18} color={COLORS.negVec} opacity={0.8} stroke="#fff" />
-      <LatexRenderer latex="-\\vec{b}" x={(ax + rnx) / 2 + 8} y={(ay + rny) / 2 - 18} fontSize={16} color={COLORS.negVec} opacity={0.7} stroke="#fff" />
+      <VecLabel sx={nbx} sy={nby} ox={0} oy={0} label="-b" color={COLORS.negVec} />
+      <VecLabel sx={rnx} sy={rny} ox={ax} oy={ay} label="-b" color={COLORS.negVec} />
       <VecLabel sx={(nbx + rnx) / 2} sy={(nby + rny) / 2} ox={nbx} oy={nby} label="a" color={vs.vecAColor} />
       <VecLabel sx={(bx + ax) / 2} sy={(by + ay) / 2} ox={bx} oy={by} label="a-b" color={vs.vecResultColor} />
       <VecLabel sx={rnx / 2} sy={rny / 2} ox={0} oy={0} label="a+(-b)" color={COLORS.vecResult} />
@@ -1108,7 +1114,7 @@ function DotProductLayer() {
                 <rect x={VB_X + VB_W - 340} y={VB_Y + 8} width={330} height={68} rx={6}
                   fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
                 <LatexRenderer
-                  latex="\\text{极化恒等式：}\\vec{a}\\cdot\\vec{b} = \\frac{|\\vec{a}+\\vec{b}|^2 - |\\vec{a}-\\vec{b}|^2}{4}"
+                  latex={`\\text{极化恒等式：}\\vec{a}\\cdot\\vec{b} = \\frac{|\\vec{a}+\\vec{b}|^2 - |\\vec{a}-\\vec{b}|^2}{4}`}
                   x={VB_X + VB_W - 334} y={VB_Y + 10} fontSize={16} color={COLORS.text} width={320} />
                 <LatexRenderer
                   latex={`= \\frac{${fl(mag2D(sumVec) ** 2)} - ${fl(mag2D(diffVec) ** 2)}}{4} = ${fl(dotVal)}`}
@@ -1239,8 +1245,6 @@ function ProjectionLayer() {
   const prevB = useRef<Vec2D>(vecB);
 
   const projVec = projectVec2D(vecA, vecB);
-  const projLen = dot2D(vecA, vecB) / mag2D(vecB);
-  const perpVec: Vec2D = [vecA[0] - projVec[0], vecA[1] - projVec[1]];
 
   const [ax, ay] = m2s(vecA[0], vecA[1]);
   const [bx, by] = m2s(vecB[0], vecB[1]);
@@ -1291,19 +1295,6 @@ function ProjectionLayer() {
             fill="none" stroke={vs.projColor} strokeWidth={1.5} opacity={0.7} />
         );
       })()}
-
-      {/* HUD */}
-      <rect x={VB_X + 8} y={VB_Y + 8} width={400} height={96} rx={6}
-        fill="rgba(255,255,255,0.93)" stroke={COLORS.border} strokeWidth={1} />
-      <LatexRenderer
-        latex="\\text{投影向量 }\\text{proj}_{\\vec{b}}(\\vec{a}) = \\frac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|^2}\\cdot\\vec{b}"
-        x={VB_X + 14} y={VB_Y + 10} fontSize={16} color={COLORS.text} width={380} />
-      <LatexRenderer
-        latex={`\\text{投影长度} = \\frac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|} ${fmtApproxLatex(projLen, 3)}`}
-        x={VB_X + 14} y={VB_Y + 38} fontSize={16} color={COLORS.textMuted} width={380} />
-      <LatexRenderer
-        latex={`|\\text{proj}| ${fmtApproxLatex(mag2D(projVec), 3)}\\text{，}|\\text{垂直分量}| ${fmtApproxLatex(mag2D(perpVec), 3)}`}
-        x={VB_X + 14} y={VB_Y + 66} fontSize={16} color={COLORS.textMuted} width={380} />
 
       {/* 控制点 */}
       <DragHandle sx={ax} sy={ay} color={COLORS.vecA} onDrag={handleDragA} title="拖拽改变向量 a" />
@@ -1419,6 +1410,38 @@ function OperationLayer({ operation }: { operation: OperationType }) {
     case 'rotation': return <RotationLayer />;
     default: return null;
   }
+}
+
+// ─── 投影 HUD（HTML overlay）───
+
+function ProjectionHud({ vecA, vecB }: { vecA: Vec2D; vecB: Vec2D }) {
+  const projVec = projectVec2D(vecA, vecB);
+  const magB = mag2D(vecB);
+  const projLen = magB > 1e-10 ? dot2D(vecA, vecB) / magB : 0;
+  const perpVec: Vec2D = [vecA[0] - projVec[0], vecA[1] - projVec[1]];
+
+  return (
+    <div style={{
+      position: 'absolute', top: 12, left: 12,
+      background: 'rgba(255,255,255,0.93)',
+      border: `1px solid ${COLORS.border}`,
+      borderRadius: RADIUS.sm,
+      padding: '8px 14px',
+      backdropFilter: 'blur(4px)',
+      pointerEvents: 'none',
+      lineHeight: 1.8,
+    }}>
+      <div style={{ fontSize: 16, color: COLORS.text }}>
+        <InlineLatex latex={`\\text{投影向量 }\\text{proj}_{\\vec{b}}(\\vec{a}) = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|^2}\\cdot\\vec{b}`} />
+      </div>
+      <div style={{ fontSize: 16, color: COLORS.textMuted }}>
+        <InlineLatex latex={`\\text{投影长度} = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{b}|} ${fmtApproxLatex(projLen, 3)}`} />
+      </div>
+      <div style={{ fontSize: 16, color: COLORS.textMuted }}>
+        <InlineLatex latex={`|\\text{proj}| ${fmtApproxLatex(mag2D(projVec), 3)}\\text{，}|\\text{垂直分量}| ${fmtApproxLatex(mag2D(perpVec), 3)}`} />
+      </div>
+    </div>
+  );
 }
 
 // ─── 主 Canvas2D 组件 ───
@@ -1593,6 +1616,9 @@ export function Canvas2D() {
           <InlineLatex latex={resultFormula} />
         </div>
       )}
+
+      {/* 投影 HUD（HTML overlay，避免 SVG foreignObject 渲染问题） */}
+      {operation === 'projection' && <ProjectionHud vecA={vecA} vecB={vecB} />}
 
       {/* 操作提示 */}
       <div

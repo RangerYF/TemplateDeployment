@@ -236,7 +236,7 @@ function buildRenderItems(
 
     const visual = getForceVisual(f.forceType)
     const displayLabel = f.label ?? visual.label
-    const labelText = `${displayLabel} ${visual.chineseName} = ${mag.toFixed(1)}N`
+    const labelText = `${displayLabel} = ${mag.toFixed(1)}N`
 
     items.push({
       bodyId: f.bodyId,
@@ -495,7 +495,7 @@ function computeResultants(
       direction: dir,
       color: RESULTANT_COLOR,
       label: 'F合',
-      labelText: `F合 合力 = ${mag.toFixed(1)}N`,
+      labelText: `F合 = ${mag.toFixed(1)}N`,
       isResultant: true,
     })
   }

@@ -11,6 +11,11 @@ import {
   getPointFaceVisData,
   getLineLineVisData,
   getLineFaceVisData,
+  calculatePointPointDistance,
+  calculatePointLineDistance,
+  calculatePointFaceDistance,
+  calculateLineLineDistance,
+  calculateLineFaceDistance,
 } from '@/engine/math/distanceCalculator';
 import type { Vec3, BuilderResult } from '@/engine/types';
 import { registerRenderer } from './index';
@@ -30,14 +35,21 @@ function getSegmentEndpoints(
   if (!seg || seg.type !== 'segment') return null;
   const props = (seg as Entity<'segment'>).properties;
 
-  const sp = entities[props.startPointId];
-  const ep = entities[props.endPointId];
-  if (!sp || sp.type !== 'point' || !ep || ep.type !== 'point') return null;
+  if (props.startPointId && props.endPointId) {
+    const sp = entities[props.startPointId];
+    const ep = entities[props.endPointId];
+    if (sp && sp.type === 'point' && ep && ep.type === 'point') {
+      const startPos = computePointPosition((sp as Entity<'point'>).properties, result);
+      const endPos = computePointPosition((ep as Entity<'point'>).properties, result);
+      if (startPos && endPos) return { start: startPos, end: endPos };
+    }
+  }
 
-  const startPos = computePointPosition((sp as Entity<'point'>).properties, result);
-  const endPos = computePointPosition((ep as Entity<'point'>).properties, result);
-  if (!startPos || !endPos) return null;
-  return { start: startPos, end: endPos };
+  if (props.curvePoints && props.curvePoints.length === 2) {
+    return { start: props.curvePoints[0], end: props.curvePoints[1] };
+  }
+
+  return null;
 }
 
 function getFacePositions(
@@ -47,17 +59,29 @@ function getFacePositions(
 ): Vec3[] | null {
   const face = entities[faceId];
   if (!face || face.type !== 'face') return null;
-  const pointIds = (face as Entity<'face'>).properties.pointIds;
+  const faceProps = (face as Entity<'face'>).properties;
 
-  const positions: Vec3[] = [];
-  for (const pid of pointIds) {
-    const pe = entities[pid];
-    if (!pe || pe.type !== 'point') return null;
-    const pos = computePointPosition((pe as Entity<'point'>).properties, result);
-    if (!pos) return null;
-    positions.push(pos);
+  if (faceProps.pointIds.length > 0) {
+    const positions: Vec3[] = [];
+    for (const pid of faceProps.pointIds) {
+      const pe = entities[pid];
+      if (!pe || pe.type !== 'point') return null;
+      const pos = computePointPosition((pe as Entity<'point'>).properties, result);
+      if (!pos) return null;
+      positions.push(pos);
+    }
+    return positions.length >= 3 ? positions : null;
   }
-  return positions.length >= 3 ? positions : null;
+
+  const src = faceProps.source;
+  if (src.type === 'surface' && src.surfaceType === 'disk' && result.kind === 'surface') {
+    const surfaceFace = result.faces[src.faceIndex];
+    if (surfaceFace?.samplePoints && surfaceFace.samplePoints.length >= 3) {
+      return surfaceFace.samplePoints.slice(0, 3);
+    }
+  }
+
+  return null;
 }
 
 function getPointPos(
@@ -128,10 +152,13 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       if (!pos1 || !pos2) return null;
 
       const vis = getPointPointVisData(pos1, pos2);
+      const calc = calculatePointPointDistance(pos1, pos2);
       return {
         type: 'pointPoint' as const,
         linePoints: [vis.point1, vis.point2] as [Vec3, Vec3],
         labelPos: [(vis.point1[0] + vis.point2[0]) / 2, (vis.point1[1] + vis.point2[1]) / 2, (vis.point1[2] + vis.point2[2]) / 2] as Vec3,
+        distanceValue: calc.value,
+        distanceLatex: calc.latex,
       };
     }
 
@@ -144,12 +171,15 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       const vis = getPointLineVisData(pointPos, ep.start, ep.end);
       const perpDir = vecNormalize(vecSub(vis.point, vis.foot));
       const lineDir = vis.lineDir;
+      const calc = calculatePointLineDistance(pointPos, ep.start, ep.end);
 
       return {
         type: 'pointLine' as const,
         linePoints: [vis.point, vis.foot] as [Vec3, Vec3],
         labelPos: [(vis.point[0] + vis.foot[0]) / 2, (vis.point[1] + vis.foot[1]) / 2, (vis.point[2] + vis.foot[2]) / 2] as Vec3,
         rightAngle: { position: vis.foot, dir1: perpDir, dir2: lineDir },
+        distanceValue: calc.value,
+        distanceLatex: calc.latex,
       };
     }
 
@@ -162,12 +192,15 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       const vis = getLineFaceVisData(ep.start, ep.end, facePositions);
       const perpDir = vecNormalize(vecSub(vis.linePoint, vis.foot));
       const faceDir = vecNormalize(vecSub(facePositions[1], facePositions[0]));
+      const calc = calculateLineFaceDistance(ep.start, ep.end, facePositions);
 
       return {
         type: 'lineFace' as const,
         linePoints: [vis.linePoint, vis.foot] as [Vec3, Vec3],
         labelPos: [(vis.linePoint[0] + vis.foot[0]) / 2, (vis.linePoint[1] + vis.foot[1]) / 2, (vis.linePoint[2] + vis.foot[2]) / 2] as Vec3,
         rightAngle: { position: vis.foot, dir1: perpDir, dir2: faceDir },
+        distanceValue: calc.value,
+        distanceLatex: calc.latex,
       };
     }
 
@@ -178,16 +211,17 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       if (!pointPos || !facePositions) return null;
 
       const vis = getPointFaceVisData(pointPos, facePositions);
-      // 垂线方向和面法线方向（用于直角标记）
       const perpDir = vecNormalize(vecSub(vis.point, vis.foot));
-      // 面上一个方向（用于直角标记的第二个方向）
       const faceDir = vecNormalize(vecSub(facePositions[1], facePositions[0]));
+      const calc = calculatePointFaceDistance(pointPos, facePositions);
 
       return {
         type: 'pointFace' as const,
         linePoints: [vis.point, vis.foot] as [Vec3, Vec3],
         labelPos: [(vis.point[0] + vis.foot[0]) / 2, (vis.point[1] + vis.foot[1]) / 2, (vis.point[2] + vis.foot[2]) / 2] as Vec3,
         rightAngle: { position: vis.foot, dir1: perpDir, dir2: faceDir },
+        distanceValue: calc.value,
+        distanceLatex: calc.latex,
       };
     }
 
@@ -198,12 +232,10 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       if (!ep1 || !ep2) return null;
 
       const vis = getLineLineVisData(ep1.start, ep1.end, ep2.start, ep2.end);
-      // 公垂线方向
       const perpDir = vecNormalize(vecSub(vis.point2, vis.point1));
-      // 线1方向（用于直角标记）
       const line1Dir = vecNormalize(vecSub(ep1.end, ep1.start));
-      // 线2方向
       const line2Dir = vecNormalize(vecSub(ep2.end, ep2.start));
+      const calc = calculateLineLineDistance(ep1.start, ep1.end, ep2.start, ep2.end);
 
       return {
         type: 'lineLine' as const,
@@ -211,6 +243,8 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
         labelPos: [(vis.point1[0] + vis.point2[0]) / 2, (vis.point1[1] + vis.point2[1]) / 2, (vis.point1[2] + vis.point2[2]) / 2] as Vec3,
         rightAngle1: { position: vis.point1, dir1: perpDir, dir2: line1Dir },
         rightAngle2: { position: vis.point2, dir1: vecNormalize(vecSub(vis.point1, vis.point2)), dir2: line2Dir },
+        distanceValue: calc.value,
+        distanceLatex: calc.latex,
       };
     }
 
@@ -251,8 +285,8 @@ function DistanceMeasurementRenderer({ entity }: { entity: Entity }) {
       {/* 距离标签 */}
       <DistanceLabel
         position={visResult.labelPos}
-        value={props.distanceValue}
-        latex={props.distanceLatex}
+        value={visResult.distanceValue}
+        latex={visResult.distanceLatex}
         color={color}
       />
 

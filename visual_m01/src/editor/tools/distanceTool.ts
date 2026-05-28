@@ -76,22 +76,26 @@ function getSegmentEndpoints(segment: Entity<'segment'>): { start: Vec3; end: Ve
   const entityStore = useEntityStore.getState();
   const props = segment.properties;
 
-  const startEntity = entityStore.getEntity(props.startPointId);
-  const endEntity = entityStore.getEntity(props.endPointId);
-  if (!startEntity || !endEntity) return null;
-  if (startEntity.type !== 'point' || endEntity.type !== 'point') return null;
+  if (props.startPointId && props.endPointId) {
+    const startEntity = entityStore.getEntity(props.startPointId);
+    const endEntity = entityStore.getEntity(props.endPointId);
+    if (startEntity && endEntity && startEntity.type === 'point' && endEntity.type === 'point') {
+      const geometryEntity = entityStore.getEntity(props.geometryId);
+      if (!geometryEntity || geometryEntity.type !== 'geometry') return null;
+      const geoProps = geometryEntity.properties as GeometryProperties;
+      const result = buildGeometry(geoProps.geometryType, geoProps.params);
+      if (!result) return null;
+      const startPos = computePointPosition(startEntity.properties as PointProperties, result);
+      const endPos = computePointPosition(endEntity.properties as PointProperties, result);
+      if (startPos && endPos) return { start: startPos, end: endPos };
+    }
+  }
 
-  const geometryEntity = entityStore.getEntity(props.geometryId);
-  if (!geometryEntity || geometryEntity.type !== 'geometry') return null;
+  if (props.curvePoints && props.curvePoints.length === 2) {
+    return { start: props.curvePoints[0], end: props.curvePoints[1] };
+  }
 
-  const geoProps = geometryEntity.properties as GeometryProperties;
-  const result = buildGeometry(geoProps.geometryType, geoProps.params);
-  if (!result) return null;
-
-  const startPos = computePointPosition(startEntity.properties as PointProperties, result);
-  const endPos = computePointPosition(endEntity.properties as PointProperties, result);
-  if (!startPos || !endPos) return null;
-  return { start: startPos, end: endPos };
+  return null;
 }
 
 function getPointPosition(pointEntity: Entity<'point'>): Vec3 | null {
@@ -115,15 +119,27 @@ function getFacePointPositions(face: Entity<'face'>): Vec3[] | null {
   const result = buildGeometry(geoProps.geometryType, geoProps.params);
   if (!result) return null;
 
-  const positions: Vec3[] = [];
-  for (const pointId of face.properties.pointIds) {
-    const pointEntity = entityStore.getEntity(pointId);
-    if (!pointEntity || pointEntity.type !== 'point') return null;
-    const pos = computePointPosition(pointEntity.properties as PointProperties, result);
-    if (!pos) return null;
-    positions.push(pos);
+  if (face.properties.pointIds.length > 0) {
+    const positions: Vec3[] = [];
+    for (const pointId of face.properties.pointIds) {
+      const pointEntity = entityStore.getEntity(pointId);
+      if (!pointEntity || pointEntity.type !== 'point') return null;
+      const pos = computePointPosition(pointEntity.properties as PointProperties, result);
+      if (!pos) return null;
+      positions.push(pos);
+    }
+    return positions;
   }
-  return positions;
+
+  const src = face.properties.source;
+  if (src.type === 'surface' && src.surfaceType === 'disk' && result.kind === 'surface') {
+    const surfaceFace = result.faces[src.faceIndex];
+    if (surfaceFace?.samplePoints && surfaceFace.samplePoints.length >= 3) {
+      return surfaceFace.samplePoints.slice(0, 3);
+    }
+  }
+
+  return null;
 }
 
 // ─── 距离创建 ───

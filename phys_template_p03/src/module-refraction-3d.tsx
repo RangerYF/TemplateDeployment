@@ -61,7 +61,7 @@ function makeTextSprite(text: string, color: string = '#333'): THREE.Sprite {
   tex.magFilter = THREE.LinearFilter;
   const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
   const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(3.2, 0.8, 1);
+  sprite.scale.set(4.8, 1.2, 1);
   return sprite;
 }
 

@@ -352,7 +352,7 @@ export function OrbitCanvas() {
       <div className="pointer-events-none absolute right-4 top-4 hidden rounded-full px-3 py-1.5 text-xs font-medium text-white md:block" style={{ background: 'rgba(255,255,255,0.12)' }}>
         2D Canvas · 左键拖拽 · 滚轮缩放 {viewport.zoom.toFixed(2)}x
       </div>
-      <div className="absolute bottom-4 right-4 rounded-[18px] border px-4 py-3 text-xs backdrop-blur-md xl:hidden" style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(5,10,24,0.66)', color: COLORS.white }}>
+      <div className="absolute bottom-4 right-4 rounded-[18px] border px-4 py-3 text-xs backdrop-blur-md lg:hidden" style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(5,10,24,0.66)', color: COLORS.white }}>
         <div className="font-semibold">{frame.metrics.title}</div>
         <div className="mt-1 max-w-[260px] text-[11px]" style={{ color: 'rgba(255,255,255,0.68)' }}>
           {frame.metrics.values.slice(0, 3).map((item) => `${item.label}: ${item.value}`).join(' · ')}

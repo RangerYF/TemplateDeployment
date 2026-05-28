@@ -34,7 +34,7 @@ const DEFAULT_PARAMS_BY_MODEL = Object.fromEntries(
 );
 const DEFAULT_MODEL_ID = 'CEL-001';
 const TAU = Math.PI * 2;
-const HOHMANN_VISUAL_ANGULAR_SPEED = 0.18;
+const HOHMANN_DEFAULT_R1 = 6.8e6;
 const CHASE_RADIUS_GAP_M = 1e5;
 const ORBIT_RADIUS_GAP_M = 1e5;
 const ELLIPSE_RADIUS_GAP_M = 1e6;
@@ -150,6 +150,16 @@ function getTimeScale(modelId: string, params: Record<string, number>): number {
     const delta = (params.initialAngleDeg * Math.PI) / 180;
     return Math.max(60, delta / Math.max(referenceOmega1 - referenceOmega2, 1e-12) / 10);
   }
+  if (modelId === 'CEL-011') {
+    const refPeriodLow = TAU * Math.sqrt(HOHMANN_DEFAULT_R1 ** 3 / referenceMu);
+    return refPeriodLow / 10;
+  }
+  if (modelId === 'CEL-021') {
+    const defaultLm = 1e8 * 1000;
+    const defaultTotal = 2e30 + 1e30;
+    const refPeriod = TAU * Math.sqrt(defaultLm ** 3 / (CONSTANTS.gravitationalConstant * defaultTotal));
+    return refPeriod / 10;
+  }
   if (modelId === 'CEL-012') return 20;
   return 1;
 }
@@ -204,6 +214,10 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   fireHohmann: () => set((state) => {
     if (state.currentModelId !== 'CEL-011') return {};
+    const params = getActiveParams(state.currentModelId, state.paramsByModel);
+    const mu = CONSTANTS.gravitationalConstant * (params.earthMassKg ?? 6e24);
+    const omegaLow = Math.sqrt(mu / (params.lowOrbitRadiusM ?? HOHMANN_DEFAULT_R1) ** 3);
+    const omegaHigh = Math.sqrt(mu / (params.highOrbitRadiusM ?? 4.2e7) ** 3);
     const nextPhase: HohmannPhase = state.hohmannPhase === 'low'
       ? 'transfer'
       : state.hohmannPhase === 'transfer'
@@ -212,9 +226,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
           ? 'transferDown'
           : 'low';
     const nextIgnitionAngle = state.hohmannPhase === 'low'
-      ? normalizeAngle(state.hohmannIgnitionAngle + state.elapsedSeconds * HOHMANN_VISUAL_ANGULAR_SPEED)
+      ? normalizeAngle(state.hohmannIgnitionAngle + state.elapsedSeconds * omegaLow)
       : state.hohmannPhase === 'high'
-        ? normalizeAngle(state.hohmannIgnitionAngle + Math.PI + state.elapsedSeconds * HOHMANN_VISUAL_ANGULAR_SPEED)
+        ? normalizeAngle(state.hohmannIgnitionAngle + Math.PI + state.elapsedSeconds * omegaHigh)
         : state.hohmannPhase === 'transferDown'
           ? normalizeAngle(state.hohmannIgnitionAngle + Math.PI)
           : state.hohmannIgnitionAngle;

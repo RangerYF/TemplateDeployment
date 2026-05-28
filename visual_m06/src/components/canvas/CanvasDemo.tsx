@@ -323,8 +323,8 @@ const SUBSCRIPT_DIGITS = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇'
 function nextMarkerLabel(entities: Record<string, import('@/editor/demo/demoTypes').DemoEntity>): string {
   const existingLabels = new Set(
     Object.values(entities)
-      .filter((e) => e.type === 'demoMarker')
-      .map((e) => (e as DemoMarker).label),
+      .filter((e) => 'label' in e && (e as { label: string }).label)
+      .map((e) => (e as { label: string }).label),
   );
   // A..Z
   for (let i = 0; i < 26; i++) {
@@ -406,7 +406,7 @@ function CoordGrid({ view }: { view: ViewState }) {
       })}
       {xNums.filter((x) => x !== 0).map((x) => {
         const [sx] = m2s(x, 0);
-        return <text key={`tx${x}`} x={sx} y={xLabelSvgY} textAnchor="middle"
+        return <text key={`tx${x}`} x={sx} y={xLabelSvgY + 16} textAnchor="middle"
           fontSize={14} fill={COLORS.textMuted} fontFamily="Inter, sans-serif">{x}</text>;
       })}
       {yNums.filter((y) => y !== 0).map((y) => {
@@ -424,7 +424,7 @@ function CoordGrid({ view }: { view: ViewState }) {
         points={`0,${view.y + 2} -5,${view.y + 12} 5,${view.y + 12}`}
         fill={COLORS.axis}
       />
-      <text x={view.x + view.w - 14} y={xLabelSvgY} fontSize={15} fontWeight={600} fill={COLORS.text} fontFamily="Inter, sans-serif">x</text>
+      <text x={view.x + view.w - 14} y={xLabelSvgY + 16} fontSize={15} fontWeight={600} fill={COLORS.text} fontFamily="Inter, sans-serif">x</text>
       <text x={yLabelSvgX + 16} y={view.y + 14} fontSize={15} fontWeight={600} fill={COLORS.text} fontFamily="Inter, sans-serif">y</text>
     </g>
   );
@@ -474,7 +474,7 @@ export function CanvasDemo() {
         ctx.points[e.label] = { x: (e as { x: number }).x, y: (e as { y: number }).y };
       }
     }
-    useConstraintStore.getState().solveAll(ctx);
+    useConstraintStore.getState().solveAll(ctx, entities);
   }, [entities, constraintCount]);
   const { selectedId, hoveredId, select, setHovered } = useDemoSelectionStore();
   const { activeTool, opKind, step, pendingStartPoint, pendingVec1Id, pendingMarkerIds,
@@ -1773,7 +1773,11 @@ export function CanvasDemo() {
 
   // 向量自动标签（a, b, c, ...）
   function nextVecLabel(): string {
-    const existing = new Set(vectors.map((v) => v.label));
+    const existing = new Set(
+      Object.values(entities)
+        .filter((e) => 'label' in e && (e as { label: string }).label)
+        .map((e) => (e as { label: string }).label),
+    );
     for (let i = 0; i < 26; i++) {
       const lbl = String.fromCharCode(97 + i);
       if (!existing.has(lbl)) return lbl;
@@ -2935,6 +2939,7 @@ function DemoToolBar() {
   return (
     <div style={{
       position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+      maxWidth: 'calc(100% - 20px)', overflowX: 'auto',
       zIndex: 10, display: 'flex', gap: 2,
       background: 'rgba(255,255,255,0.92)',
       backdropFilter: 'blur(8px)',
@@ -3037,13 +3042,6 @@ function DemoToolBar() {
         title="显示/隐藏所有标记点坐标"
       />
 
-      {/* 分隔线 */}
-      <div style={{ width: 1, background: COLORS.border, margin: '2px 4px', alignSelf: 'stretch' }} />
-
-      {/* 缩放提示 */}
-      <div style={{ alignSelf: 'center', fontSize: 14, color: COLORS.textMuted, whiteSpace: 'nowrap', padding: '0 4px' }}>
-        平移 · 滚轮缩放
-      </div>
     </div>
   );
 }
@@ -3502,19 +3500,34 @@ function LocusConstraintLayer() {
   const constraints = useConstraintStore((s) => s.constraints);
   const objectiveExtrema = useConstraintStore((s) => s.objectiveExtrema);
   const items = useMemo(() =>
-    Object.values(constraints).filter((c) => c.visible && c.segments.length > 0),
+    Object.values(constraints).filter((c) => c.visible && (c.segments.length > 0 || Object.keys(c.segmentsByVec).length > 0)),
     [constraints],
   );
   if (items.length === 0) return null;
   return (
     <g className="constraint-locus-layer">
       {items.map((c) => {
-        const d = c.segments.map(([x1, y1, x2, y2]) => {
-          const [sx1, sy1] = m2s(x1, y1);
-          const [sx2, sy2] = m2s(x2, y2);
-          return `M${sx1},${sy1}L${sx2},${sy2}`;
-        }).join(' ');
-        return <path key={c.id} d={d} fill="none" stroke={c.color} strokeWidth={2} opacity={0.7} />;
+        const paths: React.ReactNode[] = [];
+        // Point constraint segments
+        if (c.segments.length > 0) {
+          const d = c.segments.map(([x1, y1, x2, y2]) => {
+            const [sx1, sy1] = m2s(x1, y1);
+            const [sx2, sy2] = m2s(x2, y2);
+            return `M${sx1},${sy1}L${sx2},${sy2}`;
+          }).join(' ');
+          paths.push(<path key={c.id} d={d} fill="none" stroke={c.color} strokeWidth={2} opacity={0.7} />);
+        }
+        // Vector constraint segments (per vector)
+        for (const [vecLabel, segs] of Object.entries(c.segmentsByVec)) {
+          if (segs.length === 0) continue;
+          const d = segs.map(([x1, y1, x2, y2]) => {
+            const [sx1, sy1] = m2s(x1, y1);
+            const [sx2, sy2] = m2s(x2, y2);
+            return `M${sx1},${sy1}L${sx2},${sy2}`;
+          }).join(' ');
+          paths.push(<path key={`${c.id}-${vecLabel}`} d={d} fill="none" stroke={c.color} strokeWidth={2} opacity={0.7} />);
+        }
+        return paths;
       })}
       {objectiveExtrema?.min && (() => {
         const [sx, sy] = m2s(objectiveExtrema.min!.x, objectiveExtrema.min!.y);

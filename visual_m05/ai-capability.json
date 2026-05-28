@@ -15,13 +15,56 @@
     "set-result-panel-visible",
     "run-single-step",
     "load-preset-experiment",
-    "load-teaching-scenario",
-    "simplify-current-scene"
+    "load-teaching-scenario"
   ],
   "operations": [
     {
       "type": "setSimulationType",
-      "description": "切换或创建模拟实验。payload: { simulationType: \"coinFlip\"|\"diceRoll\"|\"twoDiceSum\"|\"ballDraw\"|\"monteCarloPi\"|\"meetingProblem\"|\"buffonsNeedle\"|\"histogram\"|\"stemLeaf\"|\"binomialDist\"|\"hypergeometricDist\"|\"normalDist\"|\"linearRegression\"|\"lawOfLargeNumbers\", params?: object, run?: boolean }。",
+      "description": "切换或创建模拟实验。simulationType 可选值：古典概型 coinFlip|diceRoll|twoDiceSum|ballDraw|tournamentMatch|boxSwapBalls；几何概型/随机过程 monteCarloPi|meetingProblem|buffonsNeedle|randomWalk1D|randomWalk2D|markovChain；统计图 histogram|stemLeaf|pieChart|lineChart；概率分布 binomialDist|hypergeometricDist|normalDist；回归/大数定律 linearRegression|lawOfLargeNumbers。payload: { simulationType, params?, run? }。",
+      "simulationTypeParams": {
+        "tournamentMatch": {
+          "pAB": "number，A 胜 B 的概率，默认 0.5",
+          "pAC": "number，A 胜 C 的概率，默认 0.5",
+          "pBC": "number，B 胜 C 的概率，默认 0.5",
+          "n": "number，模拟轮数，默认 1000",
+          "trackedEvents": "string[]，跟踪事件列表，可选值：champion_A|champion_B|champion_C|A_wins_4_straight|B_wins_4_straight|games_eq_3|games_eq_4|games_eq_5|games_eq_6|games_eq_7|games_le_5|games_ge_5"
+        },
+        "boxSwapBalls": {
+          "initBlack": "number，每箱初始黑球数，1-5，默认 1",
+          "initRed": "number，每箱初始红球数，1-8，默认 2",
+          "operations": "number，每轮交换次数，1-30，默认 4",
+          "n": "number，模拟轮数，默认 1000"
+        },
+        "randomWalk1D": {
+          "steps": "number，每条路径步数，2-1000，默认 50",
+          "pRight": "number，向右概率，0-1，默认 0.5（对称游走）",
+          "numPaths": "number，显示路径数，1-6，默认 5",
+          "n": "number，模拟次数（终点分布），默认 1000"
+        },
+        "randomWalk2D": {
+          "steps": "number，每条路径步数，10-2000，默认 200",
+          "numPaths": "number，显示路径数，1-6，默认 3",
+          "n": "number，模拟次数（终点距离分布），默认 500"
+        },
+        "markovChain": {
+          "states": "string[]，状态名，2-6 个，默认 ['晴','阴','雨']",
+          "transition": "number[][]，N×N 转移矩阵，每行和为 1",
+          "initial": "number[]，初始分布，长度 N，和为 1，默认 [1,0,0]",
+          "steps": "number，演化步数，2-200，默认 20",
+          "n": "number，模拟轮数，默认 500",
+          "showSteadyState": "boolean，是否显示理论稳态分布，默认 true"
+        },
+        "pieChart": {
+          "dataSpec": "DataSpec，数据源（与 histogram 共用 preset 数据集 DS-01~DS-05）",
+          "binCount": "number，分组数，2-10，默认 5",
+          "sortByValue": "boolean，是否按频率降序，默认 false"
+        },
+        "lineChart": {
+          "dataSpec": "DataSpec，数据源（默认 DS-04 日温度数据）",
+          "showTrend": "boolean，是否叠加最小二乘趋势线，默认 true",
+          "showMarkers": "boolean，是否显示数据点标记，默认 false"
+        }
+      },
       "payloadSchema": {
         "simulationType": { "type": "string" },
         "simType": { "type": "string" },
@@ -54,7 +97,7 @@
         "precision": { "type": "number" }
       },
       "useWhen": "用户要求选择预设数据集、输入一组数据、筛选数据或设置小数精度。",
-      "doNotUseWhen": "非 histogram/stemLeaf 模拟不要使用。"
+      "doNotUseWhen": "非 histogram/stemLeaf/pieChart/lineChart 模拟不要使用。"
     },
     {
       "type": "runSimulation",
@@ -240,6 +283,62 @@
       ],
       "patch": {},
       "explanation": "已切换到单次掷骰子模式并完成一次试验。"
+    },
+    {
+      "instruction": "模拟三人羽毛球淘汰赛，A 胜 B 概率 0.6，A 胜 C 概率 0.7，B 胜 C 概率 0.5，看谁最终夺冠概率最大。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "tournamentMatch", "params": { "pAB": 0.6, "pAC": 0.7, "pBC": 0.5, "n": 5000, "trackedEvents": ["champion_A", "champion_B", "champion_C"] }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已设置三人淘汰赛并模拟 5000 轮，可在结果面板中对比三人夺冠频率。"
+    },
+    {
+      "instruction": "演示两箱换球实验，每箱 1 黑 2 红，交换 4 次后看 A 箱黑球分布。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "boxSwapBalls", "params": { "initBlack": 1, "initRed": 2, "operations": 4, "n": 2000 }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已设置两箱换球实验，每轮交换 4 次后统计 A 箱黑球数量分布。"
+    },
+    {
+      "instruction": "展示一维对称随机游走，走 100 步，画 5 条路径。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "randomWalk1D", "params": { "steps": 100, "pRight": 0.5, "numPaths": 5, "n": 1000 }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已生成 5 条对称随机游走路径（100 步），同时模拟 1000 次终点分布。"
+    },
+    {
+      "instruction": "演示二维随机游走，走 500 步。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "randomWalk2D", "params": { "steps": 500, "numPaths": 3, "n": 500 }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已生成 3 条二维随机游走路径（500 步），终点距离近似服从瑞利分布。"
+    },
+    {
+      "instruction": "演示天气马尔可夫链，晴天有 70% 概率保持晴天。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "markovChain", "params": { "states": ["晴", "阴", "雨"], "transition": [[0.7, 0.2, 0.1], [0.3, 0.4, 0.3], [0.2, 0.3, 0.5]], "initial": [1, 0, 0], "steps": 30, "n": 1000, "showSteadyState": true }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已设置天气马尔可夫链并演化 30 步，显示理论稳态分布对比。"
+    },
+    {
+      "instruction": "把成绩数据画成饼图，分 6 组。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "pieChart", "params": { "dataSpec": { "mode": "preset", "presetId": "DS-01" }, "binCount": 6, "sortByValue": true }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已使用预设成绩数据生成 6 组饼图，按频率降序排列。"
+    },
+    {
+      "instruction": "用日温度数据画折线图，显示趋势线和数据点。",
+      "operations": [
+        { "type": "setSimulationType", "simulationType": "lineChart", "params": { "dataSpec": { "mode": "preset", "presetId": "DS-04" }, "showTrend": true, "showMarkers": true }, "run": true }
+      ],
+      "patch": {},
+      "explanation": "已使用日温度数据生成折线图，叠加最小二乘趋势线并标注数据点。"
     }
   ],
   "planningRules": [

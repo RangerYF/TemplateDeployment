@@ -4,7 +4,7 @@ import {
   isBuilderFeedbackMode,
   isBuilderFreeFeedbackMode,
   isBuilderTemplateFeedbackMode,
-  isElectricFeedbackMode,
+  isP04StandaloneMode,
   isP13StandaloneMode,
   isP08StandaloneMode,
   isPresetVisible,
@@ -197,14 +197,14 @@ function parseHash(): AppRoute {
   if (path === 'voltage-resistance-method') return { page: 'voltage-resistance-method' };
   if (path === 'current-resistance-method') return { page: 'current-resistance-method' };
   if (path === 'gallery') return { page: 'gallery' };
-  if (path === 'p13') return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' };
-  if (path === 'p13-builder') return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' };
+  if (path === 'p13') return (isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' };
+  if (path === 'p13-builder') return (isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' };
   if (path === 'p08') {
     const moduleParam = params.get('module');
     const p08Module = isP08ModuleKey(moduleParam) ? moduleParam : undefined;
-    return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08', p08Module };
+    return (isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08', p08Module };
   }
-  if (path === 'p08-builder') return (isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08-builder' };
+  if (path === 'p08-builder') return (isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08-builder' };
   if (path.startsWith('preset/')) {
     const presetId = path.slice(7);
     const fromParam = params.get('from');
@@ -217,11 +217,11 @@ function parseHash(): AppRoute {
     return getVisiblePresetId(presetId)
       ? { page: 'simulator', presetId, from, p08Module }
       : from === 'p08'
-        ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08', p08Module })
+        ? ((isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p08', p08Module })
         : from === 'p13'
-          ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' })
+          ? ((isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13' })
           : from === 'p13-builder'
-            ? ((isElectricFeedbackMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' })
+            ? ((isP04StandaloneMode || isBuilderFeedbackMode) ? { page: 'gallery' } : { page: 'p13-builder' })
           : { page: 'gallery' };
   }
   // 兼容旧格式：裸 presetId
@@ -394,17 +394,17 @@ export function App() {
             page: isP08StandaloneMode ? 'p08' : 'gallery',
           })}
           onSelectP13={
-            !isBuilderFeedbackMode && !isElectricFeedbackMode && !isP08StandaloneMode
+            !isBuilderFeedbackMode && !isP04StandaloneMode && !isP08StandaloneMode
               ? () => navigateTo({ page: 'p13' })
               : undefined
           }
           onSelectP08={
-            !isBuilderFeedbackMode && !isElectricFeedbackMode
+            !isBuilderFeedbackMode && !isP04StandaloneMode
               ? () => navigateTo({ page: 'p08' })
               : undefined
           }
           onSelectP08Builder={
-            !isBuilderFeedbackMode && !isElectricFeedbackMode
+            !isBuilderFeedbackMode && !isP04StandaloneMode
               ? () => navigateTo({ page: 'p08-builder' })
               : undefined
           }

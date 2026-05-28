@@ -76,7 +76,11 @@ const SCENE_ANALYSIS_PRESETS: Record<string, { activeTabs: string[]; activeDataS
 const SCENE_UI_PRESETS: Record<string, {
   propertyPanelTab?: PropertyPanelTab
   coordinateAxes?: CoordinateAxesConfig
+  viewport?: { offset: { x: number; y: number }; scale: number }
 }> = {
+  'SHM-001': {
+    viewport: { offset: { x: 0, y: 80 }, scale: 45 },
+  },
   'FM-041': {
     propertyPanelTab: 'props',
   },
@@ -152,6 +156,9 @@ function getDefaultUiSnapshot(sceneId?: string) {
   return {
     propertyPanelTab: preset?.propertyPanelTab ?? DEFAULT_PROPERTY_PANEL_TAB,
     coordinateAxes: cloneCoordinateAxes(preset?.coordinateAxes ?? DEFAULT_COORDINATE_AXES),
+    viewport: preset?.viewport
+      ? { offset: { ...preset.viewport.offset }, scale: preset.viewport.scale }
+      : { offset: { ...DEFAULT_VIEWPORT_SNAPSHOT.offset }, scale: DEFAULT_VIEWPORT_SNAPSHOT.scale },
   }
 }
 
@@ -175,10 +182,7 @@ export function createDefaultSceneDraft(
     ui: {
       coordinateAxes: uiDefaults.coordinateAxes,
       propertyPanelTab: uiDefaults.propertyPanelTab,
-      viewport: {
-        offset: { ...DEFAULT_VIEWPORT_SNAPSHOT.offset },
-        scale: DEFAULT_VIEWPORT_SNAPSHOT.scale,
-      },
+      viewport: uiDefaults.viewport,
     },
     analysis: {
       activeTabs: [...analysisDefaults.activeTabs],

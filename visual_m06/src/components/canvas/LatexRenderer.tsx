@@ -38,6 +38,8 @@ export function LatexRenderer({
     <foreignObject x={x} y={y} width={width} height={height} overflow="visible" opacity={opacity} style={{ pointerEvents: 'none' }}>
       <div
         ref={containerRef}
+        // @ts-expect-error xmlns needed for SVG foreignObject XHTML rendering
+        xmlns="http://www.w3.org/1999/xhtml"
         style={{
           fontSize: `${fontSize}px`,
           color,

@@ -1,5 +1,6 @@
 import type { RandomSource } from '../random';
 import type { TournamentEventId, TournamentMatchParams } from '../../types/simulation';
+import { Fraction } from './fraction';
 
 export type Player = 'A' | 'B' | 'C';
 
@@ -97,6 +98,206 @@ export function simulateOneTournament(params: TournamentMatchParams, rng: Random
   }
 
   return { rounds, champion, totalGames: game };
+}
+
+// ─── 精确递归枚举所有可能赛程 + 概率（用 Fraction 精确有理数） ───
+export interface ExactTrial {
+  trial: TournamentTrial;
+  probFraction: Fraction;  // 精确分数概率
+  prob: number;            // 数值（toNumber 缓存，用于比较）
+}
+
+/** 把 params 中的浮点胜率提前转成 Fraction，避免反复转换 */
+interface FractionParams {
+  pAB: Fraction; pAC: Fraction; pBC: Fraction;
+  qAB: Fraction; qAC: Fraction; qBC: Fraction;  // 1 - p
+}
+function toFractionParams(params: TournamentMatchParams): FractionParams {
+  const pAB = Fraction.fromDecimal(params.pAB);
+  const pAC = Fraction.fromDecimal(params.pAC);
+  const pBC = Fraction.fromDecimal(params.pBC);
+  return { pAB, pAC, pBC, qAB: pAB.complement(), qAC: pAC.complement(), qBC: pBC.complement() };
+}
+
+/** 返回某场比赛中 p1 胜 p2 的精确分数概率 */
+function probWinnerFrac(p1: Player, p2: Player, fp: FractionParams): Fraction {
+  if (p1 === 'A' && p2 === 'B') return fp.pAB;
+  if (p1 === 'B' && p2 === 'A') return fp.qAB;
+  if (p1 === 'A' && p2 === 'C') return fp.pAC;
+  if (p1 === 'C' && p2 === 'A') return fp.qAC;
+  if (p1 === 'B' && p2 === 'C') return fp.pBC;
+  if (p1 === 'C' && p2 === 'B') return fp.qBC;
+  return new Fraction(1n, 2n);
+}
+
+export function enumerateAllTrials(params: TournamentMatchParams): ExactTrial[] {
+  const fp = toFractionParams(params);
+  const results: ExactTrial[] = [];
+
+  function recurse(
+    rounds: TournamentRound[],
+    losses: Record<Player, number>,
+    playing: [Player, Player],
+    bye: Player | null,
+    accProb: Fraction,
+    game: number,
+  ) {
+    const [p1, p2] = playing;
+    const probP1 = probWinnerFrac(p1, p2, fp);
+    const branches: Array<{ winner: Player; loser: Player; p: Fraction }> = [
+      { winner: p1, loser: p2, p: probP1 },
+      { winner: p2, loser: p1, p: probP1.complement() },
+    ];
+    for (const { winner, loser, p } of branches) {
+      if (p.isZero()) continue;
+      const newLosses = { ...losses, [loser]: losses[loser] + 1 };
+      const newRound: TournamentRound = { game, p1, p2, bye, winner, loser };
+      const newRounds = [...rounds, newRound];
+      const newAccProb = accProb.multiply(p);
+
+      if (newLosses[loser] >= 2) {
+        const remaining = PLAYERS.filter(pl => newLosses[pl] < 2);
+        if (remaining.length === 1) {
+          results.push({
+            trial: { rounds: newRounds, champion: remaining[0], totalGames: game },
+            probFraction: newAccProb,
+            prob: newAccProb.toNumber(),
+          });
+        } else {
+          const others = remaining.filter(pl => pl !== winner);
+          recurse(newRounds, newLosses, [winner, others[0]], null, newAccProb, game + 1);
+        }
+      } else {
+        if (bye) {
+          recurse(newRounds, newLosses, [winner, bye], loser, newAccProb, game + 1);
+        } else {
+          recurse(newRounds, newLosses, [winner, loser], null, newAccProb, game + 1);
+        }
+      }
+    }
+  }
+
+  recurse([], { A: 0, B: 0, C: 0 }, ['A', 'B'], 'C', Fraction.one, 1);
+  return results;
+}
+
+/** 累加所有满足 predicate 的赛程概率（用 Fraction 精确求和） */
+function computeExactProbFrac(allTrials: ExactTrial[], predicate: (t: TournamentTrial) => boolean): Fraction {
+  let sum = Fraction.zero;
+  for (const et of allTrials) {
+    if (predicate(et.trial)) sum = sum.add(et.probFraction);
+  }
+  return sum;
+}
+
+// ─── 推导自动生成（枚举每条满足赛程，逐场展开） ─────────────
+
+const PLAYER_NAME_MAP: Record<Player, string> = { A: '甲', B: '乙', C: '丙' };
+
+/** 某场比赛的胜方概率符号 + 数值，例 "p_{AB}=\frac{1}{2}" */
+function roundProbExpr(round: TournamentRound, fp: FractionParams): { symbol: string; value: Fraction } {
+  const isP1Win = round.winner === round.p1;
+  const probSymbol = (() => {
+    // 用 p_{XY} 或 1-p_{XY}
+    const { p1, p2, winner } = round;
+    // 按字母序选 pAB/pAC/pBC 作为基准
+    const key = ((): { sym: string; isP1: boolean } => {
+      if ((p1 === 'A' && p2 === 'B') || (p1 === 'B' && p2 === 'A')) {
+        return { sym: 'p_{AB}', isP1: (p1 === 'A') === (winner === p1) ? true : false };
+      }
+      if ((p1 === 'A' && p2 === 'C') || (p1 === 'C' && p2 === 'A')) {
+        return { sym: 'p_{AC}', isP1: (p1 === 'A') === (winner === p1) ? true : false };
+      }
+      // B vs C
+      return { sym: 'p_{BC}', isP1: (p1 === 'B') === (winner === p1) ? true : false };
+    })();
+    return key.isP1 ? key.sym : `(1-${key.sym})`;
+  })();
+  void isP1Win;  // 标记已用
+  const value = probWinnerFrac(round.winner, round.loser, fp);
+  return { symbol: probSymbol, value };
+}
+
+/** 把一条赛程展开为「逐场描述 + 累乘式 + 结果分式」 */
+function describeOneTrial(et: ExactTrial, fp: FractionParams, idx: number): string[] {
+  const lines: string[] = [];
+  // 标题行：赛程 N（共 K 场）
+  lines.push(`\\textbf{赛程 ${idx}}: ${et.trial.totalGames} \\text{ 场, 冠军 } ${PLAYER_NAME_MAP[et.trial.champion]}`);
+  // 逐场描述
+  const factorSymbols: string[] = [];
+  const factorValues: string[] = [];
+  for (const r of et.trial.rounds) {
+    const { symbol, value } = roundProbExpr(r, fp);
+    const desc = `\\text{第${r.game}场 } ${PLAYER_NAME_MAP[r.p1]} \\text{vs} ${PLAYER_NAME_MAP[r.p2]}: ${PLAYER_NAME_MAP[r.winner]}\\text{胜}\\,(${symbol}=${value.toLatex()})`;
+    lines.push(`\\quad ${desc}`);
+    factorSymbols.push(symbol);
+    factorValues.push(value.toLatex());
+  }
+  // 累乘式
+  lines.push(`\\quad P_{${idx}} = ${factorSymbols.join(' \\cdot ')} = ${factorValues.join(' \\cdot ')} = ${et.probFraction.toLatex()}`);
+  return lines;
+}
+
+function genDerivationAuto(
+  _id: TournamentEventId,
+  label: string,
+  params: TournamentMatchParams,
+  allTrials: ExactTrial[],
+  predicate: (t: TournamentTrial) => boolean,
+): { title: string; steps: string[] } {
+  const fp = toFractionParams(params);
+  const matched = allTrials.filter(t => predicate(t.trial));
+  const steps: string[] = [];
+
+  // 头部：说明事件 + 总公式
+  steps.push(`\\text{记 } p_{AB}=${fp.pAB.toLatex()},\\, p_{AC}=${fp.pAC.toLatex()},\\, p_{BC}=${fp.pBC.toLatex()} \\text{（当前参数）}`);
+
+  if (matched.length === 0) {
+    steps.push(`\\text{枚举所有满足"${label}"的赛程：} 0 \\text{ 条}`);
+    steps.push(`\\therefore P(${label}) = 0`);
+    return { title: `P(${label}) 的推导`, steps };
+  }
+
+  steps.push(`\\text{枚举所有满足"${label}"的赛程：共 } ${matched.length} \\text{ 条，逐条计算后求和}`);
+
+  // 按总场数分组
+  const byGames = new Map<number, ExactTrial[]>();
+  for (const t of matched) {
+    const arr = byGames.get(t.trial.totalGames) ?? [];
+    arr.push(t);
+    byGames.set(t.trial.totalGames, arr);
+  }
+
+  let trialIdx = 0;
+  let total = Fraction.zero;
+  const allProbStrs: string[] = [];
+  for (const games of Array.from(byGames.keys()).sort((a, b) => a - b)) {
+    const group = byGames.get(games)!;
+    if (byGames.size > 1) {
+      steps.push(`\\rule{0pt}{14pt}\\textbf{【情形：${games} 场结束（${group.length} 条赛程）】}`);
+    }
+    for (const et of group) {
+      trialIdx++;
+      const lines = describeOneTrial(et, fp, trialIdx);
+      steps.push(...lines);
+      total = total.add(et.probFraction);
+      allProbStrs.push(`P_{${trialIdx}}`);
+    }
+  }
+
+  // 求和
+  steps.push(`\\rule{0pt}{16pt}\\therefore P(\\text{${label}}) = ${allProbStrs.join(' + ')}`);
+  // 数值求和（用分式逐个展示再合计）
+  const allProbValues = matched.map(t => t.probFraction.toLatex());
+  steps.push(`= ${allProbValues.join(' + ')}`);
+  steps.push(`= ${total.toLatex()}` + (total.den === 1n ? '' : ` \\approx ${total.toNumber().toFixed(4)}`));
+
+  return { title: `P(${label}) 的精确推导`, steps };
+}
+
+// ─── 兼容旧接口：toFractionLatex（仅用于 stats 输出） ──────
+export function toFractionLatex(value: number, _tol = 1e-9, _maxDenom = 10000): string {
+  return Fraction.fromDecimal(value).toLatex();
 }
 
 // ─── Event predicates ───
@@ -309,18 +510,23 @@ export function runTournamentMatch(
     }
   }
 
-  const isSymmetric = params.pAB === 0.5 && params.pAC === 0.5 && params.pBC === 0.5;
+  // 精确递归枚举所有可能赛程（任意胜率下都能算精确理论概率）
+  const allExactTrials = enumerateAllTrials(params);
 
-  const events: TournamentEventStat[] = trackedDefs.map(def => ({
-    id: def.id,
-    label: def.label,
-    occurCount: eventCounts[def.id],
-    freq: params.n > 0 ? eventCounts[def.id] / params.n : 0,
-    theoreticalProb: isSymmetric ? def.theoreticalProb : undefined,
-    theoreticalLatex: isSymmetric ? def.theoreticalLatex : undefined,
-    derivation: isSymmetric ? def.derivation : undefined,
-    runningFreq: runningFreqs[def.id],
-  }));
+  const events: TournamentEventStat[] = trackedDefs.map(def => {
+    const exactFrac = computeExactProbFrac(allExactTrials, def.predicate);
+    return {
+      id: def.id,
+      label: def.label,
+      occurCount: eventCounts[def.id],
+      freq: params.n > 0 ? eventCounts[def.id] / params.n : 0,
+      theoreticalProb: exactFrac.toNumber(),
+      theoreticalLatex: exactFrac.toLatex(),
+      derivation: genDerivationAuto(def.id, def.label, params, allExactTrials, def.predicate),
+      // ^ 第一个参数仅占位（保留 id 便于将来按事件 ID 做特殊处理）
+      runningFreq: runningFreqs[def.id],
+    };
+  });
 
   const total = Math.max(params.n, 1);
   const championDistribution = {

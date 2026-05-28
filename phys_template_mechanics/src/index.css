@@ -35,3 +35,20 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.analysis-tab-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.analysis-tab-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.analysis-tab-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.analysis-tab-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

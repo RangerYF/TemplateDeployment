@@ -186,14 +186,6 @@ export function LinearRegressionRenderer({ result, xLabel, yLabel, showResiduals
         );
       })}
 
-      {/* Residual lines */}
-      {showResiduals && result.residuals.map((res, i) => (
-        <line key={i}
-          x1={spx(res.x)} y1={spy(res.actual)}
-          x2={spx(res.x)} y2={spy(res.predicted)}
-          stroke={COLORS.warning} strokeWidth={1} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
-      ))}
-
       {/* 回归曲线：线性模型用直线，非线性模型用密集采样的 polyline */}
       {result.curvePoints && result.curvePoints.length >= 2 && (
         <polyline
@@ -241,6 +233,14 @@ export function LinearRegressionRenderer({ result, xLabel, yLabel, showResiduals
           fill={COLORS.error} stroke={COLORS.white} strokeWidth={2}
           pointerEvents="none" vectorEffect="non-scaling-stroke" />
       )}
+
+      {/* Residual lines — 渲染在数据点与均值点之上，避免被遮盖 */}
+      {showResiduals && result.residuals.map((res, i) => (
+        <line key={i}
+          x1={spx(res.x)} y1={spy(res.actual)}
+          x2={spx(res.x)} y2={spy(res.predicted)}
+          stroke={COLORS.warning} strokeWidth={2.5} strokeDasharray="5 3" vectorEffect="non-scaling-stroke" />
+      ))}
 
       {/* Stats */}
       <text x={ML + 10} y={MT + 14} fontSize={11} fill={COLORS.textMuted}>

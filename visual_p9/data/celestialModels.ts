@@ -201,8 +201,8 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
     shortName: '天体追及',
     category: 'chase',
     params: [
-      { key: 'innerRadiusM', label: '内轨半径 r1', defaultValue: 6.8e6, min: 1e6, max: 9.99e7, step: 1e5, unit: 'm', displayScale: 'scientific' },
-      { key: 'outerRadiusM', label: '外轨半径 r2', defaultValue: 1.0e7, min: 1.1e6, max: 1e8, step: 1e5, unit: 'm', displayScale: 'scientific' },
+      { key: 'innerRadiusM', label: '内轨半径 r1', defaultValue: 6.8e6, min: 6.571e6, max: 9.99e7, step: 1e5, unit: 'm', displayScale: 'scientific' },
+      { key: 'outerRadiusM', label: '外轨半径 r2', defaultValue: 1.0e7, min: 6.671e6, max: 1e8, step: 1e5, unit: 'm', displayScale: 'scientific' },
       { key: 'initialAngleDeg', label: '初始角度差 Δθ', defaultValue: 60, min: 0, max: 350, step: 1, unit: 'deg' },
       { key: 'centralMassKg', label: '中心天体质量 M', defaultValue: 6.0e24, min: 6.0e23, max: 6.0e25, step: 1e23, unit: 'kg', displayScale: 'scientific' },
     ],
@@ -210,10 +210,9 @@ export const CELESTIAL_MODELS: CelestialModel[] = [
       { label: '角速度差', expression: '\\omega_1>\\omega_2', note: '内轨角速度更大' },
       { label: '追及条件', expression: '(\\omega_1-\\omega_2)t=2k\\pi+\\Delta\\theta', note: '相对角位移达到整圈加初始角差' },
       { label: '最短追及', expression: 't=\\frac{\\Delta\\theta}{\\omega_1-\\omega_2}', note: '第一次相遇' },
-      { label: '星下点追击', expression: '(\\omega_1-\\omega_E)t=2k\\pi', note: '示意考虑地球自转后的卫星过站周期' },
     ],
     animations: { mode: 'relative-angular', defaultSpeed: 1, highlight: ['内轨更快', '相遇点标注', '追及时间计算'] },
-    teaching_points: ['同一中心天体下，高轨角速度更小。', '初始角差越大，第一次相遇所需时间越长。', '地面站标记用于演示星下点追击与地球自转影响。'],
+    teaching_points: ['同一中心天体下，高轨角速度更小。', '初始角差越大，第一次相遇所需时间越长。'],
   },
 ];
 

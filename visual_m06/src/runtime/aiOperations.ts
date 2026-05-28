@@ -28,7 +28,7 @@ type M06StateSnapshot = {
 
 const MAX_HISTORY = 50;
 const OPERATIONS = new Set<OperationType>(Object.keys(OPERATION_META) as OperationType[]);
-const DEMO_OP_KINDS = new Set<DemoOpKind>(['add', 'subtract', 'dotProduct', 'scale']);
+const DEMO_OP_KINDS = new Set<DemoOpKind>(['add', 'subtract', 'dotProduct', 'scale', 'projection']);
 
 function cloneSerializable<T>(value: T): T {
   if (typeof globalThis.structuredClone === 'function') {
@@ -351,6 +351,17 @@ function executeSetUnitCircleAngle(operation: AiOperation): void {
   });
 }
 
+function executeSetRotationAngle(operation: AiOperation): void {
+  let rad = finiteNumber(operation.angleRad ?? operation.rad ?? 0, 'angleRad');
+  if (operation.angleDeg !== undefined) {
+    rad = finiteNumber(operation.angleDeg, 'angleDeg') * Math.PI / 180;
+  }
+  if (operation.piMultiple !== undefined || operation.anglePiMultiple !== undefined) {
+    rad = finiteNumber(operation.piMultiple ?? operation.anglePiMultiple, 'piMultiple') * Math.PI;
+  }
+  useVectorStore.getState().setRotationAngle(rad);
+}
+
 function executePlayParallelogramAnimation(): void {
   useVectorStore.getState().playParallelogramAnim();
 }
@@ -595,6 +606,9 @@ function executeOperation(operation: AiOperation): void {
       return;
     case 'setUnitCircleAngle':
       executeSetUnitCircleAngle(operation);
+      return;
+    case 'setRotationAngle':
+      executeSetRotationAngle(operation);
       return;
     case 'playParallelogramAnimation':
       executePlayParallelogramAnimation();

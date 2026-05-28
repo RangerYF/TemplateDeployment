@@ -135,6 +135,7 @@ export function AnalysisPanel() {
       >
         {/* 分组标签页（多选） */}
         <div
+          className="analysis-tab-scroll"
           style={{
             display: 'flex',
             gap: 6,

@@ -10,7 +10,10 @@ const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const filter = process.argv[2];
 const selected = filter ? manifest.filter((app) => app.subject === filter || app.id === filter) : manifest;
 const selectedProjects = Array.from(
-  new Map(selected.map((app) => [app.path, app])).values(),
+  new Map(selected.map((app) => {
+    const key = app.devScript ? `${app.path}::${app.devScript}` : app.path;
+    return [key, app];
+  })).values(),
 );
 
 if (selected.length === 0) {
@@ -44,7 +47,8 @@ function runApp(app) {
   }
 
   const pm = detectPkgManager(cwd);
-  const command = runCmd(pm, "dev", `--host 0.0.0.0 --port ${app.port}`);
+  const script = app.devScript || "dev";
+  const command = runCmd(pm, script, `--host 0.0.0.0 --port ${app.port}`);
   console.log(`[dev] ${app.id} (${pm}) -> ${cwd} (port ${app.port})`);
   const child = spawnCommand(command, cwd);
   child.on("error", (error) => {

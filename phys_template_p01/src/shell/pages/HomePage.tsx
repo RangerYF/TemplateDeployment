@@ -1,7 +1,7 @@
 import {
   isBuilderEnabled,
   isBuilderFeedbackMode,
-  isElectricFeedbackMode,
+  isP04StandaloneMode,
   isP08StandaloneMode,
 } from '@/app-config';
 import { COLORS, SHADOWS, RADIUS } from '@/styles/tokens';
@@ -119,12 +119,12 @@ export function HomePage({
     );
   }
 
-  const title = isElectricFeedbackMode
+  const title = isP04StandaloneMode
     ? '电学实验反馈版'
     : isBuilderFeedbackMode
       ? '电学实验与搭建反馈版'
       : '电路模拟器';
-  const subtitle = isElectricFeedbackMode
+  const subtitle = isP04StandaloneMode
     ? '当前只开放模板实验与专题页体验'
     : isBuilderFeedbackMode
       ? '当前保留两块入口：电学实验模板与自由搭建'

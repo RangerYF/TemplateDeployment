@@ -87,7 +87,7 @@ function serveStatic(distDir) {
 const servers = [];
 
 for (const app of selected) {
-  const distDir = path.join(rootDir, app.path, "dist");
+  const distDir = path.join(rootDir, app.path, app.distDir || "dist");
   if (!existsSync(distDir)) {
     console.error(`[skip] ${app.id} -> dist 目录不存在: ${distDir}（请先运行 build）`);
     continue;

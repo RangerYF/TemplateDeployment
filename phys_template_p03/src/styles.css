@@ -790,7 +790,7 @@ input[type="range"]:active::-webkit-slider-thumb { transform: scale(0.95); }
 .interface { stroke: var(--ink-2); stroke-width: 1.25; opacity: 0.6; }
 .screen-line { stroke: var(--ink); stroke-width: 2; }
 .ray { stroke-linecap: round; stroke-linejoin: round; fill: none; }
-.label-txt { fill: var(--ink); font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; }
+.label-txt { fill: var(--ink); font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; }
 .label-txt.dim { fill: var(--ink-3); }
 
 /* ---------- Pattern display ---------- */

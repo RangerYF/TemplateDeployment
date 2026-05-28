@@ -10,6 +10,9 @@ import {
   getLineFaceVisData,
   getLineLineVisData,
   generateArcPoints,
+  calculateDihedralAngle,
+  calculateLineFaceAngle,
+  calculateLineLineAngle,
 } from '@/engine/math/angleCalculator';
 import type { Vec3, BuilderResult } from '@/engine/types';
 import { registerRenderer } from './index';
@@ -30,14 +33,21 @@ function getSegmentEndpoints(
   if (!seg || seg.type !== 'segment') return null;
   const props = (seg as Entity<'segment'>).properties;
 
-  const sp = entities[props.startPointId];
-  const ep = entities[props.endPointId];
-  if (!sp || sp.type !== 'point' || !ep || ep.type !== 'point') return null;
+  if (props.startPointId && props.endPointId) {
+    const sp = entities[props.startPointId];
+    const ep = entities[props.endPointId];
+    if (sp && sp.type === 'point' && ep && ep.type === 'point') {
+      const startPos = computePointPosition((sp as Entity<'point'>).properties, result);
+      const endPos = computePointPosition((ep as Entity<'point'>).properties, result);
+      if (startPos && endPos) return { start: startPos, end: endPos };
+    }
+  }
 
-  const startPos = computePointPosition((sp as Entity<'point'>).properties, result);
-  const endPos = computePointPosition((ep as Entity<'point'>).properties, result);
-  if (!startPos || !endPos) return null;
-  return { start: startPos, end: endPos };
+  if (props.curvePoints && props.curvePoints.length === 2) {
+    return { start: props.curvePoints[0], end: props.curvePoints[1] };
+  }
+
+  return null;
 }
 
 function getFacePositions(
@@ -47,17 +57,29 @@ function getFacePositions(
 ): Vec3[] | null {
   const face = entities[faceId];
   if (!face || face.type !== 'face') return null;
-  const pointIds = (face as Entity<'face'>).properties.pointIds;
+  const faceProps = (face as Entity<'face'>).properties;
 
-  const positions: Vec3[] = [];
-  for (const pid of pointIds) {
-    const pe = entities[pid];
-    if (!pe || pe.type !== 'point') return null;
-    const pos = computePointPosition((pe as Entity<'point'>).properties, result);
-    if (!pos) return null;
-    positions.push(pos);
+  if (faceProps.pointIds.length > 0) {
+    const positions: Vec3[] = [];
+    for (const pid of faceProps.pointIds) {
+      const pe = entities[pid];
+      if (!pe || pe.type !== 'point') return null;
+      const pos = computePointPosition((pe as Entity<'point'>).properties, result);
+      if (!pos) return null;
+      positions.push(pos);
+    }
+    return positions.length >= 3 ? positions : null;
   }
-  return positions.length >= 3 ? positions : null;
+
+  const src = faceProps.source;
+  if (src.type === 'surface' && src.surfaceType === 'disk' && result.kind === 'surface') {
+    const surfaceFace = result.faces[src.faceIndex];
+    if (surfaceFace?.samplePoints && surfaceFace.samplePoints.length >= 3) {
+      return surfaceFace.samplePoints.slice(0, 3);
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -128,7 +150,8 @@ function AngleMeasurementRenderer({ entity }: { entity: Entity }) {
 
       const visData = getDihedralVisData(edgeEndpoints.start, edgeEndpoints.end, face1Pos, face2Pos);
       const arcPts = generateArcPoints(visData.arcCenter, visData.dir1, visData.dir2, ARC_RADIUS, visData.angleRadians);
-      return { arcPoints: arcPts };
+      const calc = calculateDihedralAngle(edgeEndpoints.start, edgeEndpoints.end, face1Pos, face2Pos);
+      return { arcPoints: arcPts, angleDegrees: calc.degrees, angleLatex: calc.latex };
     }
 
     if (props.kind === 'lineFace') {
@@ -141,7 +164,8 @@ function AngleMeasurementRenderer({ entity }: { entity: Entity }) {
 
       const visData = getLineFaceVisData(endpoints.start, endpoints.end, facePts);
       const arcPts = generateArcPoints(visData.arcCenter, visData.projDir, visData.lineDir, ARC_RADIUS, visData.angleRadians);
-      return { arcPoints: arcPts };
+      const calc = calculateLineFaceAngle(endpoints.start, endpoints.end, facePts);
+      return { arcPoints: arcPts, angleDegrees: calc.degrees, angleLatex: calc.latex };
     }
 
     if (props.kind === 'lineLine') {
@@ -152,7 +176,8 @@ function AngleMeasurementRenderer({ entity }: { entity: Entity }) {
 
       const visData = getLineLineVisData(ep1.start, ep1.end, ep2.start, ep2.end);
       const arcPts = generateArcPoints(visData.arcCenter, visData.dir1, visData.dir2, ARC_RADIUS, visData.angleRadians);
-      return { arcPoints: arcPts };
+      const calc = calculateLineLineAngle(ep1.start, ep1.end, ep2.start, ep2.end);
+      return { arcPoints: arcPts, angleDegrees: calc.degrees, angleLatex: calc.latex };
     }
 
     return null;
@@ -166,7 +191,7 @@ function AngleMeasurementRenderer({ entity }: { entity: Entity }) {
   return (
     <group>
       <Line points={arcPoints} color={color} lineWidth={ARC_WIDTH} />
-      <AngleLabel position={labelPos} text={props.angleLatex} degrees={props.angleDegrees} color={color} />
+      <AngleLabel position={labelPos} text={visResult.angleLatex} degrees={visResult.angleDegrees} color={color} />
       <AngleHitbox entity={entity} arcPoints={arcPoints} />
     </group>
   );

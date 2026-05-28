@@ -87,7 +87,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </main>
         <button
           aria-label="调整右侧参数栏宽度"
-          className="relative z-20 hidden w-2 shrink-0 cursor-col-resize xl:block"
+          className="relative z-20 hidden w-2 shrink-0 cursor-col-resize lg:block"
           style={{ background: resizeState?.target === 'right' ? 'rgba(33,150,243,0.18)' : 'transparent' }}
           onPointerDown={(event) => {
             event.preventDefault();
@@ -97,7 +97,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <span className="absolute left-1/2 top-1/2 h-14 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }} />
         </button>
         <aside
-          className="hidden shrink-0 overflow-y-auto border-l xl:block"
+          className="hidden shrink-0 overflow-y-auto border-l lg:block"
           style={{ width: rightWidth, borderColor: COLORS.border, background: COLORS.bg }}
         >
           <PanelSection title="播放与显示">

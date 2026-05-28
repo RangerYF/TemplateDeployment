@@ -28,12 +28,12 @@
     "delete-demo-entity",
     "bind-demo-endpoints",
     "unbind-demo-endpoint",
-    "simplify-current-scene"
+    "set-rotation-angle"
   ],
   "operations": [
     {
       "type": "setOperation",
-      "description": "切换 M06 主运算类型。payload: { operation: \"concept\"|\"coordinate\"|\"parallelogram\"|\"triangle\"|\"subtraction\"|\"scalar\"|\"dotProduct\"|\"decomposition\"|\"space3D\"|\"crossProduct\"|\"geometry3D\"|\"demoStage\" }。",
+      "description": "切换 M06 主运算类型。payload: { operation: \"concept\"|\"coordinate\"|\"parallelogram\"|\"triangle\"|\"subtraction\"|\"scalar\"|\"dotProduct\"|\"decomposition\"|\"space3D\"|\"crossProduct\"|\"geometry3D\"|\"projection\"|\"rotation\"|\"demoStage\" }。",
       "payloadSchema": {
         "operation": { "type": "string" },
         "operationType": { "type": "string" },
@@ -208,6 +208,18 @@
       "doNotUseWhen": "普通向量夹角由 M06 根据向量自动计算，不要手写。"
     },
     {
+      "type": "setRotationAngle",
+      "description": "设置向量旋转角度。payload: { angleRad?: number, angleDeg?: number, piMultiple?: number }。仅在 rotation 运算模式下有效。",
+      "payloadSchema": {
+        "angleRad": { "type": "number" },
+        "angleDeg": { "type": "number" },
+        "piMultiple": { "type": "number" },
+        "anglePiMultiple": { "type": "number" }
+      },
+      "useWhen": "用户要求设置向量旋转的角度，如旋转 60°、旋转 π/3。",
+      "doNotUseWhen": "单位圆角度使用 setUnitCircleAngle；普通向量夹角由 M06 自动计算。"
+    },
+    {
       "type": "playParallelogramAnimation",
       "description": "播放平行四边形构造动画。payload: {}。",
       "payloadSchema": {},
@@ -240,7 +252,7 @@
     },
     {
       "type": "addDemoVectorOperation",
-      "description": "在自由演示台添加向量运算节点。payload: { kind: \"add\"|\"subtract\"|\"dotProduct\"|\"scale\", vec1Id?: string, vec2Id?: string, label1?: string, label2?: string, scalarK?: number, origin?: [x,y] }。",
+      "description": "在自由演示台添加向量运算节点。payload: { kind: \"add\"|\"subtract\"|\"dotProduct\"|\"scale\"|\"projection\", vec1Id?: string, vec2Id?: string, label1?: string, label2?: string, scalarK?: number, origin?: [x,y] }。",
       "payloadSchema": {
         "kind": { "type": "string" },
         "vec1Id": { "type": "string" },
@@ -426,6 +438,83 @@
       ],
       "patch": {},
       "explanation": "已在自由演示台创建两个向量并添加加法运算。"
+    },
+    {
+      "instruction": "演示向量 a=(3,4) 在 b=(1,0) 方向上的投影。",
+      "operations": [
+        { "type": "setOperation", "operation": "projection" },
+        { "type": "setVector2D", "target": "vecA", "value": [3, 4] },
+        { "type": "setVector2D", "target": "vecB", "value": [1, 0] }
+      ],
+      "patch": {},
+      "explanation": "已切换到投影模式并设置两个向量，投影向量和投影长度由 M06 自动计算。"
+    },
+    {
+      "instruction": "把向量 (1,0) 旋转 60°。",
+      "operations": [
+        { "type": "setOperation", "operation": "rotation" },
+        { "type": "setVector2D", "target": "vecA", "value": [1, 0] },
+        { "type": "setRotationAngle", "angleDeg": 60 }
+      ],
+      "patch": {},
+      "explanation": "已切换到旋转模式，设置原向量并设定旋转角度 60°，旋转后向量由 M06 自动计算。"
+    },
+    {
+      "instruction": "计算 a=(1,2,3) 和 b=(4,5,6) 的叉积。",
+      "operations": [
+        { "type": "setCrossProductDemo", "vecA3": [1, 2, 3], "vecB3": [4, 5, 6], "show3DGrid": true }
+      ],
+      "patch": {},
+      "explanation": "已设置两个三维向量，叉积结果由 M06 自动计算并在 3D 视图中展示。"
+    },
+    {
+      "instruction": "把自由演示台的向量 u 放大 3 倍。",
+      "operations": [
+        { "type": "scaleDemoVector", "label": "u", "k": 3 }
+      ],
+      "patch": {},
+      "explanation": "已将向量 u 原地缩放为 3 倍，起点不变。"
+    },
+    {
+      "instruction": "把自由演示台的向量 v 颜色改成红色，标签改成 w。",
+      "operations": [
+        { "type": "updateDemoVector", "label": "v", "color": "#F44336", "newLabel": "w" }
+      ],
+      "patch": {},
+      "explanation": "已更新向量 v 的颜色和标签。"
+    },
+    {
+      "instruction": "让自由演示台的 u 终点和 v 起点连接。",
+      "operations": [
+        { "type": "bindDemoEndpoints", "label1": "u", "label2": "v", "endpoint1": "end", "endpoint2": "start" }
+      ],
+      "patch": {},
+      "explanation": "已绑定 u 的终点与 v 的起点，拖动时会同步移动。"
+    },
+    {
+      "instruction": "角度改成弧度显示，保留 4 位小数。",
+      "operations": [
+        { "type": "setFormatOptions", "angleUnit": "rad", "decimalPlaces": 4 }
+      ],
+      "patch": {},
+      "explanation": "已切换为弧度制并设置 4 位小数精度。"
+    },
+    {
+      "instruction": "在自由演示台显示 u 在 v 方向的投影。",
+      "operations": [
+        { "type": "addDemoVectorOperation", "kind": "projection", "label1": "u", "label2": "v" }
+      ],
+      "patch": {},
+      "explanation": "已在自由演示台添加 u 到 v 的投影运算节点。"
+    },
+    {
+      "instruction": "用 e1=(1,1) 和 e2=(1,-1) 分解向量 (4,2)。但 e1 和 e2 如果共线就无法分解。",
+      "operations": [
+        { "type": "setDecompositionDemo", "target": [4, 2], "basis1": [1, 1], "basis2": [1, -1], "showDecompParallel": true }
+      ],
+      "patch": {},
+      "explanation": "已设置分解目标和基底。注意：如果基底共线则无法分解，M06 会显示警告。",
+      "warnings": ["如果 basis1 与 basis2 共线，M06 无法唯一分解，将显示警告提示。"]
     }
   ],
   "planningRules": [

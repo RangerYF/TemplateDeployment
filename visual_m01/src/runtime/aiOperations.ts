@@ -12,6 +12,7 @@ import {
   calculatePointLineDistance,
   calculatePointPointDistance,
 } from '@/engine/math/distanceCalculator';
+import { isInscribedSphereSupported } from '@/engine/math/inscribedSphere';
 import { computePointPosition } from '@/components/scene/renderers/usePointPosition';
 import type { Vec3 } from '@/engine/types';
 import {
@@ -25,6 +26,7 @@ import type { Command } from '@/editor/commands';
 import type {
   Entity,
   AngleMeasurementProperties,
+  CoordinateSystemProperties,
   DistanceMeasurementProperties,
   GeometryProperties,
   FaceProperties,
@@ -521,6 +523,172 @@ function executeAddCircumsphere(): void {
   );
 }
 
+function executeAddInSphere(): void {
+  const geometry = getActiveGeometryOrThrow();
+  const props = geometry.properties as GeometryProperties;
+  if (props.geometryType === 'sphere') {
+    throw new Error('球体本身不需要添加内切球');
+  }
+  if (!isInscribedSphereSupported(props.geometryType)) {
+    throw new Error(`${props.geometryType} 暂不支持内切球`);
+  }
+  const existing = useEntityStore.getState().getInSphere();
+  if (existing) return;
+
+  useHistoryStore.getState().execute(
+    new CreateEntityCommand('inSphere', { geometryId: geometry.id }),
+  );
+}
+
+function executeAddCircumCircle(operation: AiOperation): void {
+  const labels = asStringArray(operation.labels);
+  if (labels.length !== 3) {
+    throw new Error('addCircumCircle 需要 3 个点名');
+  }
+  const points = labels.map(findPointByLabelOrThrow);
+  const geometryId = (points[0].properties as PointProperties).geometryId;
+
+  useHistoryStore.getState().execute(
+    new CreateEntityCommand('circumCircle', {
+      pointIds: [points[0].id, points[1].id, points[2].id] as [string, string, string],
+      geometryId,
+    }),
+  );
+}
+
+const ROTATION_GEOMETRY_TYPES = new Set(['cone', 'cylinder', 'truncatedCone', 'sphere']);
+const ROTATION_DEFAULT_AXES: CoordinateSystemProperties['axes'] = [[0, 0, 1], [1, 0, 0], [0, 1, 0]];
+
+function computeFaceNormalForCoord(faceId: string): Vec3 | null {
+  const store = useEntityStore.getState();
+  const face = store.getEntity(faceId);
+  if (!face || face.type !== 'face') return null;
+  const faceProps = face.properties as FaceProperties;
+  const geoEntity = store.getEntity(faceProps.geometryId);
+  if (!geoEntity || geoEntity.type !== 'geometry') return null;
+  const geoProps = geoEntity.properties as GeometryProperties;
+  const result = buildGeometry(geoProps.geometryType, geoProps.params as never);
+  if (!result) return null;
+
+  const positions: Vec3[] = [];
+  for (let i = 0; i < Math.min(3, faceProps.pointIds.length); i++) {
+    const pe = store.getEntity(faceProps.pointIds[i]);
+    if (!pe || pe.type !== 'point') return null;
+    const pos = computePointPosition(pe.properties as PointProperties, result);
+    if (!pos) return null;
+    positions.push(pos);
+  }
+  if (positions.length < 3) return null;
+
+  const [p0, p1, p2] = positions;
+  const e1: Vec3 = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+  const e2: Vec3 = [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]];
+  const nx = e1[1] * e2[2] - e1[2] * e2[1];
+  const ny = e1[2] * e2[0] - e1[0] * e2[2];
+  const nz = e1[0] * e2[1] - e1[1] * e2[0];
+  const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+  if (len < 1e-12) return null;
+  return [nx / len, ny / len, nz / len];
+}
+
+function computeAxes(
+  origin: Vec3,
+  faceNormal: Vec3,
+  refPoint: Vec3 | null,
+): CoordinateSystemProperties['axes'] {
+  let z: Vec3 = [...faceNormal];
+  if (z[1] < 0) z = [-z[0], -z[1], -z[2]];
+
+  let x: Vec3;
+  if (refPoint) {
+    const dir: Vec3 = [refPoint[0] - origin[0], refPoint[1] - origin[1], refPoint[2] - origin[2]];
+    const dot = dir[0] * z[0] + dir[1] * z[1] + dir[2] * z[2];
+    const proj: Vec3 = [dir[0] - dot * z[0], dir[1] - dot * z[1], dir[2] - dot * z[2]];
+    const projLen = Math.sqrt(proj[0] * proj[0] + proj[1] * proj[1] + proj[2] * proj[2]);
+    if (projLen > 1e-10) {
+      x = [proj[0] / projLen, proj[1] / projLen, proj[2] / projLen];
+    } else {
+      x = autoInferXAxis(z);
+    }
+  } else {
+    x = autoInferXAxis(z);
+  }
+
+  const y: Vec3 = [
+    z[1] * x[2] - z[2] * x[1],
+    z[2] * x[0] - z[0] * x[2],
+    z[0] * x[1] - z[1] * x[0],
+  ];
+  return [x, y, z];
+}
+
+function autoInferXAxis(z: Vec3): Vec3 {
+  const absX = Math.abs(z[0]);
+  const absY = Math.abs(z[1]);
+  const absZ = Math.abs(z[2]);
+  let ref: Vec3;
+  if (absX <= absY && absX <= absZ) ref = [1, 0, 0];
+  else if (absZ <= absY) ref = [0, 0, 1];
+  else ref = [0, 1, 0];
+  const d = ref[0] * z[0] + ref[1] * z[1] + ref[2] * z[2];
+  const proj: Vec3 = [ref[0] - d * z[0], ref[1] - d * z[1], ref[2] - d * z[2]];
+  const len = Math.sqrt(proj[0] * proj[0] + proj[1] * proj[1] + proj[2] * proj[2]);
+  return [proj[0] / len, proj[1] / len, proj[2] / len];
+}
+
+function executeAddCoordinateSystem(operation: AiOperation): void {
+  const originLabel = asString(operation.originLabel);
+  if (!originLabel) {
+    throw new Error('addCoordinateSystem 需要 originLabel 指定原点');
+  }
+  const originPoint = findPointByLabelOrThrow(originLabel);
+  const geometry = getActiveGeometryOrThrow();
+  const geoProps = geometry.properties as GeometryProperties;
+
+  const existing = useEntityStore.getState().getCoordinateSystem();
+
+  let axes: CoordinateSystemProperties['axes'];
+  let zFaceId: string | undefined;
+
+  if (ROTATION_GEOMETRY_TYPES.has(geoProps.geometryType)) {
+    axes = ROTATION_DEFAULT_AXES;
+  } else {
+    const zFaceLabels = asStringArray(operation.zFaceLabels);
+    if (zFaceLabels.length < 3) {
+      throw new Error('多面体坐标系需要 zFaceLabels（至少 3 个点名）指定 Z 轴所在面');
+    }
+    const face = findFaceByLabelsOrThrow(zFaceLabels);
+    zFaceId = face.id;
+    const normal = computeFaceNormalForCoord(face.id);
+    if (!normal) {
+      throw new Error('无法计算所选面的法向量');
+    }
+    const originPos = getPointPositionOrThrow(originPoint);
+    const xRefLabel = asString(operation.xRefLabel);
+    const refPos = xRefLabel ? getPointPositionOrThrow(findPointByLabelOrThrow(xRefLabel)) : null;
+    axes = computeAxes(originPos, normal, refPos);
+  }
+
+  if (existing) {
+    useHistoryStore.getState().execute(
+      new UpdatePropertiesCommand<'coordinateSystem'>(
+        existing.id,
+        { ...existing.properties },
+        { originPointId: originPoint.id, geometryId: geometry.id, zFaceId, axes },
+      ),
+    );
+  } else {
+    useHistoryStore.getState().execute(
+      new CreateEntityCommand('coordinateSystem', {
+        originPointId: originPoint.id,
+        geometryId: geometry.id,
+        zFaceId,
+        axes,
+      }),
+    );
+  }
+}
+
 function executeAddCrossSectionByLabels(operation: AiOperation): void {
   const labels = asStringArray(operation.labels);
   if (labels.length < 3) {
@@ -877,6 +1045,15 @@ export async function applyAiOperations(operations: unknown): Promise<BridgeOper
           break;
         case 'addCircumsphere':
           executeAddCircumsphere();
+          break;
+        case 'addInSphere':
+          executeAddInSphere();
+          break;
+        case 'addCircumCircle':
+          executeAddCircumCircle(item);
+          break;
+        case 'addCoordinateSystem':
+          executeAddCoordinateSystem(item);
           break;
         case 'addCrossSectionByLabels':
           executeAddCrossSectionByLabels(item);

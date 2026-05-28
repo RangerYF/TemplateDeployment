@@ -3,6 +3,7 @@ import type { PresetData } from '@/core/types';
 export type AppScope =
   | 'full'
   | 'electric-feedback'
+  | 'p04-standalone'
   | 'builder-feedback'
   | 'builder-free-feedback'
   | 'p08-standalone'
@@ -13,6 +14,8 @@ const rawScope = import.meta.env.VITE_APP_SCOPE?.trim().toLowerCase();
 export const appScope: AppScope =
   rawScope === 'electric-feedback'
     ? 'electric-feedback'
+    : rawScope === 'p04-standalone'
+      ? 'p04-standalone'
     : rawScope === 'builder-feedback'
       ? 'builder-feedback'
       : rawScope === 'builder-free-feedback'
@@ -24,15 +27,16 @@ export const appScope: AppScope =
         : 'full';
 
 export const isElectricFeedbackMode = appScope === 'electric-feedback';
+export const isP04StandaloneMode = appScope === 'p04-standalone' || appScope === 'electric-feedback';
 export const isBuilderFeedbackMode = appScope === 'builder-feedback';
 export const isBuilderTemplateFeedbackMode = isBuilderFeedbackMode;
 export const isBuilderFreeFeedbackMode = appScope === 'builder-free-feedback';
 export const isSingleEntryBuilderFeedbackMode = isBuilderFreeFeedbackMode;
 export const isP08StandaloneMode = appScope === 'p08-standalone';
 export const isP13StandaloneMode = appScope === 'p13-standalone';
-export const isBuilderEnabled = !isElectricFeedbackMode && !isP08StandaloneMode && !isP13StandaloneMode;
+export const isBuilderEnabled = !isP04StandaloneMode && !isP08StandaloneMode && !isP13StandaloneMode;
 export const isFullAppMode = appScope === 'full';
-export const isElectricExperimentFeedbackMode = isElectricFeedbackMode || isBuilderFeedbackMode;
+export const isElectricExperimentFeedbackMode = isP04StandaloneMode || isBuilderFeedbackMode;
 
 const visiblePresetCategories = isP08StandaloneMode
   ? ['P-08']

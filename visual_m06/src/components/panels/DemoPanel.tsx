@@ -27,6 +27,8 @@ import type { Vec2D } from '@/editor/entities/types';
 import { Eye, EyeOff } from 'lucide-react';
 import { InlineLatex } from '@/components/shared/InlineLatex';
 import { toVecLatex } from '@/lib/vecLatex';
+import { findLabelConflict } from '@/engine/labelUtils';
+import { validateVecExpr, isVecExpression } from '@/engine/vecExprParser';
 
 // ─── PanelSection（折叠/展开，匹配 visual_template LeftPanel 样式）───
 
@@ -503,7 +505,7 @@ export function DemoPanel() {
           <OpInspector op={selectedEntity as DemoVecOp} entities={entities} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
         )}
         {selectedEntity?.type === 'demoMarker' && (
-          <MarkerInspector marker={selectedEntity as DemoMarker} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
+          <MarkerInspector marker={selectedEntity as DemoMarker} entities={entities} execute={execute} onDelete={() => select(null)} scope={sliderScope} />
         )}
         {selectedEntity?.type === 'demoSegment' && (
           <SegmentInspector seg={selectedEntity as DemoSegment} entities={entities} execute={execute} onDelete={() => select(null)} />
@@ -530,12 +532,12 @@ export function DemoPanel() {
           <PolygonInspector polygon={selectedEntity as DemoPolygon} entities={entities} execute={execute} onDelete={() => select(null)} />
         )}
         {selectedEntity?.type === 'demoSlider' && (
-          <SliderInspector slider={selectedEntity as DemoSlider} execute={execute} onDelete={() => select(null)} />
+          <SliderInspector slider={selectedEntity as DemoSlider} entities={entities} execute={execute} onDelete={() => select(null)} />
         )}
       </div>
 
       {/* 约束轨迹 */}
-      <ConstraintSection />
+      <ConstraintSection entities={entities} />
 
       {/* 导入/导出 */}
       <PanelSection title="场景管理" defaultOpen={true} style={{ borderTop: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
@@ -564,13 +566,19 @@ export function DemoPanel() {
 // ═══════════════════════════════════════════
 
 function MarkerInspector({
-  marker, execute, onDelete, scope,
+  marker, entities, execute, onDelete, scope,
 }: {
   marker: DemoMarker;
+  entities: Record<string, DemoEntity>;
   execute: (cmd: Command) => void;
   onDelete: () => void;
   scope?: Record<string, number>;
 }) {
+  const [mrkLabelDraft, setMrkLabelDraft] = useState(marker.label);
+  const [mrkLabelError, setMrkLabelError] = useState<string | null>(null);
+  const [prevMrkId, setPrevMrkId] = useState(marker.id);
+  if (prevMrkId !== marker.id) { setPrevMrkId(marker.id); setMrkLabelDraft(marker.label); setMrkLabelError(null); }
+
   function handleCoordChange(axis: 'x' | 'y', val: number, expr?: string) {
     const before = axis === 'x' ? { x: marker.x, xExpr: marker.xExpr } : { y: marker.y, yExpr: marker.yExpr };
     const after = axis === 'x' ? { x: val, xExpr: expr } : { y: val, yExpr: expr };
@@ -578,6 +586,11 @@ function MarkerInspector({
   }
 
   function handleLabelChange(label: string) {
+    setMrkLabelDraft(label);
+    if (!label.trim()) { setMrkLabelError('名称不能为空'); return; }
+    const conflict = findLabelConflict(label, entities, marker.id);
+    if (conflict) { setMrkLabelError(`名称已被${conflict}使用`); return; }
+    setMrkLabelError(null);
     execute(new UpdateMarkerCmd(marker.id, { label: marker.label }, { label }));
   }
 
@@ -609,21 +622,24 @@ function MarkerInspector({
       </PanelSection>
 
       <PanelSection title="标签">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: mrkLabelError ? 0 : 6 }}>
           <input
             type="text"
-            value={marker.label}
+            value={mrkLabelDraft}
             maxLength={8}
             onChange={(e) => handleLabelChange(e.target.value)}
             style={{
               flex: 1, padding: '4px 8px', borderRadius: RADIUS.sm,
-              border: `1px solid ${COLORS.border}`, fontSize: 14, color: COLORS.text,
+              border: `1px solid ${mrkLabelError ? '#e53e3e' : COLORS.border}`, fontSize: 14, color: COLORS.text,
             }}
           />
           <ToggleBtn active={marker.showCoord} onClick={handleShowCoordToggle}>
             {marker.showCoord ? '显示坐标' : '隐藏坐标'}
           </ToggleBtn>
         </div>
+        {mrkLabelError && (
+          <div style={{ fontSize: 11, color: '#e53e3e', marginTop: 2, marginBottom: 6 }}>{mrkLabelError}</div>
+        )}
       </PanelSection>
 
       <PanelSection title="颜色">
@@ -1317,23 +1333,29 @@ function isValidSliderLabel(label: string): boolean {
 }
 
 function SliderInspector({
-  slider, execute, onDelete,
+  slider, entities, execute, onDelete,
 }: {
   slider: DemoSlider;
+  entities: Record<string, DemoEntity>;
   execute: (cmd: Command) => void;
   onDelete: () => void;
 }) {
   const [labelDraft, setLabelDraft] = useState(slider.label);
-  const [labelValid, setLabelValid] = useState(true);
+  const [sliderLabelError, setSliderLabelError] = useState<string | null>(null);
 
   function handleLabelChange(label: string) {
     setLabelDraft(label);
-    if (isValidSliderLabel(label)) {
-      setLabelValid(true);
-      execute(new UpdateGenericCmd(slider.id, { label: slider.label }, { label }));
-    } else {
-      setLabelValid(false);
+    if (!isValidSliderLabel(label)) {
+      setSliderLabelError('仅限字母/数字组合（字母开头），不可用 pi、sqrt 等保留名');
+      return;
     }
+    const conflict = findLabelConflict(label, entities, slider.id);
+    if (conflict) {
+      setSliderLabelError(`名称已被${conflict}使用`);
+      return;
+    }
+    setSliderLabelError(null);
+    execute(new UpdateGenericCmd(slider.id, { label: slider.label }, { label }));
   }
 
   function handleMinChange(val: string) {
@@ -1387,12 +1409,12 @@ function SliderInspector({
             onChange={(e) => handleLabelChange(e.target.value)}
             style={{
               flex: 1, padding: '4px 8px', borderRadius: RADIUS.sm,
-              border: `1px solid ${labelValid ? COLORS.border : '#e53e3e'}`, fontSize: 14, color: COLORS.text,
+              border: `1px solid ${sliderLabelError ? '#e53e3e' : COLORS.border}`, fontSize: 14, color: COLORS.text,
             }}
           />
-          {!labelValid && (
+          {sliderLabelError && (
             <div style={{ fontSize: 11, color: '#e53e3e', marginTop: 2 }}>
-              仅限字母/数字组合（字母开头），不可用 pi、sqrt 等保留名
+              {sliderLabelError}
             </div>
           )}
         </div>
@@ -2292,12 +2314,21 @@ function VectorInspector({
   scope?: Record<string, number>;
 }) {
   const comps = getVecComponents(vec);
+  const [vecLabelDraft, setVecLabelDraft] = useState(vec.label);
+  const [vecLabelError, setVecLabelError] = useState<string | null>(null);
+  const [prevVecId, setPrevVecId] = useState(vec.id);
+  if (prevVecId !== vec.id) { setPrevVecId(vec.id); setVecLabelDraft(vec.label); setVecLabelError(null); }
 
   function handleColorChange(color: string) {
     execute(new UpdateVectorPropsCmd(vec.id, { color: vec.color }, { color }));
   }
 
   function handleLabelChange(label: string) {
+    setVecLabelDraft(label);
+    if (!label.trim()) { setVecLabelError('名称不能为空'); return; }
+    const conflict = findLabelConflict(label, entities, vec.id);
+    if (conflict) { setVecLabelError(`名称已被${conflict}使用`); return; }
+    setVecLabelError(null);
     execute(new UpdateVectorPropsCmd(vec.id, { label: vec.label }, { label }));
   }
 
@@ -2405,15 +2436,15 @@ function VectorInspector({
       </PanelSection>
 
       <PanelSection title="标签">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: vecLabelError ? 0 : 6 }}>
           <input
             type="text"
-            value={vec.label}
+            value={vecLabelDraft}
             maxLength={8}
             onChange={(e) => handleLabelChange(e.target.value)}
             style={{
               flex: 1, padding: '4px 8px', borderRadius: RADIUS.sm,
-              border: `1px solid ${COLORS.border}`, fontSize: 14, color: COLORS.text,
+              border: `1px solid ${vecLabelError ? '#e53e3e' : COLORS.border}`, fontSize: 14, color: COLORS.text,
             }}
           />
           <button
@@ -2427,6 +2458,9 @@ function VectorInspector({
             {vec.showLabel ? '显示' : '隐藏'}
           </button>
         </div>
+        {vecLabelError && (
+          <div style={{ fontSize: 11, color: '#e53e3e', marginTop: 2, marginBottom: 6 }}>{vecLabelError}</div>
+        )}
       </PanelSection>
 
       <PanelSection title="颜色">
@@ -2769,16 +2803,21 @@ function OpInspector({
 // ─── 约束轨迹区域 ───
 
 const CONSTRAINT_TEMPLATES = [
-  { label: '选择模板...', value: '' },
-  { label: '圆: dist(P,A) = r', value: 'dist(P,A) = 3' },
-  { label: '模长: mag(P) = r', value: 'mag(P) = 4' },
-  { label: '夹角: angle(A,P,B) = θ', value: 'angle(A,P,B) = 90' },
-  { label: '点积: dot(P,A) = k', value: 'dot(P,A) = 0' },
-  { label: '直线距离: distLine(P,A,B) = d', value: 'distLine(P,A,B) = 2' },
+  { label: '选择模板...', value: '', group: '' },
+  { label: '圆: dist(P,A) = r', value: 'dist(P,A) = 3', group: '点约束' },
+  { label: '模长: mag(P) = r', value: 'mag(P) = 4', group: '点约束' },
+  { label: '夹角: angle(A,P,B) = θ', value: 'angle(A,P,B) = 90', group: '点约束' },
+  { label: '点积: dot(P,A) = k', value: 'dot(P,A) = 0', group: '点约束' },
+  { label: '直线距离: distLine(P,A,B) = d', value: 'distLine(P,A,B) = 2', group: '点约束' },
+  { label: '向量模长: |⃗a| = r', value: '|\\vec{a}|=1', group: '向量约束' },
+  { label: '向量点积: ⃗a·⃗b = k', value: '\\vec{a}\\cdot\\vec{b}=0', group: '向量约束' },
+  { label: '向量差模: |⃗a-⃗b| = k', value: '|\\vec{a}-\\vec{b}|=2', group: '向量约束' },
+  { label: '混合约束', value: '|\\vec{a}-\\vec{b}|+2\\sqrt{3}\\vec{a}\\cdot\\vec{b}=0', group: '向量约束' },
 ];
 
-function ConstraintSection() {
+function ConstraintSection({ entities }: { entities: Record<string, DemoEntity> }) {
   const [input, setInput] = useState('');
+  const [inputError, setInputError] = useState('');
   const constraints = useConstraintStore((s) => s.constraints);
   const addConstraint = useConstraintStore((s) => s.addConstraint);
   const removeConstraint = useConstraintStore((s) => s.removeConstraint);
@@ -2789,15 +2828,42 @@ function ConstraintSection() {
   const objectiveExtrema = useConstraintStore((s) => s.objectiveExtrema);
   const list = Object.values(constraints);
 
+  const vecLabels = useMemo(() => {
+    const labels: string[] = [];
+    for (const e of Object.values(entities)) {
+      if (e.type === 'demoVector' && (e as DemoVector).label) labels.push((e as DemoVector).label);
+    }
+    return labels;
+  }, [entities]);
+
   const handleAdd = () => {
     const val = input.trim();
     if (!val) return;
+    if (isVecExpression(val)) {
+      const missing = validateVecExpr(val, new Set(vecLabels));
+      if (missing.length > 0) {
+        setInputError(`请先创建向量 ${missing.join(', ')}`);
+        return;
+      }
+    } else {
+      const refNames = (val.match(/[A-Z][a-zA-Z0-9]*/g) ?? []).filter((n) => n !== 'O');
+      const entityLabels = new Set(
+        Object.values(entities).filter((e) => 'label' in e).map((e) => (e as { label: string }).label),
+      );
+      const missingPts = refNames.filter((n) => !entityLabels.has(n));
+      if (missingPts.length > 0) {
+        setInputError(`请先创建标记点 ${[...new Set(missingPts)].join(', ')}`);
+        return;
+      }
+    }
     addConstraint(val);
     setInput('');
+    setInputError('');
   };
 
   return (
     <PanelSection title="约束轨迹" defaultOpen={list.length > 0} style={{ borderTop: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
+      {/* 模板下拉 */}
       <select
         style={{
           width: '100%', padding: '4px 8px', fontSize: 11, marginBottom: 6,
@@ -2805,22 +2871,24 @@ function ConstraintSection() {
           background: COLORS.white, color: COLORS.textMuted, cursor: 'pointer',
         }}
         value=""
-        onChange={(e) => { if (e.target.value) setInput(e.target.value); }}
+        onChange={(e) => { if (e.target.value) { setInput(e.target.value); setInputError(''); } }}
       >
         {CONSTRAINT_TEMPLATES.map((t, i) => (
           <option key={i} value={t.value}>{t.label}</option>
         ))}
       </select>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+
+      {/* 输入框 */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: inputError ? 2 : 6 }}>
         <input
           style={{
             flex: 1, padding: '4px 8px', fontSize: 12,
-            border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
+            border: `1px solid ${inputError ? '#ef4444' : COLORS.border}`, borderRadius: RADIUS.sm,
             background: COLORS.white, color: COLORS.text,
           }}
-          placeholder="例: dist(P,A) = 3"
+          placeholder="例: |\\vec{a}|=1  或  dist(P,A)=3"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => { setInput(e.target.value); setInputError(''); }}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
         />
         <button
@@ -2832,6 +2900,11 @@ function ConstraintSection() {
           onClick={handleAdd}
         >+</button>
       </div>
+      {inputError && (
+        <div style={{ fontSize: 10, color: '#ef4444', marginBottom: 4 }}>{inputError}</div>
+      )}
+
+      {/* 约束列表 */}
       {list.map((c) => (
         <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
           <div
@@ -2846,10 +2919,13 @@ function ConstraintSection() {
             style={{
               flex: 1, fontSize: 11, color: c.visible ? COLORS.text : COLORS.textMuted,
               cursor: 'pointer', textDecoration: c.visible ? 'none' : 'line-through',
+              overflow: 'hidden',
             }}
             onClick={() => updateConstraint(c.id, { visible: !c.visible })}
           >
-            {c.expression}
+            {isVecExpression(c.expression)
+              ? <InlineLatex latex={c.expression} style={{ fontSize: 11 }} />
+              : c.expression}
           </span>
           <button
             style={{
@@ -2872,8 +2948,11 @@ function ConstraintSection() {
         >清空全部</button>
       )}
       <div style={{ marginTop: 6, fontSize: 10, color: COLORS.textMuted, lineHeight: 1.5 }}>
-        P 为未知点，其他字母为已知点名<br />
-        dist(P,A) mag(P) dot(P,A) cross(P,A) angle(A,P,B) distLine(P,A,B)
+        <strong>点约束:</strong> P 为自由点（需先创建），O 为原点，其他为已有标记点<br />
+        dist(P,A) mag(P) dot(P,A) angle(A,P,B) distLine(P,A,B)<br />
+        <strong>向量约束:</strong> {'\\vec{a}'} 标记向量<br />
+        {'|\\vec{a}|  \\vec{a}\\cdot\\vec{b}  |\\vec{a}-\\vec{b}|'}<br />
+        支持 {'\\sqrt{}  \\pi  \\frac{}{}'}；也支持 mag(a) dot(a,b)
       </div>
 
       {list.length > 0 && (
@@ -2887,7 +2966,7 @@ function ConstraintSection() {
               border: `1px solid ${COLORS.border}`, borderRadius: RADIUS.sm,
               background: COLORS.white, color: COLORS.text, boxSizing: 'border-box',
             }}
-            placeholder="例: dist(P,A)"
+            placeholder="例: dist(P,A)  或  |\\vec{a}-\\vec{b}|"
             value={objectiveExpr}
             onChange={(e) => setObjectiveExpr(e.target.value)}
           />

@@ -613,7 +613,7 @@ function solveSlab(settings: RefractionSettings, source: Point): SolveResult {
     }
 
     segments.push({ from: currentPos, to: hit.point, kind: currentKind });
-    normals.push([hit.point, add(hit.point, mul(hit.normal, 120))]);
+    normals.push([add(hit.point, mul(hit.normal, -120)), add(hit.point, mul(hit.normal, 120))]);
 
     const n1 = inside ? settings.slabIndex : 1;
     const n2 = inside ? 1 : settings.slabIndex;
@@ -700,7 +700,7 @@ function solveHemisphere(settings: RefractionSettings, source: Point): SolveResu
     return {
       segments: [{ from: source, to: target, kind: 'incident' }, { from: target, to: exit, kind: 'refracted' }, { from: exit, to: out, kind: 'exit' }],
       angleMarks: [makeArcMark(exit, norm(sub(exit, center)), mul(insideDir, -1), '0.0°', 26)],
-      normals: [[center, exit]],
+      normals: [[center, add(exit, mul(norm(sub(exit, center)), 100))]],
       hitPoint: exit,
       status: '球心入射，曲面处垂直出射',
       pathMode: '球心入射专用模式',
@@ -740,7 +740,8 @@ function solveHemisphere(settings: RefractionSettings, source: Point): SolveResu
     }
 
     segments.push({ from: currentPos, to: hit.point, kind: currentKind });
-    normals.push([hit.point, add(hit.point, mul(hit.normal, hit.edge === 'arc' ? 100 : 120))]);
+    const nLen = hit.edge === 'arc' ? 100 : 120;
+    normals.push([add(hit.point, mul(hit.normal, -nLen)), add(hit.point, mul(hit.normal, nLen))]);
     lastHitPoint = hit.point;
 
     const n1 = inside ? settings.hemisphereIndex : 1;
