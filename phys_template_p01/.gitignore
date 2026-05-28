@@ -3,11 +3,17 @@ node_modules/
 
 # Build output
 dist/
+dist-p04/
+dist-p08/
+dist-p13/
 
 # Environment
 .env
 .env.*
 !.env.electric-feedback
+!.env.p04-standalone
+!.env.p08-standalone
+!.env.p13-standalone
 *.local
 
 # IDE
