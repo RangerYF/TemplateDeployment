@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style 1: Playground 游乐场 — 物理模板原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100vh;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;user-select:none;}
+
+/* === FULL VIEWPORT — scene-specific backgrounds === */
+.viewport{position:relative;width:100%;height:100vh;overflow:hidden;transition:background .6s;}
+
+/* Scene backgrounds */
+.bg-mechanics{background:linear-gradient(180deg,#7ec8e3 0%,#a8dce8 35%,#c9e8f0 60%,#e0f0e8 80%,#b8c8a0 85%,#8a9e6c 88%,#6d7a4e 100%);}
+.bg-celestial{background:radial-gradient(ellipse at 50% 30%,#0f1b3d 0%,#0a1128 40%,#060d1f 100%);}
+.bg-circuit{background:linear-gradient(180deg,#e8ecf4 0%,#dce2ee 50%,#d0d8e8 100%);}
+
+/* Stars for celestial */
+.stars{position:absolute;inset:0;z-index:0;pointer-events:none;display:none;}
+.bg-celestial .stars{display:block;}
+
+/* Ground for mechanics */
+.ground-strip{position:absolute;bottom:0;left:0;right:0;height:15%;z-index:1;display:none;}
+.bg-mechanics .ground-strip{display:block;background:linear-gradient(180deg,#8b7355 0%,#7a6548 30%,#695838 100%);border-top:3px solid #5a4a38;}
+
+/* Desk for circuit */
+.desk-strip{position:absolute;bottom:0;left:0;right:0;height:20%;z-index:1;display:none;}
+.bg-circuit .desk-strip{display:block;background:linear-gradient(180deg,#c4a882 0%,#b89b74 50%,#a88d66 100%);border-top:2px solid #9a7d5a;}
+
+/* === SCENE CANVAS === */
+.scene-layer{position:absolute;inset:0;z-index:2;}
+.scene-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+/* === FLOATING GLASS UI === */
+.glass{background:rgba(255,255,255,.22);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.4);box-shadow:0 8px 32px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.4);}
+.glass-dark{background:rgba(0,0,0,.35);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.3);color:#e2e8f0;}
+
+/* Top bar */
+.topbar{position:absolute;top:12px;left:14px;right:14px;height:46px;z-index:20;border-radius:16px;display:flex;align-items:center;padding:0 6px 0 16px;gap:10px;transition:background .3s,border-color .3s;}
+.topbar .logo{font-size:18px;font-weight:800;letter-spacing:-.5px;}
+.topbar .sep{width:1px;height:22px;background:rgba(0,0,0,.1);}
+.bg-celestial .topbar .sep{background:rgba(255,255,255,.15);}
+.scene-tabs{display:flex;gap:2px;background:rgba(0,0,0,.06);border-radius:10px;padding:3px;}
+.bg-celestial .scene-tabs{background:rgba(255,255,255,.08);}
+.scene-tab{padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:none;background:transparent;color:inherit;font-family:inherit;}
+.scene-tab:hover{background:rgba(0,0,0,.06);}
+.scene-tab.active{background:#fff;color:#1e293b;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.bg-celestial .scene-tab.active{background:rgba(255,255,255,.15);color:#fff;}
+.topbar .spacer{flex:1;}
+.badge{padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
+.badge-ready{background:rgba(34,197,94,.15);color:#16a34a;}
+.bg-celestial .badge-ready{background:rgba(34,197,94,.2);color:#4ade80;}
+.ctrl-group{display:flex;gap:3px;}
+.btn{width:38px;height:38px;border:none;border-radius:11px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit;color:inherit;}
+.btn:hover{transform:scale(1.08);}
+.btn:active{transform:scale(.95);}
+.btn-ghost{background:rgba(0,0,0,.05);}
+.btn-ghost:hover{background:rgba(0,0,0,.1);}
+.bg-celestial .btn-ghost{background:rgba(255,255,255,.08);}
+.bg-celestial .btn-ghost:hover{background:rgba(255,255,255,.15);}
+.btn-play{background:#22c55e;color:#fff;box-shadow:0 2px 10px rgba(34,197,94,.35);font-size:18px;}
+.btn-play:hover{box-shadow:0 4px 16px rgba(34,197,94,.45);}
+.btn-speed{width:auto;padding:0 12px;font-size:12px;font-weight:700;}
+
+/* Parameter panel (floating right) */
+.param-panel{position:absolute;top:72px;right:14px;width:260px;z-index:20;border-radius:16px;padding:16px;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .3s,background .3s;}
+.param-panel.hidden{transform:translateX(280px);opacity:0;pointer-events:none;}
+.pp-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;opacity:.6;}
+.pp-item{margin-bottom:14px;}
+.pp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.pp-label{font-size:13px;font-weight:600;}
+.pp-val{font-size:13px;font-weight:800;color:#2563eb;}
+.bg-celestial .pp-val{color:#a78bfa;}
+.bg-circuit .pp-val{color:#f59e0b;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2);border:3px solid #fff;}
+.bg-mechanics input[type=range]{background:linear-gradient(90deg,#bbf7d0,#22c55e);}
+.bg-mechanics input[type=range]::-webkit-slider-thumb{background:#22c55e;}
+.bg-celestial input[type=range]{background:linear-gradient(90deg,#c4b5fd,#7c3aed);}
+.bg-celestial input[type=range]::-webkit-slider-thumb{background:#7c3aed;}
+.bg-circuit input[type=range]{background:linear-gradient(90deg,#fde68a,#f59e0b);}
+.bg-circuit input[type=range]::-webkit-slider-thumb{background:#f59e0b;}
+.pp-toggle{display:flex;justify-content:space-between;align-items:center;}
+.toggle-sw{width:44px;height:26px;border-radius:13px;position:relative;cursor:pointer;transition:background .2s;border:none;}
+.toggle-sw.on{background:#22c55e;}
+.toggle-sw:not(.on){background:rgba(0,0,0,.15);}
+.toggle-sw .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .2s;}
+.toggle-sw.on .knob{left:21px;}
+.pp-divider{height:1px;background:rgba(128,128,128,.15);margin:14px 0;}
+.pp-adv{font-size:12px;opacity:.5;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 0;transition:opacity .15s;}
+.pp-adv:hover{opacity:.8;}
+.pp-adv-body{max-height:0;overflow:hidden;transition:max-height .3s;}
+.pp-adv-body.open{max-height:200px;}
+
+/* HUD readouts (bottom-left) */
+.hud{position:absolute;bottom:80px;left:14px;z-index:20;border-radius:14px;padding:10px 14px;min-width:150px;transition:background .3s;}
+.hud-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.5;margin-bottom:6px;}
+.hud-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;gap:16px;}
+.hud-label{opacity:.6;}
+.hud-val{font-weight:800;}
+.hud-unit{font-weight:400;opacity:.5;font-size:11px;margin-left:2px;}
+
+/* Bottom playback */
+.playback{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:20;border-radius:14px;padding:6px 10px;display:flex;align-items:center;gap:4px;transition:background .3s;}
+
+/* Gear toggle */
+.gear-toggle{position:absolute;top:72px;right:14px;z-index:21;width:40px;height:40px;border-radius:12px;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.gear-toggle:hover{transform:scale(1.1);}
+.param-panel:not(.hidden) ~ .gear-toggle{display:none;}
+</style>
+</head>
+<body>
+
+<div class="viewport bg-mechanics" id="viewport">
+  <!-- Scene backgrounds -->
+  <div class="ground-strip"></div>
+  <div class="desk-strip"></div>
+  <div class="stars" id="starsContainer"></div>
+
+  <!-- === SCENE CANVAS === -->
+  <div class="scene-layer">
+    <canvas class="scene-canvas" id="sceneCanvas"></canvas>
+  </div>
+
+  <!-- === FLOATING UI === -->
+
+  <!-- Top bar -->
+  <div class="topbar glass" id="topbar">
+    <span class="logo" style="color:#1e293b;">Physics</span>
+    <span class="sep"></span>
+    <div class="scene-tabs">
+      <button class="scene-tab active" onclick="switchScene('mechanics')">力学</button>
+      <button class="scene-tab" onclick="switchScene('celestial')">天体</button>
+      <button class="scene-tab" onclick="switchScene('circuit')">电路</button>
+    </div>
+    <div class="spacer"></div>
+    <span class="badge badge-ready">已就绪</span>
+    <div class="ctrl-group">
+      <button class="btn btn-play">&#9654;</button>
+      <button class="btn btn-ghost">&#9646;&#9646;</button>
+      <button class="btn btn-ghost">&#8634;</button>
+      <button class="btn btn-ghost btn-speed">1x</button>
+    </div>
+  </div>
+
+  <!-- Gear toggle (show when panel hidden) -->
+  <button class="gear-toggle glass" id="gearBtn" onclick="togglePanel()" style="display:none;">&#9881;</button>
+
+  <!-- Parameter panel -->
+  <div class="param-panel glass" id="paramPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="pp-title" id="ppTitle">力学参数</div>
+      <button style="background:none;border:none;font-size:16px;cursor:pointer;opacity:.4;color:inherit;" onclick="togglePanel()">&times;</button>
+    </div>
+
+    <!-- Mechanics params -->
+    <div id="params-mechanics">
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">物体质量</span><span class="pp-val">2.0 kg</span></div><input type="range" min="1" max="100" value="20"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">斜面角度</span><span class="pp-val">30°</span></div><input type="range" min="5" max="85" value="30"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">摩擦系数</span><span class="pp-val">0.30</span></div><input type="range" min="0" max="100" value="30"></div>
+      <div class="pp-toggle"><span class="pp-label">显示分力</span><button class="toggle-sw on" onclick="this.classList.toggle('on')"><div class="knob"></div></button></div>
+    </div>
+
+    <!-- Celestial params -->
+    <div id="params-celestial" style="display:none;">
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">恒星质量</span><span class="pp-val">1.0 M☉</span></div><input type="range" min="1" max="100" value="50"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">轨道半径</span><span class="pp-val">1.0 AU</span></div><input type="range" min="1" max="100" value="50"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">初始速度</span><span class="pp-val">29.8 km/s</span></div><input type="range" min="1" max="100" value="60"></div>
+      <div class="pp-toggle"><span class="pp-label">显示面积</span><button class="toggle-sw on" onclick="this.classList.toggle('on')"><div class="knob"></div></button></div>
+    </div>
+
+    <!-- Circuit params -->
+    <div id="params-circuit" style="display:none;">
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">电源电压</span><span class="pp-val">12 V</span></div><input type="range" min="1" max="100" value="50"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">电阻 R₁</span><span class="pp-val">4 Ω</span></div><input type="range" min="1" max="100" value="20"></div>
+      <div class="pp-item"><div class="pp-row"><span class="pp-label">电阻 R₂</span><span class="pp-val">8 Ω</span></div><input type="range" min="1" max="100" value="40"></div>
+      <div class="pp-toggle"><span class="pp-label">显示电流方向</span><button class="toggle-sw on" onclick="this.classList.toggle('on')"><div class="knob"></div></button></div>
+    </div>
+
+    <div class="pp-divider"></div>
+    <div class="pp-adv" onclick="document.getElementById('advBody').classList.toggle('open');this.querySelector('span').textContent=document.getElementById('advBody').classList.contains('open')?'▾ 收起':'▸ 高级设置'"><span>&#9656; 高级设置</span></div>
+    <div class="pp-adv-body" id="advBody">
+      <div class="pp-item" style="margin-top:8px;"><div class="pp-row"><span class="pp-label">重力加速度</span><span class="pp-val">9.8 m/s²</span></div><input type="range" min="1" max="200" value="98"></div>
+    </div>
+  </div>
+
+  <!-- HUD readouts -->
+  <div class="hud glass" id="hud">
+    <div class="hud-title">实时读数</div>
+    <div id="hud-mechanics">
+      <div class="hud-row"><span class="hud-label">支持力</span><span class="hud-val">17.0<span class="hud-unit">N</span></span></div>
+      <div class="hud-row"><span class="hud-label">摩擦力</span><span class="hud-val">5.1<span class="hud-unit">N</span></span></div>
+      <div class="hud-row"><span class="hud-label">合力</span><span class="hud-val">4.7<span class="hud-unit">N</span></span></div>
+      <div class="hud-row"><span class="hud-label">加速度</span><span class="hud-val">2.35<span class="hud-unit">m/s²</span></span></div>
+    </div>
+    <div id="hud-celestial" style="display:none;">
+      <div class="hud-row"><span class="hud-label">引力</span><span class="hud-val">3.54<span class="hud-unit">×10²² N</span></span></div>
+      <div class="hud-row"><span class="hud-label">轨道速度</span><span class="hud-val">29.8<span class="hud-unit">km/s</span></span></div>
+      <div class="hud-row"><span class="hud-label">周期</span><span class="hud-val">365.25<span class="hud-unit">天</span></span></div>
+      <div class="hud-row"><span class="hud-label">离心率</span><span class="hud-val">0.017</span></div>
+    </div>
+    <div id="hud-circuit" style="display:none;">
+      <div class="hud-row"><span class="hud-label">总电流</span><span class="hud-val">1.0<span class="hud-unit">A</span></span></div>
+      <div class="hud-row"><span class="hud-label">R₁电压</span><span class="hud-val">4.0<span class="hud-unit">V</span></span></div>
+      <div class="hud-row"><span class="hud-label">R₂电压</span><span class="hud-val">8.0<span class="hud-unit">V</span></span></div>
+      <div class="hud-row"><span class="hud-label">总功率</span><span class="hud-val">12<span class="hud-unit">W</span></span></div>
+    </div>
+  </div>
+
+  <!-- Bottom playback -->
+  <div class="playback glass" id="playbar">
+    <button class="btn btn-play" style="width:34px;height:34px;font-size:14px;">&#9654;</button>
+    <button class="btn btn-ghost" style="width:34px;height:34px;font-size:13px;">&#9646;&#9646;</button>
+    <button class="btn btn-ghost" style="width:34px;height:34px;font-size:14px;">&#8634;</button>
+    <button class="btn btn-ghost btn-speed" style="height:34px;">1x</button>
+  </div>
+</div>
+
+<script>
+const scenes=['mechanics','celestial','circuit'];
+const sceneConfig={
+  mechanics:{bg:'bg-mechanics',glass:'glass',ppTitle:'力学参数',logo:'#1e293b'},
+  celestial:{bg:'bg-celestial',glass:'glass-dark',ppTitle:'天体参数',logo:'#e2e8f0'},
+  circuit:{bg:'bg-circuit',glass:'glass',ppTitle:'电路参数',logo:'#1e293b'},
+};
+let currentScene='mechanics';
+const canvas=document.getElementById('sceneCanvas');
+const ctx=canvas.getContext('2d');
+let animFrame;
+
+function resizeCanvas(){
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*dpr;
+  canvas.height=rect.height*dpr;
+  canvas.style.width=rect.width+'px';
+  canvas.style.height=rect.height+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  drawScene();
+}
+window.addEventListener('resize',resizeCanvas);
+
+function drawArrow(x1,y1,x2,y2,color,lw,glow){
+  ctx.save();
+  if(glow){ctx.shadowColor=color;ctx.shadowBlur=12;}
+  ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const angle=Math.atan2(y2-y1,x2-x1);
+  const hl=12,hw=6;
+  ctx.fillStyle=color;ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-hl*Math.cos(angle-Math.PI/6),y2-hl*Math.sin(angle-Math.PI/6));
+  ctx.lineTo(x2-hl*Math.cos(angle+Math.PI/6),y2-hl*Math.sin(angle+Math.PI/6));
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+function drawLabel(text,x,y,color,bg){
+  ctx.save();ctx.font='bold 13px "Nunito",sans-serif';
+  const m=ctx.measureText(text);const pw=10,ph=4;
+  ctx.fillStyle=bg||'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  const r=8,w=m.width+pw*2,h=20+ph*2;
+  ctx.roundRect(x-pw,y-14-ph,w,h,r);ctx.fill();
+  ctx.fillStyle=color;ctx.fillText(text,x,y);
+  ctx.restore();
+}
+function drawRoundedRect(x,y,w,h,r,fill,stroke,sw){
+  ctx.save();ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw||2;ctx.stroke();}
+  ctx.restore();
+}
+
+function drawMechanics(){
+  const W=canvas.style.width.replace('px','')*1,H=canvas.style.height.replace('px','')*1;
+  const cx=W/2,cy=H/2;
+  const gY=cy+120, incL=340, angle=30*Math.PI/180;
+  const incX1=cx-170, incX2=cx+170, incY2=gY-incL*Math.sin(angle);
+
+  // Ground hatching
+  ctx.strokeStyle='#6b5a48';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(20,gY);ctx.lineTo(W-20,gY);ctx.stroke();
+  ctx.lineWidth=1.2;ctx.globalAlpha=.3;
+  for(let i=20;i<200;i+=22){ctx.beginPath();ctx.moveTo(i,gY+2);ctx.lineTo(i+14,gY+18);ctx.stroke();}
+  ctx.globalAlpha=1;
+
+  // Incline surface with gradient fill
+  const incGrad=ctx.createLinearGradient(incX1,gY,incX2,incY2);
+  incGrad.addColorStop(0,'#c4b8a4');incGrad.addColorStop(1,'#a09080');
+  ctx.fillStyle=incGrad;ctx.globalAlpha=.4;
+  ctx.beginPath();ctx.moveTo(incX1,gY);ctx.lineTo(incX2,gY);ctx.lineTo(incX2,incY2);ctx.closePath();ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.strokeStyle='#5a4a38';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(incX1,gY);ctx.lineTo(incX2,incY2);ctx.stroke();
+  ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(incX2,incY2);ctx.lineTo(incX2,gY);ctx.stroke();
+
+  // Angle arc
+  ctx.strokeStyle='#475569';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(incX1+65,gY,50,-angle,0);ctx.stroke();
+  ctx.font='bold 16px "Nunito"';ctx.fillStyle='#3d4a5c';ctx.fillText('30°',incX1+72,gY-8);
+
+  // Block on surface
+  const t=.55;
+  const bx=incX1+(incX2-incX1)*t;
+  const surfY=gY-(gY-incY2)*t;
+  const perpX=-Math.sin(angle), perpY=-Math.cos(angle);
+  const blockCX=bx+perpX*32, blockCY=surfY+perpY*32;
+
+  ctx.save();ctx.translate(blockCX,blockCY);ctx.rotate(-angle);
+  // Shadow
+  ctx.shadowColor='rgba(0,0,0,0.2)';ctx.shadowBlur=12;ctx.shadowOffsetY=4;
+  const bGrad=ctx.createLinearGradient(-36,-28,36,28);
+  bGrad.addColorStop(0,'#60a5fa');bGrad.addColorStop(1,'#2563eb');
+  ctx.fillStyle=bGrad;
+  ctx.beginPath();ctx.roundRect(-36,-56,72,56,10);ctx.fill();
+  ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+  // Highlight
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.beginPath();ctx.roundRect(-36,-56,72,20,{upperLeft:10,upperRight:10,lowerLeft:0,lowerRight:0});ctx.fill();
+  // Border
+  ctx.strokeStyle='#1d4ed8';ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-36,-56,72,56,10);ctx.stroke();
+  // Text
+  ctx.fillStyle='#fff';ctx.font='bold 17px "Nunito"';ctx.textAlign='center';
+  ctx.fillText('2 kg',0,-22);
+  ctx.restore();
+
+  // Force arrows with glow
+  drawArrow(blockCX,blockCY,blockCX,blockCY+110,'#ef4444',3.5,true);
+  drawArrow(blockCX,blockCY,blockCX+perpX*90,blockCY+perpY*90,'#3b82f6',3.5,true);
+  const upIncX=Math.cos(angle)*60, upIncY=-Math.sin(angle)*60;
+  drawArrow(blockCX,blockCY,blockCX+upIncX,blockCY+upIncY,'#22c55e',3.5,true);
+
+  // Labels
+  drawLabel('mg = 19.6 N',blockCX+8,blockCY+75,'#ef4444');
+  drawLabel('N = 17.0 N',blockCX+perpX*90-40,blockCY+perpY*90-8,'#3b82f6');
+  drawLabel('f = 5.1 N',blockCX+upIncX+6,blockCY+upIncY-4,'#22c55e');
+}
+
+function drawCelestial(){
+  const W=canvas.style.width.replace('px','')*1,H=canvas.style.height.replace('px','')*1;
+  const cx=W/2,cy=H/2-10;
+
+  // Stars (drawn on canvas for this scene)
+  for(let i=0;i<150;i++){
+    const sx=(Math.sin(i*93.17)*10000)%1*W;
+    const sy=(Math.sin(i*47.23)*10000)%1*H;
+    const sr=.4+((Math.sin(i*31.7)*10000)%1)*1.2;
+    const sa=.25+((Math.sin(i*77.3)*10000)%1)*.6;
+    ctx.globalAlpha=sa;ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(sx,sy,sr,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // Orbit path
+  const orbitRX=200,orbitRY=155;
+  ctx.strokeStyle='rgba(148,163,184,0.15)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.ellipse(cx,cy,orbitRX,orbitRY,0,0,Math.PI*2);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Kepler area
+  ctx.fillStyle='rgba(250,204,21,0.05)';ctx.strokeStyle='rgba(250,204,21,0.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+orbitRX,cy);
+  ctx.arc(cx,cy,orbitRX,0,-0.5,true);ctx.closePath();ctx.fill();ctx.stroke();
+
+  // Sun with glow
+  ctx.save();
+  ctx.shadowColor='#fbbf24';ctx.shadowBlur=40;
+  const sunGrad=ctx.createRadialGradient(cx-6,cy-6,4,cx,cy,34);
+  sunGrad.addColorStop(0,'#fffce0');sunGrad.addColorStop(.3,'#fbbf24');sunGrad.addColorStop(1,'#d97706');
+  ctx.fillStyle=sunGrad;ctx.beginPath();ctx.arc(cx,cy,34,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='600 12px "Nunito"';ctx.textAlign='center';
+  ctx.fillText('太阳 M☉',cx,cy+52);
+
+  // Earth
+  const ex=cx+orbitRX,ey=cy;
+  ctx.save();ctx.shadowColor='#3b82f6';ctx.shadowBlur=12;
+  const eGrad=ctx.createRadialGradient(ex-3,ey-3,2,ex,ey,15);
+  eGrad.addColorStop(0,'#93c5fd');eGrad.addColorStop(.5,'#3b82f6');eGrad.addColorStop(1,'#1e3a8a');
+  ctx.fillStyle=eGrad;ctx.beginPath();ctx.arc(ex,ey,15,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle='rgba(147,197,253,0.4)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ex,ey,15,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='600 11px "Nunito"';ctx.fillText('地球',ex,ey+28);
+
+  // Gravity arrow
+  drawArrow(ex-18,ey,cx+46,ey,'#f87171',2.5,true);
+  drawLabel('F = GMm/r²',cx+100,ey-14,'#f87171','rgba(248,113,113,0.1)');
+
+  // Velocity arrow (tangent upward)
+  drawArrow(ex,ey-18,ex,ey-85,'#4ade80',2.5,true);
+  drawLabel('v = 29.8 km/s',ex+10,ey-58,'#4ade80','rgba(74,222,128,0.1)');
+}
+
+function drawCircuit(){
+  const W=canvas.style.width.replace('px','')*1,H=canvas.style.height.replace('px','')*1;
+  const cx=W/2,cy=H/2;
+  const left=cx-160,right=cx+160,top=cy-120,bot=cy+120;
+
+  // Circuit loop with rounded corners
+  ctx.strokeStyle='#475569';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.roundRect(left,top,right-left,bot-top,14);ctx.stroke();
+
+  // Battery (left side)
+  ctx.fillStyle='#e8ecf4';ctx.fillRect(left-6,cy-28,12,56);
+  ctx.strokeStyle='#475569';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(left,cy-10);ctx.lineTo(left,cy-18);ctx.stroke();
+  ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(left-10,cy-18);ctx.lineTo(left+10,cy-18);ctx.stroke();
+  ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left-5,cy-25);ctx.lineTo(left+5,cy-25);ctx.stroke();
+  ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(left,cy+10);ctx.lineTo(left,cy+18);ctx.stroke();
+  ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(left-10,cy+18);ctx.lineTo(left+10,cy+18);ctx.stroke();
+  ctx.fillStyle='#475569';ctx.font='bold 14px "Nunito"';ctx.textAlign='center';
+  ctx.fillText('12V',left-28,cy+5);
+  ctx.font='500 10px "Nunito"';ctx.fillStyle='#94a3b8';ctx.fillText('电源',left-28,cy+18);
+
+  // R1 (top)
+  drawRoundedRect(cx-32,top-11,64,22,6,'#fef3c7','#f59e0b',2);
+  ctx.fillStyle='#92400e';ctx.font='bold 12px "Nunito"';ctx.textAlign='center';ctx.fillText('R₁',cx,top+5);
+  ctx.fillStyle='#475569';ctx.font='600 12px "Nunito"';ctx.fillText('4 Ω',cx,top-18);
+
+  // R2 (bottom)
+  drawRoundedRect(cx-32,bot-11,64,22,6,'#dbeafe','#3b82f6',2);
+  ctx.fillStyle='#1e40af';ctx.font='bold 12px "Nunito"';ctx.textAlign='center';ctx.fillText('R₂',cx,bot+5);
+  ctx.fillStyle='#475569';ctx.font='600 12px "Nunito"';ctx.fillText('8 Ω',cx,bot+32);
+
+  // Animated current dots
+  const t=Date.now()/1000;
+  ctx.fillStyle='#f59e0b';
+  const positions=[
+    [left+(cx-left)*.3+Math.sin(t*2)*20, top],
+    [right, top+(bot-top)*.3+Math.sin(t*2+1)*20],
+    [right-(cx-left)*.3-Math.sin(t*2)*20, bot],
+    [left, bot-(bot-top)*.3-Math.sin(t*2+1)*20],
+  ];
+  positions.forEach(([px,py])=>{
+    ctx.save();ctx.shadowColor='#f59e0b';ctx.shadowBlur=6;
+    ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+
+  // Current arrows
+  drawArrow(left+60,top,left+100,top,'#f59e0b',2.5,false);
+  drawArrow(right,top+50,right,top+90,'#f59e0b',2.5,false);
+  drawArrow(right-60,bot,right-100,bot,'#f59e0b',2.5,false);
+  drawArrow(left,bot-50,left,bot-90,'#f59e0b',2.5,false);
+
+  // Info card
+  drawRoundedRect(right+12,cy-20,85,48,8,'rgba(245,158,11,0.08)','rgba(245,158,11,0.2)',1);
+  ctx.fillStyle='#f59e0b';ctx.font='bold 12px "Nunito"';ctx.textAlign='left';ctx.fillText('I = 1.0 A',right+20,cy);
+  ctx.fillStyle='#92400e';ctx.font='500 11px "Nunito"';ctx.fillText('P = 12 W',right+20,cy+16);
+}
+
+function drawScene(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(currentScene==='mechanics')drawMechanics();
+  else if(currentScene==='celestial')drawCelestial();
+  else if(currentScene==='circuit')drawCircuit();
+  if(currentScene==='circuit') animFrame=requestAnimationFrame(()=>drawScene());
+}
+
+function switchScene(id){
+  cancelAnimationFrame(animFrame);
+  currentScene=id;
+  const vp=document.getElementById('viewport');
+  const cfg=sceneConfig[id];
+  vp.className='viewport '+cfg.bg;
+  document.querySelectorAll('.scene-tab').forEach((t,i)=>{t.classList.toggle('active',scenes[i]===id);});
+  const glassEls=[document.getElementById('topbar'),document.getElementById('paramPanel'),document.getElementById('hud'),document.getElementById('playbar'),document.getElementById('gearBtn')];
+  glassEls.forEach(el=>{if(el){el.classList.remove('glass','glass-dark');el.classList.add(cfg.glass);}});
+  scenes.forEach(s=>{document.getElementById('params-'+s).style.display=s===id?'block':'none';});
+  document.getElementById('ppTitle').textContent=cfg.ppTitle;
+  scenes.forEach(s=>{document.getElementById('hud-'+s).style.display=s===id?'block':'none';});
+  document.querySelector('.topbar .logo').style.color=cfg.logo;
+  drawScene();
+}
+
+function togglePanel(){
+  const p=document.getElementById('paramPanel');
+  const g=document.getElementById('gearBtn');
+  p.classList.toggle('hidden');
+  g.style.display=p.classList.contains('hidden')?'flex':'none';
+}
+
+setTimeout(resizeCanvas,50);
+</script>
+</body>
+</html>

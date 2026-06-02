@@ -97,8 +97,9 @@ function buildSlopeTeachingForces(
     gPerpendicularMagnitude,
   )
 
-  const muMixed = Math.sqrt(
-    Math.max(0, body.friction) * Math.max(0, support.supportBody.friction),
+  const muMixed = Math.max(
+    Math.max(0, body.friction),
+    Math.max(0, support.supportBody.friction),
   )
   const vParallel = dot(bodyState.linearVelocity, support.tangent)
   const staticLimit = muMixed * gPerpendicularMagnitude

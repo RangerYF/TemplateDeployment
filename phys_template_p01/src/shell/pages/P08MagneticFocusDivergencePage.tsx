@@ -3,6 +3,7 @@ import { Select } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   buildCircleFieldSymbolPositions,
   buildDivergenceGeometry,
@@ -39,6 +40,45 @@ export function P08MagneticFocusDivergencePage({ onBack }: Props) {
   const [showFormula, setShowFormula] = useState(true);
   const [showAnimatedParticles, setShowAnimatedParticles] = useState(true);
   const [animationPhase, setAnimationPhase] = useState(0);
+
+  useEffect(() => registerPageSnapshotAdapter('p08-magnetic-focus-divergence', {
+    getSnapshot: () => ({
+      fieldDirection,
+      chargeSign,
+      particleCount,
+      showFieldSymbols,
+      showCenters,
+      showFormula,
+      showAnimatedParticles,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        fieldDirection: MagneticFieldDirection;
+        chargeSign: 1 | -1;
+        particleCount: number;
+        showFieldSymbols: boolean;
+        showCenters: boolean;
+        showFormula: boolean;
+        showAnimatedParticles: boolean;
+      }>;
+      if (value.fieldDirection) setFieldDirection(value.fieldDirection);
+      if (value.chargeSign === 1 || value.chargeSign === -1) setChargeSign(value.chargeSign);
+      if (typeof value.particleCount === 'number') setParticleCount(value.particleCount);
+      if (typeof value.showFieldSymbols === 'boolean') setShowFieldSymbols(value.showFieldSymbols);
+      if (typeof value.showCenters === 'boolean') setShowCenters(value.showCenters);
+      if (typeof value.showFormula === 'boolean') setShowFormula(value.showFormula);
+      if (typeof value.showAnimatedParticles === 'boolean') setShowAnimatedParticles(value.showAnimatedParticles);
+      setAnimationPhase(0);
+    },
+  }), [
+    chargeSign,
+    fieldDirection,
+    particleCount,
+    showAnimatedParticles,
+    showCenters,
+    showFieldSymbols,
+    showFormula,
+  ]);
 
   useEffect(() => {
     let frameId = 0;

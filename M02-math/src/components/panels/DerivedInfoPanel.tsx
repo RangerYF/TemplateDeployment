@@ -1,23 +1,27 @@
 import { useActiveConic } from '@/hooks/useActiveEntity';
 import { useEntityStore } from '@/editor/store/entityStore';
 import { COLORS } from '@/styles/colors';
+import { KaTeXRenderer } from '@/components/KaTeXRenderer';
 import { classifyCircleLine } from '@/canvas/renderers/circleLineRenderer';
 import type { CircleLineRelation } from '@/canvas/renderers/circleLineRenderer';
 import type { LineEntity } from '@/types';
 import {
   formatAsymptoteConic,
   formatPointConic,
-  formatSignedConicValue,
   formatSquareTermConic,
   formatConicValue,
+  formatFractionPreferredConicValue,
 } from '@/engine/conicDisplay';
+import { toKatexInline } from '@/engine/triangleDisplay';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Format a number with 4 decimal places, always showing sign. */
 function fmtSigned(n: number): string {
   const mode = useEntityStore.getState().displayOptions.teachingFormat ? 'teaching' : 'decimal';
-  return formatSignedConicValue(n, mode);
+  const body = formatFractionPreferredConicValue(Math.abs(n), mode, 4, 96);
+  if (Math.abs(n) < 1e-10) return '0';
+  return n >= 0 ? `+${body}` : `−${body}`;
 }
 
 /** Format a coordinate pair, e.g. "(−4.0000, 0.0000)". */
@@ -30,6 +34,13 @@ function fmtPoint(x: number, y: number): string {
 function fmtAsymptote(k: number, b: number): string {
   const mode = useEntityStore.getState().displayOptions.teachingFormat ? 'teaching' : 'decimal';
   return formatAsymptoteConic(k, b, mode);
+}
+
+function toConicFormulaLatex(text: string): string {
+  return text
+    .replace(/²/g, '^2')
+    .replace(/−/g, '-')
+    .replace(/√(\d+)/g, '\\sqrt{$1}');
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -52,14 +63,19 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 /** One key → value row. */
 function Row({ label, value, color }: { label: string; value: string; color?: string }) {
+  const shouldUseKatex = value.includes('√') || value.includes('/');
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
       <span style={{ fontSize: '13px', color: COLORS.textPrimary }}>{label}</span>
       <span style={{
-        fontSize: '13px', fontFamily: 'monospace', fontWeight: 600,
+        fontSize: '13px', fontFamily: shouldUseKatex ? undefined : 'monospace', fontWeight: 600,
         color: color ?? COLORS.textDark,
+        lineHeight: 1.6,
+        display: 'inline-flex',
+        alignItems: 'center',
+        minHeight: 22,
       }}>
-        {value}
+        {shouldUseKatex ? <KaTeXRenderer latex={toKatexInline(value)} /> : value}
       </span>
     </div>
   );
@@ -92,26 +108,32 @@ export function DerivedInfoPanel() {
       }}>
         派生要素
       </p>
-      <p style={{ fontSize: '12px', color: COLORS.textSecondary, marginBottom: '12px', fontFamily: 'monospace', fontWeight: 600 }}>
+      <div style={{ fontSize: '12px', color: COLORS.textSecondary, marginBottom: '12px', fontWeight: 600, lineHeight: 1.7, minHeight: 24 }}>
         {entity.type === 'ellipse' && (() => {
-          const { a, b, cx, cy } = entity.params;
-          const a2 = formatSquareTermConic(a, displayMode);
-          const b2 = formatSquareTermConic(b, displayMode);
+          const { a, b, cx, cy, orientation = 'h' } = entity.params;
+          const major2 = formatSquareTermConic(a, displayMode);
+          const minor2 = formatSquareTermConic(b, displayMode);
           const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
           const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
-          return `${xTerm}/${a2} + ${yTerm}/${b2} = 1`;
+          const text = orientation === 'v'
+            ? `${xTerm}/${minor2} + ${yTerm}/${major2} = 1`
+            : `${xTerm}/${major2} + ${yTerm}/${minor2} = 1`;
+          return <KaTeXRenderer latex={toConicFormulaLatex(text)} />;
         })()}
         {entity.type === 'hyperbola' && (() => {
-          const { a, b, cx, cy } = entity.params;
-          const a2 = formatSquareTermConic(a, displayMode);
-          const b2 = formatSquareTermConic(b, displayMode);
+          const { a, b, cx, cy, orientation = 'h' } = entity.params;
+          const major2 = formatSquareTermConic(a, displayMode);
+          const minor2 = formatSquareTermConic(b, displayMode);
           const ox = cx !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cx), displayMode, 2)}`.replace('\u2212 ', cx > 0 ? '\u2212 ' : '+ ') : '';
           const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
-          return `${xTerm}/${a2} \u2212 ${yTerm}/${b2} = 1`;
+          const text = orientation === 'v'
+            ? `${yTerm}/${major2} \u2212 ${xTerm}/${minor2} = 1`
+            : `${xTerm}/${major2} \u2212 ${yTerm}/${minor2} = 1`;
+          return <KaTeXRenderer latex={toConicFormulaLatex(text)} />;
         })()}
         {entity.type === 'parabola' && (() => {
           const { p, cx, cy } = entity.params;
@@ -121,7 +143,8 @@ export function DerivedInfoPanel() {
           const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
-          return isV ? `${xTerm} = ${p2}y` : `${yTerm} = ${p2}x`;
+          const text = isV ? `${xTerm} = ${p2}y` : `${yTerm} = ${p2}x`;
+          return <KaTeXRenderer latex={toConicFormulaLatex(text)} />;
         })()}
         {entity.type === 'circle' && (() => {
           const { r, cx, cy } = entity.params;
@@ -130,25 +153,27 @@ export function DerivedInfoPanel() {
           const oy = cy !== 0 ? ` \u2212 ${formatConicValue(Math.abs(cy), displayMode, 2)}`.replace('\u2212 ', cy > 0 ? '\u2212 ' : '+ ') : '';
           const xTerm = cx !== 0 ? `(x${ox})\u00B2` : 'x\u00B2';
           const yTerm = cy !== 0 ? `(y${oy})\u00B2` : 'y\u00B2';
-          return `${xTerm} + ${yTerm} = ${r2}`;
+          const text = `${xTerm} + ${yTerm} = ${r2}`;
+          return <KaTeXRenderer latex={toConicFormulaLatex(text)} />;
         })()}
-      </p>
+      </div>
 
       {/* ── Ellipse ──────────────────────────────────────────────────── */}
       {entity.type === 'ellipse' && (() => {
         const d = entity.derived;
         const latus = (2 * entity.params.b * entity.params.b / entity.params.a);
         const { a, b, cx, cy } = entity.params;
+        const isV = d.orientation === 'v';
         return (
           <>
             <Section title="顶点">
-              <Row label="长轴右顶点" value={fmtPoint(cx + a, cy)}
+              <Row label={isV ? '长轴上顶点' : '长轴右顶点'} value={fmtPoint(isV ? cx : cx + a, isV ? cy + a : cy)}
                 color={COLORS.primary} />
-              <Row label="长轴左顶点" value={fmtPoint(cx - a, cy)}
+              <Row label={isV ? '长轴下顶点' : '长轴左顶点'} value={fmtPoint(isV ? cx : cx - a, isV ? cy - a : cy)}
                 color={COLORS.primary} />
-              <Row label="短轴上顶点" value={fmtPoint(cx, cy + b)}
+              <Row label={isV ? '短轴右顶点' : '短轴上顶点'} value={fmtPoint(isV ? cx + b : cx, isV ? cy : cy + b)}
                 color={COLORS.infoBlueDark} />
-              <Row label="短轴下顶点" value={fmtPoint(cx, cy - b)}
+              <Row label={isV ? '短轴左顶点' : '短轴下顶点'} value={fmtPoint(isV ? cx - b : cx, isV ? cy : cy - b)}
                 color={COLORS.infoBlueDark} />
             </Section>
             <Section title="焦点">
@@ -163,8 +188,8 @@ export function DerivedInfoPanel() {
               <Row label="通径 2b²/a" value={formatConicValue(latus, displayMode, 6)} />
             </Section>
             <Section title="准线">
-              <Row label="x₁ =" value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
-              <Row label="x₂ =" value={fmtSigned(d.directrices[1])} color={COLORS.directrix} />
+              <Row label={isV ? 'y₁ =' : 'x₁ ='} value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
+              <Row label={isV ? 'y₂ =' : 'x₂ ='} value={fmtSigned(d.directrices[1])} color={COLORS.directrix} />
             </Section>
           </>
         );
@@ -174,16 +199,17 @@ export function DerivedInfoPanel() {
       {entity.type === 'hyperbola' && (() => {
         const d = entity.derived;
         const latus = (2 * entity.params.b * entity.params.b / entity.params.a);
+        const isV = d.orientation === 'v';
         return (
           <>
             <Section title="轴端点">
-              <Row label="实轴左端点" value={fmtPoint(d.transverseVertices[0][0], d.transverseVertices[0][1])}
+              <Row label={isV ? '实轴下端点' : '实轴左端点'} value={fmtPoint(d.transverseVertices[0][0], d.transverseVertices[0][1])}
                 color={COLORS.primary} />
-              <Row label="实轴右端点" value={fmtPoint(d.transverseVertices[1][0], d.transverseVertices[1][1])}
+              <Row label={isV ? '实轴上端点' : '实轴右端点'} value={fmtPoint(d.transverseVertices[1][0], d.transverseVertices[1][1])}
                 color={COLORS.primary} />
-              <Row label="虚轴下端点" value={fmtPoint(d.conjugateVertices[0][0], d.conjugateVertices[0][1])}
+              <Row label={isV ? '虚轴左端点' : '虚轴下端点'} value={fmtPoint(d.conjugateVertices[0][0], d.conjugateVertices[0][1])}
                 color={COLORS.infoBlueDark} />
-              <Row label="虚轴上端点" value={fmtPoint(d.conjugateVertices[1][0], d.conjugateVertices[1][1])}
+              <Row label={isV ? '虚轴右端点' : '虚轴上端点'} value={fmtPoint(d.conjugateVertices[1][0], d.conjugateVertices[1][1])}
                 color={COLORS.infoBlueDark} />
             </Section>
             <Section title="焦点">
@@ -198,8 +224,8 @@ export function DerivedInfoPanel() {
               <Row label="通径 2b²/a" value={formatConicValue(latus, displayMode, 6)} />
             </Section>
             <Section title="准线">
-              <Row label="x₁ =" value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
-              <Row label="x₂ =" value={fmtSigned(d.directrices[1])} color={COLORS.directrix} />
+              <Row label={isV ? 'y₁ =' : 'x₁ ='} value={fmtSigned(d.directrices[0])} color={COLORS.directrix} />
+              <Row label={isV ? 'y₂ =' : 'x₂ ='} value={fmtSigned(d.directrices[1])} color={COLORS.directrix} />
             </Section>
             <Section title="渐近线">
               <Row label="L₁" value={fmtAsymptote(d.asymptotes[0].k, d.asymptotes[0].b)}

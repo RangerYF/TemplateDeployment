@@ -33,6 +33,7 @@ import type {
   PointProperties,
   SegmentProperties,
 } from '@/editor/entities/types';
+import { createDefaultHelperSegmentStyle } from '@/editor/entities/segmentStyle';
 import { initEditorWithSnapshot, resetEditor } from '@/editor/init';
 import { useEntityStore } from '@/editor/store/entityStore';
 import { useHistoryStore } from '@/editor/store/historyStore';
@@ -330,16 +331,17 @@ function executeAddSegmentByLabels(operation: AiOperation): void {
 
   const geometryId = (pointA.properties as PointProperties).geometryId;
   const style = isRecord(operation.style) ? operation.style : {};
+  const defaultStyle = createDefaultHelperSegmentStyle(pointA, pointB, {
+    color: typeof style.color === 'string' ? style.color : undefined,
+    dashed: typeof style.dashed === 'boolean' ? style.dashed : undefined,
+  });
   useHistoryStore.getState().execute(
     new CreateEntityCommand('segment', {
       builtIn: false,
       geometryId,
       startPointId: pointA.id,
       endPointId: pointB.id,
-      style: {
-        color: typeof style.color === 'string' ? style.color : '#ff0000',
-        dashed: typeof style.dashed === 'boolean' ? style.dashed : false,
-      },
+      style: defaultStyle,
       label: asString(operation.label) ?? undefined,
     }),
   );

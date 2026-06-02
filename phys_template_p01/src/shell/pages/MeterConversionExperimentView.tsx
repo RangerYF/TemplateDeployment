@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { COLORS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   calculateAmmeterConversion,
   calculateVoltmeterConversion,
@@ -101,6 +102,30 @@ export function MeterConversionExperimentView({ onBack }: Props) {
   const [ammeterParams, setAmmeterParams] = useState<AmmeterPageParams>(DEFAULT_AMMETER_PARAMS);
   const [voltmeterParams, setVoltmeterParams] = useState<VoltmeterPageParams>(DEFAULT_VOLTMETER_PARAMS);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-meter-conversion-experiment', {
+    getSnapshot: () => ({ mode, ammeterParams, voltmeterParams, showAdvanced }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        mode: MeterConversionMode;
+        ammeterParams: Partial<AmmeterPageParams>;
+        voltmeterParams: Partial<VoltmeterPageParams>;
+        showAdvanced: boolean;
+      }>;
+      if (value.ammeterParams) {
+        setAmmeterParams((prev) => clampAmmeterParams({ ...prev, ...value.ammeterParams }));
+      }
+      if (value.voltmeterParams) {
+        setVoltmeterParams((prev) => clampVoltmeterParams({ ...prev, ...value.voltmeterParams }));
+      }
+      if (value.mode) {
+        setMode(value.mode);
+      }
+      if (typeof value.showAdvanced === 'boolean') {
+        setShowAdvanced(value.showAdvanced);
+      }
+    },
+  }), [ammeterParams, mode, showAdvanced, voltmeterParams]);
 
   const ammeterResult = useMemo(() => calculateAmmeterConversion(ammeterParams), [ammeterParams]);
   const voltmeterResult = useMemo(() => calculateVoltmeterConversion(voltmeterParams), [voltmeterParams]);

@@ -11,6 +11,7 @@ export {
   useBuilderWorkspace,
   useBuilderStore,
   type BuilderStoreState,
+  type BuilderStoreSnapshot,
   type BuilderStoreActions,
   type BuilderInteraction,
   type BuilderLayoutMode,

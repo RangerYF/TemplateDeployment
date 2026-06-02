@@ -6,6 +6,7 @@ import { registerMechanicsDomain } from '@/domains/mechanics';
 import { registerEmDomain } from '@/domains/em';
 import { registerThermalDomain } from '@/domains/thermal';
 import { ensureRandomUUID } from '@/lib/ensure-random-uuid';
+import { registerTemplateBridge } from '@/templateBridge';
 import './styles/globals.css';
 
 ensureRandomUUID();
@@ -16,6 +17,8 @@ if (isFullAppMode) {
   registerMechanicsDomain();
   registerThermalDomain();
 }
+
+registerTemplateBridge();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

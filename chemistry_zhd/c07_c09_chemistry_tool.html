@@ -258,7 +258,7 @@
     .c09-status-tile .label { font-size: 11px; color: var(--color-subtext); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
     .c09-status-tile strong { display: block; margin-top: 4px; font-size: 18px; font-weight: 800; color: var(--color-text); }
     .c09-paths-panel { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
-    .path-list { display: grid; gap: 10px; margin-top: 0; flex: 1; min-height: 0; align-content: start; }
+    .path-list { display: grid; gap: 10px; margin-top: 0; flex: 1; min-height: 0; align-content: start; overflow-y: auto; padding-right: 4px; }
     .path-item { border: 1px solid var(--color-border); border-radius: 12px; padding: 12px 14px; background: #FCFDFE; cursor: pointer; transition: border-color var(--transition), background var(--transition), box-shadow var(--transition); }
     .path-item:hover { border-color: var(--color-primary); background: #F7FFFB; box-shadow: 0 10px 18px rgba(0, 192, 107, 0.08); }
     .path-item.active { border-color: var(--color-primary); background: linear-gradient(180deg, #FFFFFF 0%, #F7FFFB 100%); box-shadow: 0 10px 18px rgba(0, 192, 107, 0.1); }
@@ -354,6 +354,33 @@
       .c07-control-panel { position: static; }
       .status-grid { grid-template-columns: minmax(0, 1fr); }
     }
+    .c09-syn-panel{display:grid;gap:14px}
+    .c09-syn-body{display:flex;gap:14px;min-height:300px}
+    .c09-syn-menu{width:170px;flex-shrink:0;border-right:1px solid var(--color-border);padding-right:10px;overflow-y:auto}
+    .c09-syn-grp{font-size:10px;font-weight:700;color:#A16207;text-transform:uppercase;letter-spacing:.04em;margin:10px 4px 5px}
+    .c09-syn-grp:first-child{margin-top:0}
+    .c09-syn-it{padding:7px 9px;border-radius:7px;color:var(--color-text);cursor:pointer;margin-bottom:2px;border:1px solid transparent;font-size:13px}
+    .c09-syn-it:hover{background:var(--color-primary-light)}
+    .c09-syn-it.active{background:var(--color-primary-light);border-color:var(--color-primary-dark);color:var(--color-primary-dark);font-weight:600}
+    .c09-syn-main{flex:1;min-width:0}
+    .c09-syn-ctrl{display:flex;align-items:center;gap:8px;margin:10px 0 12px;flex-wrap:wrap}
+    .c09-syn-prog{font-size:12px;color:var(--color-subtext)}
+    .c09-syn-flow{display:flex;align-items:flex-start;gap:4px;border:1px solid var(--color-border);border-radius:10px;padding:18px 10px;overflow-x:auto;background:var(--color-white)}
+    .c09-syn-node{text-align:center;flex-shrink:0;cursor:pointer;border:1.5px solid transparent;border-radius:10px;padding:6px 4px}
+    .c09-syn-node:hover{border-color:#86EFAC;background:var(--color-primary-light)}
+    .c09-syn-node.sel{border-color:var(--color-primary-dark);background:var(--color-primary-light)}
+    .c09-syn-node svg{width:108px;height:auto}
+    .c09-syn-nm{font-size:12px;font-weight:600;color:var(--color-text);margin-top:2px}
+    .c09-syn-sf{font-size:10.5px;color:var(--color-subtext);font-family:Consolas,Menlo,monospace;margin-top:1px}
+    .c09-syn-ar{text-align:center;min-width:92px;flex-shrink:0;padding-top:26px;cursor:pointer;border-radius:8px}
+    .c09-syn-ar:hover{background:var(--color-primary-light)}
+    .c09-syn-ar .ty{font-size:11px;color:var(--color-primary-dark);font-weight:700}
+    .c09-syn-ar .ln{font-size:14px;color:var(--color-text);letter-spacing:-1px}
+    .c09-syn-ar .cd{font-size:10px;color:var(--color-subtext)}
+    .c09-syn-ghost{opacity:.32}
+    .c09-syn-detail{margin-top:12px;border:1px solid #CDEFD9;border-left:3px solid var(--color-primary-dark);border-radius:0 10px 10px 0;padding:11px 14px;background:var(--color-white)}
+    .c09-syn-detail:empty{display:none}
+    .c09-syn-detail code{font-family:Consolas,Menlo,monospace;background:#F1F5F9;padding:1px 5px;border-radius:4px}
   </style>
 </head>
 <body>
@@ -770,6 +797,25 @@
           </aside>
         </div>
 
+        <div class="panel-card">
+          <div class="card-title-row"><h3>合成路线（键线式 + 反应条件）</h3><span class="panel-badge">选路线 · 逐步展开</span></div>
+          <div class="c09-syn-panel">
+            <div class="c09-syn-body">
+              <div class="c09-syn-menu" id="c09SynMenu"></div>
+              <div class="c09-syn-main">
+                <div class="c09-syn-ctrl">
+                  <button class="btn-secondary" id="c09SynPrev">← 上一步</button>
+                  <button class="btn-primary" id="c09SynNext">下一步 →</button>
+                  <button class="btn-ghost" id="c09SynAll">全部展开</button>
+                  <span class="c09-syn-prog" id="c09SynProg"></span>
+                </div>
+                <div class="c09-syn-flow" id="c09SynFlow"></div>
+                <div class="c09-syn-detail" id="c09SynDetail"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="panel-card isomer-section">
           <div class="card-title-row"><h3>同分异构体展示</h3><span class="panel-badge">输入、对比与教学提示</span></div>
           <div class="c09-isomer-panel">
@@ -862,6 +908,8 @@
   <script>
     (function () {
       "use strict";
+
+      /*__C09_SYNTHESIS_CORE__*/
 
       const $ = (selector, root = document) => root.querySelector(selector);
       const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -4179,6 +4227,11 @@
               equation: edge.equation,
             })),
           })),
+          synthesis: {
+            currentRouteId: window.__c09SynState ? window.__c09SynState.routeId : null,
+            revealedStep: window.__c09SynState ? window.__c09SynState.revealed : 0,
+            routes: window.C09CORE ? Object.entries(window.C09CORE.ROUTES).map(([id, rt]) => ({ id, title: rt.title, group: rt.group, stepCount: rt.steps.length })) : [],
+          },
         };
       }
 
@@ -4341,6 +4394,20 @@
             } else {
               applied = applyC09TeachingScenario(scenarioId, warnings);
             }
+          } else if (type === "loadSynthesisRoute") {
+            const routeId = payload.routeId || payload.id;
+            if (window.C09CORE && window.C09CORE.ROUTES[routeId] && window.__c09SynSelectRoute) {
+              window.__c09SynSelectRoute(routeId);
+            } else {
+              warnings.push(`未知合成路线: ${routeId ?? "空"}`);
+              applied = false;
+            }
+          } else if (type === "revealRouteStep") {
+            if (window.__c09SynReveal) {
+              window.__c09SynReveal(typeof payload.count === "number" ? payload.count : undefined);
+            } else {
+              applied = false;
+            }
           } else {
             warnings.push(`C09 不支持 operation: ${type}`);
             applied = false;
@@ -4448,6 +4515,87 @@
 
       window.addEventListener("message", handleBridgeMessage);
 
+      // ── C09 合成路线视图 ──
+      function initC09Synthesis() {
+        const core = window.C09CORE;
+        const menuEl = document.getElementById('c09SynMenu');
+        const flowEl = document.getElementById('c09SynFlow');
+        const detailEl = document.getElementById('c09SynDetail');
+        const progEl = document.getElementById('c09SynProg');
+        if (!core || !menuEl || !flowEl) return;
+        const { renderSkeleton, MOLECULES, getMolecule, ROUTES } = core;
+
+        const CAT = { alkane:'烷烃', alkene:'烯烃', haloalkane:'卤代烃', alcohol:'醇', aldehyde:'醛', carboxylic:'羧酸', ester:'酯', aromatic:'芳香烃' };
+        const state = { routeId: null, revealed: 1 };
+        window.__c09SynState = state;
+
+        function molSvg(id) {
+          const m = getMolecule(id);
+          if (!m) return '<div style="color:#C53030">缺失分子: ' + id + '</div>';
+          const svg = renderSkeleton(Object.assign({}, m.skeleton, { _fallback: m.condensed }));
+          return svg + '<div class="c09-syn-nm">' + m.name + '</div><div class="c09-syn-sf">' + m.condensed + '</div>';
+        }
+
+        function renderMenu() {
+          const groups = {};
+          for (const [id, rt] of Object.entries(ROUTES)) (groups[rt.group] = groups[rt.group] || []).push([id, rt]);
+          let html = '';
+          for (const [g, items] of Object.entries(groups)) {
+            html += '<div class="c09-syn-grp">' + g + '</div>';
+            for (const [id, rt] of items)
+              html += '<div class="c09-syn-it' + (id === state.routeId ? ' active' : '') + '" data-route="' + id + '">' + rt.title + '</div>';
+          }
+          menuEl.innerHTML = html;
+          menuEl.querySelectorAll('[data-route]').forEach((el) => el.addEventListener('click', () => selectRoute(el.dataset.route)));
+        }
+
+        function renderFlow() {
+          const route = ROUTES[state.routeId];
+          if (!route) { flowEl.innerHTML = '<div class="subtle-text">请选择左侧路线</div>'; progEl.textContent = ''; return; }
+          const N = route.steps.length;
+          state.revealed = Math.max(1, Math.min(state.revealed, N));
+          let html = '<div class="c09-syn-node" data-mol="' + route.steps[0].from + '">' + molSvg(route.steps[0].from) + '</div>';
+          route.steps.forEach((st, i) => {
+            const ghost = i + 1 > state.revealed ? ' c09-syn-ghost' : '';
+            html += '<div class="c09-syn-ar' + ghost + '" data-step="' + i + '"><div class="ty">' + st.reactionType + '</div><div class="ln">─────▶</div><div class="cd">' + st.conditions + '</div></div>';
+            html += '<div class="c09-syn-node' + ghost + '" data-mol="' + st.to + '">' + molSvg(st.to) + '</div>';
+          });
+          flowEl.innerHTML = html;
+          progEl.textContent = '第 ' + state.revealed + ' / ' + N + ' 步';
+          flowEl.querySelectorAll('[data-mol]').forEach((el) => el.addEventListener('click', () => showMol(el.dataset.mol)));
+          flowEl.querySelectorAll('[data-step]').forEach((el) => el.addEventListener('click', () => showStep(+el.dataset.step)));
+        }
+
+        function showMol(id) {
+          const m = getMolecule(id); if (!m) return;
+          detailEl.innerHTML = '<h4 style="margin:0 0 5px;color:var(--color-primary-dark)">' + m.name + '</h4>' +
+            '<div>结构简式：<code>' + m.condensed + '</code>　分子式：<code>' + m.formula + '</code></div>' +
+            '<div>类别：' + (CAT[m.category] || m.category) + '</div>';
+        }
+
+        function showStep(i) {
+          const st = ROUTES[state.routeId].steps[i];
+          detailEl.innerHTML = '<h4 style="margin:0 0 5px;color:var(--color-primary-dark)">' + st.reactionType + '反应</h4>' +
+            '<div>条件：' + st.conditions + '</div><div>方程式：<code>' + st.equation + '</code></div>' +
+            (st.note ? '<div style="color:#A16207">提示：' + st.note + '</div>' : '');
+        }
+
+        function selectRoute(id) {
+          if (!ROUTES[id]) return;
+          state.routeId = id; state.revealed = 1; detailEl.innerHTML = '';
+          renderMenu(); renderFlow();
+        }
+
+        window.__c09SynSelectRoute = selectRoute;
+        window.__c09SynReveal = (n) => { state.revealed = (n == null) ? (ROUTES[state.routeId] || { steps: [] }).steps.length : n; renderFlow(); };
+
+        document.getElementById('c09SynNext').addEventListener('click', () => { state.revealed++; renderFlow(); });
+        document.getElementById('c09SynPrev').addEventListener('click', () => { state.revealed--; renderFlow(); });
+        document.getElementById('c09SynAll').addEventListener('click', () => { state.revealed = (ROUTES[state.routeId] || { steps: [] }).steps.length; renderFlow(); });
+
+        selectRoute(Object.keys(ROUTES)[0]);
+      }
+
       function initialize() {
         bindTabs();
         populateSelectors();
@@ -4458,6 +4606,7 @@
         renderIsomerResults();
         renderC09State();
         renderC09Map();
+        initC09Synthesis();
         activateTab(detectInitialTab());
         tick(performance.now());
         window.addEventListener("resize", () => { renderC07All(); renderC09Map(); });

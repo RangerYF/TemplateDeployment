@@ -119,7 +119,7 @@ export function FunctionGraphCanvas() {
     );
 
     hiDpiClear(ctx, canvas);
-    renderAxis(ctx, vp, { showGrid: true, piMode: true });
+    renderAxis(ctx, vp, { showGrid: true, piMode: true, showLabels: false });
 
     // ── Helper: draw a sampled curve ─────────────────────────────────────
     function drawCurve(

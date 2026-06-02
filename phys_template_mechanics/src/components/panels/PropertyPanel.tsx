@@ -978,6 +978,31 @@ function BodyPropertyContent({
         />
       )}
 
+      {/* Pendulum period (for bodies with rope/rod joint) */}
+      {(() => {
+        const g = Math.abs(scene.settings.gravity.y)
+        if (!g) return null
+        const joint = scene.joints.find(j =>
+          (j.type === 'rope' || j.type === 'rod') &&
+          (j.bodyIdA === body.id || j.bodyIdB === body.id),
+        )
+        if (!joint) return null
+        const L = joint.type === 'rope' ? joint.maxLength : (joint as { length?: number }).length
+        if (!L || L <= 0) return null
+        const T = 2 * Math.PI * Math.sqrt(L / g)
+        return (
+          <>
+            <SectionTitle>圆周/摆动</SectionTitle>
+            <PropertyRow label="理论周期 T">
+              <span className="text-xs" style={{ color: COLORS.text }}>{T.toFixed(2)}s</span>
+            </PropertyRow>
+            <div className="px-2 py-1" style={{ color: COLORS.textMuted, fontSize: 10 }}>
+              T = 2π√(L/g) = 2π√({L.toFixed(1)}/{g.toFixed(0)}) = {T.toFixed(2)}s
+            </div>
+          </>
+        )
+      })()}
+
       {/* Delete */}
       {getInteraction(body).canDelete && (
         <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
@@ -2081,6 +2106,21 @@ function JointPropertyPanel({ joint }: { joint: SceneJoint }) {
           ))}
         </>
       )}
+
+      {/* Rope/Rod: theoretical pendulum period */}
+      {(joint.type === 'rope' || joint.type === 'rod') && (() => {
+        const g = Math.abs(useSceneStore.getState().scene.settings.gravity.y)
+        const L = joint.type === 'rope' ? joint.maxLength : joint.length
+        if (!g || !L || L <= 0) return null
+        const T = 2 * Math.PI * Math.sqrt(L / g)
+        return (
+          <PropertyRow label="理论周期 T">
+            <span className="text-xs" style={{ color: COLORS.text }}>
+              {T.toFixed(2)}s
+            </span>
+          </PropertyRow>
+        )
+      })()}
 
       {/* Spring: restore natural length */}
       {joint.type === 'spring' && (

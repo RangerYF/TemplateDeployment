@@ -1,5 +1,6 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { COLORS, SHADOWS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   buildMeasureEmfResistanceSamples,
   buildMeasureEmfSliderSamples,
@@ -88,6 +89,36 @@ const pageStyle = {
 export function MeasureEmfComparisonView({ onBack }: Props) {
   const [params, setParams] = useState<MeasureEmfCompareParams>(DEFAULT_PARAMS);
   const [activeTab, setActiveTab] = useState<MeasureEmfViewTab>('chart');
+  const snapshotStateRef = useRef({ params, activeTab });
+
+  useEffect(() => {
+    snapshotStateRef.current = { params, activeTab };
+  }, [activeTab, params]);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-measure-emf-comparison', {
+    getSnapshot: () => snapshotStateRef.current,
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        params: Partial<MeasureEmfCompareParams>;
+        activeTab: MeasureEmfViewTab;
+      }>;
+      if (value.params) {
+        const nextParams = { ...snapshotStateRef.current.params, ...value.params };
+        snapshotStateRef.current = {
+          ...snapshotStateRef.current,
+          params: nextParams,
+        };
+        setParams(nextParams);
+      }
+      if (value.activeTab) {
+        snapshotStateRef.current = {
+          ...snapshotStateRef.current,
+          activeTab: value.activeTab,
+        };
+        setActiveTab(value.activeTab);
+      }
+    },
+  }), []);
 
   const sampleRecords = useMemo<Record<MeasureEmfMode, SampleRecord[]>>(() => {
     const seriesResistances = buildMeasureEmfResistanceSamples(params.maxResistance, params.sampleCount ?? 8);

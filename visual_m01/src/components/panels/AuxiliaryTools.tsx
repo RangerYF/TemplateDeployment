@@ -12,6 +12,7 @@ import {
   useUIStore,
   CreateEntityCommand,
   DeleteEntityCascadeCommand,
+  UpdatePropertiesCommand,
 } from '@/editor';
 import { useSelectionStore } from '@/editor/store/selectionStore';
 
@@ -171,6 +172,24 @@ export function AuxiliaryTools() {
             R = <TeX math={circumSphereData.radiusLatex} /> ≈ {circumSphereData.radius.toFixed(2)}
           </div>
         )}
+        {circumSphereEntity && (
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-sm" style={{ color: COLORS.textMuted }}>显示辅助虚线</span>
+            <Switch
+              checked={!!(circumSphereEntity.properties as { showAuxLines?: boolean }).showAuxLines}
+              onCheckedChange={(checked) => {
+                useHistoryStore.getState().execute(
+                  new UpdatePropertiesCommand<'circumSphere'>(
+                    circumSphereEntity.id,
+                    { showAuxLines: (circumSphereEntity.properties as { showAuxLines?: boolean }).showAuxLines },
+                    { showAuxLines: checked },
+                    '切换外接球辅助线',
+                  ),
+                );
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* ── 内切球 ── */}
@@ -208,6 +227,24 @@ export function AuxiliaryTools() {
         {inSphereHint && (
           <div className="text-sm" style={{ color: COLORS.warning }}>
             当前参数下不存在严格内切球，{inSphereHint}
+          </div>
+        )}
+        {inSphereEntity && inSphereData && (
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-sm" style={{ color: COLORS.textMuted }}>显示辅助虚线</span>
+            <Switch
+              checked={!!(inSphereEntity.properties as { showAuxLines?: boolean }).showAuxLines}
+              onCheckedChange={(checked) => {
+                useHistoryStore.getState().execute(
+                  new UpdatePropertiesCommand<'inSphere'>(
+                    inSphereEntity.id,
+                    { showAuxLines: (inSphereEntity.properties as { showAuxLines?: boolean }).showAuxLines },
+                    { showAuxLines: checked },
+                    '切换内切球辅助线',
+                  ),
+                );
+              }}
+            />
           </div>
         )}
       </div>

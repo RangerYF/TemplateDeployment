@@ -2,6 +2,7 @@ import type { AnalysisGroup } from '@/store/analysisStore'
 import { useAnalysisStore } from '@/store/analysisStore'
 import { useCommandStore } from '@/store/commandStore'
 import { cloneScene } from '@/models/sceneUtils'
+import type { Scene } from '@/models/types'
 import type { ModuleSceneSnapshotDraft } from '@/templates/snapshot'
 import { DEFAULT_COORDINATE_AXES, useEditorStore, type CoordinateAxesConfig } from '@/store/editorStore'
 import { useForceDisplayStore } from '@/store/forceDisplayStore'
@@ -29,18 +30,26 @@ const SCENE_ANALYSIS_PRESETS: Record<string, { activeTabs: string[]; activeDataS
   },
   'MOM-011': {
     activeTabs: ['vx-t', 'x-t'],
-    activeDataSourceIds: ['body-block-main', 'body-slope-main'],
+    activeDataSourceIds: ['body-ball-main', 'body-hemisphere-main'],
   },
   'MOM-013': {
     activeTabs: ['vx-t', 'x-t'],
-    activeDataSourceIds: ['body-block-a', 'body-block-b'],
+    activeDataSourceIds: ['body-block-m', 'body-block-M'],
   },
   'MOM-031': {
-    activeTabs: ['vx-t', 'x-t'],
+    activeTabs: ['v-t', 'x-t'],
     activeDataSourceIds: ['body-person-main', 'body-boat-main'],
   },
   'MOT-031': {
     activeTabs: ['vx-t', 'vy-t'],
+    activeDataSourceIds: ['body-ball-main'],
+  },
+  'MOT-021': {
+    activeTabs: ['vxy-t', 'a-t'],
+    activeDataSourceIds: ['body-ball-main'],
+  },
+  'MOT-033': {
+    activeTabs: ['Em-t', 'vy-t'],
     activeDataSourceIds: ['body-ball-main'],
   },
   'MOT-035': {
@@ -136,12 +145,33 @@ const SCENE_UI_PRESETS: Record<string, {
 const SCENE_SELECTION_PRESETS: Record<string, string> = {
   'FM-041': 'body-slider-main',
   'FM-042': 'body-bob-ball',
+  'MOT-021': 'body-ball-main',
+  'MOT-033': 'body-ball-main',
   'MOT-012': 'body-block-main',
   'MOT-002': 'body-cart-acc',
   'MOT-034': 'body-block-top',
   'SHM-001': 'body-mass-block',
   'SHM-002': 'body-mass-block',
   'SHM-003': 'body-bob-ball',
+}
+
+const SCENE_PLAYBACK_SPEED_PRESETS: Record<string, number> = {
+  'MOT-021': 0.5,
+}
+
+function resolveScenePresetKey(scene?: Pick<Scene, 'id' | 'name'>, sceneId?: string): string | undefined {
+  if (sceneId) return sceneId
+
+  const fromName = scene?.name.match(/\b[A-Z]{3}-\d{3}\b/)?.[0]
+  if (fromName) return fromName
+
+  const fromInternalId = scene?.id.match(/([a-z]{3}-\d{3})$/i)?.[1]
+  return fromInternalId?.toUpperCase()
+}
+
+function getDefaultPlaybackSpeed(scene?: Pick<Scene, 'id' | 'name'>, sceneId?: string): number {
+  const key = resolveScenePresetKey(scene, sceneId)
+  return key ? (SCENE_PLAYBACK_SPEED_PRESETS[key] ?? 1) : 1
 }
 
 function cloneCoordinateAxes(config: CoordinateAxesConfig): CoordinateAxesConfig {
@@ -260,4 +290,5 @@ export function loadRuntimeSceneDraft(draft: ModuleSceneSnapshotDraft): void {
       bodyIds: [...group.bodyIds],
     })),
   })
+  usePlaybackControlStore.getState().setPlaybackSpeed(getDefaultPlaybackSpeed(draft.scene))
 }

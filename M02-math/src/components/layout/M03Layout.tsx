@@ -6,7 +6,7 @@
  * Panels use clean card-like styling with soft borders.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Undo2, Redo2, Crosshair, MapPin,
   PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
@@ -24,7 +24,12 @@ import { MovablePointAnimPanel }     from '@/components/panels/MovablePointAnimP
 import { PresetsPanel }              from '@/components/panels/PresetsPanel';
 import { useHistoryStore } from '@/editor/store/historyStore';
 import { useEntityStore } from '@/editor/store/entityStore';
+import { useM03InteractionStore } from '@/editor/store/m03InteractionStore';
 import { COLORS } from '@/styles/colors';
+
+const LEFT_PANEL_WIDTH = 224;
+const RIGHT_PANEL_WIDTH = 268;
+const THREE_COLUMN_MIN_WIDTH = 1120;
 
 export function M03Layout() {
   const canUndo        = useHistoryStore((s) => s.canUndo);
@@ -40,13 +45,45 @@ export function M03Layout() {
   const hasSelection   = activeEntityId !== null;
   const activeToolHint =
     activeTool === 'point-on-curve'
-      ? '当前：曲上取点，点击曲线可观察切线、法线和焦点弦'
+      ? '当前：取点标注。可在曲线或“直线 + 圆锥曲线”的交点处点击标点。'
       : activeTool === 'movable-point'
-        ? '当前：放置动点，点击曲线可添加可拖动的点'
+        ? '当前：动点演示。可在曲线上放一个点，并沿曲线拖动或播放它的运动。'
         : '当前：平移缩放，可拖动画布或滚轮缩放';
+  const clearTracePins = useM03InteractionStore((s) => s.clearAll);
+  const pruneTracePins = useM03InteractionStore((s) => s.pruneInvalid);
 
   const [leftOpen, setLeftOpen]   = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
+  const prevToolRef = useRef(activeTool);
+  const [isCompact, setIsCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < THREE_COLUMN_MIN_WIDTH;
+  });
+
+  useEffect(() => {
+    if (prevToolRef.current === 'point-on-curve' && activeTool !== 'point-on-curve') {
+      clearTracePins();
+    }
+    prevToolRef.current = activeTool;
+  }, [activeTool, clearTracePins]);
+
+  useEffect(() => {
+    pruneTracePins(entities.map((entity) => entity.id));
+  }, [entities, pruneTracePins]);
+
+  useEffect(() => {
+    const updateCompact = () => {
+      const width = window.visualViewport?.width ?? window.innerWidth;
+      setIsCompact(width < THREE_COLUMN_MIN_WIDTH);
+    };
+    updateCompact();
+    window.addEventListener('resize', updateCompact);
+    window.visualViewport?.addEventListener('resize', updateCompact);
+    return () => {
+      window.removeEventListener('resize', updateCompact);
+      window.visualViewport?.removeEventListener('resize', updateCompact);
+    };
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -54,8 +91,12 @@ export function M03Layout() {
       if (e.key === 'Escape') {
         const tag = (e.target as HTMLElement)?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-        if (useEntityStore.getState().activeTool !== 'pan-zoom') {
+        const currentTool = useEntityStore.getState().activeTool;
+        if (currentTool !== 'pan-zoom') {
           useEntityStore.getState().setActiveTool('pan-zoom');
+          if (currentTool === 'point-on-curve') {
+            useM03InteractionStore.getState().clearAll();
+          }
         }
         return;
       }
@@ -99,23 +140,29 @@ export function M03Layout() {
           {/* Pan/Snap toggle */}
           <ToolButton
             active={activeTool === 'point-on-curve'}
-            onClick={() => setTool(activeTool === 'point-on-curve' ? 'pan-zoom' : 'point-on-curve')}
-            title={activeTool === 'point-on-curve' ? '退出追踪模式' : '进入追踪模式'}
+            onClick={() => {
+              const leavingTrace = activeTool === 'point-on-curve';
+              setTool(leavingTrace ? 'pan-zoom' : 'point-on-curve');
+              if (leavingTrace) {
+                clearTracePins();
+              }
+            }}
+            title={activeTool === 'point-on-curve' ? '退出取点模式' : '进入取点模式'}
             activeColor="#00C06B"
           >
             {activeTool === 'point-on-curve'
-              ? <><Crosshair size={13} /><span>追踪中</span></>
-              : <><Crosshair size={13} /><span>追踪</span></>}
+              ? <><Crosshair size={13} /><span>取点中</span></>
+              : <><Crosshair size={13} /><span>取点</span></>}
           </ToolButton>
 
           {/* Movable point tool */}
           <ToolButton
             active={activeTool === 'movable-point'}
             onClick={() => setTool(activeTool === 'movable-point' ? 'pan-zoom' : 'movable-point')}
-            title={activeTool === 'movable-point' ? '退出动点模式' : '放置/拖拽动点'}
+            title={activeTool === 'movable-point' ? '退出动点模式' : '放置并拖动沿曲线运动的点'}
             activeColor="#F59E0B"
           >
-            <MapPin size={13} /><span>动点</span>
+            <MapPin size={13} /><span>动点演示</span>
           </ToolButton>
 
           {/* Divider */}
@@ -138,32 +185,48 @@ export function M03Layout() {
       </header>
 
       {/* ── Main Three-Zone ──────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="relative flex flex-1 min-w-0 min-h-0 overflow-hidden">
 
         {/* ── LEFT: Entity List ──────────────────────────────────────────── */}
         <aside
-          className="shrink-0 bg-white border-r border-eduMind-border flex flex-col overflow-hidden transition-[width] duration-200"
-          style={{ width: leftOpen ? 224 : 0 }}
+          className="bg-white border-r border-eduMind-border flex flex-col overflow-hidden transition-[width,transform] duration-200 z-20"
+          style={isCompact
+            ? {
+                position: 'absolute',
+                inset: '0 auto 0 0',
+                width: LEFT_PANEL_WIDTH,
+                transform: leftOpen ? 'translateX(0)' : 'translateX(-100%)',
+                boxShadow: leftOpen ? '0 8px 24px rgba(0,0,0,0.12)' : 'none',
+              }
+            : { width: leftOpen ? LEFT_PANEL_WIDTH : 0, flexShrink: 0 }}
         >
           {leftOpen && (
-            <div className="flex flex-col h-full overflow-y-auto">
+            <div className="flex flex-col h-full min-w-0 overflow-y-auto">
               <EntityListPanel />
             </div>
           )}
         </aside>
 
         {/* ── CENTER: Canvas ─────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-hidden bg-eduMind-bgPage">
+        <div className="flex-1 min-w-0 min-h-0 overflow-hidden bg-eduMind-bgPage">
           <GeometryCanvas />
         </div>
 
         {/* ── RIGHT: Param Panels ────────────────────────────────────────── */}
         <aside
-          className="shrink-0 bg-white border-l border-eduMind-border flex flex-col overflow-hidden transition-[width] duration-200"
-          style={{ width: rightOpen ? 268 : 0 }}
+          className="bg-white border-l border-eduMind-border flex flex-col overflow-hidden transition-[width,transform] duration-200 z-20"
+          style={isCompact
+            ? {
+                position: 'absolute',
+                inset: '0 0 0 auto',
+                width: RIGHT_PANEL_WIDTH,
+                transform: rightOpen ? 'translateX(0)' : 'translateX(100%)',
+                boxShadow: rightOpen ? '0 8px 24px rgba(0,0,0,0.12)' : 'none',
+              }
+            : { width: rightOpen ? RIGHT_PANEL_WIDTH : 0, flexShrink: 0 }}
         >
           {rightOpen && (
-            <div className="flex flex-col h-full overflow-y-auto">
+            <div className="flex flex-col h-full min-w-0 overflow-y-auto">
               {hasSelection ? (
                 activeType === 'line' ? (
                   <LineParamPanel />
@@ -196,6 +259,25 @@ export function M03Layout() {
             </div>
           )}
         </aside>
+
+        {isCompact && (leftOpen || rightOpen) && (
+          <button
+            type="button"
+            aria-label="关闭侧边栏遮罩"
+            onClick={() => {
+              setLeftOpen(false);
+              setRightOpen(false);
+            }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.12)',
+              zIndex: 10,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          />
+        )}
       </div>
     </div>
   );

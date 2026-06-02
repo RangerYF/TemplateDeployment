@@ -24,12 +24,36 @@ interface ConicSpec {
   defaultParams: Record<string, number | string>;
 }
 
+interface ImplicitPresetSpec {
+  label: string;
+  exprStr: string;
+  defaults: Record<string, number>;
+  description: string;
+}
+
 const CONIC_SPECS: ConicSpec[] = [
-  { type: 'ellipse',   label: '椭圆',     defaultParams: { a: 5, b: 3, cx: 0, cy: 0 } },
-  { type: 'hyperbola', label: '双曲线',   defaultParams: { a: 3, b: 4, cx: 0, cy: 0 } },
+  { type: 'ellipse',   label: '椭圆 →',   defaultParams: { a: 5, b: 3, cx: 0, cy: 0, orientation: 'h' } },
+  { type: 'ellipse',   label: '椭圆 ↑',   defaultParams: { a: 5, b: 3, cx: 0, cy: 0, orientation: 'v' } },
+  { type: 'hyperbola', label: '双曲线 →', defaultParams: { a: 3, b: 4, cx: 0, cy: 0, orientation: 'h' } },
+  { type: 'hyperbola', label: '双曲线 ↑', defaultParams: { a: 3, b: 4, cx: 0, cy: 0, orientation: 'v' } },
   { type: 'parabola',  label: '抛物线 →', defaultParams: { p: 2, cx: 0, cy: 0, orientation: 'h' } },
   { type: 'parabola',  label: '抛物线 ↑', defaultParams: { p: 2, cx: 0, cy: 0, orientation: 'v' } },
   { type: 'circle',    label: '圆',       defaultParams: { r: 4, cx: 0, cy: 0 } },
+];
+
+const IMPLICIT_PRESETS: ImplicitPresetSpec[] = [
+  {
+    label: '距离比定值',
+    exprStr: 'sqrt((x-x1)^2+(y-y1)^2)-k*sqrt((x-x2)^2+(y-y2)^2)',
+    defaults: { x1: -3, y1: 0, x2: 3, y2: 0, k: 0.6 },
+    description: '到两定点距离之比为常数',
+  },
+  {
+    label: '距离积定值',
+    exprStr: 'sqrt((x-x1)^2+(y-y1)^2)*sqrt((x-x2)^2+(y-y2)^2)-m',
+    defaults: { x1: -3, y1: 0, x2: 3, y2: 0, m: 18 },
+    description: '到两定点距离之积为常数',
+  },
 ];
 
 const TYPE_NAMES: Record<string, string> = {
@@ -50,7 +74,7 @@ const DISPLAY_OPTS: Array<[keyof DisplayOptions, string]> = [
   ['showAsymptotes',      '渐近线'],
   ['showAxesOfSymmetry',  '对称轴'],
   ['showLabels',          '方程标签'],
-  ['showIntersections',   '交点 (直线)'],
+  ['showIntersections',   '交点(直线与圆锥)'],
   ['teachingFormat',      '教学格式'],
   ['showTangent',         '切线 (动点)'],
   ['showNormal',          '法线 (动点)'],
@@ -93,6 +117,24 @@ export function EntityListPanel() {
       parsed?.exprStr ?? defaultExpr,
       parsed?.namedParams ?? [],
       { color },
+    );
+    executeM03Command(new AddEntityCommand(entity));
+    useEntityStore.getState().setActiveEntityId(entity.id);
+  };
+
+  const handleAddImplicitPreset = (preset: ImplicitPresetSpec) => {
+    setShowAddMenu(false);
+    const color = ENTITY_COLORS[entities.length % ENTITY_COLORS.length];
+    const parsed = parseImplicitEquation(preset.exprStr, []);
+    if (!parsed) return;
+    const namedParams = parsed.namedParams.map((param) => ({
+      ...param,
+      value: preset.defaults[param.name] ?? param.value,
+    }));
+    const entity = createImplicitCurve(
+      parsed.exprStr,
+      namedParams,
+      { color, label: preset.label },
     );
     executeM03Command(new AddEntityCommand(entity));
     useEntityStore.getState().setActiveEntityId(entity.id);
@@ -183,6 +225,16 @@ export function EntityListPanel() {
                 {CONIC_SPECS.map((spec, i) => (
                   <MenuItem key={`${spec.type}-${i}`} onClick={() => handleAdd(spec)}>
                     {spec.label}
+                  </MenuItem>
+                ))}
+                <div style={{ borderTop: `1px solid ${COLORS.border}`, margin: '4px 8px' }} />
+                {IMPLICIT_PRESETS.map((preset) => (
+                  <MenuItem
+                    key={preset.label}
+                    onClick={() => handleAddImplicitPreset(preset)}
+                    subtitle={preset.description}
+                  >
+                    {preset.label}
                   </MenuItem>
                 ))}
                 <div style={{ borderTop: `1px solid ${COLORS.border}`, margin: '4px 8px' }} />
@@ -321,7 +373,15 @@ export function EntityListPanel() {
 
 // ─── MenuItem ────────────────────────────────────────────────────────────────
 
-function MenuItem({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+function MenuItem({
+  onClick,
+  children,
+  subtitle,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+  subtitle?: string;
+}) {
   return (
     <button
       onClick={onClick}
@@ -334,7 +394,14 @@ function MenuItem({ onClick, children }: { onClick: () => void; children: React.
       }}
       {...btnHover(COLORS.surfaceAlt)}
     >
-      {children}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: subtitle ? '2px' : 0 }}>
+        <span>{children}</span>
+        {subtitle && (
+          <span style={{ fontSize: '10px', color: COLORS.textSecondary, lineHeight: 1.35 }}>
+            {subtitle}
+          </span>
+        )}
+      </div>
     </button>
   );
 }

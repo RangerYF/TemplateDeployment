@@ -9,6 +9,8 @@ import './conveyor'
 import './hemisphere'
 import './halfSphere'
 import './groove'
+import './channel'
+import './person'
 import './ground'
 
 // Re-export registry API

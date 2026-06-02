@@ -21,6 +21,7 @@ import {
   P13StageGrid,
   type P13DisplayOptions,
 } from './p13/P13DisplayOptions';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 const pageStyle = {
   pageBg: COLORS.bgPage,
@@ -65,16 +66,61 @@ export function P13LenzMagnetCoilPage({ onBack }: Props) {
   const magnetXRef = useRef(magnetX);
   const playbackMotionRef = useRef<P13LenzMotion>('insert');
   const hasAutoStartedRef = useRef(false);
+  const restoringSnapshotRef = useRef(false);
 
   useEffect(() => {
     simulator.unload();
   }, []);
+
+  useEffect(() => registerPageSnapshotAdapter('p13-lenz-magnet-coil', {
+    getSnapshot: () => ({
+      pole,
+      motion,
+      turns,
+      analysisStep,
+      magnetX,
+      displayOptions,
+    }),
+    loadSnapshot: (snapshot) => {
+      restoringSnapshotRef.current = true;
+      const value = snapshot as Partial<{
+        pole: P13LenzPole;
+        motion: P13LenzMotion;
+        turns: number;
+        analysisStep: number;
+        magnetX: number;
+        displayOptions: Partial<P13DisplayOptions>;
+      }>;
+      if (value.pole) setPole(value.pole);
+      if (value.motion) {
+        playbackMotionRef.current = value.motion;
+        setMotion(value.motion);
+      }
+      if (typeof value.turns === 'number') setTurns(value.turns);
+      if (typeof value.analysisStep === 'number') setAnalysisStep(value.analysisStep);
+      if (typeof value.magnetX === 'number') {
+        const nextX = Math.max(LENZ_MAGNET_MIN_X, Math.min(LENZ_MAGNET_MAX_X, value.magnetX));
+        magnetXRef.current = nextX;
+        setMagnetX(nextX);
+      }
+      if (value.displayOptions) {
+        setDisplayOptions((prev) => ({ ...prev, ...value.displayOptions }));
+      }
+      setDraggingMagnet(false);
+      setIsAutoPlaying(false);
+      hasAutoStartedRef.current = true;
+      window.setTimeout(() => {
+        restoringSnapshotRef.current = false;
+      }, 0);
+    },
+  }), [analysisStep, displayOptions, magnetX, motion, pole, turns]);
 
   useEffect(() => {
     magnetXRef.current = magnetX;
   }, [magnetX]);
 
   useEffect(() => {
+    if (restoringSnapshotRef.current) return;
     setAnalysisStep(0);
   }, [pole, motion, turns]);
 

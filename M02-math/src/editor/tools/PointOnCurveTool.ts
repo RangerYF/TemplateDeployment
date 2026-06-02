@@ -54,7 +54,7 @@ export class PointOnCurveTool implements Tool {
     const store    = useM03InteractionStore.getState();
 
     // 1. Check proximity to intersection points first (higher priority)
-    const snapRadius = Math.min(vp.xRange, vp.yRange) * 0.10;
+    const snapRadius = Math.min(vp.xRange, vp.yRange) * 0.14;
 
     const lineEntities:  LineEntity[]  = [];
     const conicEntities: ConicEntity[] = [];
@@ -96,7 +96,7 @@ export class PointOnCurveTool implements Tool {
     const entities = useEntityStore.getState().entities;
 
     // Snap radius: 10% of the shorter viewport axis (scales naturally with zoom)
-    const snapRadius = Math.min(vp.xRange, vp.yRange) * 0.10;
+    const snapRadius = Math.min(vp.xRange, vp.yRange) * 0.14;
 
     const snap = findNearestOnAnyEntity(entities, event.mathX, event.mathY, vp, snapRadius);
 

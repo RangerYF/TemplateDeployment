@@ -16,8 +16,7 @@
     "load-preset-scene",
     "set-five-point-step",
     "set-auxiliary-angle-demo",
-    "set-triangle-solver",
-    "simplify-current-scene"
+    "set-triangle-solver"
   ],
   "operations": [
     {
@@ -271,6 +270,22 @@
       ],
       "patch": {},
       "explanation": "已切换到三角形解算并由 M04 计算 3-4-5 三角形。"
+    },
+    {
+      "instruction": "显示参考曲线，把追踪点移到 π/3。",
+      "operations": [
+        { "type": "setFunctionGraphOptions", "showReference": true, "traceX": 1.0472 }
+      ],
+      "patch": {},
+      "explanation": "已开启参考曲线并将追踪点设到 π/3 ≈ 1.0472。"
+    },
+    {
+      "instruction": "把函数图视窗 x 轴扩展到 -2π 到 2π。",
+      "operations": [
+        { "type": "setViewport", "target": "function", "xMin": -6.2832, "xMax": 6.2832, "yMin": -3, "yMax": 3 }
+      ],
+      "patch": {},
+      "explanation": "已设置函数图视窗 x 轴范围为 ±2π。"
     }
   ],
   "planningRules": [

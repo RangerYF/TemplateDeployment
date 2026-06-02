@@ -25,6 +25,7 @@ interface M03InteractionState {
 
   togglePinnedPoint: (pt: { mathX: number; mathY: number; entityId: string }) => void;
   togglePinnedIntersection: (pt: { mathX: number; mathY: number; lineId: string; conicId: string }) => void;
+  pruneInvalid: (entityIds: string[]) => void;
   clearAll: () => void;
   getSnapshot: () => M03InteractionSnapshot;
   loadSnapshot: (snapshot?: Partial<M03InteractionSnapshot>) => void;
@@ -74,6 +75,25 @@ export const useM03InteractionStore = create<M03InteractionState>((set, get) => 
       const label = `X${_xsectCounter}`;
       set({ pinnedIntersections: [...existing, { id, mathX, mathY, lineId, conicId, label }] });
     }
+  },
+
+  pruneInvalid(entityIds) {
+    const valid = new Set(entityIds);
+    const pinnedPoints = get().pinnedPoints.filter((pin) => valid.has(pin.entityId));
+    const pinnedIntersections = get().pinnedIntersections.filter(
+      (pin) => valid.has(pin.lineId) && valid.has(pin.conicId),
+    );
+
+    if (
+      pinnedPoints.length === get().pinnedPoints.length &&
+      pinnedIntersections.length === get().pinnedIntersections.length
+    ) {
+      return;
+    }
+
+    _pinCounter = pinnedPoints.length;
+    _xsectCounter = pinnedIntersections.length;
+    set({ pinnedPoints, pinnedIntersections });
   },
 
   clearAll() {

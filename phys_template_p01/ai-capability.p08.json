@@ -1,0 +1,411 @@
+{
+  "templateKey": "p08",
+  "aiLevel": "L2",
+  "supportsAiBuild": true,
+  "description": "P08 电磁场可视化。覆盖 5 大教学模块 24 个预设场景（静电场、带电粒子在电场中、静磁场、带电粒子在磁场中、复合场），通过结构化 operations 控制：加载预设、切换教学模块、修改物理参数、切换 force/motion/field 三视角、显示开关（电场线、等势线、电势分布、3D 电势图、轨迹）、场线密度、两点电势差测量探针、螺线管/圆形电流教学工作台、3D 相机、播放/暂停/重置。",
+  "supportedIntents": [
+    "load-preset",
+    "open-module",
+    "set-param",
+    "set-params",
+    "select-entity",
+    "switch-primary-viewport",
+    "toggle-overlay-viewport",
+    "set-display-options",
+    "set-potential-probe",
+    "clear-potential-probes",
+    "set-solenoid-teaching",
+    "add-solenoid-compass",
+    "move-solenoid-compass",
+    "add-loop-compass",
+    "move-loop-compass",
+    "reset-loop-teaching",
+    "set-electrostatic-surface-3d",
+    "reset-electrostatic-surface-3d",
+    "play",
+    "pause",
+    "reset"
+  ],
+  "operations": [
+    {
+      "type": "loadPreset",
+      "description": "加载 P08 电磁场预设场景。payload: { presetId: string, module?: \"electrostatic\"|\"particle-electric\"|\"magnetostatic\"|\"particle-magnetic\"|\"combined-field\" }。可用 presetId（共 24 个，按模块分组）：静电场 electrostatic → P02-EMF001-point-charge-field、P02-EMF002-two-charges-field、P02-EMF003-parallel-plate-efield；带电粒子在电场中 particle-electric → P02-EMF013-two-stage-efield、P02-EMF012-efield-deflection、P02-EMF011-efield-acceleration；静磁场 magnetostatic → P02-EMF021-wire-bfield、P02-EMF022-circular-current-bfield、P02-EMF023-solenoid-bfield、P02-EMF024-ampere-force-wire-bfield；带电粒子在磁场中 particle-magnetic → P02-EM003-cyclotron-motion、P02-EMF031-bfield-straight-boundary、P02-EMF032-bfield-circular-boundary、P02-EMF037-translation-circle、P02-EMF038-rotation-circle、P02-EMF039-scaling-circle、P02-EMF033-magnetic-focusing、P02-EMF036-magnetic-divergence、P02-EMF034-bfield-dual-boundary、P02-EMF035-bfield-semicircle；复合场 combined-field → P02-EMF041-velocity-selector、P02-EMF042-cyclotron、P02-EMF043-em-flowmeter、P02-EMF044-electrogravity-circular-motion。",
+      "payloadSchema": {
+        "presetId": { "type": "string" },
+        "id": { "type": "string" },
+        "module": { "type": "string" }
+      },
+      "useWhen": "用户要求加载某个电磁场场景，如 “演示点电荷场”、“切换到回旋加速器”、“展示磁聚焦”。",
+      "doNotUseWhen": "用户只想微调当前场景参数时使用 setParam/setParams；只想浏览模块导航首页时使用 openModule。"
+    },
+    {
+      "type": "openModule",
+      "description": "切换到 P08 教学模块导航页。payload: { module: \"electrostatic\"|\"particle-electric\"|\"magnetostatic\"|\"particle-magnetic\"|\"combined-field\" }。省略 module 时回到 P08 首页。",
+      "payloadSchema": {
+        "module": { "type": "string" },
+        "moduleKey": { "type": "string" }
+      },
+      "useWhen": "用户要求查看某个教学模块的所有预设，例如 “看静电场都有哪些场景”、“打开复合场专题”。",
+      "doNotUseWhen": "用户已指定具体场景时直接使用 loadPreset，不要先进入模块再加载。"
+    },
+    {
+      "type": "setParam",
+      "description": "修改当前预设的单个参数。payload: { key: string, value: number | boolean | string }。常见 key：charge（电荷 C 或 μC）、charge1/chargeQ1/chargeQ2（点电荷量）、mass（粒子质量 kg）、v0（初速度 m/s）、theta（入射角度°）、B/B1/B2（磁感应强度 T）、E（电场强度 N/C 或 V/m）、direction（磁场方向 “in”/“out”）、voltage（电压 V）、current（电流 A）、plateDistance/plateLength/plateWidth（极板距离/长度/宽度）、entryY（入射高度）、fieldRadius（圆形磁场区域半径）、turns（螺线管匝数）、loopRadius（圆形电流半径）、loopViewMode/wireViewMode/currentDirectionMode（视图/方向模式）、particleCount/baseSpeed/speedSpread/launchAngleDeg/angleSpreadDeg/entrySpacing/focusDistance/focusSpread（多粒子初始条件）、accelVoltage/accelLength/deflectVoltage（两段式电场）、capacitorModel/dielectric/plateCharge（平行板模型/介质/电量）、L（电磁流量计极板间距）、v/v1（速度选择器电压相关）、trackRadius/bottomSpeed/chargeToMass/fieldDirectionMode（圆周临界）、chargePreset（双电荷预设）、distanceCm（双电荷间距）。",
+      "payloadSchema": {
+        "key": { "type": "string" },
+        "paramKey": { "type": "string" },
+        "value": { "type": "number" }
+      },
+      "useWhen": "用户要求修改某个具体参数，例如 “磁感应强度调到 0.5T”、“电荷改成 2μC”、“粒子初速度设为 1e6 m/s”。",
+      "doNotUseWhen": "需要修改多个参数时使用 setParams；切换场景使用 loadPreset。"
+    },
+    {
+      "type": "setParams",
+      "description": "批量修改当前预设的多个参数。payload: { values: { [key: string]: number | boolean | string } }。values 中的 key 必须出现在当前预设的 paramGroups 中，不存在的 key 会被跳过并写入 warnings。",
+      "payloadSchema": {
+        "values": { "type": "object" }
+      },
+      "useWhen": "用户一次性给出多个参数，例如 “粒子电荷 1e-6 C，质量 1e-9 kg，初速度 1e5 m/s”、“B=0.5T，方向向里”。",
+      "doNotUseWhen": "只改一个参数时使用 setParam。"
+    },
+    {
+      "type": "selectEntity",
+      "description": "选中场景中的实体以高亮显示。payload: { entityId: string | null }。entityId 必须是当前场景中的实体 ref，如 charge-1、wire-1、loop-1、plate-top/bottom、particle-1 等。传 null 取消选中。",
+      "payloadSchema": {
+        "entityId": { "type": "string" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户要求关注/高亮某个具体元件，如 “看一下带电粒子”、“选中正极板”。",
+      "doNotUseWhen": "用户没有明确指向某个元件时不要主动选中。"
+    },
+    {
+      "type": "switchPrimaryViewport",
+      "description": "切换主视角。payload: { viewport: \"force\"|\"motion\"|\"field\" }。P08 主要使用这三种视角：field（场视图）显示电场线/磁感线、force（受力视图）显示力矢量、motion（运动视图）显示轨迹与运动学量。",
+      "payloadSchema": {
+        "viewport": { "type": "string" },
+        "primary": { "type": "string" }
+      },
+      "useWhen": "用户要求切换观察角度，如 “换到运动视图”、“切到受力视角”、“看场分布”。",
+      "doNotUseWhen": "用户要求在当前视角上叠加显示另一种视角时使用 toggleOverlayViewport。"
+    },
+    {
+      "type": "toggleOverlayViewport",
+      "description": "在主视角上叠加/取消叠加一个辅助视角。payload: { viewport: \"force\"|\"motion\"|\"field\" }。最多 3 个叠加层，超出时丢弃最旧的；叠加层 > 2 时密度会自动降为 compact。",
+      "payloadSchema": {
+        "viewport": { "type": "string" },
+        "overlay": { "type": "string" }
+      },
+      "useWhen": "用户要求在主视角上同时显示另一种视角的信息，如 “在场视图上叠加受力箭头”。",
+      "doNotUseWhen": "切换主视角时使用 switchPrimaryViewport；当前主视角不能与自身叠加。"
+    },
+    {
+      "type": "setDisplayOptions",
+      "description": "一站式设置 P08 显示开关与密度。payload 可包含：showFieldLines（电场线/磁感线）、showEquipotentialLines（等势线）、showPotentialMap（电势分布热力图）、showPotentialSurface3D（3D 电势曲面）、showTrajectory（带电粒子轨迹）、fieldLineDensity（\"sparse\"|\"standard\"|\"dense\"）、infoDensity（\"compact\"|\"standard\"|\"detailed\"）。",
+      "payloadSchema": {
+        "showFieldLines": { "type": "boolean" },
+        "showEquipotentialLines": { "type": "boolean" },
+        "showPotentialMap": { "type": "boolean" },
+        "showPotentialSurface3D": { "type": "boolean" },
+        "showTrajectory": { "type": "boolean" },
+        "fieldLineDensity": { "type": "string" },
+        "infoDensity": { "type": "string" }
+      },
+      "useWhen": "用户要求显示/隐藏电场线、等势线、电势热力图、3D 电势图、轨迹，或调节场线密度。",
+      "doNotUseWhen": "不要用它修改物理参数或切换视角。"
+    },
+    {
+      "type": "setPotentialProbe",
+      "description": "设置两点电势差测量探针的位置。payload: { probe: \"A\"|\"B\", point: [x,y] | {x,y} | null }。传 null 移除该探针。",
+      "payloadSchema": {
+        "probe": { "type": "string" },
+        "point": { "type": "array" },
+        "position": { "type": "array" }
+      },
+      "useWhen": "用户要求放置或移动 A/B 探针测量两点电势差，例如 “把 A 点放在 (1, 0)”。",
+      "doNotUseWhen": "要清空两个探针时使用 clearPotentialProbes。"
+    },
+    {
+      "type": "clearPotentialProbes",
+      "description": "清空两点电势差测量的所有探针。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求重置/清空两点电势差测量。",
+      "doNotUseWhen": "只需移动一个探针时使用 setPotentialProbe。"
+    },
+    {
+      "type": "setSolenoidTeaching",
+      "description": "设置螺线管教学工作台。payload: { displayMode?: \"textbook\"|\"particles\"|\"volume\", viewMode?: \"front\"|\"side\"|\"section\"|\"orbit\", camera?: { orbitYawDeg?, orbitPitchDeg?, orbitDistance? }, reset?: boolean }。仅在螺线管磁场预设（P02-EMF023-solenoid-bfield）下生效。",
+      "payloadSchema": {
+        "displayMode": { "type": "string" },
+        "viewMode": { "type": "string" },
+        "camera": { "type": "object" },
+        "reset": { "type": "boolean" }
+      },
+      "useWhen": "用户在螺线管场景中要求切换显示模式、视角或重置教学工作台。",
+      "doNotUseWhen": "非螺线管预设下不要使用，否则无效。"
+    },
+    {
+      "type": "addSolenoidCompass",
+      "description": "在螺线管教学工作台添加一根磁针。payload: { x: number, y: number, z: number, id?: string }。",
+      "payloadSchema": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户要求在螺线管周围某点放置磁针观察磁场方向。",
+      "doNotUseWhen": "非螺线管预设下不要使用。"
+    },
+    {
+      "type": "moveSolenoidCompass",
+      "description": "移动已有的螺线管磁针。payload: { id: string, x: number, y: number, z: number }。id 必须是已有磁针 ID。",
+      "payloadSchema": {
+        "id": { "type": "string" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      },
+      "useWhen": "用户要求把指定磁针移到新位置。",
+      "doNotUseWhen": "不知道磁针 ID 时优先 add 新磁针，或读取 aiContext 后再 move。"
+    },
+    {
+      "type": "addLoopCompass",
+      "description": "在圆形电流教学工作台添加一根磁针。payload: { x: number, y: number, z: number, id?: string }。",
+      "payloadSchema": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户在圆形电流场景下要求在某点放置磁针。",
+      "doNotUseWhen": "非圆形电流预设下不要使用。"
+    },
+    {
+      "type": "moveLoopCompass",
+      "description": "移动已有的圆形电流磁针。payload: { id: string, x: number, y: number, z: number }。",
+      "payloadSchema": {
+        "id": { "type": "string" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      },
+      "useWhen": "用户要求在圆形电流场景下移动指定磁针。",
+      "doNotUseWhen": "未知 id 时先读取 aiContext。"
+    },
+    {
+      "type": "resetLoopTeaching",
+      "description": "重置圆形电流教学工作台到默认状态。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求清空圆形电流磁针并恢复默认。",
+      "doNotUseWhen": "只想移动单个磁针时使用 moveLoopCompass。"
+    },
+    {
+      "type": "setElectrostaticSurface3D",
+      "description": "设置静电场立体电势图的相机。payload: { yawDeg?: number, pitchDeg?: number, zoom?: number }。",
+      "payloadSchema": {
+        "yawDeg": { "type": "number" },
+        "pitchDeg": { "type": "number" },
+        "zoom": { "type": "number" }
+      },
+      "useWhen": "用户要求旋转或缩放 3D 电势曲面，如 “转一下角度”、“放大一点”。",
+      "doNotUseWhen": "要恢复默认相机使用 resetElectrostaticSurface3D。"
+    },
+    {
+      "type": "resetElectrostaticSurface3D",
+      "description": "重置静电场立体电势图相机到默认。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求把 3D 电势图相机调回默认。",
+      "doNotUseWhen": "需要细调时使用 setElectrostaticSurface3D。"
+    },
+    {
+      "type": "play",
+      "description": "开始/继续播放仿真。payload: {}。仅对带运动的预设（粒子运动、回旋加速器等）有效。",
+      "payloadSchema": {},
+      "useWhen": "用户要求开始播放、继续运动、让粒子动起来。",
+      "doNotUseWhen": "静态场预设（如点电荷场、平行板电容器）下播放无效。"
+    },
+    {
+      "type": "pause",
+      "description": "暂停仿真。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求暂停、停一下。",
+      "doNotUseWhen": "用户要求从头开始时使用 reset。"
+    },
+    {
+      "type": "reset",
+      "description": "重置仿真时间到 0 并清空结果。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求重置、回到开始、重新演示。",
+      "doNotUseWhen": "切换场景使用 loadPreset；只暂停使用 pause。"
+    }
+  ],
+  "payloadSchema": {
+    "simulation": {
+      "type": "object",
+      "description": "P08 仿真与 UI 状态。结构性切换场景必须使用 loadPreset operation。",
+      "risk": "high",
+      "children": {
+        "ui": {
+          "type": "object",
+          "description": "UI 状态。优先使用 operations 修改。",
+          "risk": "medium",
+          "children": {
+            "paramValues": {
+              "type": "object",
+              "description": "当前预设的参数值映射。AI 应使用 setParam/setParams operations 修改。",
+              "risk": "medium"
+            },
+            "selectedEntityId": { "type": "string", "description": "选中实体 ID。", "risk": "low" },
+            "showFieldLines": { "type": "boolean", "description": "电场线/磁感线显示开关。", "risk": "low" },
+            "showEquipotentialLines": { "type": "boolean", "description": "等势线显示开关。", "risk": "low" },
+            "showPotentialMap": { "type": "boolean", "description": "电势分布热力图开关。", "risk": "low" },
+            "showPotentialSurface3D": { "type": "boolean", "description": "3D 电势曲面开关。", "risk": "low" },
+            "showTrajectory": { "type": "boolean", "description": "粒子轨迹显示开关。", "risk": "low" },
+            "fieldLineDensity": { "type": "string", "description": "场线密度 sparse/standard/dense。", "risk": "low" }
+          }
+        }
+      }
+    }
+  },
+  "constraints": [
+    "AI 输出只能是 JSON 对象，允许包含 operations、patch、explanation、warnings，不能包含 envelope。",
+    "结构性切换场景必须使用 loadPreset，不要直接手写 scene/entities/relations。",
+    "P08 只处理电磁场可视化，不要输出 P04（电路）、P13（电磁感应）或其它学科的预设。",
+    "presetId 必须来自 capability 描述列出的 24 个 P-08 预设；P02 编号属于 P-08（命名历史遗留）。",
+    "setParam 的 key 必须出现在当前预设的 paramGroups 中；不存在则跳过并写入 warnings，不要伪造。",
+    "magnetic-focusing、magnetic-divergence、bfield-dual-boundary、bfield-semicircle 是首页隐藏预设，仅在用户明确要求时加载。",
+    "螺线管/圆形电流教学工作台 operations（setSolenoidTeaching 等）仅在对应预设下生效，其它场景下使用会被忽略。",
+    "fieldLineDensity 只能是 sparse/standard/dense；infoDensity 只能是 compact/standard/detailed。",
+    "switchPrimaryViewport 只接受 force/motion/field 这三种 P08 实际支持的视角。",
+    "操作组合时遵循顺序：先 loadPreset / openModule，再 setParams，再 setDisplayOptions/switchPrimaryViewport，最后 play。",
+    "operations 必须最小充分；单个 operation 可满足时不要额外添加。"
+  ],
+  "examples": [
+    {
+      "instruction": "演示单点电荷的电场和等势线。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF001-point-charge-field", "module": "electrostatic" },
+        { "type": "setDisplayOptions", "showFieldLines": true, "showEquipotentialLines": true }
+      ],
+      "patch": {},
+      "explanation": "已加载单点电荷场，同时显示电场线与同心等势线。"
+    },
+    {
+      "instruction": "演示带电粒子在磁场中做圆周运动，磁感应强度 0.5T，方向向里，初速度 1e6 m/s。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EM003-cyclotron-motion", "module": "particle-magnetic" },
+        { "type": "setParams", "values": { "B": 0.5, "direction": "in", "v0": 1000000 } },
+        { "type": "play" }
+      ],
+      "patch": {},
+      "explanation": "已加载洛伦兹力圆周运动预设，设置磁场和初速度后开始播放。"
+    },
+    {
+      "instruction": "切到电磁场复合场专题，看一下都有什么场景。",
+      "operations": [
+        { "type": "openModule", "module": "combined-field" }
+      ],
+      "patch": {},
+      "explanation": "已切换到复合场模块导航页，可见速度选择器、回旋加速器、电磁流量计、电磁重力圆周运动四个预设。"
+    },
+    {
+      "instruction": "演示螺线管磁场，切到剖面视角，并在中心放一根磁针。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF023-solenoid-bfield", "module": "magnetostatic" },
+        { "type": "setSolenoidTeaching", "viewMode": "section" },
+        { "type": "addSolenoidCompass", "x": 0, "y": 0, "z": 0, "id": "compass-center" }
+      ],
+      "patch": {},
+      "explanation": "已加载螺线管场景，切换到剖面视角并在中心点放置磁针。"
+    },
+    {
+      "instruction": "演示双点电荷场，把两个电荷距离改成 5cm，并显示电势热力图。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF002-two-charges-field", "module": "electrostatic" },
+        { "type": "setParam", "key": "distanceCm", "value": 5 },
+        { "type": "setDisplayOptions", "showPotentialMap": true }
+      ],
+      "patch": {},
+      "explanation": "已加载双点电荷场并调整距离，开启电势热力图叠加。"
+    },
+    {
+      "instruction": "在场视图上叠加受力视角看看。",
+      "operations": [
+        { "type": "toggleOverlayViewport", "viewport": "force" }
+      ],
+      "patch": {},
+      "explanation": "已在当前主视角上叠加受力视角的力箭头。"
+    },
+    {
+      "instruction": "在 (1,0) 和 (3,0) 放两个测量点测电势差。",
+      "operations": [
+        { "type": "setPotentialProbe", "probe": "A", "point": [1, 0] },
+        { "type": "setPotentialProbe", "probe": "B", "point": [3, 0] }
+      ],
+      "patch": {},
+      "explanation": "已分别在 (1,0) 与 (3,0) 放置 A、B 两个测量探针，UI 上会显示 U_AB。"
+    },
+    {
+      "instruction": "把场线密度调高。",
+      "operations": [
+        { "type": "setDisplayOptions", "fieldLineDensity": "dense" }
+      ],
+      "patch": {},
+      "explanation": "已将场线密度切到 dense。"
+    },
+    {
+      "instruction": "演示回旋加速器，磁场 0.8T，电场 5e4 V/m。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF042-cyclotron", "module": "combined-field" },
+        { "type": "setParams", "values": { "B": 0.8, "E": 50000 } },
+        { "type": "play" }
+      ],
+      "patch": {},
+      "explanation": "已加载回旋加速器并设置磁场、电场，开始播放。"
+    },
+    {
+      "instruction": "演示速度选择器，并解释为什么粒子能直线穿过。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF041-velocity-selector", "module": "combined-field" },
+        { "type": "play" }
+      ],
+      "patch": {},
+      "explanation": "已加载速度选择器并开始播放。当 qE = qvB 时，粒子直线穿过；偏离该速度时被偏转。"
+    },
+    {
+      "instruction": "演示平行板电场加速带电粒子，电压 200V。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P02-EMF011-efield-acceleration", "module": "particle-electric" },
+        { "type": "setParam", "key": "voltage", "value": 200 },
+        { "type": "play" }
+      ],
+      "patch": {},
+      "explanation": "已加载平行板电场加速预设，设置电压后开始播放。"
+    },
+    {
+      "instruction": "把 3D 电势图转到俯视角度，缩放设为 1.5。",
+      "operations": [
+        { "type": "setElectrostaticSurface3D", "yawDeg": 0, "pitchDeg": 80, "zoom": 1.5 }
+      ],
+      "patch": {},
+      "explanation": "已将 3D 电势图相机调整为接近俯视，缩放 1.5。"
+    },
+    {
+      "instruction": "重新开始演示。",
+      "operations": [
+        { "type": "reset" }
+      ],
+      "patch": {},
+      "explanation": "已重置仿真时间到 0。"
+    }
+  ],
+  "planningRules": [
+    "先判断用户目标属于哪个 P08 模块（静电场/带电粒子在电场/静磁场/带电粒子在磁场/复合场），优先用 loadPreset 加载对应场景。",
+    "如果用户只是想了解模块而未指定具体场景，使用 openModule 切到导航页。",
+    "loadPreset 后如有参数要求，紧跟 setParams 一次性设置；最后再用 play/setDisplayOptions 调整观感。",
+    "显示开关（电场线、等势线、电势热力图、3D 电势图、轨迹）使用一站式 setDisplayOptions，避免冗余 operations。",
+    "螺线管/圆形电流教学工作台 operations 仅在对应预设下使用，跨预设的工作台操作会被忽略。",
+    "切换视角时，主视角变化用 switchPrimaryViewport；叠加显示用 toggleOverlayViewport（最多 3 个叠加）。",
+    "粒子运动预设需要 play 才能看到动效；静态场预设不需要 play。",
+    "operations 最小充分；不要为单次需求拆出多个等价 operation。"
+  ]
+}

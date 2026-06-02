@@ -85,6 +85,9 @@ function executeSingleCommand(scene: Scene, refs: MutableRefs, command: Template
     case 'setGravity':
       scene.settings.gravity = { ...command.gravity }
       return
+    case 'setEnergyConservation':
+      scene.settings.energyConservation = command.enabled
+      return
     case 'addBody':
       addBody(scene, refs, command)
       return

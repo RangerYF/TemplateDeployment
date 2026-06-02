@@ -58,6 +58,7 @@ const DISPLAY_KEYS = new Set<keyof DisplayOptions>([
   'showTangent',
   'showNormal',
   'showFocalChord',
+  'teachingFormat',
 ]);
 
 const DEFAULT_LABELS: Record<ConicType, string> = {
@@ -266,13 +267,15 @@ function conicParams(type: ConicType, raw: unknown): EllipseParams | HyperbolaPa
     const a = numberFromRecord(value, 'a', 5);
     const b = numberFromRecord(value, 'b', 3);
     if (!(a > 0 && b > 0 && a > b)) throw new Error('椭圆要求 a > b > 0');
-    return { a, b, cx: numberFromRecord(value, 'cx', 0), cy: numberFromRecord(value, 'cy', 0) };
+    const orientation = value.orientation === 'v' ? 'v' : 'h';
+    return { a, b, cx: numberFromRecord(value, 'cx', 0), cy: numberFromRecord(value, 'cy', 0), orientation };
   }
   if (type === 'hyperbola') {
     const a = numberFromRecord(value, 'a', 3);
     const b = numberFromRecord(value, 'b', 3);
     if (!(a > 0 && b > 0)) throw new Error('双曲线要求 a、b 大于 0');
-    return { a, b, cx: numberFromRecord(value, 'cx', 0), cy: numberFromRecord(value, 'cy', 0) };
+    const orientation = value.orientation === 'v' ? 'v' : 'h';
+    return { a, b, cx: numberFromRecord(value, 'cx', 0), cy: numberFromRecord(value, 'cy', 0), orientation };
   }
   if (type === 'parabola') {
     const p = numberFromRecord(value, 'p', 2);
@@ -323,11 +326,18 @@ function conicPointByKind(entity: ConicEntity, kind: string | null): [number, nu
   if (!kind) return null;
   const normalized = kind.toLowerCase().replace(/[\s_-]+/g, '');
   if (entity.type === 'ellipse') {
-    const { a, b, cx, cy } = entity.params;
-    if (['rightvertex', 'right', '右顶点', '右端点'].includes(normalized)) return [cx + a, cy];
-    if (['leftvertex', 'left', '左顶点', '左端点'].includes(normalized)) return [cx - a, cy];
-    if (['topvertex', 'top', '上顶点'].includes(normalized)) return [cx, cy + b];
-    if (['bottomvertex', 'bottom', '下顶点'].includes(normalized)) return [cx, cy - b];
+    const { a, b, cx, cy, orientation = 'h' } = entity.params;
+    if (orientation === 'v') {
+      if (['topvertex', 'top', '上顶点', '长轴上顶点'].includes(normalized)) return [cx, cy + a];
+      if (['bottomvertex', 'bottom', '下顶点', '长轴下顶点'].includes(normalized)) return [cx, cy - a];
+      if (['rightvertex', 'right', '右顶点', '短轴右顶点', '右端点'].includes(normalized)) return [cx + b, cy];
+      if (['leftvertex', 'left', '左顶点', '短轴左顶点', '左端点'].includes(normalized)) return [cx - b, cy];
+    } else {
+      if (['rightvertex', 'right', '右顶点', '右端点', '长轴右顶点'].includes(normalized)) return [cx + a, cy];
+      if (['leftvertex', 'left', '左顶点', '左端点', '长轴左顶点'].includes(normalized)) return [cx - a, cy];
+      if (['topvertex', 'top', '上顶点', '短轴上顶点'].includes(normalized)) return [cx, cy + b];
+      if (['bottomvertex', 'bottom', '下顶点', '短轴下顶点'].includes(normalized)) return [cx, cy - b];
+    }
   }
   if (entity.type === 'circle') {
     const { r, cx, cy } = entity.params;
@@ -337,9 +347,14 @@ function conicPointByKind(entity: ConicEntity, kind: string | null): [number, nu
     if (['bottomvertex', 'bottom', '下顶点'].includes(normalized)) return [cx, cy - r];
   }
   if (entity.type === 'hyperbola') {
-    const { a, cx, cy } = entity.params;
-    if (['rightvertex', 'right', '右顶点', '右支顶点'].includes(normalized)) return [cx + a, cy];
-    if (['leftvertex', 'left', '左顶点', '左支顶点'].includes(normalized)) return [cx - a, cy];
+    const { a, cx, cy, orientation = 'h' } = entity.params;
+    if (orientation === 'v') {
+      if (['topvertex', 'top', '上顶点', '上支顶点'].includes(normalized)) return [cx, cy + a];
+      if (['bottomvertex', 'bottom', '下顶点', '下支顶点'].includes(normalized)) return [cx, cy - a];
+    } else {
+      if (['rightvertex', 'right', '右顶点', '右支顶点'].includes(normalized)) return [cx + a, cy];
+      if (['leftvertex', 'left', '左顶点', '左支顶点'].includes(normalized)) return [cx - a, cy];
+    }
   }
   if (entity.type === 'parabola') {
     const { cx, cy } = entity.params;
@@ -542,6 +557,15 @@ function executeSetActiveEntity(operation: AiOperation): void {
   useEntityStore.getState().setActiveEntityId(entity.id);
 }
 
+function executeRemoveEntity(operation: AiOperation): void {
+  const entity = getEntityByRef(operation);
+  const store = useEntityStore.getState();
+  if (store.entities.length <= 1) {
+    throw new Error('至少保留一个实体，不能删除');
+  }
+  store.removeEntity(entity.id);
+}
+
 function executeSetEntityStyle(operation: AiOperation): void {
   const entity = getEntityByRef(operation);
   const patch: Partial<AnyEntity> = {};
@@ -563,8 +587,8 @@ function executeLoadPresetConicScene(operation: AiOperation): void {
         : presetId === 'standard-circle' ? 'circle'
           : 'ellipse';
   const params =
-    presetType === 'ellipse' ? { a: 5, b: 3, cx: 0, cy: 0 }
-      : presetType === 'hyperbola' ? { a: 3, b: 3, cx: 0, cy: 0 }
+    presetType === 'ellipse' ? { a: 5, b: 3, cx: 0, cy: 0, orientation: 'h' as const }
+      : presetType === 'hyperbola' ? { a: 3, b: 3, cx: 0, cy: 0, orientation: 'h' as const }
         : presetType === 'parabola' ? { p: 2, cx: 0, cy: 0, orientation: 'h' as const }
           : { r: 4, cx: 0, cy: 0 };
   const label =
@@ -573,8 +597,12 @@ function executeLoadPresetConicScene(operation: AiOperation): void {
         : presetType === 'parabola' ? '标准抛物线'
           : '标准圆';
   const entity = createEntity(presetType, params as never, { label, color: ENTITY_COLORS[0] });
+  useM03InteractionStore.getState().clearAll();
+  useLocusStore.getState().clearTrace();
+  useOpticalStore.getState().reset();
   useEntityStore.getState().replaceAllEntities([entity]);
   useEntityStore.getState().setActiveEntityId(entity.id);
+  useEntityStore.getState().setActiveTool('pan-zoom');
   useEntityStore.getState().setViewport({ ...DEFAULT_M03_VIEWPORT });
 }
 
@@ -754,6 +782,9 @@ function executeOperation(operation: AiOperation): void {
       return;
     case 'setActiveEntity':
       executeSetActiveEntity(operation);
+      return;
+    case 'removeEntity':
+      executeRemoveEntity(operation);
       return;
     case 'setEntityStyle':
       executeSetEntityStyle(operation);

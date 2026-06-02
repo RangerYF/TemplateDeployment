@@ -1,0 +1,275 @@
+{
+  "templateKey": "p13",
+  "aiLevel": "L2",
+  "supportsAiBuild": true,
+  "description": "P13 电磁感应工作台。覆盖 5 大模型家族 8 个预设场景（动生电动势基础回路、楞次定律磁棒-线圈、单棒纯电阻/含电源/含电容、双棒基础/恒外力、竖直导轨单棒，外加自由搭建 builder），通过结构化 operations 控制：加载预设、切换 P13 首页/builder、修改 workbench 参数（磁场/导轨间距/质量/电阻/初速等）、播放控制、设置教学分析步骤、切换显示开关（向量/标注/网格/坐标轴）、切换单棒+电容情景（充电/放电/恒外力）。",
+  "supportedIntents": [
+    "load-preset",
+    "open-home",
+    "open-builder",
+    "set-workbench-params",
+    "set-playback-state",
+    "set-analysis-step",
+    "set-display-options",
+    "set-capacitor-scenario",
+    "play",
+    "pause",
+    "reset"
+  ],
+  "operations": [
+    {
+      "type": "loadPreset",
+      "description": "加载 P13 电磁感应预设。payload: { presetId: string }。可用 8 个预设：P02-EM004-emf-induction（线圈切割磁场基础回路 BASE-001）、P13-EMI-001-lenz-magnet-coil（磁棒-线圈楞次定律）、P13-EMI-011-single-rod-resistive（单棒基础·纯电阻 EMI-011）、P13-EMI-012-single-rod-with-source（单棒+含电源 EMI-012）、P13-EMI-013-single-rod-with-capacitor（单棒+含电容 EMI-013）、P13-EMI-021-double-rod-basic（双棒基础·无摩擦 EMI-021）、P13-EMI-024-double-rod-driven（双棒+恒外力 EMI-024）、P13-EMI-031-vertical-rail-rod（竖直导轨单棒 EMI-031）。",
+      "payloadSchema": {
+        "presetId": { "type": "string" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户要求加载某个 P13 场景，如 “演示楞次定律”、“切换到单棒含电源”、“看双棒模型”。",
+      "doNotUseWhen": "用户只想浏览 P13 模型导航首页时使用 openHome；进入自由搭建用 openBuilder。"
+    },
+    {
+      "type": "openHome",
+      "description": "打开 P13 模型导航首页（按模型家族分组展示 8 个预设）。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求查看 P13 所有模型 / 模型家族总览。",
+      "doNotUseWhen": "用户已指定具体场景时直接使用 loadPreset。"
+    },
+    {
+      "type": "openBuilder",
+      "description": "打开 P13 自由搭建工作台。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求自由组合磁场区域、线圈、棒等元件，例如 “进入自由搭建”、“我要自己搭一个”。",
+      "doNotUseWhen": "用户要演示已有标准场景时使用 loadPreset。"
+    },
+    {
+      "type": "setWorkbenchParams",
+      "description": "修改当前 P13 workbench 的参数。payload: { params?: object, state?: object, workbench?: string }。params 字段用于嵌套到 snapshot.params（适用于 single-rod / double-rod / vertical-rail-rod / base-loop）；state 字段用于直接覆盖 snapshot 顶层字段（适用于 lenz-magnet-coil 的 pole/motion/turns/magnetX）。各 workbench 的可用字段：1) single-rod（resistive/with-source/with-capacitor）的 params → magneticField（T）、magneticFieldDirection（\"in\"|\"out\"）、railSpan（m）、mass（kg）、rodResistance（Ω）、externalResistance（Ω）、initialVelocity（m/s）、frictionCoefficient、sourceVoltage（V，with-source）、initialCapacitorVoltage（V，with-capacitor）、capacitanceMicroFarad（μF，with-capacitor）、externalForce（N，with-capacitor 恒外力场景）；2) double-rod 的 params → magneticField、railSpan、mass1/mass2、rod1Resistance/rod2Resistance、initialVelocity1/initialVelocity2、externalForce1（driven 用）、capacitance、initialCapacitorVoltage、frictionCoefficient1/frictionCoefficient2；3) vertical-rail-rod 的 params → magneticField、railSpan、mass、rodResistance、externalResistance、gravity；4) base-loop 的 params → magneticField、loopWidth、loopHeight 等基础回路参数；5) lenz-magnet-coil 不使用 params，请使用 state 字段提交 pole（\"N\"|\"S\"）、motion（\"insert\"|\"pullOut\"|\"stop\"）、turns（线圈匝数）、magnetX（磁铁位置）。workbench 字段可选，用于显式指定 snapshot key。",
+      "payloadSchema": {
+        "params": { "type": "object" },
+        "state": { "type": "object" },
+        "workbench": { "type": "string" }
+      },
+      "useWhen": "用户要求修改当前场景的物理参数，如 “磁场 0.6T”、“质量改成 0.2kg”、“电阻 1Ω”、“初速度 3 m/s”。",
+      "doNotUseWhen": "lenz-magnet-coil 场景不使用 params，请直接通过 setAnalysisStep / 后续专用 operation 控制；只想 reset 时使用 reset。"
+    },
+    {
+      "type": "setPlaybackState",
+      "description": "设置当前 workbench 的播放/暂停状态或跳转时间。payload: { isPlaying?: boolean, currentTime?: number, workbench?: string }。",
+      "payloadSchema": {
+        "isPlaying": { "type": "boolean" },
+        "currentTime": { "type": "number" },
+        "workbench": { "type": "string" }
+      },
+      "useWhen": "用户要求开始/暂停演示，或跳到某个时间点，如 “跳到 t=2s”、“暂停”。",
+      "doNotUseWhen": "纯播放/暂停可用语义糖 play/pause；完全重置使用 reset。"
+    },
+    {
+      "type": "setAnalysisStep",
+      "description": "设置当前 workbench 的分析步骤索引。payload: { step: number, workbench?: string }。常用于楞次定律链路（原磁通量 → 变化 → 感应电流 → 感应磁场 → 安培力）或单棒受力四步分析；step 为非负整数，0 表示第一步。",
+      "payloadSchema": {
+        "step": { "type": "number" },
+        "analysisStep": { "type": "number" },
+        "workbench": { "type": "string" }
+      },
+      "useWhen": "用户要求 “下一步”、“上一步”、“跳到第 3 步”、“看安培力那一步”。",
+      "doNotUseWhen": "不要在非教学步骤型场景下使用（如 double-rod-basic 默认不强分步）。"
+    },
+    {
+      "type": "setDisplayOptions",
+      "description": "设置 P13 显示开关。payload 可包含：showVectors（速度/电流/安培力等方向箭头）、showLabels（结构标签、读数文字）、showGrid（背景辅助网格）、showAxes（坐标轴）。",
+      "payloadSchema": {
+        "showVectors": { "type": "boolean" },
+        "showLabels": { "type": "boolean" },
+        "showGrid": { "type": "boolean" },
+        "showAxes": { "type": "boolean" },
+        "workbench": { "type": "string" }
+      },
+      "useWhen": "用户要求显示/隐藏向量箭头、标签、网格、坐标轴。",
+      "doNotUseWhen": "不要用它修改物理参数或播放状态。"
+    },
+    {
+      "type": "setCapacitorScenario",
+      "description": "切换单棒+电容场景下的子情景。payload: { scenario: \"charge\"|\"discharge\"|\"external-force\" }。仅在 p13-single-rod-with-capacitor 下生效，自动定位到该 workbench。",
+      "payloadSchema": {
+        "scenario": { "type": "string" },
+        "capacitorScenario": { "type": "string" }
+      },
+      "useWhen": "用户在单棒+电容场景下要求切换到 “充电式”、“放电式” 或 “恒外力式”。",
+      "doNotUseWhen": "非 with-capacitor 场景下不要使用。"
+    },
+    {
+      "type": "play",
+      "description": "开始/继续播放当前 workbench 的演示。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求开始演示、让棒动起来、播放。",
+      "doNotUseWhen": "需要从头开始时使用 reset。"
+    },
+    {
+      "type": "pause",
+      "description": "暂停当前 workbench 的演示。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求暂停、停一下。",
+      "doNotUseWhen": "需要回到时间 0 时使用 reset。"
+    },
+    {
+      "type": "reset",
+      "description": "把当前 workbench 重置到 currentTime=0、isPlaying=false、analysisStep=0。payload: {}。",
+      "payloadSchema": {},
+      "useWhen": "用户要求重新开始、回到开始、清除当前演示。",
+      "doNotUseWhen": "只想暂停时使用 pause；想切换场景使用 loadPreset。"
+    }
+  ],
+  "payloadSchema": {
+    "pages": {
+      "type": "object",
+      "description": "P13 各 workbench 的 page snapshot 集合。AI 通过 operations 间接修改，不要直接手写 page 树。",
+      "risk": "high",
+      "children": {
+        "p13-single-rod-resistive": { "type": "object", "description": "单棒纯电阻工作台。", "risk": "high" },
+        "p13-single-rod-with-source": { "type": "object", "description": "单棒+含电源工作台。", "risk": "high" },
+        "p13-single-rod-with-capacitor": { "type": "object", "description": "单棒+含电容工作台。", "risk": "high" },
+        "p13-double-rod-basic": { "type": "object", "description": "双棒基础工作台。", "risk": "high" },
+        "p13-double-rod-driven": { "type": "object", "description": "双棒+恒外力工作台。", "risk": "high" },
+        "p13-vertical-rail-rod": { "type": "object", "description": "竖直导轨单棒工作台。", "risk": "high" },
+        "p13-lenz-magnet-coil": { "type": "object", "description": "楞次定律磁棒-线圈工作台。", "risk": "high" },
+        "p13-base-loop": { "type": "object", "description": "动生电动势基础回路工作台。", "risk": "high" },
+        "p13-builder": { "type": "object", "description": "P13 自由搭建工作台。", "risk": "high" }
+      }
+    }
+  },
+  "constraints": [
+    "AI 输出只能是 JSON 对象，允许包含 operations、patch、explanation、warnings，不能包含 envelope。",
+    "结构性切换场景必须使用 loadPreset，不要直接手写 page snapshot。",
+    "P13 只处理电磁感应工作台，不要输出 P04（电路）、P08（电磁场）或其它学科的预设。",
+    "presetId 必须从 capability 描述列出的 8 个 P-13 预设中选择；P02-EM004 是 P13 基础回路（命名历史遗留）。",
+    "setWorkbenchParams 之前必须先 loadPreset，否则无法确定目标 workbench；显式传 workbench 参数也可。",
+    "lenz-magnet-coil 工作台不使用 params 结构，physical 参数在 snapshot 顶层（pole/motion/turns/magnetX）；如需要修改请用 setWorkbenchParams 并把这些字段提交在 params 同级（提供 workbench=p13-lenz-magnet-coil）。",
+    "single-rod 的参数 magneticField/railSpan/mass/rodResistance 等都有物理合理范围（如 magneticField 0~2T、railSpan 0.1~2m、mass 0.01~5kg），超出范围时给 warnings。",
+    "double-rod 的两根棒分别用 1/2 后缀区分（mass1/mass2、initialVelocity1/initialVelocity2 等）。",
+    "operations 必须最小充分；单个 setWorkbenchParams 可满足时不要拆成多个；单个 reset 可满足时不要再叠加 setPlaybackState。",
+    "切换预设后 workbench 状态会被预设默认值覆盖，因此先 loadPreset，再 setWorkbenchParams。"
+  ],
+  "examples": [
+    {
+      "instruction": "演示楞次定律。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-001-lenz-magnet-coil" }
+      ],
+      "patch": {},
+      "explanation": "已加载磁棒-线圈楞次定律预设，可逐步分析方向判断。"
+    },
+    {
+      "instruction": "演示单棒切割磁场，磁场 0.8T，导轨间距 0.5m，棒质量 0.1kg，初速度 5 m/s。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-011-single-rod-resistive" },
+        { "type": "setWorkbenchParams", "params": { "magneticField": 0.8, "railSpan": 0.5, "mass": 0.1, "initialVelocity": 5 } }
+      ],
+      "patch": {},
+      "explanation": "已加载单棒纯电阻预设并设置磁场、导轨间距、质量、初速度。"
+    },
+    {
+      "instruction": "切到单棒+含电源场景，电源电动势 6V。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-012-single-rod-with-source" },
+        { "type": "setWorkbenchParams", "params": { "sourceVoltage": 6 } }
+      ],
+      "patch": {},
+      "explanation": "已加载单棒+含电源场景并设置电源电动势 6V。"
+    },
+    {
+      "instruction": "演示单棒+电容的恒外力情形，外力 2N。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-013-single-rod-with-capacitor" },
+        { "type": "setCapacitorScenario", "scenario": "external-force" },
+        { "type": "setWorkbenchParams", "params": { "externalForce": 2 } }
+      ],
+      "patch": {},
+      "explanation": "已加载单棒+电容场景，切换到恒外力情形并设置外力 2N。"
+    },
+    {
+      "instruction": "演示双棒模型，棒1 质量 0.2kg，棒2 质量 0.1kg，棒1 初速度 3 m/s。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-021-double-rod-basic" },
+        { "type": "setWorkbenchParams", "params": { "mass1": 0.2, "mass2": 0.1, "initialVelocity1": 3 } }
+      ],
+      "patch": {},
+      "explanation": "已加载双棒基础场景并设置两棒质量和棒1初速度。"
+    },
+    {
+      "instruction": "演示双棒+恒外力，给棒1施加 1.5N 的外力。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-024-double-rod-driven" },
+        { "type": "setWorkbenchParams", "params": { "externalForce1": 1.5 } }
+      ],
+      "patch": {},
+      "explanation": "已加载双棒+恒外力并设置棒1的外力。"
+    },
+    {
+      "instruction": "演示竖直导轨单棒，磁场 1T，外阻 2Ω。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P13-EMI-031-vertical-rail-rod" },
+        { "type": "setWorkbenchParams", "params": { "magneticField": 1, "externalResistance": 2 } }
+      ],
+      "patch": {},
+      "explanation": "已加载竖直导轨单棒并设置磁场和外阻，棒会从静止释放收敛到终态速度。"
+    },
+    {
+      "instruction": "进入自由搭建。",
+      "operations": [
+        { "type": "openBuilder" }
+      ],
+      "patch": {},
+      "explanation": "已打开 P13 自由搭建工作台。"
+    },
+    {
+      "instruction": "跳到楞次定律分析第 3 步。",
+      "operations": [
+        { "type": "setAnalysisStep", "step": 3, "workbench": "p13-lenz-magnet-coil" }
+      ],
+      "patch": {},
+      "explanation": "已切换到楞次定律分析第 3 步（感应电流方向判定）。"
+    },
+    {
+      "instruction": "把楞次定律切到 S 极拔出的情况，线圈 200 匝。",
+      "operations": [
+        { "type": "setWorkbenchParams", "workbench": "p13-lenz-magnet-coil", "state": { "pole": "S", "motion": "pullOut", "turns": 200 } }
+      ],
+      "patch": {},
+      "explanation": "已切换楞次定律到 S 极拔出场景并设置线圈 200 匝。"
+    },
+    {
+      "instruction": "隐藏网格和坐标轴，但保留向量箭头。",
+      "operations": [
+        { "type": "setDisplayOptions", "showGrid": false, "showAxes": false, "showVectors": true }
+      ],
+      "patch": {},
+      "explanation": "已关闭网格与坐标轴，保留向量箭头显示。"
+    },
+    {
+      "instruction": "暂停一下。",
+      "operations": [
+        { "type": "pause" }
+      ],
+      "patch": {},
+      "explanation": "已暂停当前 workbench 的演示。"
+    },
+    {
+      "instruction": "重新开始。",
+      "operations": [
+        { "type": "reset" }
+      ],
+      "patch": {},
+      "explanation": "已把 currentTime、isPlaying、analysisStep 全部归零。"
+    }
+  ],
+  "planningRules": [
+    "先判断用户目标属于哪个 P13 模型家族（线圈切割/楞次磁棒/单棒/双棒/竖直导轨/自由搭建），用 loadPreset 加载对应预设；自由搭建用 openBuilder。",
+    "如果用户只是询问 P13 都有哪些模型，使用 openHome 切到总览。",
+    "loadPreset 之后再 setWorkbenchParams 才能确保参数写入正确的 workbench；不要在不加载预设的情况下直接修改参数。",
+    "setWorkbenchParams 的 params 中只放该 workbench 支持的 key；不支持的 key 会被 normalize 函数忽略。",
+    "single-rod / double-rod / vertical-rail-rod 都共享 magneticField、railSpan 等基本参数，但 double-rod 用 mass1/mass2 区分。",
+    "setCapacitorScenario 仅对 with-capacitor 场景有效，跨场景调用会无效。",
+    "教学分步 setAnalysisStep 常用于楞次定律和单棒受力分析；其它场景下通常不需要分步。",
+    "operations 最小充分；不要为同一意图叠加多个等价 operation。"
+  ]
+}

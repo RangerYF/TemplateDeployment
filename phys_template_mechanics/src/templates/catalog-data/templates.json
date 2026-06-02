@@ -519,7 +519,7 @@
   {
     "meta": {
       "id": "MOM-003",
-      "name": "部分弹性碰撞",
+      "name": "一般碰撞",
       "module": "P-12",
       "status": "ready"
     },
@@ -543,15 +543,15 @@
       "status": "ready"
     },
     "teaching": {
-      "teachingObjective": "通过滑块冲坡模板，观察滑块动量与机械能在斜面系统中的转化过程。",
+      "teachingObjective": "通过小球在光滑球槽中的滑动，观察动量守恒与系统共速现象。",
       "constructionSteps": [
         "1. 设置场景重力为 (0, -10)。",
-        "2. 将地面设置为光滑水平面，并放置可在水平面上运动的斜面。",
-        "3. 添加滑块 block-main 并放在斜面低端。",
-        "4. 给滑块设置沿斜面向上的初速度，观察冲坡过程中斜面反向运动与最高点共速。"
+        "2. 将地面设置为光滑水平面，放置可滑动的光滑球槽。",
+        "3. 在球槽左侧边缘内壁放置小球，设置水平向右初速度。",
+        "4. 运行仿真观察小球沿弧面滑动时球槽反向运动与共速现象。"
       ]
     },
-    "sceneSource": "command",
+    "sceneSource": "manual",
     "sceneJsonPath": "/templates/scenes/MOM-011.json"
   },
   {
@@ -581,15 +581,15 @@
       "status": "ready"
     },
     "teaching": {
-      "teachingObjective": "通过滑块碰撞后滑行模板，分段观察碰撞阶段动量关系与碰后摩擦耗散。",
+      "teachingObjective": "通过完全非弹性碰撞模板，观察碰后两物体共速运动与动量守恒。",
       "constructionSteps": [
-        "1. 设置场景重力为 (0, -10)。",
-        "2. 添加有限平台 platform-main，并在平台上放置两个滑块。",
-        "3. 设置 block-a 初速度使其追碰 block-b。",
-        "4. 观察碰撞阶段与碰后平台摩擦滑行阶段的分段变化。"
+        "1. 设置场景重力为 (0, -10)，地面光滑。",
+        "2. 放置滑块m（轻）和滑块M（重），均在光滑地面上。",
+        "3. 给滑块m设置水平初速度，M静止。",
+        "4. 运行仿真观察碰撞后两物体共速，验证 mv₀ = (m+M)v共。"
       ]
     },
-    "sceneSource": "command",
+    "sceneSource": "manual",
     "sceneJsonPath": "/templates/scenes/MOM-013.json"
   },
   {
@@ -600,15 +600,15 @@
       "status": "ready"
     },
     "teaching": {
-      "teachingObjective": "通过“人-船”近似模型，观察系统总动量接近零时主体与承载体的反向运动关系。",
+      "teachingObjective": "通过人在光滑水面槽型船上匀速行走的模型，观察动量守恒与位移关系。",
       "constructionSteps": [
-        "1. 设置场景重力为 (0, -10)，并将地面设置为近似无摩擦。",
-        "2. 添加更长的 boat-main（船）并吸附到 ground。",
-        "3. 添加 person-main（人）并吸附到船上。",
-        "4. 设置更慢的相对运动速度，观察人船反向位移关系。"
+        "1. 设置场景重力为 (0, -10)，水面光滑。",
+        "2. 放置槽型船在水面上，人在船内右侧。",
+        "3. 人以恒定速度向左行走，船向右运动（总动量=0）。",
+        "4. 人到达左壁停下，船也停下。观察 x-t 曲线中的位移关系。"
       ]
     },
-    "sceneSource": "command",
+    "sceneSource": "manual",
     "sceneJsonPath": "/templates/scenes/MOM-031.json"
   },
   {

@@ -2,6 +2,7 @@ import { useEntityStore } from './store/entityStore';
 import { useHistoryStore } from './store/historyStore';
 import { CreateEntityCommand } from './commands/createEntity';
 import { createCrossSectionFromPoints } from './crossSectionHelper';
+import { createDefaultHelperSegmentStyle } from './entities/segmentStyle';
 import type { PointProperties } from './entities/types';
 
 // ─── 解析结果类型 ───
@@ -106,7 +107,7 @@ export function executeTextCommand(parsed: ParsedCommand): CommandResult {
       geometryId,
       startPointId: pointA.id,
       endPointId: pointB.id,
-      style: { color: '#ff0000', dashed: false },
+      style: createDefaultHelperSegmentStyle(pointA, pointB),
     });
 
     useHistoryStore.getState().execute(command);

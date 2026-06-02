@@ -98,20 +98,24 @@ export const FUNCTION_COLORS: readonly string[] = [
 
 export type ConicType = 'ellipse' | 'hyperbola' | 'parabola' | 'circle';
 
-/** 椭圆参数: x²/a² + y²/b² = 1  (a > b > 0, 长轴沿 x 轴) */
+export type ConicAxisOrientation = 'h' | 'v';
+
+/** 椭圆参数: 主轴可沿 x 轴或 y 轴，均满足 a > b > 0。 */
 export interface EllipseParams {
   a:  number;   // 半长轴
   b:  number;   // 半短轴
   cx: number;   // 中心 x
   cy: number;   // 中心 y
+  orientation?: ConicAxisOrientation; // h = 长轴沿 x 轴, v = 长轴沿 y 轴
 }
 
-/** 双曲线参数: x²/a² - y²/b² = 1  (实轴沿 x 轴) */
+/** 双曲线参数: 实轴可沿 x 轴或 y 轴。 */
 export interface HyperbolaParams {
   a:  number;   // 半实轴
   b:  number;   // 半虚轴
   cx: number;   // 中心 x
   cy: number;   // 中心 y
+  orientation?: ConicAxisOrientation; // h = 实轴沿 x 轴, v = 实轴沿 y 轴
 }
 
 /**
@@ -141,6 +145,7 @@ export interface EllipseDerived {
   e:           number;                            // 离心率 c/a
   foci:        [[number, number], [number, number]]; // F₁(-c,0) F₂(c,0)
   directrices: [number, number];                  // 准线 x = ±a²/c = ±a/e
+  orientation: ConicAxisOrientation;
 }
 
 export interface HyperbolaDerived {
@@ -151,6 +156,7 @@ export interface HyperbolaDerived {
   asymptotes:  [{ k: number; b: number }, { k: number; b: number }]; // y = ±(b/a)x + offset
   transverseVertices: [[number, number], [number, number]];
   conjugateVertices:  [[number, number], [number, number]];
+  orientation: ConicAxisOrientation;
 }
 
 export interface ParabolaDerived {

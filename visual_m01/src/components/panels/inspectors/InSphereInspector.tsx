@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { Entity, GeometryProperties } from '@/editor/entities/types';
-import { useEntityStore } from '@/editor';
+import { useEntityStore, useHistoryStore, UpdatePropertiesCommand } from '@/editor';
 import { computeInscribedSphere, getInSphereConditionHint } from '@/engine/math/inscribedSphere';
+import { Switch } from '@/components/ui/switch';
 import { TeX } from '@/components/ui/TeX';
 import { COLORS } from '@/styles/tokens';
 import { registerInspector } from './registry';
@@ -56,6 +57,25 @@ function InSphereInspector({ entity }: { entity: Entity }) {
       {conditionHint && (
         <div className="text-sm" style={{ color: COLORS.warning }}>
           当前参数下不存在严格内切球，{conditionHint}
+        </div>
+      )}
+
+      {sphere && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>显示辅助虚线</span>
+          <Switch
+            checked={!!isEntity.properties.showAuxLines}
+            onCheckedChange={(checked) => {
+              useHistoryStore.getState().execute(
+                new UpdatePropertiesCommand<'inSphere'>(
+                  isEntity.id,
+                  { showAuxLines: isEntity.properties.showAuxLines },
+                  { showAuxLines: checked },
+                  '切换内切球辅助线',
+                ),
+              );
+            }}
+          />
         </div>
       )}
     </div>

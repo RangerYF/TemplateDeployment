@@ -50,11 +50,13 @@ const STATIC = {
   circleWidth:    2.5,
   dotColor:       '#1F2937',
   dotRadius:      3.5,
+  activeDotRadius: 5.5,
   /** Min circle radius (px) before showing any angle labels */
   labelMinRadius: 100,
   /** Radial offset from circle edge for angle labels */
   labelOffset:    16,
   labelFont:      '10px monospace',
+  activeLabelFont:'bold 12px monospace',
   labelColor:     '#6B7280',
   /** Zoom thresholds for secondary (45° steps) and tertiary (30° steps) labels */
   secondaryThreshold: 140,
@@ -72,8 +74,8 @@ const DYNAMIC = {
   snapGlowColor:    'rgba(50, 213, 131, 0.25)',
 
   // ── Origin-to-P line ──
-  radiusLineColor:  'rgba(100,116,139,0.35)',
-  radiusLineWidth:  1.5,
+  radiusLineColor:  'rgba(109,40,217,0.78)',
+  radiusLineWidth:  2.6,
 
   // ── Projection lines (subtler) ──
   projLineWidth:    1.5,
@@ -82,16 +84,16 @@ const DYNAMIC = {
   footDotRadius:    3,
 
   // ── Angle arc ──
-  arcColor:         COLORS.angleArc,
-  arcWidth:         1.5,
-  arcRadiusFrac:    0.22,    // fraction of unit radius
+  arcColor:         COLORS.snapAccent,
+  arcWidth:         2.8,
+  arcRadiusFrac:    0.24,    // fraction of unit radius
   arcMinPx:         10,
-  arrowSize:        5,
+  arrowSize:        7,
 
   // ── Labels ──
   labelFont:        'bold 12px monospace',
-  labelFontSmall:   '11px monospace',
-  angleLabelColor:  COLORS.angleArc,
+  labelFontSmall:   'bold 13px monospace',
+  angleLabelColor:  COLORS.snapAccent,
   sinLabelColor:    COLORS.sinColor,
   cosLabelColor:    COLORS.cosColor,
   pLabelFont:       'bold 13px monospace',
@@ -130,6 +132,7 @@ function matchesSet(a: number, set: Set<number>): boolean {
 export function renderStaticUnitCircle(
   ctx:      CanvasRenderingContext2D,
   viewport: Viewport,
+  activeAngleRad?: number,
 ): void {
   ctx.save();
 
@@ -151,6 +154,7 @@ export function renderStaticUnitCircle(
 
   ctx.save();
   ctx.font = STATIC.labelFont;
+  const activeAngle = activeAngleRad ?? NaN;
 
   for (const entry of EXACT_VALUE_TABLE) {
     const x = Math.cos(entry.angleDecimal);
@@ -161,6 +165,7 @@ export function renderStaticUnitCircle(
     const isPrimary   = matchesSet(entry.angleDecimal, PRIMARY_ANGLES);
     const isSecondary = matchesSet(entry.angleDecimal, SECONDARY_ANGLES);
     const isTertiary  = matchesSet(entry.angleDecimal, TERTIARY_ANGLES);
+    const isActiveAngle = Number.isFinite(activeAngle) && Math.abs(entry.angleDecimal - activeAngle) < 1e-6;
 
     const showDot = isPrimary
       || (isSecondary && radiusPx > 80)
@@ -168,9 +173,14 @@ export function renderStaticUnitCircle(
 
     if (showDot) {
       ctx.beginPath();
-      ctx.arc(px, py, STATIC.dotRadius, 0, Math.PI * 2);
-      ctx.fillStyle = STATIC.dotColor;
+      ctx.arc(px, py, isActiveAngle ? STATIC.activeDotRadius : STATIC.dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = isActiveAngle ? COLORS.snapAccent : STATIC.dotColor;
       ctx.fill();
+      if (isActiveAngle) {
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
 
     // Label visibility: only at sufficient zoom, with higher thresholds per tier
@@ -203,7 +213,8 @@ export function renderStaticUnitCircle(
           lx - hw > 4 && lx + hw < viewport.width - 4 &&
           ly - hh > 4 && ly + hh < viewport.height - 4
         ) {
-          ctx.fillStyle    = STATIC.labelColor;
+          ctx.fillStyle    = isActiveAngle ? COLORS.snapAccent : STATIC.labelColor;
+          ctx.font         = isActiveAngle ? STATIC.activeLabelFont : STATIC.labelFont;
           ctx.textAlign    = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(labelText, lx, ly);

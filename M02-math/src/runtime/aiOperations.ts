@@ -44,6 +44,8 @@ const FEATURE_KEYS = new Set([
   'showFeaturePoints',
   'showGrid',
   'showAxisLabels',
+  'showIntersections',
+  'showAsymptotes',
 ] as const);
 const EASING_NAMES = new Set<EasingName>(['linear', 'easeIn', 'easeInOut', 'easeOut', 'spring', 'bounce']);
 
@@ -408,6 +410,15 @@ function executeSetActiveFunction(operation: AiOperation): void {
   useFunctionStore.getState().setActiveFunctionId(fn.id);
 }
 
+function executeRemoveFunction(operation: AiOperation): void {
+  const fn = getFunctionByRef(operation);
+  const store = useFunctionStore.getState();
+  if (store.functions.length <= 1) {
+    throw new Error('至少保留一个函数，不能删除');
+  }
+  store.removeFunction(fn.id);
+}
+
 function executeSetTangentAtX(operation: AiOperation): void {
   const fn = getFunctionByRef(operation);
   const x = asNumber(operation.x);
@@ -559,6 +570,9 @@ export async function applyAiOperations(operations: unknown): Promise<BridgeOper
           break;
         case 'setActiveFunction':
           executeSetActiveFunction(item);
+          break;
+        case 'removeFunction':
+          executeRemoveFunction(item);
           break;
         case 'setTangentAtX':
           executeSetTangentAtX(item);

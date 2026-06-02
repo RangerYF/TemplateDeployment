@@ -15,7 +15,7 @@
     "add-tangent",
     "adjust-function-style",
     "set-param-animation",
-    "simplify-current-scene"
+    "remove-function"
   ],
   "operations": [
     {
@@ -121,7 +121,7 @@
     },
     {
       "type": "setFeatureFlags",
-      "description": "切换显示特征。payload: { showDerivative?: boolean, showFeaturePoints?: boolean, showGrid?: boolean, showAxisLabels?: boolean, showTangent?: boolean }。",
+      "description": "切换显示特征。payload: { showDerivative?: boolean, showFeaturePoints?: boolean, showGrid?: boolean, showAxisLabels?: boolean, showTangent?: boolean, showIntersections?: boolean, showAsymptotes?: boolean }。",
       "payloadSchema": {
         "showDerivative": {
           "type": "boolean"
@@ -137,9 +137,15 @@
         },
         "showTangent": {
           "type": "boolean"
+        },
+        "showIntersections": {
+          "type": "boolean"
+        },
+        "showAsymptotes": {
+          "type": "boolean"
         }
       },
-      "useWhen": "用户要求显示/隐藏导函数、零点极值等特征点、网格、坐标轴或切线状态。",
+      "useWhen": "用户要求显示/隐藏导函数、零点极值等特征点、网格、坐标轴、切线状态、函数交点或渐近线。",
       "doNotUseWhen": "指定切点横坐标时使用 setTangentAtX。"
     },
     {
@@ -244,6 +250,16 @@
       },
       "useWhen": "用户要求演示参数变化，例如振幅从 1 到 3、平移量变化。",
       "doNotUseWhen": "不要开启播放态或录制态。"
+    },
+    {
+      "type": "removeFunction",
+      "description": "删除已有函数。payload: { functionId?: string, label?: string }。通过 functionId 或 label 定位目标函数。至少保留 1 个函数，删到最后一个时报错。",
+      "payloadSchema": {
+        "functionId": { "type": "string" },
+        "label": { "type": "string" }
+      },
+      "useWhen": "用户要求删除、移除、清理某个函数，例如「删掉 g(x)」「把第二个函数去掉」。",
+      "doNotUseWhen": "用户要求修改函数时使用 updateFunction；清空全部函数然后重建时先逐个 removeFunction 再 addFunction。"
     }
   ],
   "payloadSchema": {
@@ -404,6 +420,46 @@
       ],
       "patch": {},
       "explanation": "已配置振幅参数动画，未自动开始播放。"
+    },
+    {
+      "instruction": "帮我在 x=1 处添加一条切线函数。",
+      "operations": [
+        { "type": "addTangentFunction", "label": "f(x)", "x": 1 }
+      ],
+      "patch": {},
+      "explanation": "已在 f(x) 的 x=1 处创建切线函数，方程由 M02 自动计算。"
+    },
+    {
+      "instruction": "选中 g(x)。",
+      "operations": [
+        { "type": "setActiveFunction", "label": "g(x)" }
+      ],
+      "patch": {},
+      "explanation": "已激活 g(x)，面板将显示其详细信息。"
+    },
+    {
+      "instruction": "把 f(x) 改成蓝色虚线。",
+      "operations": [
+        { "type": "setFunctionStyle", "label": "f(x)", "color": "#2196F3", "lineStyle": "dashed" }
+      ],
+      "patch": {},
+      "explanation": "已将 f(x) 设为蓝色虚线。"
+    },
+    {
+      "instruction": "删掉 g(x)。",
+      "operations": [
+        { "type": "removeFunction", "label": "g(x)" }
+      ],
+      "patch": {},
+      "explanation": "已删除 g(x)。"
+    },
+    {
+      "instruction": "显示函数交点和渐近线。",
+      "operations": [
+        { "type": "setFeatureFlags", "showIntersections": true, "showAsymptotes": true }
+      ],
+      "patch": {},
+      "explanation": "已开启交点和渐近线显示。"
     }
   ],
   "planningRules": [

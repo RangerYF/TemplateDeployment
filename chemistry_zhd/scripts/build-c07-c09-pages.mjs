@@ -6,6 +6,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const sourceFile = path.join(rootDir, 'c07_c09_chemistry_tool.html');
 const distDir = path.join(rootDir, 'dist');
+const coreFile = path.join(rootDir, 'c09-synthesis', 'core.mjs');
+
+// 把 c09-synthesis/core.mjs 内联为命名空间模块 window.C09CORE，
+// 内部辅助名（L/R/ln/...）封闭在自有 IIFE 中，不污染主脚本作用域。
+function readCoreInjected() {
+  let src = fs.readFileSync(coreFile, 'utf8');
+  src = src.replace(/^export\s+(const|function)\s+/gm, '$1 ');
+  return `window.C09CORE=(function(){\n${src}\nreturn {renderSkeleton,MOLECULES,getMolecule,ROUTES,validateSynthesisData};\n})();`;
+}
 
 const OUTPUTS = {
   c07: {
@@ -29,6 +38,8 @@ function ensureSource() {
 
 function buildPage(sourceHtml, target) {
   let html = sourceHtml;
+
+  html = html.replace('/*__C09_SYNTHESIS_CORE__*/', readCoreInjected);
 
   html = html.replace(
     /<title>[\s\S]*?<\/title>/,

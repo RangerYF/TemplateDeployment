@@ -35,8 +35,12 @@ export class PhysicsBridge {
     this.forceCollector.attach(this.world)
     this.updateBodyIdLookup()
 
-    // Register pre-solve for conveyor belt mechanism
+    // Register pre-solve for friction mixing override + conveyor belt mechanism
     this.world.on('pre-solve', (contact: Contact) => {
+      const frictionA = contact.getFixtureA().getFriction()
+      const frictionB = contact.getFixtureB().getFriction()
+      contact.setFriction(Math.max(frictionA, frictionB))
+
       if (this.conveyorSpeeds.size === 0) return
       const bodyA = contact.getFixtureA().getBody()
       const bodyB = contact.getFixtureB().getBody()

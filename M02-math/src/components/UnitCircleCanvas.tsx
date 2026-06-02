@@ -111,8 +111,8 @@ export function UnitCircleCanvas() {
 
     hiDpiClear(ctx, canvas);
     renderAxis(ctx, vp, { showGrid: false });
-    renderStaticUnitCircle(ctx, vp);
-  }, [viewport, canvasSize, staticRef]);
+    renderStaticUnitCircle(ctx, vp, isSnapped ? angleRad : undefined);
+  }, [viewport, canvasSize, staticRef, angleRad, isSnapped]);
 
   // ── Dynamic layer: point P, projections, arc, labels ──────────────────────
   useEffect(() => {

@@ -25,6 +25,7 @@
  *  └──────────────────────────────────────────┘
  */
 
+import { useEffect, useState }       from 'react';
 import { useParamSlider }            from '@/hooks/useParamSlider';
 import { usePiSlider }               from '@/hooks/usePiSlider';
 import { useM04FunctionStore }       from '@/editor/store/m04FunctionStore';
@@ -36,7 +37,7 @@ import { UniversalSlider }            from '@/components/shared/UniversalSlider'
 import { COLORS }                    from '@/styles/colors';
 import { btnHover }                  from '@/styles/interactionStyles';
 import { Switch }                    from '@/components/ui/switch';
-import type { FnType, TrigTransform } from '@/types';
+import type { FnType, TrigTransform, ViewportState } from '@/types';
 
 // ─── Colours ─────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,10 @@ function liveSet(key: keyof TrigTransform, value: number): void {
 function commitTransform(before: TrigTransform, after: TrigTransform): void {
   if (JSON.stringify(before) === JSON.stringify(after)) return;
   executeM03Command(new UpdateTransformCommand(before, after));
+}
+
+function fmtViewportValue(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
 // ─── SliderRow (delegates to UniversalSlider) ────────────────────────────────
@@ -131,11 +136,30 @@ function FnTab({
 export function TrigTransformPanel() {
   const fnType        = useM04FunctionStore((s) => s.fnType);
   const transform     = useM04FunctionStore((s) => s.transform);
+  const viewport      = useM04FunctionStore((s) => s.viewport);
   const showReference = useM04FunctionStore((s) => s.showReference);
   const setFnType     = useM04FunctionStore((s) => s.setFnType);
   const setShowRef    = useM04FunctionStore((s) => s.setShowReference);
+  const setViewport   = useM04FunctionStore((s) => s.setViewport);
 
   const fnColor = FN_COLOR[fnType];
+  const [viewportDraft, setViewportDraft] = useState({
+    xMin: fmtViewportValue(viewport.xMin),
+    xMax: fmtViewportValue(viewport.xMax),
+    yMin: fmtViewportValue(viewport.yMin),
+    yMax: fmtViewportValue(viewport.yMax),
+  });
+  const [viewportError, setViewportError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setViewportDraft({
+      xMin: fmtViewportValue(viewport.xMin),
+      xMax: fmtViewportValue(viewport.xMax),
+      yMin: fmtViewportValue(viewport.yMin),
+      yMax: fmtViewportValue(viewport.yMax),
+    });
+    setViewportError(null);
+  }, [viewport]);
 
   // ── Sliders (Rules of Hooks: all unconditional) ───────────────────────────
 
@@ -182,6 +206,28 @@ export function TrigTransformPanel() {
 
   // ── Ref label for checkbox ────────────────────────────────────────────────
   const refLabel = `参考曲线 y = ${fnType}(x)`;
+
+  const commitViewport = (patch?: Partial<ViewportState>) => {
+    const next: ViewportState = { ...viewport, ...patch };
+    if (!(next.xMin < next.xMax) || !(next.yMin < next.yMax)) {
+      setViewportError('坐标范围要求最小值小于最大值');
+      return;
+    }
+    setViewport(next);
+    setViewportError(null);
+  };
+
+  const handleViewportCommit = () => {
+    const xMin = parseFloat(viewportDraft.xMin);
+    const xMax = parseFloat(viewportDraft.xMax);
+    const yMin = parseFloat(viewportDraft.yMin);
+    const yMax = parseFloat(viewportDraft.yMax);
+    if ([xMin, xMax, yMin, yMax].some((v) => Number.isNaN(v))) {
+      setViewportError('坐标范围请输入数字');
+      return;
+    }
+    commitViewport({ xMin, xMax, yMin, yMax });
+  };
 
   return (
     <div style={{ padding: '12px 14px', borderTop: `1px solid ${COLORS.border}` }}>
@@ -249,6 +295,68 @@ export function TrigTransformPanel() {
         onCommit={([v]) => kSlider.handleCommit(v)}
       />
 
+      <div style={{
+        borderTop: `1px solid ${COLORS.border}`,
+        marginTop: 8,
+        paddingTop: 8,
+        marginBottom: 6,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.textSecondary, marginBottom: 6 }}>
+          坐标范围
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+          <div style={{ padding: '6px 8px', borderRadius: 8, background: COLORS.surfaceAlt }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: COLORS.textSecondary, marginBottom: 4 }}>
+              横轴 x
+            </div>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <input
+                type="number"
+                value={viewportDraft.xMin}
+                onChange={(e) => { setViewportDraft((draft) => ({ ...draft, xMin: e.target.value })); setViewportError(null); }}
+                onBlur={handleViewportCommit}
+                style={rangeInputStyle}
+              />
+              <span style={{ fontSize: 10, color: COLORS.textSecondary }}>~</span>
+              <input
+                type="number"
+                value={viewportDraft.xMax}
+                onChange={(e) => { setViewportDraft((draft) => ({ ...draft, xMax: e.target.value })); setViewportError(null); }}
+                onBlur={handleViewportCommit}
+                style={rangeInputStyle}
+              />
+            </div>
+          </div>
+          <div style={{ padding: '6px 8px', borderRadius: 8, background: COLORS.surfaceAlt }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: COLORS.textSecondary, marginBottom: 4 }}>
+              纵轴 y
+            </div>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <input
+                type="number"
+                value={viewportDraft.yMin}
+                onChange={(e) => { setViewportDraft((draft) => ({ ...draft, yMin: e.target.value })); setViewportError(null); }}
+                onBlur={handleViewportCommit}
+                style={rangeInputStyle}
+              />
+              <span style={{ fontSize: 10, color: COLORS.textSecondary }}>~</span>
+              <input
+                type="number"
+                value={viewportDraft.yMax}
+                onChange={(e) => { setViewportDraft((draft) => ({ ...draft, yMax: e.target.value })); setViewportError(null); }}
+                onBlur={handleViewportCommit}
+                style={rangeInputStyle}
+              />
+            </div>
+          </div>
+        </div>
+        {viewportError && (
+          <div style={{ marginTop: 6, fontSize: 10, color: COLORS.errorDark }}>
+            {viewportError}
+          </div>
+        )}
+      </div>
+
       {/* ── Period & phase readout ────────────────────────────────────────── */}
       <div style={{
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6,
@@ -290,3 +398,17 @@ export function TrigTransformPanel() {
     </div>
   );
 }
+
+const rangeInputStyle: React.CSSProperties = {
+  width: '100%',
+  minWidth: 0,
+  padding: '3px 4px',
+  fontSize: 11,
+  fontFamily: 'monospace',
+  color: COLORS.textPrimary,
+  background: COLORS.surface,
+  border: `1px solid ${COLORS.borderMuted}`,
+  borderRadius: 6,
+  textAlign: 'right',
+  outline: 'none',
+};

@@ -1,23 +1,23 @@
 {
   "meta": {
     "id": "MOM-003",
-    "name": "部分弹性碰撞",
+    "name": "一般碰撞",
     "module": "P-12",
     "status": "ready"
   },
   "teaching": {
-    "teachingObjective": "通过部分弹性碰撞模板，对比恢复系数小于 1 时动量守恒与动能损失并存的现象。",
+    "teachingObjective": "通过一般碰撞模板，对比恢复系数小于 1 时动量守恒与动能损失并存的现象。",
     "constructionSteps": [
       "1. 设置场景重力为 (0, -10)。",
       "2. 添加球体 ball-left 与 ball-right，并吸附到 ground。",
       "3. 设置 ball-left 初速度为向右，ball-right 初速度为 0。",
-      "4. 将两球恢复系数设为 0.5，构造部分弹性碰撞。"
+      "4. 将两球恢复系数设为 0.5，构造一般碰撞。"
     ]
   },
   "sceneJsonPath": "/templates/scenes/MOM-003.json",
   "commandProgram": {
     "templateId": "MOM-003",
-    "sceneName": "MOM-003 部分弹性碰撞",
+    "sceneName": "MOM-003 一般碰撞",
     "version": "1.0",
     "allowNonZeroInitialVelocity": true,
     "commands": [
@@ -35,13 +35,14 @@
         "patch": {
           "position": {
             "x": -3.2,
-            "y": 0.3
+            "y": 0.5
           },
           "mass": 1,
           "friction": 0,
           "restitution": 0.5,
+          "radius": 0.5,
           "initialVelocity": {
-            "x": 6,
+            "x": 3,
             "y": 0
           }
         }
@@ -61,11 +62,12 @@
         "patch": {
           "position": {
             "x": 0.6,
-            "y": 0.3
+            "y": 0.5
           },
           "mass": 1,
           "friction": 0,
-          "restitution": 0.5
+          "restitution": 0.5,
+          "radius": 0.5
         }
       },
       {

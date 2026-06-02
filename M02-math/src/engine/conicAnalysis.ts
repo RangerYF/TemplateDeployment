@@ -9,37 +9,62 @@ import type {
 // ─── Derived element calculators ─────────────────────────────────────────────
 
 /**
- * Compute all derived elements of an ellipse x²/a² + y²/b² = 1 (a > b > 0).
+ * Compute all derived elements of an ellipse.
  *
  * Acceptance check (a=5, b=3):
  *   c = √(25-9) = 4.000  e = 0.800  foci = (±4, 0)  directrices x = ±6.25
  */
 export function computeEllipseDerived(p: EllipseParams): EllipseDerived {
-  const { a, b, cx, cy } = p;
+  const { a, b, cx, cy, orientation = 'h' } = p;
   const c = Math.sqrt(a * a - b * b);
   const e = c / a;
-  // directrix: x = cx ± a²/c  (= cx ± a/e)
   const d = a * a / c;
+  if (orientation === 'v') {
+    return {
+      c,
+      e,
+      foci:        [[cx, cy - c], [cx, cy + c]],
+      directrices: [cy - d, cy + d],
+      orientation,
+    };
+  }
   return {
     c,
     e,
     foci:        [[cx - c, cy], [cx + c, cy]],
     directrices: [cx - d, cx + d],
+    orientation,
   };
 }
 
 /**
- * Compute all derived elements of a hyperbola x²/a² - y²/b² = 1 (real axis along x).
+ * Compute all derived elements of a hyperbola.
  *
  * Acceptance check (a=3, b=4):
  *   c = √(9+16) = 5.000  e = 1.667  asymptote slopes ±1.333
  */
 export function computeHyperbolaDerived(p: HyperbolaParams): HyperbolaDerived {
-  const { a, b, cx, cy } = p;
+  const { a, b, cx, cy, orientation = 'h' } = p;
   const c = Math.sqrt(a * a + b * b);
   const e = c / a;
-  const d = a * a / c;             // directrix offset: x = cx ± a²/c
-  const slope = b / a;             // asymptote slope ±b/a
+  const d = a * a / c;
+  if (orientation === 'v') {
+    const slope = a / b;
+    return {
+      c,
+      e,
+      foci:        [[cx, cy - c], [cx, cy + c]],
+      directrices: [cy - d, cy + d],
+      asymptotes:  [
+        { k:  slope, b: cy - slope * cx },
+        { k: -slope, b: cy + slope * cx },
+      ],
+      transverseVertices: [[cx, cy - a], [cx, cy + a]],
+      conjugateVertices:  [[cx - b, cy], [cx + b, cy]],
+      orientation,
+    };
+  }
+  const slope = b / a;
   return {
     c,
     e,
@@ -51,6 +76,7 @@ export function computeHyperbolaDerived(p: HyperbolaParams): HyperbolaDerived {
     ],
     transverseVertices: [[cx - a, cy], [cx + a, cy]],
     conjugateVertices:  [[cx, cy - b], [cx, cy + b]],
+    orientation,
   };
 }
 

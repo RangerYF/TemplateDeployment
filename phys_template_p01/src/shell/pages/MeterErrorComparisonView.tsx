@@ -21,6 +21,7 @@ import {
   ExperimentBoardScene,
   type ExperimentBoardTooltipData,
 } from '@/shell/components/ExperimentBoardScene';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 // ─── 常量 ─────────────────────────────────────────
 
@@ -120,6 +121,34 @@ export function MeterErrorComparisonView({ onBack }: Props) {
   const [showFormula, setShowFormula] = useState(false);
   const [viewMode, setViewMode] = useState<CircuitViewMode>('diagram');
   const [showIdealModel, setShowIdealModel] = useState(true);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-meter-error-comparison', {
+    getSnapshot: () => ({ params, closed, showFormula, viewMode, showIdealModel }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        params: Partial<MeterErrorParams>;
+        closed: boolean;
+        showFormula: boolean;
+        viewMode: CircuitViewMode;
+        showIdealModel: boolean;
+      }>;
+      if (value.params) {
+        setParams((prev) => ({ ...prev, ...value.params }));
+      }
+      if (typeof value.closed === 'boolean') {
+        setClosed(value.closed);
+      }
+      if (typeof value.showFormula === 'boolean') {
+        setShowFormula(value.showFormula);
+      }
+      if (value.viewMode) {
+        setViewMode(value.viewMode);
+      }
+      if (typeof value.showIdealModel === 'boolean') {
+        setShowIdealModel(value.showIdealModel);
+      }
+    },
+  }), [closed, params, showFormula, showIdealModel, viewMode]);
 
   const result = calculateMeterError(params);
 

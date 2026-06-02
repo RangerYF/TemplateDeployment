@@ -67,24 +67,32 @@ function nearestEllipse(
   mx: number,
   my: number,
 ): [number, number] {
-  const { a, b, cx, cy } = entity.params;
+  const { a, b, cx, cy, orientation = 'h' } = entity.params;
   const STEPS = 400;
   let bestT = 0;
   let bestD = Infinity;
 
   for (let i = 0; i < STEPS; i++) {
     const t = (i / STEPS) * 2 * Math.PI;
-    const d = distSq(cx + a * Math.cos(t), cy + b * Math.sin(t), mx, my);
+    const ex = orientation === 'v' ? cx + b * Math.cos(t) : cx + a * Math.cos(t);
+    const ey = orientation === 'v' ? cy + a * Math.sin(t) : cy + b * Math.sin(t);
+    const d = distSq(ex, ey, mx, my);
     if (d < bestD) { bestD = d; bestT = t; }
   }
 
   const step  = (2 * Math.PI) / STEPS;
   const tBest = ternaryMin(
-    (t) => distSq(cx + a * Math.cos(t), cy + b * Math.sin(t), mx, my),
+    (t) => {
+      const ex = orientation === 'v' ? cx + b * Math.cos(t) : cx + a * Math.cos(t);
+      const ey = orientation === 'v' ? cy + a * Math.sin(t) : cy + b * Math.sin(t);
+      return distSq(ex, ey, mx, my);
+    },
     bestT - step,
     bestT + step,
   );
-  return [cx + a * Math.cos(tBest), cy + b * Math.sin(tBest)];
+  return orientation === 'v'
+    ? [cx + b * Math.cos(tBest), cy + a * Math.sin(tBest)]
+    : [cx + a * Math.cos(tBest), cy + b * Math.sin(tBest)];
 }
 
 function nearestHyperbola(
@@ -93,7 +101,42 @@ function nearestHyperbola(
   my:     number,
   vp:     Viewport,
 ): [number, number] {
-  const { a, b, cx, cy } = entity.params;
+  const { a, b, cx, cy, orientation = 'h' } = entity.params;
+
+  if (orientation === 'v') {
+    const xExt  = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
+    const yExt  = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
+    const tMaxX = Math.asinh(xExt / b);
+    const tMaxY = Math.acosh(Math.max(1.01, yExt / a));
+    const tMax  = Math.max(tMaxX, tMaxY) + 0.5;
+
+    const STEPS = 400;
+    let bestT = 0;
+    let bestD = Infinity;
+    let bestSign: 1 | -1 = 1;
+
+    for (let i = 0; i <= STEPS; i++) {
+      const t = -tMax + (i / STEPS) * 2 * tMax;
+      for (const sign of [1, -1] as const) {
+        const x = cx + b * Math.sinh(t);
+        const y = cy + sign * a * Math.cosh(t);
+        const d = distSq(x, y, mx, my);
+        if (d < bestD) { bestD = d; bestT = t; bestSign = sign; }
+      }
+    }
+
+    const step  = (2 * tMax) / STEPS;
+    const tBest = ternaryMin(
+      (t) => {
+        const x = cx + b * Math.sinh(t);
+        const y = cy + bestSign * a * Math.cosh(t);
+        return distSq(x, y, mx, my);
+      },
+      bestT - step,
+      bestT + step,
+    );
+    return [cx + b * Math.sinh(tBest), cy + bestSign * a * Math.cosh(tBest)];
+  }
 
   // Adaptive parameter range to cover the visible viewport
   const yExt  = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;

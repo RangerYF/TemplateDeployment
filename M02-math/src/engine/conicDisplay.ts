@@ -56,6 +56,22 @@ export function formatConicValue(
   return formatTeachingValue(value, Math.min(decimals, 2));
 }
 
+export function formatFractionPreferredConicValue(
+  value: number,
+  mode: ConicDisplayMode,
+  decimals = 4,
+  maxDen = 96,
+): string {
+  if (!Number.isFinite(value)) return '—';
+  const roundedInt = Math.round(value);
+  if (Math.abs(value - roundedInt) < 1e-10) return String(roundedInt);
+
+  const frac = toFraction(value, maxDen);
+  if (frac) return frac.startsWith('-') ? `−${frac.slice(1)}` : frac;
+
+  return formatConicValue(value, mode, decimals);
+}
+
 export function formatSignedTeachingValue(value: number, decimals = 4): string {
   if (!Number.isFinite(value)) return '—';
   if (Math.abs(value) < 1e-10) return '0';

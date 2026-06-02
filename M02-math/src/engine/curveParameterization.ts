@@ -29,17 +29,21 @@ export function resolvePointOnEntity(
 ): { mathX: number; mathY: number } | null {
   switch (entity.type) {
     case 'ellipse': {
-      const { a, b, cx, cy } = entity.params;
-      return { mathX: cx + a * Math.cos(t), mathY: cy + b * Math.sin(t) };
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
+      return orientation === 'v'
+        ? { mathX: cx + b * Math.cos(t), mathY: cy + a * Math.sin(t) }
+        : { mathX: cx + a * Math.cos(t), mathY: cy + b * Math.sin(t) };
     }
     case 'circle': {
       const { r, cx, cy } = entity.params;
       return { mathX: cx + r * Math.cos(t), mathY: cy + r * Math.sin(t) };
     }
     case 'hyperbola': {
-      const { a, b, cx, cy } = entity.params;
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
       const sign = branch === 'left' ? -1 : 1;
-      return { mathX: cx + sign * a * Math.cosh(t), mathY: cy + b * Math.sinh(t) };
+      return orientation === 'v'
+        ? { mathX: cx + b * Math.sinh(t), mathY: cy + sign * a * Math.cosh(t) }
+        : { mathX: cx + sign * a * Math.cosh(t), mathY: cy + b * Math.sinh(t) };
     }
     case 'parabola': {
       const { p, cx, cy, orientation = 'h' } = entity.params;
@@ -74,9 +78,11 @@ export function projectOntoEntity(
 ): ResolvedPoint | null {
   switch (entity.type) {
     case 'ellipse': {
-      const { a, b, cx, cy } = entity.params;
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
       return projectOntoParametric(
-        (t) => [cx + a * Math.cos(t), cy + b * Math.sin(t)],
+        (t) => orientation === 'v'
+          ? [cx + b * Math.cos(t), cy + a * Math.sin(t)]
+          : [cx + a * Math.cos(t), cy + b * Math.sin(t)],
         mx, my, 0, 2 * Math.PI, 400,
       );
     }
@@ -90,12 +96,21 @@ export function projectOntoEntity(
       return { t, mathX: cx + r * Math.cos(t), mathY: cy + r * Math.sin(t) };
     }
     case 'hyperbola': {
-      const { a, b, cx, cy } = entity.params;
-      const yExt = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
-      const xExt = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
-      const tMaxY = Math.asinh(yExt / b);
-      const tMaxX = Math.acosh(Math.max(1.01, xExt / a));
-      const tMax = Math.max(tMaxY, tMaxX) + 0.5;
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
+      const tMax = (() => {
+        if (orientation === 'v') {
+          const xExt = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
+          const yExt = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
+          const tMaxX = Math.asinh(xExt / b);
+          const tMaxY = Math.acosh(Math.max(1.01, yExt / a));
+          return Math.max(tMaxX, tMaxY) + 0.5;
+        }
+        const yExt = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
+        const xExt = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
+        const tMaxY = Math.asinh(yExt / b);
+        const tMaxX = Math.acosh(Math.max(1.01, xExt / a));
+        return Math.max(tMaxY, tMaxX) + 0.5;
+      })();
 
       let bestResult: ResolvedPoint | null = null;
       let bestDist = Infinity;
@@ -103,7 +118,9 @@ export function projectOntoEntity(
       for (const branchVal of ['right', 'left'] as const) {
         const sign = branchVal === 'left' ? -1 : 1;
         const result = projectOntoParametric(
-          (t) => [cx + sign * a * Math.cosh(t), cy + b * Math.sinh(t)],
+          (t) => orientation === 'v'
+            ? [cx + b * Math.sinh(t), cy + sign * a * Math.cosh(t)]
+            : [cx + sign * a * Math.cosh(t), cy + b * Math.sinh(t)],
           mx, my, -tMax, tMax, 400,
         );
         if (result) {
@@ -242,7 +259,15 @@ export function getEntityTRange(entity: AnyEntity, vp: Viewport): [number, numbe
     case 'circle':
       return [0, 2 * Math.PI];
     case 'hyperbola': {
-      const { a, b, cx, cy } = entity.params;
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
+      if (orientation === 'v') {
+        const xExt = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
+        const yExt = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
+        const tMaxX = Math.asinh(xExt / b);
+        const tMaxY = Math.acosh(Math.max(1.01, yExt / a));
+        const tMax = Math.max(tMaxX, tMaxY) + 0.5;
+        return [-tMax, tMax];
+      }
       const yExt = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy)) + 1;
       const xExt = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx)) + 1;
       const tMaxY = Math.asinh(yExt / b);

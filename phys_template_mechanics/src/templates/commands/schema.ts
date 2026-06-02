@@ -13,7 +13,7 @@ export const TEMPLATE_COMMAND_API_CATEGORIES: ReadonlyArray<{
 }> = [
   {
     category: 'scene',
-    commands: ['setGravity'],
+    commands: ['setGravity', 'setEnergyConservation'],
   },
   {
     category: 'body',
@@ -45,6 +45,11 @@ type ForcePatch = Partial<Omit<SceneForce, 'id' | 'type' | 'targetBodyId'>>
 export interface SetGravityCommand {
   kind: 'setGravity'
   gravity: Vec2
+}
+
+export interface SetEnergyConservationCommand {
+  kind: 'setEnergyConservation'
+  enabled: boolean
 }
 
 export interface AddBodyCommand {
@@ -105,6 +110,7 @@ export interface PatchForceCommand {
 
 export type TemplateCommand =
   | SetGravityCommand
+  | SetEnergyConservationCommand
   | AddBodyCommand
   | PatchBodyCommand
   | SnapToCommand

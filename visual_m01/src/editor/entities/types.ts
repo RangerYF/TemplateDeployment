@@ -96,10 +96,12 @@ export interface CoordinateSystemProperties {
 
 export interface CircumSphereProperties {
   geometryId: string;
+  showAuxLines?: boolean;
 }
 
 export interface InSphereProperties {
   geometryId: string;
+  showAuxLines?: boolean;
 }
 
 export interface CircumCircleProperties {

@@ -8,7 +8,7 @@ type RefractionExperimentId = 'opt-001' | 'opt-002' | 'opt-003' | 'opt-004' | 'o
 type HemisphereMode = 'center' | 'plane';
 type FiberModel = 'straight' | 'bent';
 type SnellSourceShape = 'point' | 'line' | 'polygon';
-type DragTarget = 'source' | 'element' | 'pan' | null;
+type DragTarget = 'source' | 'source2' | 'element' | 'pan' | null;
 
 interface RefractionSettings {
   experimentId: RefractionExperimentId;
@@ -18,6 +18,10 @@ interface RefractionSettings {
   sourceAnchorX: number;
   sourceY?: number;
   sourceAngleDeg?: number;
+  showSource2?: boolean;
+  source2AngleDeg?: number;
+  source2AnchorX?: number;
+  source2Y?: number;
   elementCenterX: number;
   elementCenterY?: number;
   canvasPanX?: number;
@@ -38,12 +42,14 @@ interface RefractionSettings {
   apparentObjectDepthCm: number;
   apparentWaterN: number;
   apparentRayAngleDeg: number;
+  apparentRayOpacity?: number;
   snellSourceDepthCm: number;
   snellSourceShape?: SnellSourceShape;
   snellSourceSizeCm?: number;
   snellPolygonSides?: number;
   snellWaterN: number;
   snellIncidentAngleDeg: number;
+  snellLineSampleCount?: number;
   snellViewMode: '3d' | '2d' | 'topview';
   showAngles: boolean;
   showNormals: boolean;
@@ -137,6 +143,8 @@ const BASE_SHAPE_PRESETS: Record<ShapeKind, Partial<RefractionSettings>> = {
   apparent: { experimentId: 'opt-005', shape: 'apparent', sourceAnchorX: 500, sourceY: 90, sourceAngleDeg: -90, elementCenterX: 500, elementCenterY: 260, apparentMode: 'depth' as const, apparentObjectDepthCm: 5, apparentWaterN: 1.333, apparentRayAngleDeg: 20, rayThick: 1.2 },
   snellwindow: { experimentId: 'opt-006', shape: 'snellwindow', sourceAnchorX: 500, sourceY: 90, elementCenterX: 500, elementCenterY: 260, snellSourceDepthCm: 8, snellSourceShape: 'point', snellSourceSizeCm: 4, snellPolygonSides: 5, snellWaterN: 1.333, snellIncidentAngleDeg: 30, snellViewMode: '3d' as const },
 };
+
+const SOURCE2_COLOR = 'oklch(0.62 0.18 250)';
 
 const deg = (r: number): number => r * 180 / Math.PI;
 const rad = (d: number): number => d * Math.PI / 180;
@@ -695,7 +703,7 @@ function solveHemisphere(settings: RefractionSettings, source: Point): SolveResu
     const target = center;
     const insideDir = norm(sub(target, source));
     const exit = intersectRayCircle(target, insideDir, center, R, (p) => p.y >= center.y - 0.5);
-    if (!exit) return { segments: [extendRay(source, dir)], angleMarks: [], normals: [], status: '未命中半球' };
+    if (!exit) return { segments: [extendRay(source, dir)], angleMarks: [], normals: [], status: '未命中半球', pathMode: '未命中', firstEdge: null, lastEdge: null };
     const out = add(exit, mul(insideDir, 1400));
     return {
       segments: [{ from: source, to: target, kind: 'incident' }, { from: target, to: exit, kind: 'refracted' }, { from: exit, to: out, kind: 'exit' }],
@@ -1007,7 +1015,7 @@ function applyShapePreset(settings: RefractionSettings, shape: ShapeKind): Refra
     showNormals: true,
     showFormula: true,
     showColor: true,
-    lightMode: 'single',
+    showSource2: false,
   };
 }
 
@@ -1034,6 +1042,7 @@ function SnellWindow3DModule({ settings }: { settings: RefractionSettings }) {
           sourceShape={settings.snellSourceShape ?? 'point'}
           sourceSizeCm={settings.snellSourceSizeCm ?? 4}
           polygonSides={settings.snellPolygonSides ?? 5}
+          lineSampleCount={settings.snellLineSampleCount ?? 7}
           wavelength={settings.wavelength}
           showColor={settings.showColor}
         />
@@ -1051,6 +1060,8 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
   if (settings.shape === 'snellwindow') return <SnellWindow3DModule settings={settings} />;
 
   const result = solveRefraction(settings);
+  const showS2 = settings.showSource2 === true && settings.shape !== 'apparent';
+  const result2 = showS2 ? solveRefraction({ ...settings, sourceAngleDeg: settings.source2AngleDeg ?? 35, sourceAnchorX: settings.source2AnchorX ?? settings.sourceAnchorX, sourceY: settings.source2Y ?? 150 }) : null;
   const rayColor = settings.showColor ? (window as any).wavelengthToColor(settings.wavelength) : 'var(--accent-strong)';
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const dragRef = React.useRef<{ kind: DragTarget; startX: number; startY: number; prev: RefractionSettings } | null>(null);
@@ -1083,6 +1094,14 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
           ...prev,
           sourceAnchorX: clamp((info.prev.sourceAnchorX ?? 180) + localDx, SOURCE_MIN_X, SOURCE_MAX_X),
           sourceY: clamp((info.prev.sourceY ?? 90) + localDy, SOURCE_MIN_Y, SOURCE_MAX_Y),
+        }));
+        return;
+      }
+      if (info.kind === 'source2') {
+        apply((prev: RefractionSettings) => ({
+          ...prev,
+          source2AnchorX: clamp((info.prev.source2AnchorX ?? info.prev.sourceAnchorX ?? 180) + localDx, SOURCE_MIN_X, SOURCE_MAX_X),
+          source2Y: clamp((info.prev.source2Y ?? 150) + localDy, SOURCE_MIN_Y, SOURCE_MAX_Y),
         }));
         return;
       }
@@ -1135,16 +1154,40 @@ function RefractionModule({ settings }: { settings: RefractionSettings }) {
           {settings.showNormals && result.normals.map((line, idx) => (
             <line key={idx} className="normal-line" x1={line[0].x} y1={line[0].y} x2={line[1].x} y2={line[1].y} />
           ))}
-          {result.segments.map((segment, index) => (
-            <RenderedRay key={index} segment={segment} color={rayColor} thick={settings.rayThick} />
-          ))}
+          <g opacity={settings.shape === 'apparent' ? (settings.apparentRayOpacity ?? 1) : 1}>
+            {result.segments.map((segment, index) => (
+              <RenderedRay key={index} segment={segment} color={rayColor} thick={settings.rayThick} />
+            ))}
+          </g>
           {settings.showAngles && result.angleMarks.map((mark, index) => <AngleMarkView key={index} mark={mark} />)}
+
+          {showS2 && result2 && (
+            <g opacity={0.55}>
+              {result2.segments.map((segment, index) => (
+                <RenderedRay key={`s2-${index}`} segment={segment} color={SOURCE2_COLOR} thick={settings.rayThick * 0.85} />
+              ))}
+              {settings.showAngles && result2.angleMarks.map((mark, index) => (
+                <AngleMarkView key={`s2a-${index}`} mark={{ ...mark, radius: mark.radius + 18 }} />
+              ))}
+            </g>
+          )}
+          {showS2 && (
+            <g data-ref-no-pan="true" style={{ cursor: 'grab' }} onPointerDown={beginDrag('source2')}
+               transform={`translate(${settings.source2AnchorX ?? settings.sourceAnchorX}, ${settings.source2Y ?? 150}) rotate(${settings.source2AngleDeg ?? 35})`}>
+              <text className="label-txt dim" x="-88" y="16" fill={SOURCE2_COLOR}>对比光源</text>
+              <rect x="-62" y="-5.5" width="46" height="11" rx="5.5" fill="rgba(30, 40, 80, 0.96)" stroke="rgba(100, 150, 255, 0.4)" strokeWidth="0.8" />
+              <circle cx="-5" cy="0" r="5.1" fill="rgba(24, 31, 60, 0.98)" />
+              <circle cx="-1.2" cy="0" r="3.6" fill="rgba(100, 160, 255, 0.35)" />
+              <circle cx="-1.2" cy="0" r="1.2" fill="rgba(200,220,255,0.98)" />
+            </g>
+          )}
         </g>
       </svg>
 
       <div className="legend">
         <div className="legend-title">图例</div>
         <div className="legend-row"><span className="swatch" style={{ background: rayColor }} /><span className="label">主光线</span></div>
+        {showS2 && <div className="legend-row"><span className="swatch" style={{ background: SOURCE2_COLOR, opacity: 0.55 }} /><span className="label">对比光线</span></div>}
         <div className="legend-row"><span className="swatch dashed" /><span className="label">法线</span></div>
         <div className="legend-row"><span className="swatch" style={{ background: 'rgba(52, 122, 110, 0.78)' }} /><span className="label">介质边界</span></div>
       </div>
@@ -1361,6 +1404,10 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
         <>
           <SectionTitle aside="SOURCE">主光源</SectionTitle>
           <Slider label="光线角 α" value={settings.sourceAngleDeg ?? 56} onChange={(v: number) => setSettings({ ...settings, sourceAngleDeg: v })} min={-85} max={175} step={1} unit="°" hint="光源方向独立于介质位置" />
+          <Toggle label="对比光源" checked={settings.showSource2 === true} onChange={(v: boolean) => setSettings({ ...settings, showSource2: v })} />
+          {settings.showSource2 && (
+            <Slider label="对比角 β" value={settings.source2AngleDeg ?? 35} onChange={(v: number) => setSettings({ ...settings, source2AngleDeg: v })} min={-85} max={175} step={1} unit="°" hint="与主光源相同位置、不同入射角" />
+          )}
         </>
       )}
 
@@ -1400,13 +1447,17 @@ function RefractionControls({ settings, setSettings }: { settings: RefractionSet
           <Slider label="物体深度 h" value={settings.apparentObjectDepthCm ?? 5} onChange={(v: number) => setSettings({ ...settings, apparentObjectDepthCm: v })} min={1} max={15} step={0.5} unit="cm" />
           <Slider label="水折射率 n" value={settings.apparentWaterN ?? 1.333} onChange={(v: number) => setSettings({ ...settings, apparentWaterN: v })} min={1.1} max={1.8} step={0.01} unit="" />
           <Slider label="光线张角" value={settings.apparentRayAngleDeg ?? 20} onChange={(v: number) => setSettings({ ...settings, apparentRayAngleDeg: v })} min={2} max={80} step={1} unit="°" hint="超过临界角时可观察全反射" />
+          <Slider label="光线透明度" value={Math.round((1 - (settings.apparentRayOpacity ?? 1)) * 100)} onChange={(v: number) => setSettings({ ...settings, apparentRayOpacity: 1 - v / 100 })} min={0} max={100} step={5} unit="%" hint="调高可隐藏光线，方便观察虚像位置" />
         </>
       )}
       {settings.shape === 'snellwindow' && (
         <>
           <SegSelect value={settings.snellSourceShape ?? 'point'} onChange={(v: SnellSourceShape) => setSettings({ ...settings, snellSourceShape: v })} options={[{ value: 'point', label: '点光源' }, { value: 'line', label: '线光源' }, { value: 'polygon', label: '多边形' }]} />
           {(settings.snellSourceShape ?? 'point') !== 'point' && (
-            <Slider label="光源尺寸" value={settings.snellSourceSizeCm ?? 4} onChange={(v: number) => setSettings({ ...settings, snellSourceSizeCm: v })} min={1} max={12} step={0.5} unit="cm" />
+            <>
+              <Slider label="光源尺寸" value={settings.snellSourceSizeCm ?? 4} onChange={(v: number) => setSettings({ ...settings, snellSourceSizeCm: v })} min={1} max={12} step={0.5} unit="cm" />
+              <Slider label="采样点数" value={settings.snellLineSampleCount ?? 7} onChange={(v: number) => setSettings({ ...settings, snellLineSampleCount: Math.round(v) })} min={2} max={15} step={1} unit="" hint="每个采样点绘制独立斯涅尔窗" />
+            </>
           )}
           {(settings.snellSourceShape ?? 'point') === 'polygon' && (
             <Slider label="多边形边数" value={settings.snellPolygonSides ?? 5} onChange={(v: number) => setSettings({ ...settings, snellPolygonSides: Math.round(v) })} min={3} max={8} step={1} unit="" />
@@ -1453,6 +1504,8 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
   const Readout = (window as any).Readout;
   const FormulaBlock = (window as any).FormulaBlock;
   const result = solveRefraction(settings);
+  const showS2 = settings.showSource2 === true && settings.shape !== 'apparent' && settings.shape !== 'snellwindow';
+  const result2 = showS2 ? solveRefraction({ ...settings, sourceAngleDeg: settings.source2AngleDeg ?? 35, sourceAnchorX: settings.source2AnchorX ?? settings.sourceAnchorX, sourceY: settings.source2Y ?? 150 }) : null;
   const formulaNotes = buildRefractionFormulaNotes(settings, result);
 
   const shapeLabel = SHAPES.find((shape) => shape.id === settings.shape)?.label || '介质';
@@ -1509,8 +1562,11 @@ function RefractionReadouts({ settings }: { settings: RefractionSettings }) {
             <Readout label="首次命中边界" value={edgeLabel(result.firstEdge)} unit="" />
             <Readout label="最后命中边界" value={edgeLabel(result.lastEdge)} unit="" />
             <Readout label="入射角" value={fmt(result.incidentDeg, 2)} unit={result.incidentDeg == null ? '' : '°'} />
+            {result2 && <Readout label="入射角 (对比)" value={fmt(result2.incidentDeg, 2)} unit={result2.incidentDeg == null ? '' : '°'} />}
             <Readout label="折射角" value={fmt(result.refractedDeg, 2)} unit={result.refractedDeg == null ? '' : '°'} hi />
+            {result2 && <Readout label="折射角 (对比)" value={fmt(result2.refractedDeg, 2)} unit={result2.refractedDeg == null ? '' : '°'} hi />}
             <Readout label="反射角" value={fmt(result.reflectedDeg, 2)} unit={result.reflectedDeg == null ? '' : '°'} />
+            {result2 && <Readout label="反射角 (对比)" value={fmt(result2.reflectedDeg, 2)} unit={result2.reflectedDeg == null ? '' : '°'} />}
             {result.exitDeg !== undefined && <Readout label="出射角" value={fmt(result.exitDeg, 2)} unit={result.exitDeg == null ? '' : '°'} />}
             {result.criticalDeg !== undefined && <Readout label="临界角" value={fmt(result.criticalDeg, 2)} unit={result.criticalDeg == null ? '' : '°'} />}
             {result.shiftCm !== undefined && <Readout label="侧向位移" value={fmt(result.shiftCm, 2)} unit={result.shiftCm == null ? '' : 'cm'} />}

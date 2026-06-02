@@ -2,14 +2,14 @@
  * TwoPointLineTool — define the active line by clicking two canvas points.
  *
  * Interaction flow:
- *   1st click  → records P₁; draws a green dot + instruction hint on the dynamic canvas.
- *   Pointer move (after P₁) → draws a dashed preview line P₁→cursor on dynamic canvas.
- *   2nd click  → computes line params (slope or vertical), updates the active LineEntity,
+ *   1st click  -> records P1; draws a green dot + instruction hint on the dynamic canvas.
+ *   Pointer move (after P1) -> draws a dashed preview line P1->cursor on dynamic canvas.
+ *   2nd click  -> computes line params (slope or vertical), updates the active LineEntity,
  *                commits one UpdateLineParamCommand, clears dynamic canvas, switches
  *                active tool back to 'pan-zoom'.
- *   Escape key → handled externally in GeometryCanvas via activeTool store reset;
+ *   Escape key -> handled externally in GeometryCanvas via activeTool store reset;
  *                onDeactivate() clears the overlay.
- *   Wheel      → zoom (same as PanZoomTool) so teacher can pan/zoom mid-interaction.
+ *   Wheel      -> zoom (same as PanZoomTool) so teacher can pan/zoom mid-interaction.
  */
 
 import type { Editor } from '@/editor/core/Editor';
@@ -53,7 +53,7 @@ export class TwoPointLineTool implements Tool {
     if (c) c.getContext('2d')?.clearRect(0, 0, c.width, c.height);
   }
 
-  /** Draw P₁ dot + coordinate pill + instruction banner. */
+  /** Draw P1 dot + coordinate pill + instruction banner. */
   private drawFirstPointOverlay(mx: number, my: number): void {
     const canvas = this.getDynamic();
     if (!canvas || !this.editor) return;
@@ -81,12 +81,12 @@ export class TwoPointLineTool implements Tool {
     ctx.textBaseline = 'middle';
     ctx.fillText(hint, canvas.width / 2, by + 12);
 
-    // P₁ dot
+    // P1 dot
     const [cx, cy] = vp.toCanvas(mx, my);
-    renderDot(ctx, cx, cy, mx, my, 'P₁');
+    renderDot(ctx, cx, cy, mx, my, 'P1');
   }
 
-  /** Clear and redraw P₁ dot + dashed preview line + ghost P₂ at cursor. */
+  /** Clear and redraw P1 dot + dashed preview line + ghost P2 at cursor. */
   private drawPreview(hx: number, hy: number): void {
     const canvas = this.getDynamic();
     if (!canvas || !this.editor || !this.firstPt) return;
@@ -112,7 +112,7 @@ export class TwoPointLineTool implements Tool {
     ctx.textBaseline = 'middle';
     ctx.fillText(hint, canvas.width / 2, 22);
 
-    // Dashed preview line P₁ → cursor
+    // Dashed preview line P1 -> cursor
     const [cx1, cy1] = vp.toCanvas(this.firstPt[0], this.firstPt[1]);
     const [cx2, cy2] = vp.toCanvas(hx, hy);
     ctx.save();
@@ -126,10 +126,10 @@ export class TwoPointLineTool implements Tool {
     ctx.stroke();
     ctx.restore();
 
-    // P₁ dot
-    renderDot(ctx, cx1, cy1, this.firstPt[0], this.firstPt[1], 'P₁');
+    // P1 dot
+    renderDot(ctx, cx1, cy1, this.firstPt[0], this.firstPt[1], 'P1');
 
-    // Ghost P₂ at cursor
+    // Ghost P2 at cursor
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx2, cy2, DOT_RADIUS, 0, 2 * Math.PI);
@@ -153,13 +153,13 @@ export class TwoPointLineTool implements Tool {
 
   onPointerDown(ev: ToolEvent): void {
     if (!this.firstPt) {
-      // First click: record P₁
+      // First click: record P1
       this.firstPt = [ev.mathX, ev.mathY];
       this.drawFirstPointOverlay(ev.mathX, ev.mathY);
       return;
     }
 
-    // Second click: compute line from P₁ → P₂
+    // Second click: compute line from P1 -> P2
     const [x1, y1] = this.firstPt;
     const  x2 = ev.mathX, y2 = ev.mathY;
 
@@ -201,7 +201,7 @@ export class TwoPointLineTool implements Tool {
     );
   }
 
-  /** Commit successful second-click or cancel: clear overlay → pan-zoom. */
+  /** Commit successful second-click or cancel: clear overlay -> pan-zoom. */
   private finish(): void {
     this.clearCanvas();
     this.firstPt = null;

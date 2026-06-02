@@ -25,12 +25,24 @@
       "type": "setPathEndpoints",
       "description": "设置有机物转化路径的起点和终点。payload: { startNodeId?: string, endNodeId?: string, start?: string, end?: string }。",
       "payloadSchema": {
-        "startNodeId": { "type": "string" },
-        "endNodeId": { "type": "string" },
-        "start": { "type": "string" },
-        "end": { "type": "string" },
-        "from": { "type": "string" },
-        "to": { "type": "string" }
+        "startNodeId": {
+          "type": "string"
+        },
+        "endNodeId": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string"
+        },
+        "end": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
       },
       "useWhen": "用户要求寻找烷烃到羧酸、烯烃到酯、芳香烃到酚等有机转化路线。",
       "doNotUseWhen": "用户要求查询某分子式的同分异构体时使用 setIsomerQuery。"
@@ -39,10 +51,18 @@
       "type": "setLevelFilter",
       "description": "设置路径学段筛选。payload: { levels?: [\"[高中必修]\",\"[高中选修]\"], includeRequired?: boolean, includeElective?: boolean }。",
       "payloadSchema": {
-        "levels": { "type": "array" },
-        "levelFilter": { "type": "array" },
-        "includeRequired": { "type": "boolean" },
-        "includeElective": { "type": "boolean" }
+        "levels": {
+          "type": "array"
+        },
+        "levelFilter": {
+          "type": "array"
+        },
+        "includeRequired": {
+          "type": "boolean"
+        },
+        "includeElective": {
+          "type": "boolean"
+        }
       },
       "useWhen": "用户要求只看必修、只看选修或放宽/收紧学段筛选。",
       "doNotUseWhen": "按反应类型筛选时使用 setReactionTypeFilter。"
@@ -51,9 +71,15 @@
       "type": "setReactionTypeFilter",
       "description": "设置反应类型筛选。payload: { reactionType: \"全部\"|\"取代\"|\"水解\"|\"消去\"|\"加成\"|\"氧化\"|\"酯化\"|... }。",
       "payloadSchema": {
-        "reactionType": { "type": "string" },
-        "typeValue": { "type": "string" },
-        "filter": { "type": "string" }
+        "reactionType": {
+          "type": "string"
+        },
+        "typeValue": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string"
+        }
       },
       "useWhen": "用户要求只看取代、水解、加成、氧化、酯化等路径边。",
       "doNotUseWhen": "选择具体路径起终点时使用 setPathEndpoints。"
@@ -69,8 +95,12 @@
       "type": "selectPath",
       "description": "选择当前已搜索出的某条路径。payload: { pathIndex: number }。",
       "payloadSchema": {
-        "pathIndex": { "type": "number" },
-        "index": { "type": "number" }
+        "pathIndex": {
+          "type": "number"
+        },
+        "index": {
+          "type": "number"
+        }
       },
       "useWhen": "用户要求切换到第 N 条路径、备选路径或推荐路径。",
       "doNotUseWhen": "用户要求选中路径中的某一步时使用 selectReactionStep。"
@@ -79,10 +109,18 @@
       "type": "selectReactionStep",
       "description": "高亮当前路径中的某一步反应。payload: { edgeId?: string, stepIndex?: number, reactionType?: string }。",
       "payloadSchema": {
-        "edgeId": { "type": "string" },
-        "id": { "type": "string" },
-        "stepIndex": { "type": "number" },
-        "reactionType": { "type": "string" }
+        "edgeId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "stepIndex": {
+          "type": "number"
+        },
+        "reactionType": {
+          "type": "string"
+        }
       },
       "useWhen": "用户要求查看路径中的水解、氧化、酯化、消去等某一步条件和方程式。",
       "doNotUseWhen": "用户要求整条路径播放时使用 setPathPlayback。"
@@ -91,8 +129,12 @@
       "type": "setPathPlayback",
       "description": "控制路径动画播放。payload: { playing?: boolean, speed?: 0.5|1|2 }。",
       "payloadSchema": {
-        "playing": { "type": "boolean" },
-        "speed": { "type": "number" }
+        "playing": {
+          "type": "boolean"
+        },
+        "speed": {
+          "type": "number"
+        }
       },
       "useWhen": "用户要求播放、暂停路径动画或调整速度。",
       "doNotUseWhen": "用户要求单步前进时使用 stepPathForward。"
@@ -115,9 +157,15 @@
       "type": "setMapHint",
       "description": "显示或隐藏路径图操作提示。payload: { showMapHint?: boolean, visible?: boolean }。",
       "payloadSchema": {
-        "showMapHint": { "type": "boolean" },
-        "visible": { "type": "boolean" },
-        "enabled": { "type": "boolean" }
+        "showMapHint": {
+          "type": "boolean"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
       },
       "useWhen": "用户要求显示/隐藏操作提示或新手引导。",
       "doNotUseWhen": "不要用它修改路径起终点。"
@@ -126,10 +174,18 @@
       "type": "setIsomerQuery",
       "description": "查询同分异构体。payload: { formula: string, ringHint?: \"auto\"|\"noRing\"|\"benzene\"|\"oxygen\"|\"halogen\"|\"nitrogen\" }。",
       "payloadSchema": {
-        "formula": { "type": "string" },
-        "formulaInput": { "type": "string" },
-        "molecularFormula": { "type": "string" },
-        "ringHint": { "type": "string" }
+        "formula": {
+          "type": "string"
+        },
+        "formulaInput": {
+          "type": "string"
+        },
+        "molecularFormula": {
+          "type": "string"
+        },
+        "ringHint": {
+          "type": "string"
+        }
       },
       "useWhen": "用户要求查询 C4H10、C2H6O、C4H8、C7H8O 等分子式的同分异构体。",
       "doNotUseWhen": "用户要求寻找有机转化路线时使用 setPathEndpoints。"
@@ -138,8 +194,12 @@
       "type": "loadFormulaPreset",
       "description": "载入内置分子式预设并查询同分异构体。payload: { formula: string, ringHint?: string }。",
       "payloadSchema": {
-        "formula": { "type": "string" },
-        "ringHint": { "type": "string" }
+        "formula": {
+          "type": "string"
+        },
+        "ringHint": {
+          "type": "string"
+        }
       },
       "useWhen": "用户明确要求查看某个内置分子式预设。",
       "doNotUseWhen": "路径转换任务不要使用。"
@@ -148,12 +208,43 @@
       "type": "loadTeachingScenario",
       "description": "载入语义化教学场景。payload: { scenarioId: \"alkane-to-carboxylic\"|\"alkene-to-ester\"|\"aromatic-to-phenol\"|\"haloalkane-hydrolysis\"|\"alcohol-oxidation\"|\"esterification\"|\"isomer-alkane\"|\"isomer-functional-group\"|\"aromatic-position-isomer\"|\"halogen-position-isomer\" }。",
       "payloadSchema": {
-        "scenarioId": { "type": "string" },
-        "presetId": { "type": "string" },
-        "id": { "type": "string" }
+        "scenarioId": {
+          "type": "string"
+        },
+        "presetId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
       },
       "useWhen": "用户用自然语言要求讲解有机转化主线、卤代烃水解、醇氧化、酯化或典型同分异构体。",
       "doNotUseWhen": "用户明确给出起终点或分子式时使用具体 operation。"
+    },
+    {
+      "type": "loadSynthesisRoute",
+      "description": "切换并展示「合成路线」面板中的某条多步合成/转化路线。payload: { routeId: string }。routeId 取值见 getAiContext().synthesis.routes。",
+      "payloadSchema": {
+        "routeId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "useWhen": "用户想看某条基础有机合成/转化路线的键线式分步图（如卤代烃↔烯烃、乙醇氧化链、苯→溴苯）。",
+      "doNotUseWhen": "用户在问官能团转化网络（用 setPathEndpoints）或同分异构体（用 setIsomerQuery）。"
+    },
+    {
+      "type": "revealRouteStep",
+      "description": "将当前合成路线逐步展开到第 count 步；不传 count 表示全部展开。payload: { count?: number }。",
+      "payloadSchema": {
+        "count": {
+          "type": "number"
+        }
+      },
+      "useWhen": "已 loadSynthesisRoute 后，逐步讲解每一步反应。",
+      "doNotUseWhen": "尚未 loadSynthesisRoute 选定路线时。"
     }
   ],
   "payloadSchema": {
@@ -163,8 +254,16 @@
       "required": true,
       "risk": "high",
       "children": {
-        "editor": { "type": "object", "description": "路径起终点、筛选、路径选择和播放设置。AI 应通过路径 operations 修改。", "risk": "high" },
-        "isomerQuery": { "type": "object", "description": "同分异构体分子式和边界提示。AI 应通过 setIsomerQuery 修改。", "risk": "medium" }
+        "editor": {
+          "type": "object",
+          "description": "路径起终点、筛选、路径选择和播放设置。AI 应通过路径 operations 修改。",
+          "risk": "high"
+        },
+        "isomerQuery": {
+          "type": "object",
+          "description": "同分异构体分子式和边界提示。AI 应通过 setIsomerQuery 修改。",
+          "risk": "medium"
+        }
       }
     }
   },
@@ -182,7 +281,11 @@
     {
       "instruction": "寻找烷烃到羧酸的推荐转化路线。",
       "operations": [
-        { "type": "setPathEndpoints", "startNodeId": "alkane", "endNodeId": "carboxylic" }
+        {
+          "type": "setPathEndpoints",
+          "startNodeId": "alkane",
+          "endNodeId": "carboxylic"
+        }
       ],
       "patch": {},
       "explanation": "已设置烷烃到羧酸的路径起终点，路线由 C09 搜索。"
@@ -190,8 +293,17 @@
     {
       "instruction": "只看必修范围内从烯烃到酯的路径。",
       "operations": [
-        { "type": "setLevelFilter", "levels": ["[高中必修]"] },
-        { "type": "setPathEndpoints", "startNodeId": "alkene", "endNodeId": "ester" }
+        {
+          "type": "setLevelFilter",
+          "levels": [
+            "[高中必修]"
+          ]
+        },
+        {
+          "type": "setPathEndpoints",
+          "startNodeId": "alkene",
+          "endNodeId": "ester"
+        }
       ],
       "patch": {},
       "explanation": "已限制为必修路径并搜索烯烃到酯的转化。"
@@ -199,7 +311,11 @@
     {
       "instruction": "查看 C4H10 的同分异构体。",
       "operations": [
-        { "type": "setIsomerQuery", "formula": "C4H10", "ringHint": "noRing" }
+        {
+          "type": "setIsomerQuery",
+          "formula": "C4H10",
+          "ringHint": "noRing"
+        }
       ],
       "patch": {},
       "explanation": "已查询 C4H10 的课堂常见同分异构体。"
@@ -207,7 +323,10 @@
     {
       "instruction": "高亮当前路径中的水解步骤。",
       "operations": [
-        { "type": "selectReactionStep", "reactionType": "水解" }
+        {
+          "type": "selectReactionStep",
+          "reactionType": "水解"
+        }
       ],
       "patch": {},
       "explanation": "已在当前路径中高亮水解步骤。"
@@ -218,6 +337,7 @@
     "路径问题优先使用 setPathEndpoints；分子式问题优先使用 setIsomerQuery，不要混用。",
     "用户要求只看某类反应或学段时先设置筛选，再搜索路径。",
     "涉及路径条件、方程式和同分异构体结构时只输出输入控制项，结果由 C09 内置数据展示。",
-    "不要根据测试集个例添加多余操作，保持 operations 最小充分。"
+    "不要根据测试集个例添加多余操作，保持 operations 最小充分。",
+    "合成路线相关意图只输出 loadSynthesisRoute / revealRouteStep；routeId 必须取自 getAiContext().synthesis.routes，不要臆造。"
   ]
 }

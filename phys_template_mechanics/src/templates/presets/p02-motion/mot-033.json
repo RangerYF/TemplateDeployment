@@ -6,12 +6,12 @@
     "status": "ready"
   },
   "teaching": {
-    "teachingObjective": "通过“竖直圆周运动”模板，让学生观察临界速度条件下绳约束运动的动力学特征。",
+    "teachingObjective": "通过“竖直圆周运动”模板，让学生观察理想约束下速度、位置与机械能的同步变化。",
     "constructionSteps": [
       "1. 设置场景重力为 (0, -10)。",
       "2. 添加物体 anchor-top（anchor）。",
       "3. 添加物体 ball-main（ball），并设置切向初速度。",
-      "4. 添加约束 rope-main（rope），连接 anchor-top 与 ball-main。"
+      "4. 添加约束 rod-main（rod），连接 anchor-top 与 ball-main。"
     ]
   },
   "sceneJsonPath": "/templates/scenes/MOT-033.json",
@@ -61,8 +61,8 @@
       },
       {
         "kind": "addJoint",
-        "ref": "rope-main",
-        "jointType": "rope",
+        "ref": "rod-main",
+        "jointType": "rod",
         "bodyRefA": "anchor-top",
         "bodyRefB": "ball-main",
         "anchorA": {

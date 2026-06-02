@@ -1,6 +1,6 @@
 export type BodyType =
   | 'block' | 'ball' | 'ground' | 'slope' | 'wall' | 'anchor'
-  | 'pulley-mount' | 'conveyor' | 'hemisphere' | 'half-sphere' | 'groove'
+  | 'pulley-mount' | 'conveyor' | 'hemisphere' | 'half-sphere' | 'groove' | 'channel' | 'person'
 
 export interface SceneBody {
   id: string
@@ -45,10 +45,15 @@ export interface SceneBody {
   grooveWidth?: number // V形槽开口宽度 (m)
   grooveDepth?: number // V形槽深度 (m)
   grooveThickness?: number // 槽壁厚度 (m)
+  // channel (槽型船)
+  channelLength?: number // 内部长度 (m)
+  channelWallHeight?: number // 侧壁高度 (m)
+  channelThickness?: number // 壁/底板厚度 (m)
 }
 
 export interface SceneSettings {
   gravity: { x: number; y: number }
+  energyConservation?: boolean
 }
 
 export type JointType = 'rope' | 'rod' | 'spring' | 'pulley'

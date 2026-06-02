@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { COLORS } from '@/styles/tokens';
 import {
   type CurrentResistanceMeasurementSnapshot,
@@ -11,6 +11,7 @@ import {
 import {
   useCurrentResistanceMethod,
 } from './current-resistance-method/useCurrentResistanceMethod';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 const pageStyle = {
   pageBg: COLORS.bgPage,
@@ -69,6 +70,15 @@ interface CurrentResistanceMeasurementSet {
 export function CurrentResistanceMethodPage({ onBack }: Props) {
   const { params, result, setParam, applyParams, resetParams } =
     useCurrentResistanceMethod();
+  useEffect(() => registerPageSnapshotAdapter('p04-current-resistance-method', {
+    getSnapshot: () => ({ params }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{ params: Partial<CurrentResistanceMethodParams> }>;
+      if (value.params) {
+        applyParams(value.params);
+      }
+    },
+  }), [applyParams, params]);
   const activeSet = selectCurrentResistanceMeasurementSet(
     result,
     params.meterMode,

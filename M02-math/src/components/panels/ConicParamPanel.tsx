@@ -1,24 +1,29 @@
-import { useRef, useState, useEffect } from 'react';
-import { Play } from 'lucide-react';
+import { useEffect } from 'react';
 import * as math from 'mathjs';
 import { useActiveConic } from '@/hooks/useActiveEntity';
 import { useParamSlider } from '@/hooks/useParamSlider';
 import { useEntityStore } from '@/editor/store/entityStore';
+import { useEccentricityDemoStore } from '@/editor/store/eccentricityDemoStore';
 import { updateEntityParams } from '@/editor/entities/types';
 import { UpdateCurveParamCommand } from '@/editor/commands/UpdateCurveParamCommand';
 import { executeM03Command } from '@/editor/commands/m03Execute';
 import { UniversalSlider, ResetButton } from '@/components/shared/UniversalSlider';
+import { KaTeXRenderer } from '@/components/KaTeXRenderer';
 import { COLORS } from '@/styles/colors';
 import { btnHover } from '@/styles/interactionStyles';
 import {
   getEntityEccentricity,
-  getEntityFixedC,
-  startEccentricityAnimation,
 } from '@/engine/eccentricityEngine';
-import { EccentricityZoneBar } from '@/components/panels/EccentricityPanel';
-import type { ConicEntity } from '@/types';
+import { EccentricityZoneBar, defaultSweepRange, sweepRangeBounds } from '@/components/panels/EccentricityPanel';
+import type { ConicAxisOrientation, ConicEntity } from '@/types';
 import { isConicEntity } from '@/types';
 import { formatConicValue } from '@/engine/conicDisplay';
+
+function toConicFormulaLatex(text: string): string {
+  return text
+    .replace(/²/g, '^2')
+    .replace(/−/g, '-');
+}
 
 // ─── Stale-closure-safe store helpers ─────────────────────────────────────────
 
@@ -125,6 +130,17 @@ function toggleParabolaOrientation(): void {
   executeM03Command(new UpdateCurveParamCommand(beforeEntity.id, beforeEntity, afterEntity));
 }
 
+function toggleConicOrientation(): void {
+  const store        = useEntityStore.getState();
+  const beforeEntity = store.entities.find((en) => en.id === store.activeEntityId);
+  if (!beforeEntity || (beforeEntity.type !== 'ellipse' && beforeEntity.type !== 'hyperbola')) return;
+  const currentOrientation = beforeEntity.params.orientation === 'v' ? 'v' : 'h';
+  const newOrientation: ConicAxisOrientation = currentOrientation === 'v' ? 'h' : 'v';
+  const afterEntity = updateEntityParams(beforeEntity, { orientation: newOrientation } as never);
+  store.updateEntity(beforeEntity.id, afterEntity);
+  executeM03Command(new UpdateCurveParamCommand(beforeEntity.id, beforeEntity, afterEntity));
+}
+
 function eccentricityTypeLabel(e: number): string {
   if (e < 1 - 1e-6) return '椭圆';
   if (Math.abs(e - 1) < 1e-6) return '抛物线';
@@ -220,20 +236,27 @@ export function ConicParamPanel() {
       }}>
         曲线参数
       </p>
-      <p style={{ fontSize: '12px', color: COLORS.textDark, marginBottom: '12px', fontFamily: 'monospace', fontWeight: 600 }}>
-        {entity.type === 'ellipse'   && 'x²/a² + y²/b² = 1'}
-        {entity.type === 'hyperbola' && 'x²/a² − y²/b² = 1'}
-        {entity.type === 'parabola'  && 'y² = 2px'}
-        {entity.type === 'circle'    && '(x−cx)² + (y−cy)² = r²'}
-      </p>
+      <div style={{ fontSize: '12px', color: COLORS.textDark, marginBottom: '12px', fontWeight: 600, lineHeight: 1.7, minHeight: 24 }}>
+        {entity.type === 'ellipse'   && <KaTeXRenderer latex={toConicFormulaLatex((entity.params.orientation ?? 'h') === 'v' ? 'x²/b² + y²/a² = 1' : 'x²/a² + y²/b² = 1')} />}
+        {entity.type === 'hyperbola' && <KaTeXRenderer latex={toConicFormulaLatex((entity.params.orientation ?? 'h') === 'v' ? 'y²/a² − x²/b² = 1' : 'x²/a² − y²/b² = 1')} />}
+        {entity.type === 'parabola'  && <KaTeXRenderer latex={toConicFormulaLatex('y² = 2px')} />}
+        {entity.type === 'circle'    && <KaTeXRenderer latex={toConicFormulaLatex('(x−cx)² + (y−cy)² = r²')} />}
+      </div>
 
       {/* ── Ellipse ──────────────────────────────────────────────────── */}
       {entity.type === 'ellipse' && (() => {
         const ep = p as typeof entity.params;
         const bMax = Math.max(0.2, ep.a - 0.05);
         const cMax = Math.max(0.05, ep.a - 0.05);
+        const orientation = ep.orientation ?? 'h';
         return (
           <>
+            <OrientationToggle
+              orientation={orientation}
+              horizontalLabel="长轴沿 x 轴"
+              verticalLabel="长轴沿 y 轴"
+              onToggle={toggleConicOrientation}
+            />
             <UniversalSlider label="a" value={ep.a} min={0.5} max={10} step={0.1}
               color={entity.color}
               parseInput={parseConicParamInput}
@@ -270,8 +293,15 @@ export function ConicParamPanel() {
       {entity.type === 'hyperbola' && (() => {
         const hp = p as typeof entity.params;
         const cMin = Math.sqrt(hp.a * hp.a + 0.05 * 0.05);
+        const orientation = hp.orientation ?? 'h';
         return (
           <>
+            <OrientationToggle
+              orientation={orientation}
+              horizontalLabel="实轴沿 x 轴"
+              verticalLabel="实轴沿 y 轴"
+              onToggle={toggleConicOrientation}
+            />
             <UniversalSlider label="a" value={hp.a} min={0.5} max={10} step={0.1}
               color={entity.color}
               parseInput={parseConicParamInput}
@@ -399,44 +429,19 @@ export function ConicParamPanel() {
 // ─── Compact eccentricity section ─────────────────────────────────────────────
 
 function CompactEccentricity({ entity }: { entity: ConicEntity }) {
-  const cancelRef = useRef<(() => void) | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      cancelRef.current?.();
-      cancelRef.current = null;
-    };
-  }, [entity.id]);
-
-  useEffect(() => {
-    return () => { cancelRef.current?.(); };
-  }, []);
-
+  const activeEntityId = useEccentricityDemoStore((s) => s.activeEntityId);
+  const sweepRange = useEccentricityDemoStore((s) => s.sweepRange);
+  const speed = useEccentricityDemoStore((s) => s.speed);
+  const playState = useEccentricityDemoStore((s) => s.playState);
+  const setActiveDemoEntity = useEccentricityDemoStore((s) => s.setActiveEntity);
   const currentE = getEntityEccentricity(entity);
+  const effectiveRange = activeEntityId === entity.id ? sweepRange : defaultSweepRange(entity);
+  const speedPercent = `${Math.round(speed * 100)}%`;
 
-  function handleAutoSweep() {
-    if (isAnimating) return;
-    const store = useEntityStore.getState();
-    const raw   = store.entities.find((en) => en.id === entity.id);
-    if (!raw || !isConicEntity(raw)) return;
-    const live = raw;
-    const fixedC = getEntityFixedC(live);
-
-    setIsAnimating(true);
-    const cancel = startEccentricityAnimation({
-      entityId: live.id,
-      fromE:    0.01,
-      toE:      2.0,
-      fixedC,
-      duration: 3000,
-      onComplete: () => {
-        setIsAnimating(false);
-        cancelRef.current = null;
-      },
-    });
-    cancelRef.current = cancel;
-  }
+  useEffect(() => {
+    if (activeEntityId === entity.id) return;
+    setActiveDemoEntity(entity.id, defaultSweepRange(entity));
+  }, [activeEntityId, entity, setActiveDemoEntity]);
 
   return (
     <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.border}` }}>
@@ -456,32 +461,142 @@ function CompactEccentricity({ entity }: { entity: ConicEntity }) {
         fontSize: '10px',
         color: COLORS.textSecondary,
         marginTop: 4,
-        marginBottom: 0,
+        marginBottom: 6,
         lineHeight: 1.5,
       }}>
-        从 e = 0 到 e = 2，观察椭圆、抛物线、双曲线之间的变化
+        右侧“离心率演变”面板现已支持速度调节、播放、暂停与停止。
       </p>
 
-      <button
-        onClick={handleAutoSweep}
-        disabled={isAnimating}
-        title="自动演示离心率变化"
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 6 }}>
+        {([
+          { value: 'ellipse-only', label: '仅椭圆' },
+          { value: 'ellipse-to-parabola', label: '到抛物线' },
+          { value: 'hyperbola-only', label: '仅双曲线' },
+          { value: 'full-conics', label: '全部' },
+        ] as Array<{ value: ReturnType<typeof defaultSweepRange>; label: string }>).map((option) => {
+          const active = option.value === effectiveRange;
+          return (
+            <div
+              key={option.value}
+              style={{
+                padding: '4px 8px',
+                borderRadius: 6,
+                border: `1px solid ${active ? COLORS.primary : COLORS.borderMuted}`,
+                background: active ? `${COLORS.primary}18` : COLORS.surface,
+                color: active ? COLORS.primary : COLORS.textSecondary,
+                fontSize: '10px',
+                fontWeight: 600,
+                textAlign: 'center',
+              }}
+            >
+              {option.label}
+            </div>
+          );
+        })}
+      </div>
+
+      <div
         style={{
-          width: '100%', marginTop: 8,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-          padding: '5px 0',
-          borderRadius: 6,
-          fontSize: '12px', fontWeight: 600,
-          border: 'none', cursor: isAnimating ? 'not-allowed' : 'pointer',
-          background: isAnimating ? COLORS.border : `${COLORS.primary}22`,
-          color: isAnimating ? COLORS.textDisabled : COLORS.primary,
-          transition: 'background 0.15s',
+          marginTop: 8,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 6,
         }}
-        {...(isAnimating ? {} : btnHover(`${COLORS.primary}38`, `${COLORS.primary}22`))}
       >
-        <Play size={11} />
-        自动演示离心率 ▶
-      </button>
+        <div
+          style={{
+            padding: '5px 8px',
+            borderRadius: 6,
+            background: COLORS.surfaceAlt,
+            color: COLORS.textDark,
+            fontSize: '11px',
+            fontWeight: 600,
+            textAlign: 'center',
+          }}
+        >
+          速度 {speedPercent}
+        </div>
+        <div
+          style={{
+            padding: '5px 8px',
+            borderRadius: 6,
+            background: playState === 'playing'
+              ? `${COLORS.primary}18`
+              : playState === 'paused'
+                ? `${COLORS.warning}18`
+                : COLORS.surfaceAlt,
+            color: playState === 'playing'
+              ? COLORS.primary
+              : playState === 'paused'
+                ? '#B45309'
+                : COLORS.textSecondary,
+            fontSize: '11px',
+            fontWeight: 600,
+            textAlign: 'center',
+          }}
+        >
+          {playState === 'playing' ? '播放中' : playState === 'paused' ? '已暂停' : '待播放'}
+        </div>
+      </div>
+
+      <div
+        style={{
+          width: '100%',
+          marginTop: 8,
+          padding: '6px 8px',
+          borderRadius: 6,
+          fontSize: '10px',
+          lineHeight: 1.5,
+          border: `1px dashed ${COLORS.borderMuted}`,
+          background: COLORS.surface,
+          color: COLORS.textSecondary,
+        }}
+      >
+        当前范围：{sweepRangeBounds(effectiveRange, currentE).label}。需要控制椭圆到双曲线的演示节奏时，使用下方独立“离心率演变”面板中的速度滑块和播放/暂停按钮。
+      </div>
+    </div>
+  );
+}
+
+function OrientationToggle({
+  orientation,
+  horizontalLabel,
+  verticalLabel,
+  onToggle,
+}: {
+  orientation: ConicAxisOrientation;
+  horizontalLabel: string;
+  verticalLabel: string;
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+      <span style={{ fontSize: '13px', fontWeight: 600, color: COLORS.textDark }}>方向</span>
+      <div style={{ display: 'flex', gap: '4px' }}>
+        {(['h', 'v'] as const).map((dir) => {
+          const isActive = dir === orientation;
+          return (
+            <button
+              key={dir}
+              onClick={isActive ? undefined : onToggle}
+              style={{
+                padding: '4px 10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                borderRadius: '4px',
+                border: `1.5px solid ${isActive ? COLORS.primary : COLORS.borderMuted}`,
+                background: isActive ? `${COLORS.primary}22` : 'transparent',
+                color: isActive ? COLORS.primary : COLORS.textSecondary,
+                cursor: isActive ? 'default' : 'pointer',
+                transition: 'background 0.15s',
+              }}
+              {...(isActive ? {} : btnHover(COLORS.surfaceHover))}
+            >
+              {dir === 'h' ? horizontalLabel : verticalLabel}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

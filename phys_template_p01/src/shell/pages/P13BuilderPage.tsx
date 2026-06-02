@@ -68,6 +68,7 @@ import {
   scaleArrowLength,
 } from './p13/P13StagePrimitives';
 import { P13TimeSeriesChart } from './p13/P13TimeSeriesChart';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 type BuilderFamily = 'single-rod' | 'double-rod' | 'vertical-rail';
 type AnalysisStepLike =
@@ -151,6 +152,60 @@ export function P13BuilderPage({ onBack, onSelectPreset }: Props) {
   useEffect(() => {
     simulator.unload();
   }, []);
+
+  useEffect(() => registerPageSnapshotAdapter('p13-builder', {
+    getSnapshot: () => ({
+      family,
+      singleVariant,
+      singleCapacitorScenario,
+      doubleVariant,
+      singleParams,
+      doubleParams,
+      verticalParams,
+      currentTime,
+      isPlaying,
+      analysisStep,
+      displayOptions,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        family: BuilderFamily;
+        singleVariant: P13SingleRodVariant;
+        singleCapacitorScenario: BuilderSingleRodCapacitorScenario;
+        doubleVariant: P13DoubleRodVariant;
+        singleParams: Parameters<typeof normalizeSingleRodParams>[1];
+        doubleParams: Parameters<typeof normalizeDoubleRodParams>[1];
+        verticalParams: Parameters<typeof normalizeVerticalRailRodParams>[0];
+        currentTime: number;
+        isPlaying: boolean;
+        analysisStep: number;
+        displayOptions: P13DisplayOptions;
+      }>;
+      if (value.family) setFamily(value.family);
+      if (value.singleVariant) setSingleVariant(value.singleVariant);
+      if (value.singleCapacitorScenario) setSingleCapacitorScenario(value.singleCapacitorScenario);
+      if (value.doubleVariant) setDoubleVariant(value.doubleVariant);
+      if (value.singleParams) setSingleParams(normalizeSingleRodParams(value.singleVariant ?? singleVariant, value.singleParams));
+      if (value.doubleParams) setDoubleParams(normalizeDoubleRodParams(value.doubleVariant ?? doubleVariant, value.doubleParams));
+      if (value.verticalParams) setVerticalParams(normalizeVerticalRailRodParams(value.verticalParams));
+      if (typeof value.currentTime === 'number') setCurrentTime(value.currentTime);
+      if (typeof value.isPlaying === 'boolean') setIsPlaying(value.isPlaying);
+      if (typeof value.analysisStep === 'number') setAnalysisStep(value.analysisStep);
+      if (value.displayOptions) setDisplayOptions(value.displayOptions);
+    },
+  }), [
+    analysisStep,
+    currentTime,
+    displayOptions,
+    doubleParams,
+    doubleVariant,
+    family,
+    isPlaying,
+    singleCapacitorScenario,
+    singleParams,
+    singleVariant,
+    verticalParams,
+  ]);
 
   useEffect(() => {
     setSingleParams((previous) => normalizeSingleRodParams(singleVariant, previous));

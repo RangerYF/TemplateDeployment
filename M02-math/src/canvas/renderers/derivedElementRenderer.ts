@@ -1,6 +1,7 @@
 import type { Viewport } from '@/canvas/Viewport';
 import type { ConicEntity } from '@/types';
 import { COLORS } from '@/styles/colors';
+import { toFraction } from '@/engine/conicDisplay';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -16,7 +17,8 @@ function lineAtEdge(
  * `−` uses Unicode minus for visual consistency.
  */
 function fmtCoord(n: number): string {
-  const s = Number.isInteger(n) ? String(n) : n.toFixed(2);
+  const frac = toFraction(n, 96);
+  const s = frac ?? (Number.isInteger(n) ? String(n) : n.toFixed(2));
   return s.startsWith('-') ? '\u2212' + s.slice(1) : s;
 }
 
@@ -180,8 +182,13 @@ function renderDirectrices(
     case 'ellipse':
     case 'hyperbola': {
       const [d1, d2] = entity.derived.directrices;
-      drawVerticalDirectrix(d1);
-      drawVerticalDirectrix(d2);
+      if (entity.derived.orientation === 'v') {
+        drawHorizontalDirectrix(d1);
+        drawHorizontalDirectrix(d2);
+      } else {
+        drawVerticalDirectrix(d1);
+        drawVerticalDirectrix(d2);
+      }
       break;
     }
     case 'parabola':
@@ -220,6 +227,7 @@ function renderAsymptotes(
   ctx.setLineDash([8, 5]);
 
   const { a, b, cx: hcx, cy: hcy } = entity.params;
+  const isV = entity.derived.orientation === 'v';
 
   for (const { k, b: lineB } of entity.derived.asymptotes) {
     // Draw the line
@@ -236,9 +244,11 @@ function renderAsymptotes(
     let label: string;
     if (hcx === 0 && hcy === 0) {
       // Centred at origin — simple form
-      const rStr = (a === b)
+      const ratioNumerator = isV ? a : b;
+      const ratioDenominator = isV ? b : a;
+      const rStr = (ratioNumerator === ratioDenominator)
         ? `${slopeSign}x`
-        : `${slopeSign}(${fmtCoord(b)}/${fmtCoord(a)})x`;
+        : `${slopeSign}(${fmtCoord(ratioNumerator)}/${fmtCoord(ratioDenominator)})x`;
       label = `y = ${rStr}`;
     } else {
       // General form y = k(x − cx) + cy
@@ -342,11 +352,18 @@ function renderVertices(
 
   switch (entity.type) {
     case 'ellipse': {
-      const { a, b, cx, cy } = entity.params;
-      drawColoredVertex(cx + a, cy,     'A\u2081', VERTEX_COLOR);
-      drawColoredVertex(cx - a, cy,     'A\u2082', VERTEX_COLOR);
-      drawColoredVertex(cx,     cy + b, 'B\u2081', CONJUGATE_VERTEX_COLOR);
-      drawColoredVertex(cx,     cy - b, 'B\u2082', CONJUGATE_VERTEX_COLOR);
+      const { a, b, cx, cy, orientation = 'h' } = entity.params;
+      if (orientation === 'v') {
+        drawColoredVertex(cx,     cy + a, 'A\u2081', VERTEX_COLOR);
+        drawColoredVertex(cx,     cy - a, 'A\u2082', VERTEX_COLOR);
+        drawColoredVertex(cx + b, cy,     'B\u2081', CONJUGATE_VERTEX_COLOR);
+        drawColoredVertex(cx - b, cy,     'B\u2082', CONJUGATE_VERTEX_COLOR);
+      } else {
+        drawColoredVertex(cx + a, cy,     'A\u2081', VERTEX_COLOR);
+        drawColoredVertex(cx - a, cy,     'A\u2082', VERTEX_COLOR);
+        drawColoredVertex(cx,     cy + b, 'B\u2081', CONJUGATE_VERTEX_COLOR);
+        drawColoredVertex(cx,     cy - b, 'B\u2082', CONJUGATE_VERTEX_COLOR);
+      }
       break;
     }
     case 'hyperbola': {
@@ -451,12 +468,16 @@ function formatEquation(entity: ConicEntity): string {
 
   switch (entity.type) {
     case 'ellipse': {
-      const { a, b } = entity.params;
-      return `x\u00B2/${n(a * a)} + y\u00B2/${n(b * b)} = 1`;
+      const { a, b, orientation = 'h' } = entity.params;
+      return orientation === 'v'
+        ? `x\u00B2/${n(b * b)} + y\u00B2/${n(a * a)} = 1`
+        : `x\u00B2/${n(a * a)} + y\u00B2/${n(b * b)} = 1`;
     }
     case 'hyperbola': {
-      const { a, b } = entity.params;
-      return `x\u00B2/${n(a * a)} \u2212 y\u00B2/${n(b * b)} = 1`;
+      const { a, b, orientation = 'h' } = entity.params;
+      return orientation === 'v'
+        ? `y\u00B2/${n(a * a)} \u2212 x\u00B2/${n(b * b)} = 1`
+        : `x\u00B2/${n(a * a)} \u2212 y\u00B2/${n(b * b)} = 1`;
     }
     case 'parabola': {
       const { p, orientation = 'h' } = entity.params;
@@ -492,9 +513,13 @@ function renderEquationLabel(
 
   switch (entity.type) {
     case 'ellipse':
-      anchorX = entity.params.cx; anchorY = entity.params.cy + entity.params.b; break;
+      anchorX = entity.params.cx;
+      anchorY = entity.params.cy + (entity.params.orientation === 'v' ? entity.params.a : entity.params.b);
+      break;
     case 'hyperbola':
-      anchorX = entity.params.cx; anchorY = entity.params.cy + entity.params.b; break;
+      anchorX = entity.params.cx;
+      anchorY = entity.params.cy + (entity.params.orientation === 'v' ? entity.params.a : entity.params.b);
+      break;
     case 'parabola':
       anchorX = entity.params.cx; anchorY = entity.params.cy + entity.params.p; break;
     case 'circle':

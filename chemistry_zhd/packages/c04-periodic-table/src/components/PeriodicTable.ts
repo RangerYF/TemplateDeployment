@@ -10,17 +10,19 @@ export type ColorMode = 'category' | 'state' | 'electronegativity';
 // ----------------------------------------------------------------
 // 分类配色（Mode: category）
 // ----------------------------------------------------------------
+// 适度增强：10 类拉开到不同色相，背景加深至约 100 档、边框 300 档、
+// 文字 700 档，保持浅色护眼基调的同时显著提升类间可辨识度（投影友好）。
 export const CATEGORY_COLORS: Record<ElementCategory, ColorSet> = {
-  'alkali-metal':          { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA' },
-  'alkaline-earth-metal':  { bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' },
-  'transition-metal':      { bg: '#FEFCE8', text: '#A16207', border: '#FEF08A' },
-  'post-transition-metal': { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' },
-  'metalloid':             { bg: '#F0FDFA', text: '#0F766E', border: '#99F6E4' },
-  'nonmetal':              { bg: '#F0FDF4', text: '#15803D', border: '#86EFAC' },
-  'halogen':               { bg: '#F7FEE7', text: '#4D7C0F', border: '#BEF264' },
-  'noble-gas':             { bg: '#FAF5FF', text: '#6D28D9', border: '#DDD6FE' },
-  'lanthanide':            { bg: '#FDF4FF', text: '#86198F', border: '#F0ABFC' },
-  'actinide':              { bg: '#FFF1F2', text: '#9F1239', border: '#FECDD3' },
+  'alkali-metal':          { bg: '#FEE2E2', text: '#B91C1C', border: '#FCA5A5' }, // 红
+  'alkaline-earth-metal':  { bg: '#FFEDD5', text: '#C2410C', border: '#FDBA74' }, // 橙
+  'transition-metal':      { bg: '#FEF9C3', text: '#A16207', border: '#FDE047' }, // 黄
+  'post-transition-metal': { bg: '#DBEAFE', text: '#1D4ED8', border: '#93C5FD' }, // 蓝
+  'metalloid':             { bg: '#CCFBF1', text: '#0F766E', border: '#5EEAD4' }, // 青
+  'nonmetal':              { bg: '#DCFCE7', text: '#15803D', border: '#86EFAC' }, // 绿
+  'halogen':               { bg: '#ECFCCB', text: '#4D7C0F', border: '#BEF264' }, // 青绿
+  'noble-gas':             { bg: '#F3E8FF', text: '#6D28D9', border: '#D8B4FE' }, // 紫
+  'lanthanide':            { bg: '#FAE8FF', text: '#A21CAF', border: '#F0ABFC' }, // 品红
+  'actinide':              { bg: '#FFE4E6', text: '#9F1239', border: '#FDA4AF' }, // 玫瑰
 };
 
 export const CATEGORY_NAMES: Record<ElementCategory, string> = {

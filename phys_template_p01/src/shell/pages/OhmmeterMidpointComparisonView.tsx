@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { COLORS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   calculateOhmmeterMidpointComparison,
   clampOhmmeterTheta,
@@ -49,6 +50,17 @@ interface Props {
 
 export function OhmmeterMidpointComparisonView({ onBack, onOpenPreset }: Props) {
   const [params, setParams] = useState<OhmmeterPageParams>(DEFAULT_PARAMS);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-ohmmeter-midpoint-comparison', {
+    getSnapshot: () => ({ params }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{ params: Partial<OhmmeterPageParams> }>;
+      if (value.params) {
+        setParams((prev) => ({ ...prev, ...value.params }));
+      }
+    },
+  }), [params]);
+
   const result = useMemo(
     () =>
       calculateOhmmeterMidpointComparison({

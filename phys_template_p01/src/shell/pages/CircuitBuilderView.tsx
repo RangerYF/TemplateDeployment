@@ -19,6 +19,7 @@ import { PropertyPanel, type BuilderTemplateSummary } from '../panels/PropertyPa
 import { BuilderCanvas } from '../canvas/BuilderCanvas';
 import { BuilderToolbar } from '../timeline/BuilderToolbar';
 import { COLORS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 interface CircuitBuilderViewProps {
   onBack: () => void;
@@ -64,6 +65,30 @@ export function CircuitBuilderView({
     [selectedFamilyId, selectedVariantId],
   );
   const showTemplateLibraryInFree = entryMode === 'free' && isBuilderTemplateFeedbackMode;
+
+  useEffect(() => registerPageSnapshotAdapter(`builder-view-${entryMode}`, {
+    getSnapshot: () => ({
+      entryMode,
+      realisticModeByWorkspace,
+      advancedEditEnabled,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        entryMode: 'template' | 'free';
+        realisticModeByWorkspace: Partial<Record<BuilderWorkspaceId, boolean>>;
+        advancedEditEnabled: boolean;
+      }>;
+      if (value.realisticModeByWorkspace) {
+        setRealisticModeByWorkspace((prev) => ({
+          ...prev,
+          ...value.realisticModeByWorkspace,
+        }));
+      }
+      if (typeof value.advancedEditEnabled === 'boolean') {
+        setAdvancedEditEnabled(value.advancedEditEnabled);
+      }
+    },
+  }), [advancedEditEnabled, entryMode, realisticModeByWorkspace]);
 
   useEffect(() => {
     if (entryMode !== 'free') return;

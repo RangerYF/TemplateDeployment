@@ -77,9 +77,9 @@
   ],
   "joints": [
     {
-      "id": "joint-rope-main",
-      "type": "rope",
-      "label": "绳",
+      "id": "joint-rod-main",
+      "type": "rod",
+      "label": "杆",
       "bodyIdA": "body-anchor-top",
       "bodyIdB": "body-ball-main",
       "anchorA": {
@@ -90,11 +90,12 @@
         "x": 0,
         "y": 0
       },
-      "maxLength": 1.799999999999999
+      "length": 1.799999999999999
     }
   ],
   "forces": [],
   "settings": {
+    "energyConservation": true,
     "gravity": {
       "x": 0,
       "y": -10

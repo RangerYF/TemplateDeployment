@@ -81,12 +81,31 @@ interface EquationReview {
 }
 
 const COMMON_HIGH_SCHOOL_SPECIES = new Set([
-  'H2', 'O2', 'H2O', 'N2', 'Cl2', 'Br2', 'I2', 'HCl', 'H2SO4', 'HNO3', 'NH3', 'CO2', 'CO', 'CH4',
-  'NaOH', 'KOH', 'Ca(OH)2', 'Al(OH)3', 'Al(OH)4-', 'Na(Al(OH)4)', 'Na2CO3', 'NaHCO3', 'CaCO3', 'CuO',
-  'Fe2O3', 'KMnO4', 'K2Cr2O7', 'MnO2', 'Na2O2', 'C6H12O6', 'C6H12O7', 'Ag', 'AgCl', 'AgNO3',
-  'Ag(NH3)2+', 'Ag(NH3)2OH', 'Cu(OH)2', 'Cu2+', 'Cu+', 'Fe2+', 'Fe3+', 'MnO4-', 'Mn2+', 'H+', 'OH-',
-  'e-', 'SO42-', 'SO32-', 'CO32-', 'HCO3-', 'NO3-', 'NH4+', 'Cl-', 'Br-', 'I-', 'Na+', 'K+', 'Ca2+',
-  'Mg2+', 'Al3+', 'Ba2+', 'SO2', 'SO3', 'H2S', 'PCl5', 'PCl3', 'NO', 'NO2', 'N2O4', 'HI'
+  // 单质
+  'H2', 'O2', 'N2', 'Cl2', 'Br2', 'I2', 'Na', 'Fe', 'Cu', 'Ag', 'Zn', 'C', 'Mg', 'Al', 'Si', 'S', 'P', 'K', 'Ca', 'Ba', 'Mn',
+  // 氧化物
+  'H2O', 'CO2', 'CO', 'SO2', 'SO3', 'NO', 'NO2', 'N2O4', 'Na2O', 'Na2O2', 'MgO', 'CuO', 'Cu2O',
+  'Al2O3', 'Fe2O3', 'Fe3O4', 'FeO', 'MnO2', 'SiO2', 'H2O2', 'P2O5', 'CaO', 'BaO',
+  // 酸
+  'HCl', 'H2SO4', 'HNO3', 'H2CO3', 'H3PO4', 'H2S', 'HBr', 'HI', 'HF', 'H2SiO3', 'HClO',
+  // 碱
+  'NaOH', 'KOH', 'Ca(OH)2', 'Ba(OH)2', 'Mg(OH)2', 'Al(OH)3', 'Fe(OH)3', 'Fe(OH)2', 'Cu(OH)2',
+  'NH3·H2O', 'NaAlO2',
+  // 盐
+  'NaCl', 'KCl', 'CaCO3', 'Na2CO3', 'NaHCO3', 'CaCl2', 'BaCl2', 'AgNO3', 'AgCl', 'BaSO4',
+  'CuSO4', 'FeCl3', 'FeCl2', 'Na2SO4', 'FeSO4', 'KMnO4', 'K2Cr2O7', 'KClO3', 'NH4Cl', 'NH4NO3',
+  'Na2SiO3', 'Na2SO3', 'Na2S', 'CuCl2', 'ZnSO4', 'MgCl2', 'MgSO4', 'Al2(SO4)3', 'NaNO3', 'KNO3',
+  // 其他分子
+  'NH3', 'CH4', 'PCl5', 'PCl3',
+  // 有机物
+  'C6H12O6', 'C6H12O7', 'C12H22O11', 'C2H4', 'C2H2', 'C2H5OH', 'C3H8', 'CH3COOH', 'HCHO', 'HCOOH', 'C6H5OH',
+  // 阳离子
+  'H+', 'Na+', 'K+', 'Ca2+', 'Mg2+', 'Ba2+', 'Al3+', 'Fe2+', 'Fe3+', 'Cu2+', 'Cu+', 'Zn2+', 'Ag+', 'Mn2+', 'NH4+',
+  // 阴离子
+  'OH-', 'Cl-', 'Br-', 'I-', 'S2-', 'SO42-', 'SO32-', 'CO32-', 'NO3-', 'HCO3-', 'MnO4-', 'PO43-',
+  'AlO2-', 'SiO32-', 'ClO-', 'Cr2O72-', 'CrO42-', 'e-',
+  // 配位化合物
+  'Ag(NH3)2+', 'Ag(NH3)2OH',
 ]);
 
 function normalizeSpeciesKey(formula: string): string {
@@ -119,7 +138,7 @@ function buildEquationReview(eq: ParsedEquation): EquationReview {
       ? {
           tone: 'pass',
           label: '物质库覆盖',
-          detail: '所有物种都落在当前内置的高中常见物质库内，这类结果会写入历史记录。',
+          detail: '方程式用到的物质都是高中常见物质，会写入历史记录。注意：这只说明“物质常见”，并不代表“反应一定发生”——反应能否成立仍需结合反应条件、强弱酸碱、溶解性与氧化还原规律另行判断。',
         }
       : {
           tone: 'warn',
@@ -150,7 +169,7 @@ function buildEquationReview(eq: ParsedEquation): EquationReview {
   return {
     allowHistory: uncovered.length === 0,
     summary: uncovered.length === 0
-      ? '已通过守恒与物质库检查，结果可直接用于课堂核对，也会写入历史记录。'
+      ? '已完成原子/电荷守恒核对，用到的物质也都常见。但“守恒”不等于“反应一定发生”，是否真实成立请再结合反应条件、强弱酸碱与氧化还原规律判断。'
       : '已给出守恒配平结果，但因超出当前常用物质库覆盖范围，本次只展示结果，不写入历史记录。',
     items,
   };
@@ -486,7 +505,7 @@ app.innerHTML = `
   </div>
   <div id="preview-line" class="preview-line"></div>
   <div class="input-hint">
-    支持格式：<strong>H2 + O2 = H2O</strong>，箭头可用 <strong>=</strong> 或 <strong>→</strong>，括号如 <strong>Ca(OH)2</strong>，支持 Unicode 下标 / 状态符号如 <strong>(s)(aq)↑</strong>
+    支持格式：<strong>H<sub>2</sub> + O<sub>2</sub> = H<sub>2</sub>O</strong>，箭头可用 <strong>=</strong> 或 <strong>→</strong>，括号如 <strong>Ca(OH)<sub>2</sub></strong>，支持 Unicode 下标 / 状态符号如 <strong>(s)(aq)↑</strong>
   </div>
   <div id="quickbar"></div>
 </div>
@@ -559,27 +578,70 @@ const QB_DEFAULTS: QuickGroup[] = [
     {label:'⁴⁺',insert:'4+'},{label:'⁴⁻',insert:'4-'},
   ]},
   { id:'elem', name:'元素',  items:
-    ['H','O','C','N','S','Cl','Fe','Ca','Na','K','Al','Mg','Cu','Zn','P','Mn','Cr','Br','I']
+    ['H','O','C','N','S','Cl','Fe','Ca','Na','K','Al','Mg','Cu','Zn','P','Mn','Cr','Br','I','Ag','Ba','Si']
       .map(e=>({label:e,insert:e}))
   },
-  { id:'mol',  name:'分子',  items:[
-    {label:'H₂O',insert:'H2O'},{label:'O₂',insert:'O2'},{label:'H₂',insert:'H2'},
-    {label:'N₂',insert:'N2'},{label:'CO₂',insert:'CO2'},{label:'HCl',insert:'HCl'},
-    {label:'H₂SO₄',insert:'H2SO4'},{label:'HNO₃',insert:'HNO3'},
-    {label:'NaOH',insert:'NaOH'},{label:'Ca(OH)₂',insert:'Ca(OH)2'},
-    {label:'NaCl',insert:'NaCl'},{label:'CaCO₃',insert:'CaCO3'},
-    {label:'KMnO₄',insert:'KMnO4'},{label:'Fe₂O₃',insert:'Fe2O3'},
+  { id:'simple', name:'单质', items:[
+    {label:'H₂',insert:'H2'},{label:'O₂',insert:'O2'},{label:'N₂',insert:'N2'},
+    {label:'Cl₂',insert:'Cl2'},{label:'Br₂',insert:'Br2'},{label:'I₂',insert:'I2'},
+    {label:'Na',insert:'Na'},{label:'Fe',insert:'Fe'},{label:'Cu',insert:'Cu'},
+    {label:'Ag',insert:'Ag'},{label:'Zn',insert:'Zn'},{label:'C',insert:'C'},
+  ]},
+  { id:'oxide', name:'氧化物', items:[
+    {label:'H₂O',insert:'H2O'},{label:'CO₂',insert:'CO2'},{label:'CO',insert:'CO'},
+    {label:'SO₂',insert:'SO2'},{label:'SO₃',insert:'SO3'},{label:'NO',insert:'NO'},
+    {label:'NO₂',insert:'NO2'},{label:'Na₂O',insert:'Na2O'},{label:'Na₂O₂',insert:'Na2O2'},
+    {label:'MgO',insert:'MgO'},{label:'CuO',insert:'CuO'},{label:'Al₂O₃',insert:'Al2O3'},
+    {label:'Fe₂O₃',insert:'Fe2O3'},{label:'Fe₃O₄',insert:'Fe3O4'},{label:'MnO₂',insert:'MnO2'},
+    {label:'SiO₂',insert:'SiO2'},{label:'H₂O₂',insert:'H2O2'},{label:'P₂O₅',insert:'P2O5'},
+    {label:'CaO',insert:'CaO'},{label:'N₂O₄',insert:'N2O4'},
+  ]},
+  { id:'acid', name:'酸', items:[
+    {label:'HCl',insert:'HCl'},{label:'H₂SO₄',insert:'H2SO4'},{label:'HNO₃',insert:'HNO3'},
+    {label:'H₂CO₃',insert:'H2CO3'},{label:'H₃PO₄',insert:'H3PO4'},{label:'H₂S',insert:'H2S'},
+    {label:'HBr',insert:'HBr'},{label:'HI',insert:'HI'},{label:'HF',insert:'HF'},
+    {label:'H₂SiO₃',insert:'H2SiO3'},{label:'HClO',insert:'HClO'},
+    {label:'CH₃COOH',insert:'CH3COOH'},
+  ]},
+  { id:'base', name:'碱', items:[
+    {label:'NaOH',insert:'NaOH'},{label:'KOH',insert:'KOH'},
+    {label:'Ca(OH)₂',insert:'Ca(OH)2'},{label:'Ba(OH)₂',insert:'Ba(OH)2'},
+    {label:'Mg(OH)₂',insert:'Mg(OH)2'},{label:'Al(OH)₃',insert:'Al(OH)3'},
+    {label:'Fe(OH)₃',insert:'Fe(OH)3'},{label:'Fe(OH)₂',insert:'Fe(OH)2'},
+    {label:'Cu(OH)₂',insert:'Cu(OH)2'},{label:'NH₃·H₂O',insert:'NH3·H2O'},
+  ]},
+  { id:'salt', name:'盐', items:[
+    {label:'NaCl',insert:'NaCl'},{label:'KCl',insert:'KCl'},
+    {label:'CaCO₃',insert:'CaCO3'},{label:'Na₂CO₃',insert:'Na2CO3'},
+    {label:'NaHCO₃',insert:'NaHCO3'},{label:'CaCl₂',insert:'CaCl2'},
+    {label:'BaCl₂',insert:'BaCl2'},{label:'AgNO₃',insert:'AgNO3'},
+    {label:'AgCl',insert:'AgCl'},{label:'BaSO₄',insert:'BaSO4'},
+    {label:'CuSO₄',insert:'CuSO4'},{label:'FeCl₃',insert:'FeCl3'},
+    {label:'FeCl₂',insert:'FeCl2'},{label:'Na₂SO₄',insert:'Na2SO4'},
+    {label:'FeSO₄',insert:'FeSO4'},{label:'KMnO₄',insert:'KMnO4'},
+    {label:'K₂Cr₂O₇',insert:'K2Cr2O7'},{label:'KClO₃',insert:'KClO3'},
+    {label:'NH₄Cl',insert:'NH4Cl'},{label:'NH₄NO₃',insert:'NH4NO3'},
+    {label:'Na₂SiO₃',insert:'Na2SiO3'},
+  ]},
+  { id:'other', name:'其他', items:[
+    {label:'NH₃',insert:'NH3'},{label:'PCl₃',insert:'PCl3'},{label:'PCl₅',insert:'PCl5'},
   ]},
   { id:'ion',  name:'离子',  items:[
     {label:'H⁺',insert:'H+'},{label:'OH⁻',insert:'OH-'},
     {label:'Na⁺',insert:'Na+'},{label:'K⁺',insert:'K+'},
     {label:'Ca²⁺',insert:'Ca2+'},{label:'Mg²⁺',insert:'Mg2+'},
+    {label:'Ba²⁺',insert:'Ba2+'},{label:'Ag⁺',insert:'Ag+'},
     {label:'Fe²⁺',insert:'Fe2+'},{label:'Fe³⁺',insert:'Fe3+'},
     {label:'Al³⁺',insert:'Al3+'},{label:'Cu²⁺',insert:'Cu2+'},
-    {label:'Cl⁻',insert:'Cl-'},{label:'SO₄²⁻',insert:'SO42-'},
+    {label:'Zn²⁺',insert:'Zn2+'},{label:'Mn²⁺',insert:'Mn2+'},
+    {label:'Cl⁻',insert:'Cl-'},{label:'Br⁻',insert:'Br-'},
+    {label:'I⁻',insert:'I-'},{label:'S²⁻',insert:'S2-'},
+    {label:'SO₄²⁻',insert:'SO42-'},{label:'SO₃²⁻',insert:'SO32-'},
     {label:'CO₃²⁻',insert:'CO32-'},{label:'NO₃⁻',insert:'NO3-'},
     {label:'MnO₄⁻',insert:'MnO4-'},{label:'HCO₃⁻',insert:'HCO3-'},
     {label:'NH₄⁺',insert:'NH4+'},{label:'PO₄³⁻',insert:'PO43-'},
+    {label:'AlO₂⁻',insert:'AlO2-'},{label:'SiO₃²⁻',insert:'SiO32-'},
+    {label:'ClO⁻',insert:'ClO-'},{label:'Cr₂O₇²⁻',insert:'Cr2O72-'},
     {label:'e⁻',insert:'e-'},
   ]},
   { id:'org',  name:'有机物', items:[
@@ -587,6 +649,8 @@ const QB_DEFAULTS: QuickGroup[] = [
     {label:'C₂H₂',insert:'C2H2'},{label:'C₂H₅OH',insert:'C2H5OH'},
     {label:'C₃H₈',insert:'C3H8'},{label:'CH₃COOH',insert:'CH3COOH'},
     {label:'C₆H₁₂O₆',insert:'C6H12O6'},{label:'C₁₂H₂₂O₁₁',insert:'C12H22O11'},
+    {label:'HCHO',insert:'HCHO'},{label:'HCOOH',insert:'HCOOH'},
+    {label:'C₆H₅OH',insert:'C6H5OH'},
   ]},
 ];
 

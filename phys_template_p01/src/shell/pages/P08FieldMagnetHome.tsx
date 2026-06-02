@@ -6,6 +6,7 @@ import {
   getP08SceneTeachingUse,
   type P08ModuleKey,
 } from './p08PresetCatalog';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 const MODULE_DECORATION: Record<
   P08ModuleKey,
@@ -69,6 +70,15 @@ export function P08FieldMagnetHome({
       setActiveKey(initialActiveKey);
     }
   }, [initialActiveKey]);
+  useEffect(() => registerPageSnapshotAdapter('p08-field-magnet-home', {
+    getSnapshot: () => ({ activeKey }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{ activeKey: P08ModuleKey }>;
+      if (value.activeKey) {
+        setActiveKey(value.activeKey);
+      }
+    },
+  }), [activeKey]);
   const activeSection =
     sections.find((section) => section.key === activeKey) ?? sections[0];
 

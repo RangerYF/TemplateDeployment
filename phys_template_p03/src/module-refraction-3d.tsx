@@ -11,6 +11,7 @@ interface SnellWindowProps {
   sourceShape?: 'point' | 'line' | 'polygon';
   sourceSizeCm?: number;
   polygonSides?: number;
+  lineSampleCount?: number;
   wavelength: number;
   showColor: boolean;
 }
@@ -106,22 +107,35 @@ function makeDashedLine(pts: THREE.Vector3[], color: number, opacity: number, da
   return line;
 }
 
-function makeCircleLine(radius: number, color: number, opacity: number): THREE.Line {
+function makeCircleLine(radius: number, color: number, opacity: number): THREE.Group {
   const pts: THREE.Vector3[] = [];
   const segs = 96;
   for (let i = 0; i <= segs; i++) {
     const a = Math.PI * 2 * i / segs;
     pts.push(new THREE.Vector3(Math.cos(a) * radius, 0.08, Math.sin(a) * radius));
   }
-  return new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints(pts),
-    new THREE.LineBasicMaterial({ color, transparent: true, opacity })
+  const group = new THREE.Group();
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  group.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent: true, opacity })));
+  const tube = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, 0.06, 6, 96),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: opacity * 0.7 })
   );
+  tube.rotation.x = Math.PI / 2;
+  tube.position.y = 0.08;
+  group.add(tube);
+  return group;
 }
 
-function sourceSamplePoints(shape: SnellWindowProps['sourceShape'], size: number, sides: number, depth: number): THREE.Vector3[] {
+function sourceSamplePoints(shape: SnellWindowProps['sourceShape'], size: number, sides: number, depth: number, lineSamples: number = 7): THREE.Vector3[] {
   if (shape === 'line') {
-    return [-0.5, -0.33, -0.17, 0, 0.17, 0.33, 0.5].map((t) => new THREE.Vector3(t * size, -depth, 0));
+    const count = Math.max(2, Math.min(20, lineSamples));
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i < count; i++) {
+      const t = count === 1 ? 0 : (i / (count - 1) - 0.5);
+      pts.push(new THREE.Vector3(t * size, -depth, 0));
+    }
+    return pts;
   }
   if (shape === 'polygon') {
     const safeSides = Math.round(Math.min(8, Math.max(3, sides || 5)));
@@ -190,7 +204,8 @@ function buildScene(ctx: Ctx, props: SnellWindowProps) {
   const critAngle = Math.asin(Math.min(1, 1 / waterN));
   const critDeg = critAngle * 180 / Math.PI;
   const windowR = depth * Math.tan(critAngle);
-  const samples = sourceSamplePoints(sourceShape, sourceSize, polygonSides, depth);
+  const lineSamples = Math.round(props.lineSampleCount ?? 7);
+  const samples = sourceSamplePoints(sourceShape, sourceSize, polygonSides, depth, lineSamples);
   const outerSamples = sourceOuterPoints(sourceShape, sourceSize, polygonSides, depth);
   const axisTop = 10;
   const axisBot = -(depth + 4);
@@ -375,8 +390,8 @@ function buildScene(ctx: Ctx, props: SnellWindowProps) {
   // ── 11. Snell's window ring ──
   addWindowPatch(ctx.dyn, outerSamples, windowR);
   if (samples.length > 1) {
-    outerSamples.forEach((pt, index) => {
-      const ring = makeCircleLine(windowR, COL_GREEN, index === 0 ? 0.45 : 0.22);
+    samples.forEach((pt, index) => {
+      const ring = makeCircleLine(windowR, COL_GREEN, index === 0 ? 0.7 : 0.35);
       ring.position.set(pt.x, 0, pt.z);
       ctx.dyn.add(ring);
     });
@@ -390,8 +405,8 @@ function buildScene(ctx: Ctx, props: SnellWindowProps) {
   ctx.dyn.add(torus);
 
   // Critical cone(s)
-  const coneMat = new THREE.MeshPhongMaterial({ color: COL_GREEN, transparent: true, opacity: sourceShape === 'point' ? 0.025 : 0.012, side: THREE.DoubleSide, depthWrite: false });
-  const coneSources = sourceShape === 'point' ? [srcPos] : outerSamples;
+  const coneMat = new THREE.MeshPhongMaterial({ color: COL_GREEN, transparent: true, opacity: sourceShape === 'point' ? 0.09 : 0.04, side: THREE.DoubleSide, depthWrite: false });
+  const coneSources = sourceShape === 'point' ? [srcPos] : samples;
   coneSources.forEach((pt) => {
     const cone = new THREE.Mesh(
       new THREE.ConeGeometry(windowR, depth, 32, 1, true),

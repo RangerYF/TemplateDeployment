@@ -304,7 +304,7 @@ export function renderDynamic(
 
     renderPointLabel(
       ctx,
-      `∩ ${pin.label}`,
+      `X ${pin.label}`,
       formatPointCoord(pin.mathX, pin.mathY),
       px,
       py,
@@ -354,14 +354,14 @@ export function renderDynamic(
     );
     drawCrosshairMarker(ctx, canvasX, canvasY, 9, XSECT_COLOR, true);
 
-    // Tooltip with ∩ prefix
+    // Tooltip with X prefix
     renderTooltip(
       ctx,
       formatPointCoord(hoveredIntersection.mathX, hoveredIntersection.mathY),
       canvasX, canvasY,
       XSECT_COLOR,
       viewport,
-      '∩',
+      'X',
     );
   }
 }

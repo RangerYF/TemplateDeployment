@@ -32,6 +32,7 @@ import {
   setCurrentDragJointType,
 } from '@/components/panels/dragState'
 import { AnalysisRecorder } from '@/engine/AnalysisRecorder'
+import { EnergyCompensator } from '@/engine/EnergyCompensator'
 import { augmentForcesWithTeachingForces, isTeachingForceType } from '@/engine/teachingForces'
 import { useAnalysisStore } from '@/store/analysisStore'
 import { usePlaybackControlStore } from '@/store/playbackControlStore'
@@ -61,14 +62,13 @@ import {
 
 const renderer = new CanvasRenderer()
 const analysisRecorder = new AnalysisRecorder()
+const energyCompensator = new EnergyCompensator()
 
 // Module-level drag preview state (avoids react-hooks/immutability lint errors with refs in callbacks)
 let _dragPreview: { bodyType: BodyType; body: SceneBody } | null = null
 let _dragJointGuide: { jointType: JointType; screenX: number; screenY: number } | null = null
 let _dragRaf = 0
-const AUTO_HIDDEN_FORCE_TYPES = new Set<BodyType>(['conveyor', 'hemisphere', 'half-sphere', 'groove'])
-const MOM013_RUNTIME_SCENE_ID = 'template-scene-mom-013'
-const MOM013_PLATFORM_BODY_ID = 'body-platform-main'
+const AUTO_HIDDEN_FORCE_TYPES = new Set<BodyType>(['conveyor', 'hemisphere', 'half-sphere', 'groove', 'channel'])
 const MAX_TIMELINE_SNAPSHOTS = 36000
 const TOAST_COOLDOWN_MS = 3500
 
@@ -232,18 +232,11 @@ function shouldAutoHideForces(body: SceneBody): boolean {
 function collectAutoHiddenForceBodyIds(scene: Scene): Set<string> {
   const result = new Set<string>()
   for (const body of scene.bodies) {
-    if (shouldAutoHideForces(body) || shouldAutoHideSceneSpecificBody(scene, body)) {
+    if (shouldAutoHideForces(body)) {
       result.add(body.id)
     }
   }
   return result
-}
-
-function shouldAutoHideSceneSpecificBody(scene: Scene, body: SceneBody): boolean {
-  if (scene.id === MOM013_RUNTIME_SCENE_ID && body.id === MOM013_PLATFORM_BODY_ID && body.isStatic) {
-    return true
-  }
-  return false
 }
 
 /** 从全部基础力计算合力（不含 resultant 自身） */
@@ -275,6 +268,52 @@ function computeResultants(forces: ForceData[]): ForceData[] {
     result.push({ bodyId, forceType: 'resultant', vector: { x: sx, y: sy }, magnitude: mag })
   }
   return result
+}
+
+function cloneSceneBody(body: SceneBody): SceneBody {
+  return {
+    ...body,
+    position: { ...body.position },
+    initialVelocity: { ...body.initialVelocity },
+    initialAcceleration: { ...body.initialAcceleration },
+  }
+}
+
+function buildSimulationBodyPoseOverrides(
+  scene: Scene,
+  bodyStates: BodyState[],
+): Map<string, { position: { x: number; y: number }; angle: number }> {
+  const overrides = new Map<string, { position: { x: number; y: number }; angle: number }>()
+
+  for (const state of bodyStates) {
+    overrides.set(state.id, {
+      position: { ...state.position },
+      angle: state.angle,
+    })
+  }
+
+  const supportBodies = scene.bodies.filter((body) => body.isStatic)
+  if (supportBodies.length === 0) return overrides
+
+  for (const body of scene.bodies) {
+    if (body.type !== 'block' || body.isStatic || !body.fixedRotation) continue
+    const currentPose = overrides.get(body.id)
+    if (!currentPose) continue
+
+    const probeBody = cloneSceneBody(body)
+    probeBody.position = { ...currentPose.position }
+    probeBody.angle = currentPose.angle
+
+    const snap = computeSnap(probeBody, supportBodies, false, 0.22)
+    if (!snap) continue
+
+    overrides.set(body.id, {
+      position: { ...snap.position },
+      angle: Math.abs(snap.angle) < 1e-4 ? 0 : snap.angle,
+    })
+  }
+
+  return overrides
 }
 
 function drawFm041RotationCue(
@@ -859,10 +898,7 @@ export function Canvas() {
       })
 
       // 传入实时位姿覆盖（避免每帧克隆 sceneBodies）
-      const bodyPoseOverrides = new Map<string, { position: { x: number; y: number }; angle: number }>()
-      for (const bs of bodiesRef.current) {
-        bodyPoseOverrides.set(bs.id, { position: bs.position, angle: bs.angle })
-      }
+      const bodyPoseOverrides = buildSimulationBodyPoseOverrides(currentScene, bodiesRef.current)
       for (const [bodyId, pose] of fm041SimVisual.overrides) {
         bodyPoseOverrides.set(bodyId, pose)
       }
@@ -988,11 +1024,17 @@ export function Canvas() {
       physicsBridge.saveSnapshot()
       timelineSnapshotsRef.current = []
       const initialBodies = physicsBridge.getBodyStates()
+      const initialBaseForces = physicsBridge.probeForces(currentScene)
+      const initialTeachingForces = augmentForcesWithTeachingForces(currentScene, initialBodies, initialBaseForces)
+      forceDataRef.current = [...initialTeachingForces, ...computeResultants(initialBaseForces)]
+      bodiesRef.current = initialBodies
+      jointStatesRef.current = physicsBridge.getJointStates()
       pushTimelineSnapshot({
         t: 0,
         bodies: cloneBodyStates(initialBodies),
-        forces: [],
+        forces: cloneForceData(forceDataRef.current),
       })
+      renderFrame()
     } else {
       const snapshots = timelineSnapshotsRef.current
       if (snapshots.length > 0) {
@@ -1006,7 +1048,7 @@ export function Canvas() {
       startFromEditRef.current = false
     }
     playSim()
-  }, [findSnapshotIndexByTime, playSim, pushTimelineSnapshot, syncTimelineUi, timelineCurrentTime])
+  }, [findSnapshotIndexByTime, playSim, pushTimelineSnapshot, renderFrame, syncTimelineUi, timelineCurrentTime])
 
   const handlePauseControl = useCallback(() => {
     useAnalysisStore.getState().seekToTime(timelineCurrentTime)
@@ -1015,6 +1057,7 @@ export function Canvas() {
 
   const handleResetControl = useCallback(() => {
     physicsBridge.restoreSnapshot()
+    energyCompensator.reset()
     stopSim()
     useAnalysisStore.getState().clearHistory()
     clearTimelineSnapshots()
@@ -1078,18 +1121,21 @@ export function Canvas() {
         }
         simTime = 0
         const initialBodies = physicsBridge.getBodyStates()
+        if (currentScene.settings.energyConservation) {
+          energyCompensator.initialize(initialBodies, currentScene)
+        }
         const initialFrame = analysisRecorder.recordInitialFrame(
           initialBodies,
           currentScene,
           analysisState.analysisGroups,
-          [],
+          forceDataRef.current,
         )
         analysisState.pushFrame(initialFrame)
         if (timelineSnapshotsRef.current.length === 0) {
           pushTimelineSnapshot({
             t: 0,
             bodies: cloneBodyStates(initialBodies),
-            forces: [],
+            forces: cloneForceData(forceDataRef.current),
           })
         } else {
           syncTimelineUi(timelineSnapshotsRef.current.length - 1, timelineSnapshotsRef.current)
@@ -1116,6 +1162,13 @@ export function Canvas() {
             const bodyStates = physicsBridge.getBodyStates()
             if (!isFiniteBodyStates(bodyStates)) {
               throw new Error('检测到非有限物体状态')
+            }
+            if (currentScene.settings.energyConservation) {
+              energyCompensator.compensate(
+                bodyStates,
+                currentScene,
+                (id, v) => physicsBridge.setLinearVelocity(id, v),
+              )
             }
             bodiesRef.current = bodyStates
             // 3. 收集所有力

@@ -164,12 +164,14 @@ export function renderM03Pins(
 
   // Render curve pins
   for (const pin of pinnedPoints) {
+    if (!colorMap.has(pin.entityId)) continue;
     const color = colorMap.get(pin.entityId) ?? '#9CA3AF';
     renderCurvePin(ctx, pin, viewport, color);
   }
 
   // Render intersection pins
   for (const pin of pinnedIntersections) {
+    if (!colorMap.has(pin.lineId) || !colorMap.has(pin.conicId)) continue;
     const lineColor  = colorMap.get(pin.lineId)  ?? '#9CA3AF';
     const conicColor = colorMap.get(pin.conicId) ?? '#9CA3AF';
     renderIntersectionPin(ctx, pin, viewport, lineColor, conicColor);

@@ -78,6 +78,22 @@ export interface BuilderWorkspaceState {
   solverError: string | null;
 }
 
+export interface BuilderWorkspaceSnapshot {
+  entities: Entity[];
+  relations: Relation[];
+  builderParamValues: ParamValues;
+  currentTemplateFamilyId: string | null;
+  currentTemplateVariantId: string | null;
+  selectedEntityId: EntityId | null;
+  canvasTransform: CoordinateTransform;
+}
+
+export interface BuilderStoreSnapshot {
+  workspaces: Record<BuilderWorkspaceId, BuilderWorkspaceSnapshot>;
+  activeWorkspaceId: BuilderWorkspaceId;
+  layoutMode: BuilderLayoutMode;
+}
+
 export interface BuilderStoreState {
   workspaces: Record<BuilderWorkspaceId, BuilderWorkspaceState>;
   activeWorkspaceId: BuilderWorkspaceId;
@@ -140,6 +156,8 @@ export interface BuilderStoreActions {
   clearAll(workspaceId?: BuilderWorkspaceId): void;
 
   setCanvasTransform(transform: CoordinateTransform, workspaceId?: BuilderWorkspaceId): void;
+  getSnapshot(): BuilderStoreSnapshot;
+  loadSnapshot(snapshot: BuilderStoreSnapshot): void;
 }
 
 // ─── 内部计数器 ───
@@ -237,6 +255,34 @@ function cloneWorkspaceForTransfer(
     selectedEntityId: null,
     interaction: { type: 'idle' },
     canvasTransform: cloneCoordinateTransform(workspace.canvasTransform),
+    currentResult: null,
+    isRunning: false,
+    solverError: null,
+  };
+}
+
+function createWorkspaceSnapshot(workspace: BuilderWorkspaceState): BuilderWorkspaceSnapshot {
+  return {
+    entities: Array.from(workspace.entities.values(), cloneBuilderEntitySnapshot),
+    relations: workspace.relations.map(cloneBuilderRelationSnapshot),
+    builderParamValues: cloneBuilderParamValues(workspace.builderParamValues),
+    currentTemplateFamilyId: workspace.currentTemplateFamilyId,
+    currentTemplateVariantId: workspace.currentTemplateVariantId,
+    selectedEntityId: workspace.selectedEntityId,
+    canvasTransform: cloneCoordinateTransform(workspace.canvasTransform),
+  };
+}
+
+function hydrateWorkspaceSnapshot(snapshot: BuilderWorkspaceSnapshot): BuilderWorkspaceState {
+  return {
+    entities: new Map(snapshot.entities.map((entity) => [entity.id, cloneBuilderEntitySnapshot(entity)])),
+    relations: snapshot.relations.map(cloneBuilderRelationSnapshot),
+    builderParamValues: cloneBuilderParamValues(snapshot.builderParamValues),
+    currentTemplateFamilyId: snapshot.currentTemplateFamilyId ?? null,
+    currentTemplateVariantId: snapshot.currentTemplateVariantId ?? null,
+    selectedEntityId: snapshot.selectedEntityId ?? null,
+    interaction: { type: 'idle' },
+    canvasTransform: cloneCoordinateTransform(snapshot.canvasTransform),
     currentResult: null,
     isRunning: false,
     solverError: null,
@@ -801,6 +847,30 @@ export const useBuilderStore = create<BuilderStoreState & BuilderStoreActions>(
           canvasTransform: cloneCoordinateTransform(transform),
         }),
       );
+    },
+
+    getSnapshot() {
+      const state = get();
+      return {
+        workspaces: {
+          primary: createWorkspaceSnapshot(state.workspaces.primary),
+          secondary: createWorkspaceSnapshot(state.workspaces.secondary),
+        },
+        activeWorkspaceId: state.activeWorkspaceId,
+        layoutMode: state.layoutMode,
+      };
+    },
+
+    loadSnapshot(snapshot) {
+      set({
+        workspaces: {
+          primary: hydrateWorkspaceSnapshot(snapshot.workspaces.primary),
+          secondary: hydrateWorkspaceSnapshot(snapshot.workspaces.secondary),
+        },
+        activeWorkspaceId: snapshot.activeWorkspaceId,
+        layoutMode: snapshot.layoutMode,
+        builderClipboard: null,
+      });
     },
   }),
 );

@@ -3,6 +3,7 @@ import { Select } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   buildRectFieldSymbolPositions,
   computeOrbitRadius,
@@ -99,6 +100,61 @@ export function P08TranslationCirclePage({ onBack }: Props) {
   const [showCenters, setShowCenters] = useState(true);
   const [showAnimatedParticles, setShowAnimatedParticles] = useState(true);
   const [animationPhase, setAnimationPhase] = useState(0);
+
+  useEffect(() => registerPageSnapshotAdapter('p08-translation-circle', {
+    getSnapshot: () => ({
+      fieldDirection,
+      chargeSign,
+      speed,
+      fieldMagnitude,
+      chargeMagnitude,
+      mass,
+      particleCount,
+      entrySpacing,
+      showFieldSymbols,
+      showCenters,
+      showAnimatedParticles,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        fieldDirection: MagneticFieldDirection;
+        chargeSign: 1 | -1;
+        speed: number;
+        fieldMagnitude: number;
+        chargeMagnitude: number;
+        mass: number;
+        particleCount: number;
+        entrySpacing: number;
+        showFieldSymbols: boolean;
+        showCenters: boolean;
+        showAnimatedParticles: boolean;
+      }>;
+      if (value.fieldDirection) setFieldDirection(value.fieldDirection);
+      if (value.chargeSign === 1 || value.chargeSign === -1) setChargeSign(value.chargeSign);
+      if (typeof value.speed === 'number') setSpeed(value.speed);
+      if (typeof value.fieldMagnitude === 'number') setFieldMagnitude(value.fieldMagnitude);
+      if (typeof value.chargeMagnitude === 'number') setChargeMagnitude(value.chargeMagnitude);
+      if (typeof value.mass === 'number') setMass(value.mass);
+      if (typeof value.particleCount === 'number') setParticleCount(value.particleCount);
+      if (typeof value.entrySpacing === 'number') setEntrySpacing(value.entrySpacing);
+      if (typeof value.showFieldSymbols === 'boolean') setShowFieldSymbols(value.showFieldSymbols);
+      if (typeof value.showCenters === 'boolean') setShowCenters(value.showCenters);
+      if (typeof value.showAnimatedParticles === 'boolean') setShowAnimatedParticles(value.showAnimatedParticles);
+      setAnimationPhase(0);
+    },
+  }), [
+    chargeMagnitude,
+    chargeSign,
+    entrySpacing,
+    fieldDirection,
+    fieldMagnitude,
+    mass,
+    particleCount,
+    showAnimatedParticles,
+    showCenters,
+    showFieldSymbols,
+    speed,
+  ]);
 
   useEffect(() => {
     let frameId = 0;

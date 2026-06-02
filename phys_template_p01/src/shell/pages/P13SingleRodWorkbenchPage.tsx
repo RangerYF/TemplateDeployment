@@ -39,6 +39,7 @@ import {
   scaleArrowLength,
 } from './p13/P13StagePrimitives';
 import { P13TimeSeriesChart } from './p13/P13TimeSeriesChart';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 interface Props {
   variant: P13SingleRodVariant;
@@ -83,6 +84,34 @@ export function P13SingleRodWorkbenchPage({
   useEffect(() => {
     simulator.unload();
   }, []);
+
+  useEffect(() => registerPageSnapshotAdapter(`p13-single-rod-${variant}`, {
+    getSnapshot: () => ({
+      variant,
+      params,
+      currentTime,
+      isPlaying,
+      analysisStep,
+      capacitorScenario,
+      displayOptions,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        params: Parameters<typeof normalizeSingleRodParams>[1];
+        currentTime: number;
+        isPlaying: boolean;
+        analysisStep: number;
+        capacitorScenario: SingleRodCapacitorScenario;
+        displayOptions: P13DisplayOptions;
+      }>;
+      if (value.params) setParams(normalizeSingleRodParams(variant, value.params));
+      if (typeof value.currentTime === 'number') setCurrentTime(value.currentTime);
+      if (typeof value.isPlaying === 'boolean') setIsPlaying(value.isPlaying);
+      if (typeof value.analysisStep === 'number') setAnalysisStep(value.analysisStep);
+      if (value.capacitorScenario) setCapacitorScenario(value.capacitorScenario);
+      if (value.displayOptions) setDisplayOptions(value.displayOptions);
+    },
+  }), [analysisStep, capacitorScenario, currentTime, displayOptions, isPlaying, params, variant]);
 
   useEffect(() => {
     setParams(normalizeSingleRodParams(variant));

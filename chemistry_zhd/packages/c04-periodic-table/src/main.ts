@@ -1045,6 +1045,10 @@ function showDetail(el: ChemicalElement, cellEl: HTMLElement): void {
           <span class="detail-prop-value">${el.electronegativity !== null ? el.electronegativity.toFixed(2) : '—'}</span>
         </div>
         <div class="detail-prop">
+          <span class="detail-prop-label">第一电离能</span>
+          <span class="detail-prop-value">${el.firstIonizationEnergy !== null ? el.firstIonizationEnergy + ' kJ/mol' : '—'}</span>
+        </div>
+        <div class="detail-prop">
           <span class="detail-prop-label">电子构型</span>
           <span class="detail-prop-value">${el.electronConfiguration}</span>
         </div>
@@ -1274,6 +1278,7 @@ function getAiContext() {
         groupLabel: element.groupLabel,
         stateAtRoomTemp: element.stateAtRoomTemp,
         electronegativity: element.electronegativity,
+        firstIonizationEnergy: element.firstIonizationEnergy,
         oxidationStates: element.oxidationStates,
       })),
       teachingScenarioIds: Object.keys(TEACHING_SCENARIOS),

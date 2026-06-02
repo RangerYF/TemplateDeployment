@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style 2: Control Room 控制室 — 物理模板原型</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100vh;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:#06090f;color:#e2e8f0;}
+
+.app{display:grid;grid-template-rows:46px 1fr 92px;grid-template-columns:68px 1fr 280px;width:100%;height:100vh;}
+
+/* === TOP BAR === */
+.topbar{grid-column:1/-1;background:#0a0e1a;border-bottom:1px solid rgba(6,182,212,.06);display:flex;align-items:center;padding:0 16px;gap:12px;}
+.topbar .back{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.06);background:none;color:#64748b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.topbar .back:hover{border-color:rgba(6,182,212,.3);color:#06b6d4;}
+.t-title{font-size:14px;font-weight:600;}
+.t-scene-name{font-size:12px;color:#64748b;font-weight:500;}
+.t-sep{width:1px;height:20px;background:rgba(255,255,255,.06);}
+.spacer{flex:1;}
+.t-status{display:flex;align-items:center;gap:5px;font-size:11px;color:#64748b;}
+.t-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5);}
+.t-ctrls{display:flex;gap:3px;}
+.tb{width:32px;height:32px;border:1px solid rgba(255,255,255,.06);border-radius:7px;background:none;color:#94a3b8;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit;}
+.tb:hover{border-color:rgba(6,182,212,.25);color:#06b6d4;box-shadow:0 0 8px rgba(6,182,212,.1);}
+.tb.play{background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.25);color:#06b6d4;box-shadow:0 0 10px rgba(6,182,212,.15);}
+.tb.play:hover{background:rgba(6,182,212,.2);box-shadow:0 0 14px rgba(6,182,212,.25);}
+.tb-speed{width:auto;padding:0 8px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+
+/* === LEFT SIDEBAR === */
+.sidebar{background:#080c18;border-right:1px solid rgba(6,182,212,.04);padding:6px;display:flex;flex-direction:column;gap:4px;}
+.s-thumb{width:54px;height:54px;border-radius:10px;border:1.5px solid rgba(255,255,255,.04);background:#0d1225;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:all .2s;position:relative;}
+.s-thumb:hover{border-color:rgba(6,182,212,.2);background:#111830;}
+.s-thumb.active{border-color:#06b6d4;box-shadow:0 0 14px rgba(6,182,212,.2),inset 0 0 12px rgba(6,182,212,.05);}
+.s-icon{font-size:16px;line-height:1;}
+.s-label{font-size:7px;font-weight:600;color:#475569;letter-spacing:.3px;text-transform:uppercase;}
+.s-thumb.active .s-label{color:#06b6d4;}
+
+/* === CANVAS === */
+.canvas{background:#080d1a;position:relative;overflow:hidden;}
+.c-border{position:absolute;inset:6px;border-radius:10px;border:1px solid rgba(6,182,212,.08);box-shadow:inset 0 0 40px rgba(6,182,212,.03);overflow:hidden;}
+.c-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(6,182,212,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.025) 1px,transparent 1px);background-size:36px 36px;animation:drift 80s linear infinite;}
+@keyframes drift{from{background-position:0 0}to{background-position:36px 36px}}
+.c-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.scene-svg{display:none;}
+.scene-svg.active{display:block;}
+.c-label{position:absolute;top:14px;left:16px;font-size:10px;font-weight:500;color:rgba(6,182,212,.3);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+
+/* === RIGHT PANEL === */
+.rpanel{background:#0a0e1a;border-left:1px solid rgba(6,182,212,.04);padding:14px;overflow-y:auto;display:flex;flex-direction:column;}
+.rp-title{font-size:10px;font-weight:600;color:#06b6d4;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;font-family:'JetBrains Mono',monospace;}
+.rp-item{margin-bottom:12px;}
+.rp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.rp-label{font-size:12px;font-weight:500;color:#94a3b8;}
+.rp-val{font-size:12px;font-weight:700;color:#22d3ee;font-family:'JetBrains Mono',monospace;}
+.ds{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:rgba(6,182,212,.1);border-radius:2px;outline:none;cursor:pointer;}
+.ds::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#06b6d4;border-radius:50%;box-shadow:0 0 8px rgba(6,182,212,.5);cursor:pointer;transition:box-shadow .15s;}
+.ds::-webkit-slider-thumb:hover{box-shadow:0 0 14px rgba(6,182,212,.7);}
+.rp-tgl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.dtgl{width:38px;height:20px;background:rgba(255,255,255,.05);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;border:1px solid rgba(255,255,255,.06);}
+.dtgl.on{background:rgba(6,182,212,.25);border-color:rgba(6,182,212,.3);}
+.dtgl .k{position:absolute;top:2px;left:2px;width:14px;height:14px;background:#e2e8f0;border-radius:50%;transition:left .2s;box-shadow:0 0 3px rgba(0,0,0,.3);}
+.dtgl.on .k{left:20px;background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.5);}
+.rp-div{height:1px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.08),transparent);margin:10px 0;}
+.rp-adv{font-size:11px;color:#475569;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.rp-adv:hover{color:#06b6d4;}
+.rp-adv-body{max-height:0;overflow:hidden;transition:max-height .3s;}
+.rp-adv-body.open{max-height:180px;}
+.params-group{display:none;}
+.params-group.active{display:block;}
+
+/* === BOTTOM DASHBOARD === */
+.dashboard{grid-column:1/-1;background:#0a0e1a;border-top:1px solid rgba(6,182,212,.06);display:flex;align-items:stretch;padding:8px 12px;gap:10px;}
+.metric{flex:1;background:linear-gradient(180deg,#0d1225 0%,#111830 100%);border:1px solid rgba(6,182,212,.06);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;transition:all .2s;position:relative;overflow:hidden;}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.2),transparent);opacity:0;transition:opacity .2s;}
+.metric:hover{border-color:rgba(6,182,212,.15);}
+.metric:hover::before{opacity:1;}
+.m-label{font-size:10px;color:#475569;font-weight:500;margin-bottom:2px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;}
+.m-row{display:flex;align-items:baseline;gap:4px;}
+.m-val{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#22d3ee;text-shadow:0 0 10px rgba(6,182,212,.25);}
+.m-unit{font-size:11px;color:#475569;font-family:'JetBrains Mono',monospace;}
+.m-sub{font-size:9px;color:#334155;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.metrics-group{display:none;width:100%;gap:10px;}
+.metrics-group.active{display:flex;}
+
+@media(max-width:1024px){.app{grid-template-columns:56px 1fr 240px;}.rpanel{padding:10px;}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="back">&larr;</button>
+    <span class="t-title" id="tTitle">斜面受力分析</span>
+    <span class="t-sep"></span>
+    <span class="t-scene-name" id="tSub">力学 · 经典力学</span>
+    <div class="spacer"></div>
+    <div class="t-status"><span class="t-dot"></span>READY</div>
+    <div class="t-ctrls">
+      <button class="tb play">&#9654;</button>
+      <button class="tb">&#9646;&#9646;</button>
+      <button class="tb">&#8634;</button>
+      <button class="tb tb-speed">1.0x</button>
+    </div>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="s-thumb active" onclick="switchScene('mechanics')"><span class="s-icon">&#9651;</span><span class="s-label">力学</span></div>
+    <div class="s-thumb" onclick="switchScene('celestial')"><span class="s-icon">&#9788;</span><span class="s-label">天体</span></div>
+    <div class="s-thumb" onclick="switchScene('circuit')"><span class="s-icon">&#9889;</span><span class="s-label">电路</span></div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas">
+    <div class="c-border">
+      <div class="c-grid"></div>
+      <div class="c-label" id="cLabel">MECHANICS SIM</div>
+      <div class="c-center">
+
+        <!-- Mechanics SVG -->
+        <svg class="scene-svg active" id="sv-mechanics" width="480" height="360" viewBox="0 0 480 360">
+          <defs>
+            <marker id="aR" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#f87171"/></marker>
+            <marker id="aC" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#22d3ee"/></marker>
+            <marker id="aG" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#34d399"/></marker>
+            <filter id="gl"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <line x1="20" y1="290" x2="460" y2="290" stroke="rgba(148,163,184,.2)" stroke-width="2"/>
+          <polygon points="60,290 360,290 360,130" fill="rgba(6,182,212,.04)"/>
+          <line x1="60" y1="290" x2="360" y2="130" stroke="rgba(6,182,212,.35)" stroke-width="2.5"/>
+          <line x1="360" y1="130" x2="360" y2="290" stroke="rgba(148,163,184,.15)" stroke-width="1.5"/>
+          <path d="M 118,290 A 58,58 0 0,0 97,264" fill="none" stroke="rgba(148,163,184,.3)" stroke-width="1.5"/>
+          <text x="126" y="278" font-size="12" fill="rgba(148,163,184,.5)" font-family="JetBrains Mono">30°</text>
+          <g transform="translate(240,192) rotate(-28)">
+            <rect x="-28" y="-42" width="56" height="42" fill="rgba(6,182,212,.2)" stroke="rgba(6,182,212,.45)" stroke-width="1.5" rx="5" filter="drop-shadow(0 0 10px rgba(6,182,212,.15))"/>
+            <text x="0" y="-15" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700" font-family="Inter">2 kg</text>
+          </g>
+          <g filter="url(#gl)">
+            <line x1="240" y1="192" x2="240" y2="292" stroke="#f87171" stroke-width="2.5" marker-end="url(#aR)"/>
+            <line x1="240" y1="192" x2="204" y2="118" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#aC)"/>
+            <line x1="240" y1="192" x2="294" y2="164" stroke="#34d399" stroke-width="2.5" marker-end="url(#aG)"/>
+          </g>
+          <rect x="248" y="238" width="86" height="18" fill="rgba(248,113,113,.08)" rx="4" stroke="rgba(248,113,113,.12)"/><text x="254" y="251" font-size="10" font-weight="600" fill="#f87171" font-family="JetBrains Mono">mg=19.6N</text>
+          <rect x="162" y="100" width="76" height="18" fill="rgba(34,211,238,.08)" rx="4" stroke="rgba(34,211,238,.12)"/><text x="168" y="113" font-size="10" font-weight="600" fill="#22d3ee" font-family="JetBrains Mono">N=17.0N</text>
+          <rect x="298" y="148" width="64" height="18" fill="rgba(52,211,153,.08)" rx="4" stroke="rgba(52,211,153,.12)"/><text x="304" y="161" font-size="10" font-weight="600" fill="#34d399" font-family="JetBrains Mono">f=5.1N</text>
+        </svg>
+
+        <!-- Celestial SVG -->
+        <svg class="scene-svg" id="sv-celestial" width="500" height="380" viewBox="0 0 500 380">
+          <defs>
+            <filter id="sGl"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="pGl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <radialGradient id="sG"><stop offset="0%" stop-color="#fef9c3"/><stop offset="40%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></radialGradient>
+            <radialGradient id="eG" cx="35%" cy="35%"><stop offset="0%" stop-color="#93c5fd"/><stop offset="60%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1e3a8a"/></radialGradient>
+            <marker id="fA" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f87171"/></marker>
+            <marker id="vA" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4ade80"/></marker>
+          </defs>
+          <ellipse cx="250" cy="190" rx="180" ry="140" fill="none" stroke="rgba(148,163,184,.12)" stroke-width="1" stroke-dasharray="5 3"/>
+          <circle cx="250" cy="190" r="30" fill="url(#sG)" filter="url(#sGl)"/>
+          <text x="250" y="238" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.35)" font-family="JetBrains Mono">SUN</text>
+          <circle cx="430" cy="190" r="14" fill="url(#eG)" filter="url(#pGl)" stroke="rgba(147,197,253,.3)" stroke-width="1"/>
+          <text x="430" y="216" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.4)" font-family="JetBrains Mono">EARTH</text>
+          <line x1="414" y1="190" x2="292" y2="190" stroke="#f87171" stroke-width="2" marker-end="url(#fA)" opacity=".8"/>
+          <line x1="430" y1="174" x2="430" y2="108" stroke="#4ade80" stroke-width="2" marker-end="url(#vA)" opacity=".8"/>
+          <path d="M 250,190 L 430,190 A 180,140 0 0,0 394,82 Z" fill="rgba(250,204,21,.04)" stroke="rgba(250,204,21,.15)" stroke-width="1"/>
+        </svg>
+
+        <!-- Circuit SVG -->
+        <svg class="scene-svg" id="sv-circuit" width="480" height="360" viewBox="0 0 480 360">
+          <defs><marker id="iA" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#fbbf24"/></marker></defs>
+          <rect x="100" y="60" width="280" height="220" rx="10" fill="none" stroke="rgba(148,163,184,.3)" stroke-width="2.5"/>
+          <!-- Battery -->
+          <rect x="88" y="140" width="24" height="52" fill="#080d1a"/>
+          <line x1="100" y1="148" x2="100" y2="140" stroke="rgba(148,163,184,.5)" stroke-width="3.5"/>
+          <line x1="92" y1="140" x2="108" y2="140" stroke="rgba(148,163,184,.5)" stroke-width="2.5"/>
+          <line x1="95" y1="133" x2="105" y2="133" stroke="rgba(148,163,184,.5)" stroke-width="1.5"/>
+          <line x1="100" y1="200" x2="100" y2="192" stroke="rgba(148,163,184,.5)" stroke-width="3.5"/>
+          <line x1="92" y1="200" x2="108" y2="200" stroke="rgba(148,163,184,.5)" stroke-width="2.5"/>
+          <text x="70" y="173" font-size="12" font-weight="700" fill="#22d3ee" text-anchor="middle" font-family="JetBrains Mono">12V</text>
+          <!-- R1 -->
+          <rect x="210" y="50" width="60" height="22" fill="rgba(251,191,36,.08)" stroke="rgba(251,191,36,.35)" stroke-width="1.5" rx="4"/>
+          <text x="240" y="66" text-anchor="middle" font-size="10" font-weight="700" fill="#fbbf24" font-family="JetBrains Mono">R₁ 4Ω</text>
+          <!-- R2 -->
+          <rect x="210" y="268" width="60" height="22" fill="rgba(34,211,238,.08)" stroke="rgba(34,211,238,.35)" stroke-width="1.5" rx="4"/>
+          <text x="240" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#22d3ee" font-family="JetBrains Mono">R₂ 8Ω</text>
+          <!-- Current -->
+          <g opacity=".7">
+            <line x1="170" y1="60" x2="198" y2="60" stroke="#fbbf24" stroke-width="2" marker-end="url(#iA)"/>
+            <line x1="380" y1="110" x2="380" y2="140" stroke="#fbbf24" stroke-width="2" marker-end="url(#iA)"/>
+            <line x1="310" y1="280" x2="280" y2="280" stroke="#fbbf24" stroke-width="2" marker-end="url(#iA)"/>
+            <line x1="100" y1="240" x2="100" y2="212" stroke="#fbbf24" stroke-width="2" marker-end="url(#iA)"/>
+          </g>
+          <rect x="384" y="148" width="72" height="38" fill="rgba(251,191,36,.06)" rx="6" stroke="rgba(251,191,36,.12)"/>
+          <text x="394" y="164" font-size="10" font-weight="700" fill="#fbbf24" font-family="JetBrains Mono">I = 1.0A</text>
+          <text x="394" y="180" font-size="9" fill="rgba(251,191,36,.6)" font-family="JetBrains Mono">P = 12W</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="rpanel">
+    <div class="rp-title" id="rpTitle">MECHANICS PARAMS</div>
+
+    <div class="params-group active" id="pg-mechanics">
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">物体质量</span><span class="rp-val">2.0 kg</span></div><input type="range" class="ds" min="1" max="100" value="20"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">斜面角度</span><span class="rp-val">30°</span></div><input type="range" class="ds" min="5" max="85" value="30"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">摩擦系数</span><span class="rp-val">0.30</span></div><input type="range" class="ds" min="0" max="100" value="30"></div>
+      <div class="rp-tgl"><span class="rp-label">显示分力</span><button class="dtgl on" onclick="this.classList.toggle('on')"><div class="k"></div></button></div>
+    </div>
+    <div class="params-group" id="pg-celestial">
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">恒星质量</span><span class="rp-val">1.0 M☉</span></div><input type="range" class="ds" min="1" max="100" value="50"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">轨道半径</span><span class="rp-val">1.0 AU</span></div><input type="range" class="ds" min="1" max="100" value="50"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">初始速度</span><span class="rp-val">29.8 km/s</span></div><input type="range" class="ds" min="1" max="100" value="60"></div>
+      <div class="rp-tgl"><span class="rp-label">显示面积</span><button class="dtgl on" onclick="this.classList.toggle('on')"><div class="k"></div></button></div>
+    </div>
+    <div class="params-group" id="pg-circuit">
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">电源电压</span><span class="rp-val">12 V</span></div><input type="range" class="ds" min="1" max="100" value="48"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">电阻 R₁</span><span class="rp-val">4 Ω</span></div><input type="range" class="ds" min="1" max="100" value="16"></div>
+      <div class="rp-item"><div class="rp-row"><span class="rp-label">电阻 R₂</span><span class="rp-val">8 Ω</span></div><input type="range" class="ds" min="1" max="100" value="32"></div>
+      <div class="rp-tgl"><span class="rp-label">显示电流</span><button class="dtgl on" onclick="this.classList.toggle('on')"><div class="k"></div></button></div>
+    </div>
+
+    <div class="rp-div"></div>
+    <div class="rp-adv" onclick="document.getElementById('advB').classList.toggle('open');this.querySelector('span').textContent=document.getElementById('advB').classList.contains('open')?'▾ 收起':'▸ 高级设置'"><span>&#9656; 高级设置</span></div>
+    <div class="rp-adv-body" id="advB">
+      <div class="rp-item" style="margin-top:8px;"><div class="rp-row"><span class="rp-label">g 加速度</span><span class="rp-val">9.8 m/s²</span></div><input type="range" class="ds" min="1" max="200" value="98"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM DASHBOARD -->
+  <div class="dashboard">
+    <div class="metrics-group active" id="mt-mechanics">
+      <div class="metric"><span class="m-label">NORMAL N</span><div class="m-row"><span class="m-val">17.0</span><span class="m-unit">N</span></div><span class="m-sub">支持力 · 垂直斜面</span></div>
+      <div class="metric"><span class="m-label">FRICTION f</span><div class="m-row"><span class="m-val">5.1</span><span class="m-unit">N</span></div><span class="m-sub">摩擦力 · 沿斜面向上</span></div>
+      <div class="metric"><span class="m-label">NET FORCE</span><div class="m-row"><span class="m-val">4.7</span><span class="m-unit">N</span></div><span class="m-sub">合力 · 沿斜面向下</span></div>
+      <div class="metric"><span class="m-label">ACCEL a</span><div class="m-row"><span class="m-val">2.35</span><span class="m-unit">m/s²</span></div><span class="m-sub">加速度 · 沿斜面向下</span></div>
+    </div>
+    <div class="metrics-group" id="mt-celestial">
+      <div class="metric"><span class="m-label">GRAVITY F</span><div class="m-row"><span class="m-val">3.54</span><span class="m-unit">×10²²N</span></div><span class="m-sub">万有引力</span></div>
+      <div class="metric"><span class="m-label">VELOCITY v</span><div class="m-row"><span class="m-val">29.8</span><span class="m-unit">km/s</span></div><span class="m-sub">轨道线速度</span></div>
+      <div class="metric"><span class="m-label">PERIOD T</span><div class="m-row"><span class="m-val">365.25</span><span class="m-unit">天</span></div><span class="m-sub">公转周期</span></div>
+      <div class="metric"><span class="m-label">ECCEN e</span><div class="m-row"><span class="m-val">0.017</span><span class="m-unit"></span></div><span class="m-sub">轨道离心率</span></div>
+    </div>
+    <div class="metrics-group" id="mt-circuit">
+      <div class="metric"><span class="m-label">CURRENT I</span><div class="m-row"><span class="m-val">1.00</span><span class="m-unit">A</span></div><span class="m-sub">总电流</span></div>
+      <div class="metric"><span class="m-label">U(R₁)</span><div class="m-row"><span class="m-val">4.0</span><span class="m-unit">V</span></div><span class="m-sub">R₁两端电压</span></div>
+      <div class="metric"><span class="m-label">U(R₂)</span><div class="m-row"><span class="m-val">8.0</span><span class="m-unit">V</span></div><span class="m-sub">R₂两端电压</span></div>
+      <div class="metric"><span class="m-label">POWER P</span><div class="m-row"><span class="m-val">12.0</span><span class="m-unit">W</span></div><span class="m-sub">总功率</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const scenes=['mechanics','celestial','circuit'];
+const cfg={
+  mechanics:{title:'斜面受力分析',sub:'力学 · 经典力学',label:'MECHANICS SIM',rpTitle:'MECHANICS PARAMS'},
+  celestial:{title:'行星轨道运动',sub:'天体 · 万有引力',label:'CELESTIAL SIM',rpTitle:'CELESTIAL PARAMS'},
+  circuit:{title:'串联电路分析',sub:'电路 · 欧姆定律',label:'CIRCUIT SIM',rpTitle:'CIRCUIT PARAMS'},
+};
+function switchScene(id){
+  const c=cfg[id];
+  document.getElementById('tTitle').textContent=c.title;
+  document.getElementById('tSub').textContent=c.sub;
+  document.getElementById('cLabel').textContent=c.label;
+  document.getElementById('rpTitle').textContent=c.rpTitle;
+  scenes.forEach(s=>{
+    document.getElementById('sv-'+s).classList.toggle('active',s===id);
+    document.getElementById('pg-'+s).classList.toggle('active',s===id);
+    document.getElementById('mt-'+s).classList.toggle('active',s===id);
+  });
+  document.querySelectorAll('.s-thumb').forEach((t,i)=>t.classList.toggle('active',scenes[i]===id));
+}
+</script>
+</body>
+</html>

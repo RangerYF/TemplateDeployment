@@ -132,6 +132,25 @@ function fmtCoeff(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(2);
 }
 
+function lineToTwoPointDraft(line: LineEntity): { x1: string; y1: string; x2: string; y2: string } {
+  if (line.params.vertical) {
+    const x = fmtCoeff(line.params.x);
+    return { x1: x, y1: '0', x2: x, y2: '1' };
+  }
+
+  const x1 = 0;
+  const y1 = line.params.b;
+  const x2 = 1;
+  const y2 = line.params.k + line.params.b;
+
+  return {
+    x1: fmtCoeff(x1),
+    y1: fmtCoeff(y1),
+    x2: fmtCoeff(x2),
+    y2: fmtCoeff(y2),
+  };
+}
+
 // ─── Store helpers ─────────────────────────────────────────────────────────────
 
 function getActiveLine(): LineEntity | null {
@@ -218,6 +237,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
   const focalConstraint    = useEntityStore((s) => s.focalConstraint);
   const setFocalConstraint = useEntityStore((s) => s.setFocalConstraint);
   const setActiveTool      = useEntityStore((s) => s.setActiveTool);
+  const activeTool         = useEntityStore((s) => s.activeTool);
 
   const visible = conics.filter((c) => c.visible);
   if (visible.length === 0) return null;
@@ -239,7 +259,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
     } else {
       patch = { b: fy - prev.params.k * fx };
     }
-    const after = updateLineParams(prev, patch);
+    const after = clearLineEquation(updateLineParams(prev, patch));
     useEntityStore.getState().updateEntity(prev.id, after);
     commitUpdate(prev, after);
   };
@@ -259,8 +279,8 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
         const fociList: { label: string; x: number; y: number }[] = [];
         if (conic.type === 'ellipse' || conic.type === 'hyperbola') {
           fociList.push(
-            { label: 'F₁', x: conic.derived.foci[0][0], y: conic.derived.foci[0][1] },
-            { label: 'F₂', x: conic.derived.foci[1][0], y: conic.derived.foci[1][1] },
+            { label: 'F1', x: conic.derived.foci[0][0], y: conic.derived.foci[0][1] },
+            { label: 'F2', x: conic.derived.foci[1][0], y: conic.derived.foci[1][1] },
           );
         } else if (conic.type === 'parabola') {
           fociList.push({ label: 'F', x: conic.derived.focus[0], y: conic.derived.focus[1] });
@@ -308,7 +328,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                   {infoRow(
                     '|AB|',
                     radStr
-                      ? <>{radStr}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> \u2248 {fmt4(result.chordLength)}</span></>
+                      ? <>{radStr}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> ≈ {fmt4(result.chordLength)}</span></>
                       : fmt4(result.chordLength),
                     color,
                   )}
@@ -320,7 +340,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                       border: '1px solid rgba(251,191,36,0.30)',
                     }}>
                       <span style={{ fontSize: '10px', color: '#92400E', fontWeight: 600 }}>
-                        通径 {conic.type === 'parabola' ? '2p' : '2b\u00B2/a'}
+                        通径 {conic.type === 'parabola' ? '2p' : '2b²/a'}
                       </span>
                       <span style={{ fontSize: '11px', fontFamily: 'monospace', color: '#92400E', fontWeight: 700 }}>
                         {lrLen.toFixed(4)}
@@ -346,14 +366,14 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                   {infoRow(
                     `|A${fL}|`,
                     radA
-                      ? <>{radA}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> \u2248 {fmt4(dAF)}</span></>
+                      ? <>{radA}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> ≈ {fmt4(dAF)}</span></>
                       : fmt4(dAF),
                     '#D97706',
                   )}
                   {infoRow(
                     `|B${fL}|`,
                     radB
-                      ? <>{radB}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> \u2248 {fmt4(dBF)}</span></>
+                      ? <>{radB}<span style={{ color: COLORS.neutral, fontWeight: 400 }}> ≈ {fmt4(dBF)}</span></>
                       : fmt4(dBF),
                     '#D97706',
                   )}
@@ -364,7 +384,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
             {/* Focal triangle area */}
             {result.focalTriangleArea !== null && (
               infoRow(
-                `\u25b3${result.focalLabel === 'F\u2081' ? 'F\u2082' : 'F\u2081'}AB \u9762\u79ef`,
+                `${result.focalLabel === 'F1' ? 'F2' : 'F1'}AB 三角形面积`,
                 fmt4(result.focalTriangleArea),
                 '#FBBF24',
               )
@@ -385,30 +405,30 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                 } : {}),
               }}>
                 {result.isLatusRectum
-                  ? `\u2728 \u901a\u5f84 (Latus Rectum) \u2014 \u8fc7\u7126\u70b9 ${result.focalLabel}\uff0c\u22a5 \u4e3b\u8f74`
-                  : `\u5f26\u8fc7\u7126\u70b9 ${result.focalLabel}`}
+                  ? `通径 (Latus Rectum) - 过焦点 ${result.focalLabel}, 垂直主轴`
+                  : `弦过焦点 ${result.focalLabel}`}
               </div>
             )}
 
             {/* Circle d vs R analysis */}
             {conic.type === 'circle' && result.centerLineDist !== null && (
               <div style={{ marginTop: '6px', padding: '5px 7px', background: COLORS.surfaceHover, borderRadius: '5px', border: `1px solid ${COLORS.border}` }}>
-                {infoRow('d  (\u5706\u5fc3\u5230\u76f4\u7ebf)', result.centerLineDist.toFixed(4))}
-                {infoRow('R  (\u5706\u534a\u5f84)',     conic.params.r.toFixed(4))}
-                {infoRow(`d \u2212 R`,
+                {infoRow('d  (圆心到直线)', result.centerLineDist.toFixed(4))}
+                {infoRow('R  (圆半径)',     conic.params.r.toFixed(4))}
+                {infoRow('d - R',
                   (result.centerLineDist - conic.params.r).toFixed(4),
-                  result.lineCircleRelation === '\u76f8\u79bb' ? COLORS.error
-                    : result.lineCircleRelation === '\u76f8\u5207' ? COLORS.warning
+                  result.lineCircleRelation === '相离' ? COLORS.error
+                    : result.lineCircleRelation === '相切' ? COLORS.warning
                     : COLORS.primary,
                 )}
               </div>
             )}
 
             {/* Focus snap buttons + focal-constraint drag */}
-            {fociList.length > 0 && (
+            {fociList.length > 0 && activeTool === 'line-drag' && (
               <div style={{ marginTop: '8px' }}>
                 <p style={{ fontSize: '10px', color: COLORS.neutral, marginBottom: '4px' }}>
-                  \u8fc7\u7126\u70b9\u5438\u9644
+                  过焦点吸附
                 </p>
                 <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                   {fociList.map((f) => {
@@ -419,7 +439,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                       <div key={f.label} style={{ display: 'flex', gap: '2px' }}>
                         <button
                           onClick={() => snapToFocus(f.x, f.y)}
-                          title={`\u76f4\u7ebf\u8fc7 ${f.label}(${f.x.toFixed(2)}, ${f.y.toFixed(2)})`}
+                          title={`直线过 ${f.label}(${f.x.toFixed(2)}, ${f.y.toFixed(2)})`}
                           style={{
                             padding: '3px 8px', fontSize: '10px', fontWeight: 600,
                             borderRadius: '4px 0 0 4px', cursor: 'pointer',
@@ -428,7 +448,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                             color: COLORS.focusPoint,
                           }}
                         >
-                          \u8fc7{f.label}({f.x.toFixed(1)}, {f.y.toFixed(1)})
+                          过{f.label}({f.x.toFixed(1)}, {f.y.toFixed(1)})
                         </button>
                         <button
                           onClick={() => {
@@ -441,7 +461,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                               setActiveTool('line-drag');
                             }
                           }}
-                          title={isPinned ? `\u53d6\u6d88\u7ed5 ${f.label} \u65cb\u8f6c` : `\u7ed5 ${f.label} \u65cb\u8f6c\u62d6\u62fd`}
+                          title={isPinned ? `取消绕 ${f.label} 旋转` : `绕 ${f.label} 旋转拖拽`}
                           style={{
                             padding: '3px 5px', fontSize: '10px',
                             borderRadius: '0 4px 4px 0', cursor: 'pointer',
@@ -460,7 +480,7 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
                 </div>
                 {focalConstraint && (
                   <p style={{ fontSize: '10px', color: '#B45309', marginTop: '4px', fontStyle: 'italic' }}>
-                    \u2699 \u7ed5\u7126\u70b9\u65cb\u8f6c\u6a21\u5f0f\u2014\u62d6\u62fd\u76f4\u7ebf\u5c06\u56f4\u7ed5\u7126\u70b9\u65cb\u8f6c
+                    绕焦点旋转模式：拖拽直线将围绕焦点旋转
                   </p>
                 )}
               </div>
@@ -476,19 +496,29 @@ function IntersectionSection({ line, conics }: { line: LineEntity; conics: Conic
 // ─── TwoPointSection ──────────────────────────────────────────────────────────
 
 function TwoPointSection({ line }: { line: LineEntity }) {
+  const initialDraft = lineToTwoPointDraft(line);
   const [open, setOpen]   = useState(false);
-  const [x1, setX1]       = useState('0');
-  const [y1, setY1]       = useState('0');
-  const [x2, setX2]       = useState('1');
-  const [y2, setY2]       = useState('1');
+  const [x1, setX1]       = useState(initialDraft.x1);
+  const [y1, setY1]       = useState(initialDraft.y1);
+  const [x2, setX2]       = useState(initialDraft.x2);
+  const [y2, setY2]       = useState(initialDraft.y2);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const draft = lineToTwoPointDraft(line);
+    setX1(draft.x1);
+    setY1(draft.y1);
+    setX2(draft.x2);
+    setY2(draft.y2);
+    setError('');
+  }, [line.id, line.params.vertical, line.params.x, line.params.k, line.params.b]);
 
   const apply = () => {
     const nx1 = parseFloat(x1), ny1 = parseFloat(y1);
     const nx2 = parseFloat(x2), ny2 = parseFloat(y2);
-    if ([nx1, ny1, nx2, ny2].some(isNaN)) { setError('\u8bf7\u8f93\u5165\u6709\u6548\u6570\u5b57'); return; }
+    if ([nx1, ny1, nx2, ny2].some(isNaN)) { setError('请输入有效数字'); return; }
     if (Math.abs(nx1 - nx2) < 1e-10 && Math.abs(ny1 - ny2) < 1e-10) {
-      setError('\u4e24\u70b9\u4e0d\u80fd\u91cd\u5408'); return;
+      setError('两点不能重合'); return;
     }
     setError('');
     const prev = getActiveLine(); if (!prev) return;
@@ -513,7 +543,17 @@ function TwoPointSection({ line }: { line: LineEntity }) {
   return (
     <div style={{ padding: '0 12px', marginBottom: '10px' }}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) {
+            const draft = lineToTwoPointDraft(line);
+            setX1(draft.x1);
+            setY1(draft.y1);
+            setX2(draft.x2);
+            setY2(draft.y2);
+            setError('');
+          }
+          setOpen((v) => !v);
+        }}
         style={{
           width: '100%', padding: '5px 8px', fontSize: '11px', fontWeight: 600,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -522,18 +562,18 @@ function TwoPointSection({ line }: { line: LineEntity }) {
         }}
         {...btnHover(COLORS.surfaceLight, COLORS.surfaceHover)}
       >
-        <span>\u53cc\u70b9\u5b9a\u7ebf</span>
-        <span style={{ fontSize: '10px', opacity: 0.6 }}>{open ? '\u25b2' : '\u25bc'}</span>
+        <span>双点定线</span>
+        <span style={{ fontSize: '10px', opacity: 0.6 }}>{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
         <div style={{ marginTop: '8px', padding: '8px', background: COLORS.surfaceHover, borderRadius: '5px', border: `1px solid ${COLORS.border}` }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '6px' }}>
             {([
-              { label: 'x\u2081', val: x1, set: setX1 },
-              { label: 'y\u2081', val: y1, set: setY1 },
-              { label: 'x\u2082', val: x2, set: setX2 },
-              { label: 'y\u2082', val: y2, set: setY2 },
+              { label: 'x₁', val: x1, set: setX1 },
+              { label: 'y₁', val: y1, set: setY1 },
+              { label: 'x₂', val: x2, set: setX2 },
+              { label: 'y₂', val: y2, set: setY2 },
             ] as const).map(({ label, val, set }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ fontSize: '11px', color: COLORS.textSecondary, width: '16px' }}>{label}</span>
@@ -555,12 +595,12 @@ function TwoPointSection({ line }: { line: LineEntity }) {
             }}
             {...btnHover(COLORS.primaryHover, COLORS.primary)}
           >
-            \u5e94\u7528
+            应用
           </button>
           <p style={{ fontSize: '10px', color: COLORS.neutral, marginTop: '5px', textAlign: 'center' }}>
             {line.params.vertical
-              ? `\u5f53\u524d: x = ${line.params.x.toFixed(2)}`
-              : `\u5f53\u524d: y = ${line.params.k.toFixed(2)}x ${line.params.b >= 0 ? '+' : '\u2212'} ${Math.abs(line.params.b).toFixed(2)}`}
+              ? `当前: x = ${line.params.x.toFixed(2)}`
+              : `当前: y = ${line.params.k.toFixed(2)}x ${line.params.b >= 0 ? '+' : '-'} ${Math.abs(line.params.b).toFixed(2)}`}
           </p>
         </div>
       )}
@@ -793,6 +833,9 @@ export function LineParamPanel() {
   const isParametric   = !!(line.namedParams && line.namedParams.length > 0 && line.equationStr);
   const isDragMode     = activeTool === 'line-drag';
   const isTwoPointMode = activeTool === 'line-two-point';
+  const hasFocusableConics = conics.some((conic) =>
+    conic.visible && (conic.type === 'ellipse' || conic.type === 'hyperbola' || conic.type === 'parabola'),
+  );
 
   const toggleVertical = () => {
     const prev = getActiveLine(); if (!prev) return;
@@ -846,6 +889,22 @@ export function LineParamPanel() {
           </div>
         </div>
 
+        {hasFocusableConics && (
+          <div style={{
+            marginBottom: '8px',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            background: isDragMode ? `${COLORS.focusPoint}11` : COLORS.surfaceHover,
+            border: `1px solid ${isDragMode ? `${COLORS.focusPoint}55` : COLORS.border}`,
+            fontSize: '10px',
+            color: isDragMode ? COLORS.focusPoint : COLORS.textSecondary,
+          }}>
+            {isDragMode
+              ? '下方“交点分析”里会显示过焦点吸附按钮，可让直线经过 F / F1 / F2。'
+              : '如需使用过焦点吸附，请先打开上方“拖动”模式。'}
+          </div>
+        )}
+
         {/* Two-point mode instruction strip */}
         {isTwoPointMode && (
           <div style={{
@@ -853,7 +912,7 @@ export function LineParamPanel() {
             background: COLORS.infoBlueBg, border: `1px solid ${COLORS.infoBlueBorder}`,
             borderRadius: '5px', fontSize: '11px', color: COLORS.infoBlueDark,
           }}>
-            在画布上依次点击两点 — 第一点标记 P₁，第二点完成定线。
+            在画布上依次点击两点 - 第一点标记 P1，第二点完成定线。
             按 <kbd style={{ padding: '0 3px', background: '#DBEAFE', borderRadius: '3px', border: '1px solid #93C5FD' }}>Esc</kbd> 取消。
           </div>
         )}
@@ -861,7 +920,7 @@ export function LineParamPanel() {
         {/* ── Equation text input ───────────────────────────────────────── */}
         <div style={{ marginBottom: '10px' }}>
           <p style={{ fontSize: '10px', color: COLORS.textSecondary, marginBottom: '3px' }}>
-            \u76f4\u63a5\u8f93\u5165\u65b9\u7a0b\uff0c\u56de\u8f66\u786e\u8ba4
+            直接输入方程，回车确认
           </p>
           <input
             ref={eqInputRef}
@@ -935,7 +994,7 @@ export function LineParamPanel() {
               <p style={{ fontSize: '10px', color: COLORS.textSecondary, margin: '4px 0 0' }}>
                 {vertical
                   ? `x = ${fmtCoeff(x)}`
-                  : `k = ${fmtCoeff(k)}\u2002b = ${fmtCoeff(b)}`}
+                  : `k = ${fmtCoeff(k)}  b = ${fmtCoeff(b)}`}
               </p>
             </div>
 
@@ -946,7 +1005,7 @@ export function LineParamPanel() {
           <>
             {/* ── Vertical toggle ───────────────────────────────────────── */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <span style={{ fontSize: '12px', color: COLORS.textSecondary }}>\u8d44\u7ebf (x = c)</span>
+              <span style={{ fontSize: '12px', color: COLORS.textSecondary }}>竖线 (x = c)</span>
               <button
                 onClick={toggleVertical}
                 style={{
@@ -957,13 +1016,13 @@ export function LineParamPanel() {
                 }}
                 {...(!vertical ? btnHover(COLORS.surfaceHover) : {})}
               >
-                {vertical ? '\u5f00' : '\u5173'}
+                {vertical ? '开' : '关'}
               </button>
             </div>
 
             {/* ── Parameter sliders ─────────────────────────────────────── */}
             {vertical ? (
-              <SliderRow label="x\u2080" value={x} min={-10} max={10}
+              <SliderRow label="x₀" value={x} min={-10} max={10}
                 onChange={(v) => xSlider.handleChange(v)}
                 onCommit={(v) => xSlider.handleCommit(v)} />
             ) : (

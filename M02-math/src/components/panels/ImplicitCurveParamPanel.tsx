@@ -20,6 +20,8 @@ import { COLORS } from '@/styles/colors';
 import { pillHover, focusRing } from '@/styles/interactionStyles';
 import type { ImplicitCurveEntity, FunctionParam } from '@/types';
 
+type TeachingCurveKind = 'distance-ratio' | 'distance-product' | null;
+
 const QUICK_SYMBOLS: { label: string; insert: string; cursorBack?: number }[] = [
   { label: 'x\u00B2', insert: 'x^2' },
   { label: 'y\u00B2', insert: 'y^2' },
@@ -38,6 +40,91 @@ function getActiveImplicit(): ImplicitCurveEntity | null {
 
 function commitUpdate(before: ImplicitCurveEntity, after: ImplicitCurveEntity): void {
   executeM03Command(new UpdateImplicitCurveCommand(after.id, before, after));
+}
+
+function detectTeachingCurve(exprStr: string): TeachingCurveKind {
+  if (exprStr.includes('sqrt((x-x1)^2+(y-y1)^2)-k*sqrt((x-x2)^2+(y-y2)^2)')) {
+    return 'distance-ratio';
+  }
+  if (exprStr.includes('sqrt((x-x1)^2+(y-y1)^2)*sqrt((x-x2)^2+(y-y2)^2)-m')) {
+    return 'distance-product';
+  }
+  return null;
+}
+
+function labelParam(param: FunctionParam, kind: TeachingCurveKind): string {
+  if (kind === 'distance-ratio') {
+    if (param.name === 'x1') return 'F1 x';
+    if (param.name === 'y1') return 'F1 y';
+    if (param.name === 'x2') return 'F2 x';
+    if (param.name === 'y2') return 'F2 y';
+    if (param.name === 'k') return 'k';
+  }
+  if (kind === 'distance-product') {
+    if (param.name === 'x1') return 'F1 x';
+    if (param.name === 'y1') return 'F1 y';
+    if (param.name === 'x2') return 'F2 x';
+    if (param.name === 'y2') return 'F2 y';
+    if (param.name === 'm') return 'm';
+  }
+  return param.label;
+}
+
+function describeTeachingCurve(entity: ImplicitCurveEntity, kind: TeachingCurveKind): { title: string; body: string; accent: string } | null {
+  if (!kind) return null;
+  const params = Object.fromEntries(entity.params.namedParams.map((param) => [param.name, param.value]));
+  const x1 = Number(params.x1 ?? 0);
+  const y1 = Number(params.y1 ?? 0);
+  const x2 = Number(params.x2 ?? 0);
+  const y2 = Number(params.y2 ?? 0);
+  const focalDistance = Math.hypot(x2 - x1, y2 - y1);
+
+  if (kind === 'distance-ratio') {
+    const k = Number(params.k ?? 1);
+    const eps = 1e-3;
+    if (Math.abs(k - 1) < eps) {
+      return {
+        title: '特殊情形',
+        body: '当 k = 1 时，轨迹退化为两定点连线的中垂线。',
+        accent: COLORS.infoBlueDark,
+      };
+    }
+    if (k > 0 && k < 1) {
+      return {
+        title: '教学提示',
+        body: 'k < 1 时，轨迹更靠近 F1；在当前模板下通常表现为阿波罗尼斯圆。',
+        accent: COLORS.primary,
+      };
+    }
+    return {
+      title: '教学提示',
+      body: 'k > 1 时，轨迹更靠近 F2；当两定点不共线于坐标轴时同样成立。',
+      accent: COLORS.primary,
+    };
+  }
+
+  const m = Number(params.m ?? 0);
+  const threshold = (focalDistance * focalDistance) / 4;
+  const eps = Math.max(1e-3, threshold * 0.02);
+  if (Math.abs(m - threshold) < eps) {
+    return {
+      title: '特殊情形',
+      body: '当 m 约等于两焦点距离平方的四分之一时，会接近伯努利双纽线的分界形态。',
+      accent: COLORS.warning,
+    };
+  }
+  if (m < threshold) {
+    return {
+      title: '教学提示',
+      body: '当前更接近双叶分离的卡西尼卵形线，可观察两叶如何围绕两个定点分开。',
+      accent: COLORS.warning,
+    };
+  }
+  return {
+    title: '教学提示',
+    body: '当前更接近单叶连通的卡西尼卵形线，可观察曲线如何包围两定点形成整体。',
+    accent: COLORS.warning,
+  };
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -129,6 +216,8 @@ export function ImplicitCurveParamPanel() {
   if (!entity) return null;
 
   const hasParams = entity.params.namedParams.length > 0;
+  const teachingKind = detectTeachingCurve(entity.params.exprStr);
+  const teachingNote = describeTeachingCurve(entity, teachingKind);
 
   return (
     <div style={{ padding: '14px' }}>
@@ -150,6 +239,23 @@ export function ImplicitCurveParamPanel() {
           {formatImplicitDisplay(entity.params.exprStr)} = 0
         </p>
       </div>
+
+      {teachingNote && (
+        <div style={{
+          padding: '10px 12px',
+          marginBottom: '12px',
+          background: teachingNote.accent === COLORS.warning ? COLORS.warningLight : COLORS.infoBlueBg,
+          border: `1px solid ${teachingNote.accent === COLORS.warning ? '#FCD34D' : COLORS.infoBlueBorder}`,
+          borderRadius: '12px',
+        }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: teachingNote.accent, margin: '0 0 4px' }}>
+            {teachingNote.title}
+          </p>
+          <p style={{ fontSize: '11px', color: COLORS.textPrimary, lineHeight: 1.6, margin: 0 }}>
+            {teachingNote.body}
+          </p>
+        </div>
+      )}
 
       {/* Equation text input */}
       <div style={{ marginBottom: '14px' }}>
@@ -219,6 +325,7 @@ export function ImplicitCurveParamPanel() {
             <NamedParamSliderRow
               key={p.name}
               param={p}
+              displayLabel={labelParam(p, teachingKind)}
               onChange={(v) => handleParamChange(idx, v)}
               onCommit={(v) => handleParamCommit(idx, v)}
             />
@@ -244,9 +351,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 function NamedParamSliderRow({
-  param, onChange, onCommit,
+  param, displayLabel, onChange, onCommit,
 }: {
   param: FunctionParam;
+  displayLabel: string;
   onChange: (v: number) => void;
   onCommit: (v: number) => void;
 }) {
@@ -258,7 +366,7 @@ function NamedParamSliderRow({
 
   return (
     <UniversalSlider
-      label={param.label}
+      label={displayLabel}
       value={param.value}
       min={param.min}
       max={param.max}

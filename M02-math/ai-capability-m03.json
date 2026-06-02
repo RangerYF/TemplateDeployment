@@ -21,7 +21,9 @@
     "add-movable-point",
     "add-conic-tangent-line",
     "add-conic-normal-line",
-    "simplify-current-scene"
+    "update-implicit-curve",
+    "set-active-entity",
+    "remove-entity"
   ],
   "operations": [
     {
@@ -149,7 +151,7 @@
     },
     {
       "type": "setDisplayOptions",
-      "description": "切换显示项。payload 可包含 showGrid、showFoci、showDirectrices、showAsymptotes、showLabels、showIntersections、showVertices、showAxesOfSymmetry、showTangent、showNormal、showFocalChord。",
+      "description": "切换显示项。payload 可包含 showGrid、showFoci、showDirectrices、showAsymptotes、showLabels、showIntersections、showVertices、showAxesOfSymmetry、showTangent、showNormal、showFocalChord、teachingFormat（分式/根式格式 vs 小数格式）。",
       "payloadSchema": {
         "showGrid": {
           "type": "boolean"
@@ -428,6 +430,17 @@
       },
       "useWhen": "用户要求在圆锥曲线某点作法线。",
       "doNotUseWhen": "作切线时使用 addConicTangentLine；不要手写直线斜率。"
+    },
+    {
+      "type": "removeEntity",
+      "description": "删除已有实体（曲线、直线、隐式曲线等）。payload: { entityId?: string, label?: string, entityLabel?: string }。通过 id 或 label 定位目标。至少保留 1 个实体。",
+      "payloadSchema": {
+        "entityId": { "type": "string" },
+        "label": { "type": "string" },
+        "entityLabel": { "type": "string" }
+      },
+      "useWhen": "用户要求删除、移除某条曲线或直线，如「删掉那条直线」「去掉椭圆」。",
+      "doNotUseWhen": "用户要修改参数时使用 updateConicParams/updateLine/updateImplicitCurve；清空全部重建时先逐个 removeEntity 再 addConic/addLine。"
     }
   ],
   "payloadSchema": {
@@ -616,6 +629,54 @@
       ],
       "patch": {},
       "explanation": "已在椭圆右顶点添加切线，直线参数由 M03 自动计算。"
+    },
+    {
+      "instruction": "把椭圆的 a 改成 5，b 改成 3。",
+      "operations": [
+        { "type": "updateConicParams", "label": "椭圆", "params": { "a": 5, "b": 3 } }
+      ],
+      "patch": {},
+      "explanation": "已更新椭圆参数 a=5, b=3。"
+    },
+    {
+      "instruction": "把直线改成蓝色。",
+      "operations": [
+        { "type": "setEntityStyle", "label": "直线", "color": "#2196F3" }
+      ],
+      "patch": {},
+      "explanation": "已将直线颜色设为蓝色。"
+    },
+    {
+      "instruction": "删掉那条直线。",
+      "operations": [
+        { "type": "removeEntity", "label": "直线" }
+      ],
+      "patch": {},
+      "explanation": "已删除直线实体。"
+    },
+    {
+      "instruction": "加载焦点弦预设。",
+      "operations": [
+        { "type": "loadPresetConicScene", "presetId": "focal-chord-ellipse" }
+      ],
+      "patch": {},
+      "explanation": "已加载焦点弦预设场景。"
+    },
+    {
+      "instruction": "演示椭圆的轨迹。",
+      "operations": [
+        { "type": "setLocusDemo", "entityLabel": "椭圆", "preset": "focus-distance-sum", "enabled": true }
+      ],
+      "patch": {},
+      "explanation": "已开启椭圆焦点距离和轨迹演示。"
+    },
+    {
+      "instruction": "把坐标范围调整到 -10 到 10。",
+      "operations": [
+        { "type": "setViewport", "xMin": -10, "xMax": 10, "yMin": -10, "yMax": 10 }
+      ],
+      "patch": {},
+      "explanation": "已设置视窗范围。"
     }
   ],
   "planningRules": [

@@ -52,10 +52,15 @@ export function SpecialValuesTable() {
     cancelRef.current?.();
 
     const currentAngle = useUnitCircleStore.getState().angleRad;
+    const target = lookupAngle(angleDecimal);
+
+    // Apply target immediately so click feedback is always visible,
+    // then animate from the current angle toward the same snapped target.
+    useUnitCircleStore.getState().setAngle(target.snappedAngle, target.snapped, target.values);
 
     cancelRef.current = startAnimation({
       from:     currentAngle,
-      to:       angleDecimal,
+      to:       target.snappedAngle,
       duration: 200,
       easing:   easeOut,
       onUpdate: (rad) => {
@@ -135,6 +140,8 @@ export function SpecialValuesTable() {
                   style={{
                     background: rowBg,
                     outline: isActive ? `1px solid ${COLORS.primary}44` : 'none',
+                    boxShadow: isActive ? `inset 0 0 0 1px ${COLORS.primary}55` : 'none',
+                    transition: 'background 0.12s, box-shadow 0.12s',
                   }}
                 >
                   {/* θ cell */}

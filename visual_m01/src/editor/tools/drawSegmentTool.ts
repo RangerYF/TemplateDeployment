@@ -1,10 +1,11 @@
 import type { Tool, ToolPointerEvent } from './types';
-import type { PointProperties } from '../entities/types';
+import type { Entity, PointProperties } from '../entities/types';
 import { useEntityStore } from '../store/entityStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { useHistoryStore } from '../store/historyStore';
 import { useToolStore } from '../store/toolStore';
 import { CreateEntityCommand } from '../commands/createEntity';
+import { createDefaultHelperSegmentStyle } from '../entities/segmentStyle';
 
 /**
  * DrawSegmentTool — 画线段工具
@@ -42,13 +43,14 @@ export const drawSegmentTool: Tool = {
       if (event.hitEntityId === startPointId) return; // 不能自连
 
       // 获取两个点的 geometryId
-      const startEntity = store.getEntity(startPointId);
+      const startEntity = store.getEntity(startPointId) as Entity<'point'> | undefined;
       if (!startEntity || startEntity.type !== 'point') {
         startPointId = null;
         return;
       }
 
       const geometryId = (startEntity.properties as PointProperties).geometryId;
+      const endEntity = hitEntity as Entity<'point'>;
 
       // 构造 CreateEntityCommand 创建 Segment
       const command = new CreateEntityCommand('segment', {
@@ -56,7 +58,7 @@ export const drawSegmentTool: Tool = {
         geometryId,
         startPointId,
         endPointId: event.hitEntityId,
-        style: { color: '#ff0000', dashed: false },
+        style: createDefaultHelperSegmentStyle(startEntity, endEntity),
       });
 
       useHistoryStore.getState().execute(command);

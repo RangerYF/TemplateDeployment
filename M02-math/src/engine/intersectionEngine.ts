@@ -114,11 +114,17 @@ function intersectSlope(line: LineParams, conic: ConicEntity): [number, number][
   switch (conic.type) {
 
     case 'ellipse': {
-      const { a, b: be, cx, cy } = conic.params;
+      const { a, b: be, cx, cy, orientation = 'h' } = conic.params;
       const Bp = k * cx + b - cy;
-      const A  = 1 / (a * a) + k * k / (be * be);
-      const B  = 2 * k * Bp / (be * be);
-      const C  = Bp * Bp / (be * be) - 1;
+      const A  = orientation === 'v'
+        ? 1 / (be * be) + k * k / (a * a)
+        : 1 / (a * a) + k * k / (be * be);
+      const B  = orientation === 'v'
+        ? 2 * k * Bp / (a * a)
+        : 2 * k * Bp / (be * be);
+      const C  = orientation === 'v'
+        ? Bp * Bp / (a * a) - 1
+        : Bp * Bp / (be * be) - 1;
       for (const X of solveQuad(A, B, C)) {
         const x = cx + X;
         pts.push([x, k * x + b]);
@@ -127,11 +133,17 @@ function intersectSlope(line: LineParams, conic: ConicEntity): [number, number][
     }
 
     case 'hyperbola': {
-      const { a, b: bh, cx, cy } = conic.params;
+      const { a, b: bh, cx, cy, orientation = 'h' } = conic.params;
       const Bp = k * cx + b - cy;
-      const A  =  1 / (a * a) - k * k / (bh * bh);
-      const B  = -2 * k * Bp / (bh * bh);
-      const C  = -Bp * Bp / (bh * bh) - 1;
+      const A  = orientation === 'v'
+        ? 1 / (bh * bh) - k * k / (a * a)
+        : 1 / (a * a) - k * k / (bh * bh);
+      const B  = orientation === 'v'
+        ? -2 * k * Bp / (a * a)
+        : -2 * k * Bp / (bh * bh);
+      const C  = orientation === 'v'
+        ? -Bp * Bp / (a * a) - 1
+        : -Bp * Bp / (bh * bh) - 1;
       for (const X of solveQuad(A, B, C)) {
         const x = cx + X;
         pts.push([x, k * x + b]);
@@ -189,9 +201,11 @@ function intersectVertical(x0: number, conic: ConicEntity): [number, number][] {
   switch (conic.type) {
 
     case 'ellipse': {
-      const { a, b, cx, cy } = conic.params;
+      const { a, b, cx, cy, orientation = 'h' } = conic.params;
       const X  = x0 - cx;
-      const y2 = b * b * (1 - X * X / (a * a));
+      const y2 = orientation === 'v'
+        ? a * a * (1 - X * X / (b * b))
+        : b * b * (1 - X * X / (a * a));
       if (y2 < 0) break;
       const Y = Math.sqrt(y2);
       if (Y < 1e-10) { pts.push([x0, cy]); }
@@ -200,9 +214,11 @@ function intersectVertical(x0: number, conic: ConicEntity): [number, number][] {
     }
 
     case 'hyperbola': {
-      const { a, b, cx, cy } = conic.params;
+      const { a, b, cx, cy, orientation = 'h' } = conic.params;
       const X  = x0 - cx;
-      const y2 = b * b * (X * X / (a * a) - 1);
+      const y2 = orientation === 'v'
+        ? a * a * (X * X / (b * b) + 1)
+        : b * b * (X * X / (a * a) - 1);
       if (y2 < 0) break;
       const Y = Math.sqrt(y2);
       if (Y < 1e-10) { pts.push([x0, cy]); }
@@ -310,10 +326,10 @@ export function intersectLineConic(
       }
 
     } else {
-      // Ellipse / hyperbola — major axis is always horizontal in our model.
       const [[f1x, f1y], [f2x, f2y]] = conic.derived.foci;
       const d1 = distPointToLine(f1x, f1y, line);
       const d2 = distPointToLine(f2x, f2y, line);
+      const isVerticalAxis = conic.derived.orientation === 'v';
 
       if (d1 < FOCAL_TOL && d1 <= d2) {
         focalLabel = 'F₁';
@@ -326,7 +342,7 @@ export function intersectLineConic(
           Math.sqrt((A[0] - f1x) ** 2 + (A[1] - f1y) ** 2),
           Math.sqrt((B[0] - f1x) ** 2 + (B[1] - f1y) ** 2),
         ];
-        isLatusRectum = line.vertical;
+        isLatusRectum = isVerticalAxis ? (!line.vertical && Math.abs(line.k) < PERP_TOL) : line.vertical;
       } else if (d2 < FOCAL_TOL) {
         focalLabel = 'F₂';
         focalPoint = [f2x, f2y];
@@ -338,7 +354,7 @@ export function intersectLineConic(
           Math.sqrt((A[0] - f2x) ** 2 + (A[1] - f2y) ** 2),
           Math.sqrt((B[0] - f2x) ** 2 + (B[1] - f2y) ** 2),
         ];
-        isLatusRectum = line.vertical;
+        isLatusRectum = isVerticalAxis ? (!line.vertical && Math.abs(line.k) < PERP_TOL) : line.vertical;
       }
     }
   }

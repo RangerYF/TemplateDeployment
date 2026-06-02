@@ -55,8 +55,8 @@
       "type": "ball",
       "label": "摆球",
       "position": {
-        "x": 3.2,
-        "y": 3.9
+        "x": 1.04,
+        "y": 3.29
       },
       "angle": 0,
       "isStatic": false,
@@ -90,11 +90,12 @@
         "x": 0,
         "y": 0
       },
-      "maxLength": 6.191122676865643
+      "maxLength": 6.0
     }
   ],
   "forces": [],
   "settings": {
+    "energyConservation": true,
     "gravity": {
       "x": 0,
       "y": -10

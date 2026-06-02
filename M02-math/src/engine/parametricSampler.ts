@@ -18,11 +18,15 @@ export function sampleEllipse(
   _vp:    Viewport,
   steps = 800,
 ): ParametricPoint[] {
-  const { a, b, cx, cy } = entity.params;
+  const { a, b, cx, cy, orientation = 'h' } = entity.params;
   const pts: ParametricPoint[] = [];
   for (let i = 0; i <= steps; i++) {
     const theta = (i / steps) * 2 * Math.PI;
-    pts.push({ x: cx + a * Math.cos(theta), y: cy + b * Math.sin(theta) });
+    pts.push(
+      orientation === 'v'
+        ? { x: cx + b * Math.cos(theta), y: cy + a * Math.sin(theta) }
+        : { x: cx + a * Math.cos(theta), y: cy + b * Math.sin(theta) },
+    );
   }
   return pts;
 }
@@ -43,7 +47,29 @@ export function sampleHyperbola(
   vp:     Viewport,
   steps = 800,
 ): { right: ParametricPoint[]; left: ParametricPoint[] } {
-  const { a, b, cx, cy } = entity.params;
+  const { a, b, cx, cy, orientation = 'h' } = entity.params;
+
+  if (orientation === 'v') {
+    const xExtent = Math.max(Math.abs(vp.xMax - cx), Math.abs(vp.xMin - cx));
+    const yUpper = Math.max(0, vp.yMax - cy);
+    const yLower = Math.max(0, cy - vp.yMin);
+    const tFromX = Math.asinh(xExtent / b);
+    const tFromY = Math.acosh(Math.max(1, yUpper / a, yLower / a));
+    const tMax = Math.max(tFromX, tFromY) + 0.3;
+
+    const right: ParametricPoint[] = [];
+    const left: ParametricPoint[] = [];
+
+    for (let i = 0; i <= steps; i++) {
+      const t  = -tMax + (2 * tMax * i) / steps;
+      const ch = Math.cosh(t);
+      const sh = Math.sinh(t);
+      right.push({ x: cx + b * sh, y: cy + a * ch });
+      left.push ({ x: cx + b * sh, y: cy - a * ch });
+    }
+
+    return { right, left };
+  }
 
   // Compute the t range that covers the full visible viewport
   const yExtent    = Math.max(Math.abs(vp.yMax - cy), Math.abs(vp.yMin - cy));

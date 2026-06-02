@@ -7,6 +7,9 @@
 
 import { Circle, GitBranch, CornerUpRight } from 'lucide-react';
 import { useEntityStore } from '@/editor/store/entityStore';
+import { useM03InteractionStore } from '@/editor/store/m03InteractionStore';
+import { useLocusStore } from '@/editor/store/locusStore';
+import { useOpticalStore } from '@/editor/store/opticalStore';
 import { createEntity }   from '@/editor/entities/types';
 import { ENTITY_COLORS }  from '@/types';
 import { COLORS }          from '@/styles/colors';
@@ -59,7 +62,11 @@ const PRESETS: PresetDef[] = [
 export function PresetsPanel() {
   const replaceAllEntities = useEntityStore((s) => s.replaceAllEntities);
   const setActiveEntityId  = useEntityStore((s) => s.setActiveEntityId);
+  const setActiveTool      = useEntityStore((s) => s.setActiveTool);
   const entities           = useEntityStore((s) => s.entities);
+  const clearPins          = useM03InteractionStore((s) => s.clearAll);
+  const clearLocus         = useLocusStore((s) => s.clearTrace);
+  const resetOptical       = useOpticalStore((s) => s.reset);
 
   // Determine active preset type from first entity
   const activeType = entities.length > 0 ? entities[0].type : null;
@@ -70,8 +77,12 @@ export function PresetsPanel() {
       preset.params as never,
       { color: preset.color, label: preset.label },
     );
+    clearPins();
+    clearLocus();
+    resetOptical();
     replaceAllEntities([entity]);
     setActiveEntityId(entity.id);
+    setActiveTool('pan-zoom');
   }
 
   return (

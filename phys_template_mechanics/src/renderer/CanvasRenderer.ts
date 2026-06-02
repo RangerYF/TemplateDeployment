@@ -114,7 +114,15 @@ export class CanvasRenderer {
         simAccelerationByBodyId.set(body.id, body.initialAcceleration ?? { x: 0, y: 0 })
       }
     }
-    this.renderVelocityOverlaysInSim(ctx, bodies, viewport, simAccelerationByBodyId)
+    const circularRadiusMap = this.computeCircularRadii(bodies, simOptions?.sceneJoints ?? [])
+    this.renderVelocityOverlaysInSim(
+      ctx,
+      bodies,
+      viewport,
+      simAccelerationByBodyId,
+      circularRadiusMap,
+      simOptions?.bodyPoseOverrides,
+    )
 
     // 正式力渲染（替代 renderForceDebug）
     if (forceData && forceData.length > 0 && simOptions?.sceneBodies) {
@@ -688,20 +696,44 @@ export class CanvasRenderer {
     }
   }
 
+  private computeCircularRadii(
+    bodies: BodyState[],
+    joints: SceneJoint[],
+  ): Map<string, number> {
+    const result = new Map<string, number>()
+    const bodyPosMap = new Map(bodies.map(b => [b.id, b.position]))
+    for (const joint of joints) {
+      if (joint.type !== 'rod' && joint.type !== 'rope') continue
+      const posA = bodyPosMap.get(joint.bodyIdA)
+      const posB = bodyPosMap.get(joint.bodyIdB)
+      if (!posA || !posB) continue
+      const r = Math.hypot(posA.x - posB.x, posA.y - posB.y)
+      if (r < 0.01) continue
+      const stateA = bodies.find(b => b.id === joint.bodyIdA)
+      const stateB = bodies.find(b => b.id === joint.bodyIdB)
+      if (stateA && stateA.type === 'dynamic') result.set(joint.bodyIdA, r)
+      if (stateB && stateB.type === 'dynamic') result.set(joint.bodyIdB, r)
+    }
+    return result
+  }
+
   private renderVelocityOverlaysInSim(
     ctx: CanvasRenderingContext2D,
     bodies: BodyState[],
     viewport: Viewport,
     initialAccelerationByBodyId: Map<string, { x: number; y: number }>,
+    circularRadiusMap?: Map<string, number>,
+    bodyPoseOverrides?: Map<string, { position: { x: number; y: number }; angle: number }>,
   ): void {
     for (const body of bodies) {
       this.renderVelocityMarker(
         ctx,
-        body.position,
+        bodyPoseOverrides?.get(body.id)?.position ?? body.position,
         body.linearVelocity,
         initialAccelerationByBodyId.get(body.id) ?? { x: 0, y: 0 },
         viewport,
         this.getBodyOuterRadiusInSim(body),
+        circularRadiusMap?.get(body.id),
       )
     }
   }
@@ -713,6 +745,7 @@ export class CanvasRenderer {
     acceleration: { x: number; y: number },
     viewport: Viewport,
     bodyRadiusM: number,
+    circularRadius?: number,
   ): void {
     const vx = Number.isFinite(velocity.x) ? velocity.x : 0
     const vy = Number.isFinite(velocity.y) ? velocity.y : 0
@@ -729,10 +762,10 @@ export class CanvasRenderer {
     const uy = baseMag > 1e-8 ? baseY / baseMag : 0
     const center = worldToScreen(origin.x, origin.y, viewport)
     const bodyRadiusPx = Math.max(8, bodyRadiusM * viewport.scale)
-    const cornerOffsetPx = bodyRadiusPx / Math.SQRT2
+    const edgeOffset = bodyRadiusPx + VELOCITY_CORNER_GAP_PX
     const start = {
-      x: center.x + cornerOffsetPx + VELOCITY_CORNER_GAP_PX,
-      y: center.y - cornerOffsetPx - VELOCITY_CORNER_GAP_PX,
+      x: center.x + ux * edgeOffset,
+      y: center.y - uy * edgeOffset,
     }
     const arrowLen = Math.max(
       VELOCITY_MIN_ARROW_PX,
@@ -777,6 +810,11 @@ export class CanvasRenderer {
     if (accel >= VELOCITY_MIN_MAGNITUDE) {
       const thetaADeg = this.normalizeDeg((Math.atan2(ay, ax) * 180) / Math.PI)
       labelLines.push(`a=${accel.toFixed(2)}m/s²  θ=${thetaADeg.toFixed(0)}°`)
+    }
+    if (circularRadius && circularRadius > 0.01 && speed >= VELOCITY_MIN_MAGNITUDE) {
+      const omega = speed / circularRadius
+      const ac = speed * speed / circularRadius
+      labelLines.push(`ω=${omega.toFixed(2)}rad/s  a꜀=${ac.toFixed(1)}m/s²`)
     }
     if (labelLines.length === 0) return
 

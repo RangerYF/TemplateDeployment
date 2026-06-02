@@ -5,7 +5,7 @@
  *   getEntityEccentricity  — read e from any ConicEntity type
  *   getEntityFixedC        — read the fixed focal half-distance c
  *   applyEccentricityToEntity — create a new entity of the correct conic type
- *   startEccentricityAnimation — RAF-driven animation (wraps animationEngine)
+ *   startEccentricityAnimation — controllable RAF-driven animation
  *
  * Animation strategy:
  *   - Each frame: direct store update (no Command) for smooth preview
@@ -13,7 +13,10 @@
  *   - cancel(): stops RAF + resets isAnimating; does NOT write a Command
  */
 
-import { startAnimation, easeInOut } from '@/engine/animationEngine';
+import {
+  startMultiAnimationControlled,
+  easeInOut,
+} from '@/engine/animationEngine';
 import { eccentricityToParams }       from '@/engine/conicAnalysis';
 import { createEllipse }              from '@/editor/entities/ellipse';
 import { createHyperbola }            from '@/editor/entities/hyperbola';
@@ -23,7 +26,14 @@ import { useEntityStore }             from '@/editor/store/entityStore';
 import { useAnimationStore }          from '@/editor/store/animationStore';
 import { executeM03Command }          from '@/editor/commands/m03Execute';
 import { UpdateCurveParamCommand }    from '@/editor/commands/UpdateCurveParamCommand';
-import type { ConicEntity, BaseEntityMeta } from '@/types';
+import type {
+  AnimationControl,
+} from '@/engine/animationEngine';
+import type {
+  ConicAxisOrientation,
+  ConicEntity,
+  BaseEntityMeta,
+} from '@/types';
 import { isConicEntity } from '@/types';
 
 // ─── Read helpers ─────────────────────────────────────────────────────────────
@@ -41,52 +51,72 @@ export function getEntityEccentricity(entity: ConicEntity): number {
 /**
  * Return the fixed focal half-distance c to use for eccentricity animation.
  *
- * | type      | c formula          |
- * |-----------|--------------------|
+ * | type      | c formula            |
+ * |-----------|----------------------|
  * | ellipse   | derived.c = √(a²-b²) |
  * | hyperbola | derived.c = √(a²+b²) |
- * | parabola  | params.p / 2        |
- * | circle    | params.r (fallback; panel disables circle) |
+ * | parabola  | abs(params.p) / 2    |
+ * | circle    | params.r             |
  */
 export function getEntityFixedC(entity: ConicEntity): number {
   switch (entity.type) {
     case 'ellipse':   return entity.derived.c;
     case 'hyperbola': return entity.derived.c;
-    case 'parabola':  return entity.params.p / 2;
+    case 'parabola':  return Math.abs(entity.params.p) / 2;
     case 'circle':    return entity.params.r;
   }
+}
+
+function getOrientation(entity: ConicEntity): ConicAxisOrientation {
+  switch (entity.type) {
+    case 'ellipse':
+    case 'hyperbola':
+    case 'parabola':
+      return entity.params.orientation ?? 'h';
+    case 'circle':
+      return 'h';
+  }
+}
+
+function getParabolaSign(entity: ConicEntity): 1 | -1 {
+  return entity.type === 'parabola' && entity.params.p < 0 ? -1 : 1;
 }
 
 // ─── Apply eccentricity ───────────────────────────────────────────────────────
 
 /**
  * Create a new ConicEntity of the correct type for eccentricity `e`,
- * preserving the original `id`, `color`, `label`, and `visible` fields.
+ * preserving id, style, label, position, and axis orientation where applicable.
  *
- * The conic type switches automatically at e=1 (parabola boundary):
+ * The conic type switches automatically at e=1:
  *   e < 1 → ellipse  |  e ≈ 1 → parabola  |  e > 1 → hyperbola
  */
 export function applyEccentricityToEntity(
-  id:      string,
-  e:       number,
-  fixedC:  number,
-  cx:      number,
-  cy:      number,
-  color:   string,
-  label:   string | undefined,
-  visible: boolean,
+  sourceEntity: ConicEntity,
+  e: number,
+  fixedC: number,
 ): ConicEntity {
   const result = eccentricityToParams(e, fixedC);
+  const { id, color, label, visible } = sourceEntity;
+  const { cx, cy } = sourceEntity.params as { cx: number; cy: number };
+  const orientation = getOrientation(sourceEntity);
+  const parabolaSign = getParabolaSign(sourceEntity);
   const meta: Partial<BaseEntityMeta> = { id, color, visible };
+
   if (label !== undefined) meta.label = label;
 
   switch (result.type) {
     case 'ellipse':
-      return createEllipse({ a: result.a, b: result.b, cx, cy }, meta);
+      return createEllipse({ a: result.a, b: result.b, cx, cy, orientation }, meta);
     case 'hyperbola':
-      return createHyperbola({ a: result.a, b: result.b, cx, cy }, meta);
+      return createHyperbola({ a: result.a, b: result.b, cx, cy, orientation }, meta);
     case 'parabola':
-      return createParabola({ p: result.p!, cx, cy }, meta);
+      return createParabola({
+        p: result.p! * parabolaSign,
+        cx,
+        cy,
+        orientation,
+      }, meta);
     case 'circle':
       return createCircle({ r: result.a, cx, cy }, meta);
   }
@@ -106,62 +136,84 @@ export interface EccentricityAnimationOptions {
   onComplete?: () => void;
 }
 
+export interface EccentricityAnimationControl {
+  pause: () => void;
+  resume: () => void;
+  cancel: () => void;
+}
+
 /**
  * Start an eccentricity sweep animation.
  *
- * Returns a cancel function — call it to stop early.
+ * Returns pause/resume/cancel controls.
  * A cancel does NOT write an Undo entry; only natural completion does.
  */
 export function startEccentricityAnimation(
   options: EccentricityAnimationOptions,
-): () => void {
+): EccentricityAnimationControl {
   const { entityId, fromE, toE, fixedC, duration = 2000, onComplete } = options;
 
-  // Capture the entity state before the animation begins.
   const rawEntity = useEntityStore.getState().entities.find(
     (en) => en.id === entityId,
   );
-  if (!rawEntity || !isConicEntity(rawEntity)) return () => {};
+  if (!rawEntity || !isConicEntity(rawEntity)) {
+    return {
+      pause: () => {},
+      resume: () => {},
+      cancel: () => {},
+    };
+  }
   const initialEntity: ConicEntity = rawEntity;
-
-  const { cx, cy } = initialEntity.params as { cx: number; cy: number };
-  const { color, label, visible } = initialEntity;
 
   let finalEntity: ConicEntity = initialEntity;
   let stopped = false;
 
   useAnimationStore.getState().setIsAnimating(true);
 
-  const cancelRaf = startAnimation({
-    from:     fromE,
-    to:       toE,
+  const control: AnimationControl = startMultiAnimationControlled(
+    [
+      {
+        from: fromE,
+        to: toE,
+        onFrame: (e) => {
+          if (stopped) return;
+          const latest = useEntityStore.getState().entities.find((en) => en.id === entityId);
+          if (!latest || !isConicEntity(latest)) return;
+          const updated = applyEccentricityToEntity(latest, e, fixedC);
+          finalEntity = updated;
+          useEntityStore.getState().updateEntity(entityId, updated);
+        },
+      },
+    ],
+    easeInOut,
     duration,
-    easing:   easeInOut,
-
-    onFrame: (e) => {
-      if (stopped) return;
-      const updated = applyEccentricityToEntity(
-        entityId, e, fixedC, cx, cy, color, label, visible,
-      );
-      finalEntity = updated;
-      useEntityStore.getState().updateEntity(entityId, updated);
-    },
-
-    onComplete: () => {
+    () => {
       if (stopped) return;
       useAnimationStore.getState().setIsAnimating(false);
-      // One Undo entry for the entire animation sweep
       executeM03Command(
         new UpdateCurveParamCommand(entityId, initialEntity, finalEntity),
       );
       onComplete?.();
     },
-  });
+  );
 
-  return () => {
-    stopped = true;
-    cancelRaf();
-    useAnimationStore.getState().setIsAnimating(false);
-    onComplete?.();
+  return {
+    pause() {
+      if (stopped) return;
+      control.pause();
+      useAnimationStore.getState().setIsAnimating(false);
+    },
+    resume() {
+      if (stopped) return;
+      control.resume();
+      useAnimationStore.getState().setIsAnimating(true);
+    },
+    cancel() {
+      if (stopped) return;
+      stopped = true;
+      control.cancel();
+      useAnimationStore.getState().setIsAnimating(false);
+      onComplete?.();
+    },
   };
 }

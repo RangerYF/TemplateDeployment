@@ -23,6 +23,10 @@ interface RefractionSettings {
   sourceAnchorX: number;
   sourceY?: number;
   sourceAngleDeg?: number;
+  showSource2?: boolean;
+  source2AngleDeg?: number;
+  source2AnchorX?: number;
+  source2Y?: number;
   elementCenterX: number;
   elementCenterY?: number;
   canvasPanX?: number;
@@ -43,12 +47,14 @@ interface RefractionSettings {
   apparentObjectDepthCm: number;
   apparentWaterN: number;
   apparentRayAngleDeg: number;
+  apparentRayOpacity?: number;
   snellSourceDepthCm: number;
   snellSourceShape?: SnellSourceShape;
   snellSourceSizeCm?: number;
   snellPolygonSides?: number;
   snellWaterN: number;
   snellIncidentAngleDeg: number;
+  snellLineSampleCount?: number;
   snellViewMode: '3d' | '2d' | 'topview';
   showAngles: boolean;
   showNormals: boolean;

@@ -40,6 +40,10 @@ import { useCanvasToolStore } from '@/editor/store/canvasToolStore';
 import { COLORS } from '@/styles/colors';
 import { createId } from '@/lib/id';
 
+const LEFT_PANEL_WIDTH = 224;
+const RIGHT_PANEL_WIDTH = 268;
+const THREE_COLUMN_MIN_WIDTH = 1120;
+
 export function M02Layout() {
   const canvasRef        = useRef<FunctionCanvasHandle>(null);
   const canUndo          = useHistoryStore((s) => s.canUndo);
@@ -61,6 +65,10 @@ export function M02Layout() {
   const [leftOpen, setLeftOpen]   = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [customModalOpen, setCustomModalOpen] = useState(false);
+  const [isCompact, setIsCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < THREE_COLUMN_MIN_WIDTH;
+  });
 
   const handleUndo = () => { useHistoryStore.getState().undo(); };
   const handleRedo = () => { useHistoryStore.getState().redo(); };
@@ -112,6 +120,20 @@ export function M02Layout() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  useEffect(() => {
+    const updateCompact = () => {
+      const width = window.visualViewport?.width ?? window.innerWidth;
+      setIsCompact(width < THREE_COLUMN_MIN_WIDTH);
+    };
+    updateCompact();
+    window.addEventListener('resize', updateCompact);
+    window.visualViewport?.addEventListener('resize', updateCompact);
+    return () => {
+      window.removeEventListener('resize', updateCompact);
+      window.visualViewport?.removeEventListener('resize', updateCompact);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col h-screen bg-eduMind-bgPage">
 
@@ -148,12 +170,20 @@ export function M02Layout() {
       </header>
 
       {/* ── Main Three-Zone ─────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="relative flex flex-1 overflow-hidden">
 
         {/* ── LEFT: "Library" — Function List ────────────────────────────────── */}
         <aside
-          className="shrink-0 bg-white border-r border-eduMind-border flex flex-col overflow-hidden transition-[width] duration-200"
-          style={{ width: leftOpen ? 224 : 0 }}
+          className="bg-white border-r border-eduMind-border flex flex-col overflow-hidden transition-[width,transform] duration-200 z-20"
+          style={isCompact
+            ? {
+                position: 'absolute',
+                inset: '0 auto 0 0',
+                width: LEFT_PANEL_WIDTH,
+                transform: leftOpen ? 'translateX(0)' : 'translateX(-100%)',
+                boxShadow: leftOpen ? '0 8px 24px rgba(0,0,0,0.12)' : 'none',
+              }
+            : { width: leftOpen ? LEFT_PANEL_WIDTH : 0, flexShrink: 0 }}
         >
           {leftOpen && (
             <div className="flex flex-col h-full overflow-y-auto p-3">
@@ -169,8 +199,16 @@ export function M02Layout() {
 
         {/* ── RIGHT: "Tuner" — Parameter Panels ──────────────────────────────── */}
         <aside
-          className="shrink-0 bg-white border-l border-eduMind-border flex flex-col overflow-hidden transition-[width] duration-200"
-          style={{ width: rightOpen ? 268 : 0 }}
+          className="bg-white border-l border-eduMind-border flex flex-col overflow-hidden transition-[width,transform] duration-200 z-20"
+          style={isCompact
+            ? {
+                position: 'absolute',
+                inset: '0 0 0 auto',
+                width: RIGHT_PANEL_WIDTH,
+                transform: rightOpen ? 'translateX(0)' : 'translateX(100%)',
+                boxShadow: rightOpen ? '0 8px 24px rgba(0,0,0,0.12)' : 'none',
+              }
+            : { width: rightOpen ? RIGHT_PANEL_WIDTH : 0, flexShrink: 0 }}
         >
           {rightOpen && (
             <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden p-3">
@@ -252,9 +290,9 @@ export function M02Layout() {
                     <PiecewisePanel />
                   )}
                   <Divider />
-                  <CanvasSettingsPanel showViewport={false} />
-                  <Divider />
                   <ViewportPanel />
+                  <Divider />
+                  <CanvasSettingsPanel showViewport={false} />
                 </>
               ) : (
                 <CanvasSettingsPanel />
@@ -262,6 +300,25 @@ export function M02Layout() {
             </div>
           )}
         </aside>
+
+        {isCompact && (leftOpen || rightOpen) && (
+          <button
+            type="button"
+            aria-label="关闭侧边栏遮罩"
+            onClick={() => {
+              setLeftOpen(false);
+              setRightOpen(false);
+            }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.12)',
+              zIndex: 10,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          />
+        )}
       </div>
 
       <M02ModalLayer open={customModalOpen} onClose={() => setCustomModalOpen(false)} />

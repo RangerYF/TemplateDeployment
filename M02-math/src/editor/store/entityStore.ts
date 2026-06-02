@@ -78,7 +78,7 @@ const DEFAULT_DISPLAY_OPTIONS: DisplayOptions = {
   showDirectrices:    true,
   showAsymptotes:     true,
   showLabels:         true,
-  showIntersections:  true,
+  showIntersections:  false,
   teachingFormat:     true,
   showVertices:       true,
   showAxesOfSymmetry: false,

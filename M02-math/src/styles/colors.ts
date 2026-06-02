@@ -21,6 +21,8 @@ export const COLORS = {
   cosColor:       '#3B82F6',   // cos 投影线（蓝）
   tanColor:       '#F59E0B',   // tan 渐近线（琥珀）
   angleArc:       '#A78BFA',   // 角度弧线（紫）
+  snapAccent:     '#6D28D9',   // 特殊角吸附强调色（深紫）
+  snapAccentLight:'#EDE9FE',   // 特殊角吸附浅底
   traceHistory:   '#64748B',   // 追踪历史（灰蓝）
   auxiliaryCurve1: '#3B82F6',  // 辅助角分量1 a·sinx（蓝）
   auxiliaryCurve2: '#F59E0B',  // 辅助角分量2 b·cosx（橙）

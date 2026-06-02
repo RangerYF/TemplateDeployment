@@ -35,6 +35,7 @@ import {
   scaleArrowLength,
 } from './p13/P13StagePrimitives';
 import { P13TimeSeriesChart } from './p13/P13TimeSeriesChart';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 interface Props {
   onBack: () => void;
@@ -66,6 +67,24 @@ export function P13VerticalRailRodPage({ onBack }: Props) {
   useEffect(() => {
     simulator.unload();
   }, []);
+
+  useEffect(() => registerPageSnapshotAdapter('p13-vertical-rail-rod', {
+    getSnapshot: () => ({ params, currentTime, isPlaying, analysisStep, displayOptions }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        params: Parameters<typeof normalizeVerticalRailRodParams>[0];
+        currentTime: number;
+        isPlaying: boolean;
+        analysisStep: number;
+        displayOptions: P13DisplayOptions;
+      }>;
+      if (value.params) setParams(normalizeVerticalRailRodParams(value.params));
+      if (typeof value.currentTime === 'number') setCurrentTime(value.currentTime);
+      if (typeof value.isPlaying === 'boolean') setIsPlaying(value.isPlaying);
+      if (typeof value.analysisStep === 'number') setAnalysisStep(value.analysisStep);
+      if (value.displayOptions) setDisplayOptions(value.displayOptions);
+    },
+  }), [analysisStep, currentTime, displayOptions, isPlaying, params]);
 
   const result = useMemo(() => simulateVerticalRailRodModel(params), [params]);
   const currentState = useMemo(

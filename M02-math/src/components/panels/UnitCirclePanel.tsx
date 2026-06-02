@@ -19,7 +19,7 @@
 
 import { useUnitCircleStore }   from '@/editor/store/unitCircleStore';
 import { useM04FunctionStore }  from '@/editor/store/m04FunctionStore';
-import { approximateValues }    from '@/engine/exactValueEngine';
+import { approximateValues, lookupAngle, normalizeAngle } from '@/engine/exactValueEngine';
 import { formatPiLabel }        from '@/engine/piAxisEngine';
 import { KaTeXRenderer }        from '@/components/KaTeXRenderer';
 import { COLORS }               from '@/styles/colors';
@@ -115,6 +115,19 @@ export function UnitCirclePanel() {
     showProjections, showAngleArc, showLabels, showQuadrantHints,
   };
 
+  const handleSnapToggle = () => {
+    const next = !snapEnabled;
+    setSnapEnabled(next);
+
+    const currentAngle = useUnitCircleStore.getState().angleRad;
+    if (next) {
+      const { snapped, snappedAngle, values } = lookupAngle(currentAngle);
+      useUnitCircleStore.getState().setAngle(snappedAngle, snapped, values);
+    } else {
+      useUnitCircleStore.getState().setAngle(normalizeAngle(currentAngle), false, null);
+    }
+  };
+
 
   return (
     <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -125,52 +138,66 @@ export function UnitCirclePanel() {
           单位圆
         </span>
         <button
-          onClick={() => setSnapEnabled(!snapEnabled)}
+          onClick={handleSnapToggle}
           title="拖动时吸附到常用特殊角"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
-            padding: '3px 8px',
-            fontSize: 11,
-            fontWeight: 600,
-            background: snapEnabled ? 'rgba(50,213,131,0.12)' : COLORS.surfaceLight,
-            color:      snapEnabled ? COLORS.primary : COLORS.textSecondary,
-            border:     `1px solid ${snapEnabled ? COLORS.primary : COLORS.borderMuted}`,
+            gap: 6,
+            padding: '5px 12px',
+            fontSize: 13,
+            fontWeight: 800,
+            background: snapEnabled ? COLORS.snapAccentLight : COLORS.surfaceLight,
+            color:      snapEnabled ? COLORS.snapAccent : COLORS.textSecondary,
+            border:     `2px solid ${snapEnabled ? COLORS.snapAccent : COLORS.borderMuted}`,
             borderRadius: 9999,
             cursor: 'pointer',
-            transition: 'background 0.12s',
+            boxShadow: snapEnabled ? `0 0 0 3px rgba(109,40,217,0.14)` : 'none',
+            transition: 'background 0.12s, box-shadow 0.12s, border-color 0.12s',
           }}
           {...btnHover(
-            snapEnabled ? 'rgba(50,213,131,0.20)' : COLORS.border,
-            snapEnabled ? 'rgba(50,213,131,0.12)' : COLORS.surfaceLight,
+            snapEnabled ? '#DDD6FE' : COLORS.border,
+            snapEnabled ? COLORS.snapAccentLight : COLORS.surfaceLight,
           )}
         >
-          <span style={{ fontSize: 8 }}>{snapEnabled ? '●' : '○'}</span>
+          <span style={{ fontSize: 12, lineHeight: 1 }}>{snapEnabled ? '●' : '○'}</span>
           特殊角吸附
         </button>
       </div>
 
       {/* ── Angle display ───────────────────────────────────────────────────── */}
       <div style={{
-        padding: '8px 10px',
-        background: COLORS.surfaceAlt,
+        padding: '10px 12px',
+        background: isSnapped ? COLORS.snapAccentLight : COLORS.surfaceAlt,
         borderRadius: 10,
-        border: `1px solid ${isSnapped ? COLORS.primary : COLORS.border}`,
-        transition: 'border-color 0.15s',
+        border: `2px solid ${isSnapped ? COLORS.snapAccent : COLORS.border}`,
+        boxShadow: isSnapped ? `0 0 0 3px rgba(109,40,217,0.10)` : 'none',
+        transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s',
       }}>
-        <span style={{ fontSize: 11, color: COLORS.textSecondary, fontWeight: 600 }}>θ = </span>
+        <span style={{ fontSize: 12, color: COLORS.textSecondary, fontWeight: 700 }}>θ = </span>
         <span style={{
-          fontSize: 13,
+          fontSize: 16,
           fontFamily: 'monospace',
-          color: isSnapped ? COLORS.primary : COLORS.textPrimary,
-          fontWeight: isSnapped ? 700 : 400,
+          color: isSnapped ? COLORS.snapAccent : COLORS.textPrimary,
+          fontWeight: isSnapped ? 800 : 500,
         }}>
           {anglePi}
         </span>
-        <span style={{ fontSize: 11, color: COLORS.textSecondary, marginLeft: 6 }}>
+        <span style={{ fontSize: 12, color: COLORS.textSecondary, marginLeft: 8, fontWeight: 600 }}>
           ({angleDeg})
         </span>
+        {snapEnabled && (
+          <span
+            style={{
+              marginLeft: 8,
+              fontSize: 11,
+              fontWeight: 800,
+              color: COLORS.snapAccent,
+            }}
+          >
+            {isSnapped ? '已吸附' : '吸附开启'}
+          </span>
+        )}
       </div>
 
       {/* ── Trig value grid ─────────────────────────────────────────────────── */}

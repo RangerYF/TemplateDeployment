@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style 3: Textbook+ 教科书+ — 物理模板原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans SC','DM Sans',system-ui,sans-serif;background:#faf9f7;color:#1e293b;}
+
+.app{display:grid;grid-template-rows:50px 1fr;grid-template-columns:1fr 400px;height:100vh;}
+
+/* === TOP BAR === */
+.topbar{grid-column:1/-1;background:#fff;border-bottom:1px solid #e5e0d8;display:flex;align-items:center;padding:0 20px;gap:14px;}
+.t-title{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;color:#1a1a1a;}
+.t-sep{width:1px;height:22px;background:#ddd5ca;}
+.t-tabs{display:flex;gap:0;background:#f5f2ed;border-radius:8px;padding:3px;}
+.t-tab{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:#8c7d6d;transition:all .15s;font-family:inherit;}
+.t-tab:hover{color:#5c4d3d;}
+.t-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.spacer{flex:1;}
+.t-status{font-size:11px;color:#8c7d6d;display:flex;align-items:center;gap:5px;}
+.t-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;}
+.t-ctrls{display:flex;gap:3px;}
+.tb{width:34px;height:34px;border:1px solid #e5e0d8;border-radius:8px;background:#fff;color:#8c7d6d;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit;}
+.tb:hover{border-color:#c4b8a8;color:#5c4d3d;}
+.tb.play{background:#b45309;border-color:#b45309;color:#fff;box-shadow:0 1px 4px rgba(180,83,9,.2);}
+.tb.play:hover{background:#a3480a;}
+.tb-s{width:auto;padding:0 10px;font-size:11px;font-weight:600;}
+
+/* === CANVAS (left) === */
+.canvas-area{background:#f0ede8;position:relative;overflow:hidden;border-right:1px solid #e5e0d8;}
+.c-dots{position:absolute;inset:0;background-image:radial-gradient(#d0c8bc .7px,transparent .7px);background-size:28px 28px;}
+.c-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.scene-svg{display:none;}.scene-svg.active{display:block;}
+
+/* === TEACHING PANEL (right) === */
+.teach{background:#fff;overflow-y:auto;display:flex;flex-direction:column;}
+.tp-sec{padding:14px 18px;border-bottom:1px solid #f0ede8;}
+.tp-sec:last-child{border-bottom:none;}
+.tp-hdr{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;margin-bottom:10px;}
+.tp-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.tp-hdr h3{font-size:13px;font-weight:600;flex:1;}
+.tp-arr{font-size:11px;color:#b0a090;transition:transform .2s;}
+.tp-body{transition:max-height .3s;max-height:600px;overflow:hidden;}
+.tp-body.collapsed{max-height:0;}
+
+/* Param styles */
+.tp-icon.ic-param{background:#fef3c7;color:#b45309;}
+.tp-icon.ic-data{background:#dcfce7;color:#16a34a;}
+.tp-icon.ic-teach{background:#fce7f3;color:#be185d;}
+.tp-icon.ic-formula{background:#ede9fe;color:#6d28d9;}
+.pp{margin-bottom:10px;}
+.pp-r{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.pp-l{font-size:12px;font-weight:500;color:#5c4d3d;}
+.pp-v{font-size:12px;font-weight:700;color:#b45309;font-family:'JetBrains Mono',monospace;}
+.sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:#e5e0d8;border-radius:2px;outline:none;cursor:pointer;}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#b45309;border-radius:50%;box-shadow:0 1px 3px rgba(180,83,9,.3);cursor:pointer;}
+.pp-tgl{display:flex;justify-content:space-between;align-items:center;}
+.tg{width:38px;height:20px;background:#d0c8bc;border-radius:10px;position:relative;cursor:pointer;border:none;transition:background .2s;}
+.tg.on{background:#b45309;}
+.tg .k{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:left .2s;}
+.tg.on .k{left:20px;}
+
+/* Data rows */
+.dr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f8f6f2;font-size:12px;}
+.dr:last-child{border-bottom:none;}
+.dr-l{color:#8c7d6d;display:flex;align-items:center;gap:5px;}
+.dr-d{width:5px;height:5px;border-radius:50%;}
+.dr-v{font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a1a1a;}
+.dr-u{color:#b0a090;font-size:10px;margin-left:1px;}
+
+/* Teaching points */
+.teach-pt{display:flex;gap:6px;padding:4px 0;font-size:12px;color:#5c4d3d;line-height:1.6;}
+.teach-b{color:#be185d;font-weight:700;flex-shrink:0;}
+
+/* Formula */
+.fm{background:#f8f6f2;border:1px solid #e5e0d8;border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;margin-bottom:8px;}
+.fm-main{font-size:14px;font-weight:600;color:#1a1a1a;}
+.fm-sub{color:#8c7d6d;}
+.fm-res{color:#b45309;font-weight:600;}
+
+.params-g,.data-g,.teach-g,.formula-g{display:none;}.params-g.active,.data-g.active,.teach-g.active,.formula-g.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="t-title">物理实验室</span>
+    <span class="t-sep"></span>
+    <div class="t-tabs">
+      <button class="t-tab active" onclick="sw('mechanics')">力学</button>
+      <button class="t-tab" onclick="sw('celestial')">天体</button>
+      <button class="t-tab" onclick="sw('circuit')">电路</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="t-status"><span class="t-dot"></span>已就绪</div>
+    <div class="t-ctrls">
+      <button class="tb play">&#9654;</button>
+      <button class="tb">&#9646;&#9646;</button>
+      <button class="tb">&#8634;</button>
+      <button class="tb tb-s">1x</button>
+    </div>
+  </div>
+
+  <!-- LEFT: CANVAS -->
+  <div class="canvas-area">
+    <div class="c-dots"></div>
+    <div class="c-center">
+      <!-- Mechanics -->
+      <svg class="scene-svg active" id="sv-m" width="460" height="360" viewBox="0 0 460 360">
+        <defs>
+          <marker id="xR" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#b91c1c"/></marker>
+          <marker id="xB" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#1d4ed8"/></marker>
+          <marker id="xG" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="#15803d"/></marker>
+          <filter id="xSh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,.08)"/></filter>
+        </defs>
+        <line x1="20" y1="290" x2="440" y2="290" stroke="#9c8b7a" stroke-width="2.5"/>
+        <g opacity=".25" stroke="#8c7d6d" stroke-width="1"><line x1="20" y1="292" x2="32" y2="308"/><line x1="44" y1="292" x2="56" y2="308"/><line x1="68" y1="292" x2="80" y2="308"/><line x1="92" y1="292" x2="104" y2="308"/></g>
+        <polygon points="60,290 340,290 340,130" fill="rgba(156,139,122,.1)"/>
+        <line x1="60" y1="290" x2="340" y2="130" stroke="#5c4d3d" stroke-width="3"/>
+        <line x1="340" y1="130" x2="340" y2="290" stroke="#8c7d6d" stroke-width="2"/>
+        <path d="M 118,290 A 58,58 0 0,0 98,265" fill="none" stroke="#8c7d6d" stroke-width="1.5"/>
+        <text x="125" y="278" font-size="13" fill="#5c4d3d" font-weight="600">30°</text>
+        <g transform="translate(226,190) rotate(-28)" filter="url(#xSh)">
+          <rect x="-26" y="-40" width="52" height="40" fill="#b45309" stroke="#92400e" stroke-width="1.5" rx="5"/>
+          <text x="0" y="-14" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">2 kg</text>
+        </g>
+        <line x1="226" y1="190" x2="226" y2="292" stroke="#b91c1c" stroke-width="2.5" marker-end="url(#xR)"/>
+        <line x1="226" y1="190" x2="192" y2="122" stroke="#1d4ed8" stroke-width="2.5" marker-end="url(#xB)"/>
+        <line x1="226" y1="190" x2="276" y2="164" stroke="#15803d" stroke-width="2.5" marker-end="url(#xG)"/>
+        <rect x="232" y="236" width="88" height="20" fill="rgba(255,255,255,.88)" rx="5"/><text x="238" y="250" font-size="11" font-weight="600" fill="#b91c1c">mg = 19.6 N</text>
+        <rect x="148" y="106" width="80" height="20" fill="rgba(255,255,255,.88)" rx="5"/><text x="154" y="120" font-size="11" font-weight="600" fill="#1d4ed8">N = 17.0 N</text>
+        <rect x="280" y="148" width="66" height="20" fill="rgba(255,255,255,.88)" rx="5"/><text x="286" y="162" font-size="11" font-weight="600" fill="#15803d">f = 5.1 N</text>
+      </svg>
+      <!-- Celestial -->
+      <svg class="scene-svg" id="sv-c" width="460" height="360" viewBox="0 0 460 360">
+        <defs>
+          <radialGradient id="csG"><stop offset="0%" stop-color="#fef9c3"/><stop offset="40%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></radialGradient>
+          <radialGradient id="ceG" cx="35%" cy="35%"><stop offset="0%" stop-color="#bfdbfe"/><stop offset="60%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1e3a8a"/></radialGradient>
+          <filter id="csGl"><feGaussianBlur stdDeviation="4"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="cFa" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#b91c1c"/></marker>
+          <marker id="cVa" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#15803d"/></marker>
+        </defs>
+        <rect width="460" height="360" fill="#0f172a" rx="8"/>
+        <ellipse cx="230" cy="180" rx="160" ry="125" fill="none" stroke="rgba(148,163,184,.15)" stroke-width="1" stroke-dasharray="5 3"/>
+        <circle cx="230" cy="180" r="26" fill="url(#csG)" filter="url(#csGl)"/>
+        <circle cx="390" cy="180" r="12" fill="url(#ceG)" stroke="rgba(191,219,254,.3)" stroke-width="1"/>
+        <text x="390" y="202" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.4)">地球</text>
+        <line x1="376" y1="180" x2="268" y2="180" stroke="#b91c1c" stroke-width="2" marker-end="url(#cFa)" opacity=".8"/>
+        <line x1="390" y1="166" x2="390" y2="105" stroke="#15803d" stroke-width="2" marker-end="url(#cVa)" opacity=".8"/>
+        <path d="M 230,180 L 390,180 A 160,125 0 0,0 360,82 Z" fill="rgba(250,204,21,.04)" stroke="rgba(250,204,21,.15)" stroke-width="1"/>
+      </svg>
+      <!-- Circuit -->
+      <svg class="scene-svg" id="sv-e" width="460" height="340" viewBox="0 0 460 340">
+        <defs><marker id="cIA" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#b45309"/></marker></defs>
+        <rect x="90" y="50" width="280" height="220" rx="10" fill="none" stroke="#8c7d6d" stroke-width="2.5"/>
+        <line x1="90" y1="140" x2="90" y2="130" stroke="#8c7d6d" stroke-width="3.5"/>
+        <line x1="82" y1="130" x2="98" y2="130" stroke="#8c7d6d" stroke-width="2.5"/>
+        <line x1="85" y1="123" x2="95" y2="123" stroke="#8c7d6d" stroke-width="1.5"/>
+        <line x1="90" y1="190" x2="90" y2="180" stroke="#8c7d6d" stroke-width="3.5"/>
+        <line x1="82" y1="190" x2="98" y2="190" stroke="#8c7d6d" stroke-width="2.5"/>
+        <text x="62" y="163" font-size="12" font-weight="700" fill="#b45309" text-anchor="middle">12V</text>
+        <rect x="200" y="40" width="60" height="22" fill="#fef3c7" stroke="#b45309" stroke-width="1.5" rx="4"/>
+        <text x="230" y="56" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">R₁ 4Ω</text>
+        <rect x="200" y="258" width="60" height="22" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5" rx="4"/>
+        <text x="230" y="274" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">R₂ 8Ω</text>
+        <g opacity=".7"><line x1="155" y1="50" x2="188" y2="50" stroke="#b45309" stroke-width="2" marker-end="url(#cIA)"/><line x1="370" y1="100" x2="370" y2="135" stroke="#b45309" stroke-width="2" marker-end="url(#cIA)"/><line x1="300" y1="270" x2="270" y2="270" stroke="#b45309" stroke-width="2" marker-end="url(#cIA)"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RIGHT: TEACHING PANEL -->
+  <div class="teach">
+    <!-- Parameters -->
+    <div class="tp-sec">
+      <div class="tp-hdr" onclick="tglSec(this)"><div class="tp-icon ic-param">&#9881;</div><h3>实验参数</h3><span class="tp-arr">&#9662;</span></div>
+      <div class="tp-body">
+        <div class="params-g active" id="pm-m">
+          <div class="pp"><div class="pp-r"><span class="pp-l">物体质量</span><span class="pp-v">2.0 kg</span></div><input type="range" class="sl" value="20"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">斜面角度</span><span class="pp-v">30°</span></div><input type="range" class="sl" value="33"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">摩擦系数</span><span class="pp-v">0.30</span></div><input type="range" class="sl" value="30"></div>
+          <div class="pp-tgl"><span class="pp-l">显示分力</span><button class="tg on" onclick="this.classList.toggle('on')"><div class="k"></div></button></div>
+        </div>
+        <div class="params-g" id="pm-c">
+          <div class="pp"><div class="pp-r"><span class="pp-l">恒星质量</span><span class="pp-v">1.0 M☉</span></div><input type="range" class="sl" value="50"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">轨道半径</span><span class="pp-v">1.0 AU</span></div><input type="range" class="sl" value="50"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">初始速度</span><span class="pp-v">29.8 km/s</span></div><input type="range" class="sl" value="60"></div>
+        </div>
+        <div class="params-g" id="pm-e">
+          <div class="pp"><div class="pp-r"><span class="pp-l">电源电压</span><span class="pp-v">12 V</span></div><input type="range" class="sl" value="48"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">电阻 R₁</span><span class="pp-v">4 Ω</span></div><input type="range" class="sl" value="16"></div>
+          <div class="pp"><div class="pp-r"><span class="pp-l">电阻 R₂</span><span class="pp-v">8 Ω</span></div><input type="range" class="sl" value="32"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Data -->
+    <div class="tp-sec">
+      <div class="tp-hdr" onclick="tglSec(this)"><div class="tp-icon ic-data">&#128200;</div><h3>实时数据</h3><span class="tp-arr">&#9662;</span></div>
+      <div class="tp-body">
+        <div class="data-g active" id="dt-m">
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b91c1c"></span>重力 mg</span><span class="dr-v">19.6<span class="dr-u">N</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#1d4ed8"></span>支持力 N</span><span class="dr-v">17.0<span class="dr-u">N</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#15803d"></span>摩擦力 f</span><span class="dr-v">5.1<span class="dr-u">N</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b45309"></span>合力</span><span class="dr-v">4.7<span class="dr-u">N</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b45309"></span>加速度</span><span class="dr-v">2.35<span class="dr-u">m/s²</span></span></div>
+        </div>
+        <div class="data-g" id="dt-c">
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b91c1c"></span>引力 F</span><span class="dr-v">3.54<span class="dr-u">×10²²N</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#15803d"></span>速度 v</span><span class="dr-v">29.8<span class="dr-u">km/s</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b45309"></span>周期 T</span><span class="dr-v">365.25<span class="dr-u">天</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#6d28d9"></span>离心率</span><span class="dr-v">0.017</span></div>
+        </div>
+        <div class="data-g" id="dt-e">
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b45309"></span>电流 I</span><span class="dr-v">1.00<span class="dr-u">A</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b45309"></span>U(R₁)</span><span class="dr-v">4.0<span class="dr-u">V</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#1d4ed8"></span>U(R₂)</span><span class="dr-v">8.0<span class="dr-u">V</span></span></div>
+          <div class="dr"><span class="dr-l"><span class="dr-d" style="background:#b91c1c"></span>功率 P</span><span class="dr-v">12.0<span class="dr-u">W</span></span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Teaching Points -->
+    <div class="tp-sec">
+      <div class="tp-hdr" onclick="tglSec(this)"><div class="tp-icon ic-teach">&#128218;</div><h3>教学要点</h3><span class="tp-arr">&#9662;</span></div>
+      <div class="tp-body">
+        <div class="teach-g active" id="tc-m">
+          <div class="teach-pt"><span class="teach-b">&bull;</span>沿斜面方向和垂直斜面方向建立坐标系，分解重力</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>沿斜面分力 mg sin&theta; 是驱动物体下滑的力</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>垂直斜面方向平衡：N = mg cos&theta;</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>摩擦力 f = &mu;N，方向沿斜面向上阻碍下滑</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>当 tan&theta; > &mu; 时物体加速下滑</div>
+        </div>
+        <div class="teach-g" id="tc-c">
+          <div class="teach-pt"><span class="teach-b">&bull;</span>万有引力 F = GMm/r² 提供向心力</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>开普勒第二定律：等时间扫过面积相等</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>轨道速度 v = &radic;(GM/r)，半径越大速度越小</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>周期公式 T&sup2; = 4&pi;&sup2;r&sup3;/(GM)</div>
+        </div>
+        <div class="teach-g" id="tc-e">
+          <div class="teach-pt"><span class="teach-b">&bull;</span>串联电路中电流处处相等 I = U/(R₁+R₂)</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>各电阻分压与阻值成正比 U₁/U₂ = R₁/R₂</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>总电压等于各分压之和 U = U₁ + U₂</div>
+          <div class="teach-pt"><span class="teach-b">&bull;</span>功率 P = UI = I²R = U²/R</div>
+        </div>
+      </div>
+    </div>
+    <!-- Formulas -->
+    <div class="tp-sec">
+      <div class="tp-hdr" onclick="tglSec(this)"><div class="tp-icon ic-formula">&#128221;</div><h3>关键公式</h3><span class="tp-arr">&#9662;</span></div>
+      <div class="tp-body">
+        <div class="formula-g active" id="fm-m">
+          <div class="fm"><div class="fm-main">a = g(sin&theta; &minus; &mu;cos&theta;)</div><div class="fm-sub">= 9.8 &times; (sin30° &minus; 0.3 &times; cos30°)</div><div class="fm-sub">= 9.8 &times; (0.500 &minus; 0.260)</div><div class="fm-res">= 2.35 m/s²</div></div>
+          <div class="fm"><div class="fm-main">N = mg cos&theta;</div><div class="fm-sub">= 2.0 &times; 9.8 &times; cos30°</div><div class="fm-res">= 17.0 N</div></div>
+        </div>
+        <div class="formula-g" id="fm-c">
+          <div class="fm"><div class="fm-main">F = GMm/r²</div><div class="fm-sub">万有引力定律</div></div>
+          <div class="fm"><div class="fm-main">v = &radic;(GM/r)</div><div class="fm-sub">圆轨道线速度</div><div class="fm-res">= 29.8 km/s (地球)</div></div>
+          <div class="fm"><div class="fm-main">T² = 4&pi;²r³/(GM)</div><div class="fm-sub">开普勒第三定律</div><div class="fm-res">T = 365.25 天</div></div>
+        </div>
+        <div class="formula-g" id="fm-e">
+          <div class="fm"><div class="fm-main">I = U/(R₁+R₂)</div><div class="fm-sub">= 12/(4+8)</div><div class="fm-res">= 1.0 A</div></div>
+          <div class="fm"><div class="fm-main">U₁ = IR₁ = 4.0 V</div><div class="fm-main">U₂ = IR₂ = 8.0 V</div><div class="fm-sub">U₁ + U₂ = 12 V = U(总) ✓</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ids={mechanics:['m'],celestial:['c'],circuit:['e']};
+function sw(scene){
+  const k=ids[scene][0];
+  ['m','c','e'].forEach(s=>{
+    const a=s===k;
+    document.getElementById('sv-'+s).classList.toggle('active',a);
+    ['pm-','dt-','tc-','fm-'].forEach(p=>{document.getElementById(p+s).classList.toggle('active',a);});
+  });
+  document.querySelectorAll('.t-tab').forEach(t=>{
+    t.classList.toggle('active',t.textContent==={mechanics:'力学',celestial:'天体',circuit:'电路'}[scene]);
+  });
+}
+function tglSec(hdr){
+  const body=hdr.nextElementSibling;
+  const arr=hdr.querySelector('.tp-arr');
+  body.classList.toggle('collapsed');
+  arr.textContent=body.classList.contains('collapsed')?'▸':'▾';
+}
+</script>
+</body>
+</html>

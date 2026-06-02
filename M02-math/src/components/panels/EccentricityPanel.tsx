@@ -14,11 +14,12 @@
  *   - Disabled for circle entities (e is always 0)
  */
 
-import { useRef, useState, useEffect } from 'react';
-import { Play, Square } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { Pause, Play, Square } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useActiveConic } from '@/hooks/useActiveEntity';
 import { useEntityStore }  from '@/editor/store/entityStore';
+import { useEccentricityDemoStore } from '@/editor/store/eccentricityDemoStore';
 import { executeM03Command } from '@/editor/commands/m03Execute';
 import { UpdateCurveParamCommand } from '@/editor/commands/UpdateCurveParamCommand';
 import {
@@ -31,6 +32,7 @@ import { COLORS } from '@/styles/colors';
 import { btnHover } from '@/styles/interactionStyles';
 import type { ConicEntity } from '@/types';
 import { isConicEntity } from '@/types';
+import type { EccentricitySweepRange } from '@/editor/store/eccentricityDemoStore';
 
 // ─── Type label ───────────────────────────────────────────────────────────────
 
@@ -38,6 +40,26 @@ function eccentricityTypeLabel(e: number): string {
   if (e < 1 - 1e-6) return '椭圆';
   if (Math.abs(e - 1) < 1e-6) return '抛物线';
   return '双曲线';
+}
+
+export function defaultSweepRange(entity: ConicEntity): EccentricitySweepRange {
+  if (entity.type === 'ellipse') return 'ellipse-only';
+  if (entity.type === 'hyperbola') return 'hyperbola-only';
+  if (entity.type === 'parabola') return 'ellipse-to-parabola';
+  return 'full-conics';
+}
+
+export function sweepRangeBounds(range: EccentricitySweepRange, currentE: number): { fromE: number; toE: number; label: string } {
+  switch (range) {
+    case 'ellipse-only':
+      return { fromE: 0.01, toE: 0.99, label: '仅椭圆' };
+    case 'ellipse-to-parabola':
+      return { fromE: 0.01, toE: 1.0, label: '椭圆到抛物线' };
+    case 'hyperbola-only':
+      return { fromE: Math.max(1.01, currentE), toE: 2.0, label: '仅双曲线' };
+    case 'full-conics':
+      return { fromE: 0.01, toE: 2.0, label: '全部圆锥曲线' };
+  }
 }
 
 // ─── Zone bar ─────────────────────────────────────────────────────────────────
@@ -96,22 +118,41 @@ export function EccentricityPanel() {
 
   // Drag state: captures fixedC + initial entity at the first slider tick
   const dragRef   = useRef<{ c: number; initial: ConicEntity } | null>(null);
-  // Animation cancel function
-  const cancelRef = useRef<(() => void) | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const controllerRef = useRef(useEccentricityDemoStore.getState().controller);
+  const activeEntityId = useEccentricityDemoStore((s) => s.activeEntityId);
+  const sweepRange = useEccentricityDemoStore((s) => s.sweepRange);
+  const speed = useEccentricityDemoStore((s) => s.speed);
+  const playState = useEccentricityDemoStore((s) => s.playState);
+  const controller = useEccentricityDemoStore((s) => s.controller);
+  const setActiveDemoEntity = useEccentricityDemoStore((s) => s.setActiveEntity);
+  const setSweepRange = useEccentricityDemoStore((s) => s.setSweepRange);
+  const setSpeed = useEccentricityDemoStore((s) => s.setSpeed);
+  const setPlayState = useEccentricityDemoStore((s) => s.setPlayState);
+  const setController = useEccentricityDemoStore((s) => s.setController);
+  const isAnimating = playState === 'playing';
+  const isPaused = playState === 'paused';
+
+  useEffect(() => {
+    controllerRef.current = controller;
+  }, [controller]);
+
+  useEffect(() => {
+    if (!entity) return;
+    setActiveDemoEntity(entity.id, defaultSweepRange(entity));
+  }, [entity, setActiveDemoEntity]);
 
   // Cancel animation when the active entity changes
   useEffect(() => {
     return () => {
-      cancelRef.current?.();
-      cancelRef.current = null;
+      controllerRef.current?.cancel();
+      setController(null);
     };
-  }, [entity?.id]);
+  }, [entity?.id, setController]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      cancelRef.current?.();
+      controllerRef.current?.cancel();
     };
   }, []);
 
@@ -134,14 +175,10 @@ export function EccentricityPanel() {
 
   function handleConvertCircle() {
     if (!entity || entity.type !== 'circle') return;
-    const r      = entity.params.r;
-    const E0     = 0.3;
-    const fixedC = r * E0;                         // c = a·e₀
-    const ellipseEntity = applyEccentricityToEntity(
-      entity.id, E0, fixedC,
-      entity.params.cx, entity.params.cy,
-      entity.color, entity.label, entity.visible,
-    );
+    const r = entity.params.r;
+    const E0 = 0.3;
+    const fixedC = r * E0;
+    const ellipseEntity = applyEccentricityToEntity(entity, E0, fixedC);
     useEntityStore.getState().updateEntity(entity.id, ellipseEntity);
     executeM03Command(new UpdateCurveParamCommand(entity.id, entity, ellipseEntity));
   }
@@ -158,11 +195,8 @@ export function EccentricityPanel() {
     const snap = dragRef.current ?? { c: getEntityFixedC(live), initial: live };
     dragRef.current = snap;
     const { c } = snap;
-    const { cx, cy } = live.params as { cx: number; cy: number };
 
-    const updated = applyEccentricityToEntity(
-      live.id, eVal, c, cx, cy, live.color, live.label, live.visible,
-    );
+    const updated = applyEccentricityToEntity(live, eVal, c);
     store.updateEntity(live.id, updated);
   }
 
@@ -173,10 +207,7 @@ export function EccentricityPanel() {
 
     if (Math.abs(eVal - getEntityEccentricity(initial)) < 1e-9) return;
 
-    const { cx, cy } = initial.params;
-    const finalEntity = applyEccentricityToEntity(
-      initial.id, eVal, c, cx, cy, initial.color, initial.label, initial.visible,
-    );
+    const finalEntity = applyEccentricityToEntity(initial, eVal, c);
     // Ensure store has the committed state, then record command
     useEntityStore.getState().updateEntity(initial.id, finalEntity);
     executeM03Command(
@@ -187,37 +218,55 @@ export function EccentricityPanel() {
   // ── Play / Stop ─────────────────────────────────────────────────────────────
 
   function handlePlay() {
-    if (!entity || isAnimating || isCircle) return;
+    if (!entity || isCircle) return;
+    if (isPaused) {
+      controller?.resume();
+      setPlayState('playing');
+      return;
+    }
+    if (isAnimating) return;
     const store  = useEntityStore.getState();
     const raw    = store.entities.find((en) => en.id === entity.id);
     if (!raw || !isConicEntity(raw)) return;
     const live: ConicEntity = raw;
     const fixedC = getEntityFixedC(live);
+    const { fromE, toE } = sweepRangeBounds(sweepRange, getEntityEccentricity(live));
+    const span = Math.max(0.01, Math.abs(toE - fromE));
+    const duration = Math.round((span / speed) * 3200);
 
-    setIsAnimating(true);
-    const cancel = startEccentricityAnimation({
+    setPlayState('playing');
+    const control = startEccentricityAnimation({
       entityId:   live.id,
-      fromE:      0.01,
-      toE:        2.0,
+      fromE,
+      toE,
       fixedC,
-      duration:   3000,
+      duration,
       onComplete: () => {
-        setIsAnimating(false);
-        cancelRef.current = null;
+        setPlayState('idle');
+        setController(null);
       },
     });
-    cancelRef.current = cancel;
+    setController(control);
+  }
+
+  function handlePause() {
+    if (!isAnimating) return;
+    controller?.pause();
+    setPlayState('paused');
   }
 
   function handleStop() {
-    cancelRef.current?.();
-    cancelRef.current = null;
-    // isAnimating is reset by onComplete inside the cancel function
+    controller?.cancel();
+    setController(null);
+    setPlayState('idle');
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  const disabled = isCircle || isAnimating;
+  const isBusy = playState !== 'idle';
+  const disabled = isCircle || isBusy;
+  const speedPercentLabel = `${Math.round(speed * 100)}%`;
+  const canPlay = !isCircle && activeEntityId === entity.id && (playState === 'idle' || playState === 'paused');
 
   return (
     <div style={{ padding: '12px 14px', borderTop: `1px solid ${COLORS.border}` }}>
@@ -261,6 +310,70 @@ export function EccentricityPanel() {
         <span style={{ fontSize: '9px', color: 'rgba(244,114,182,0.7)' }}>双曲线 (e&gt;1)</span>
       </div>
 
+      {!isCircle && (
+        <div style={{ marginBottom: 10 }}>
+          <p style={{ fontSize: '10px', color: COLORS.textSecondary, marginBottom: 6 }}>
+            自动演示范围
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            {([
+              { value: 'ellipse-only', label: '仅椭圆' },
+              { value: 'ellipse-to-parabola', label: '到抛物线' },
+              { value: 'hyperbola-only', label: '仅双曲线' },
+              { value: 'full-conics', label: '全部' },
+            ] as Array<{ value: EccentricitySweepRange; label: string }>).map((option) => {
+              const active = option.value === sweepRange;
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => setSweepRange(option.value)}
+                  disabled={isBusy}
+                  style={{
+                    padding: '5px 8px',
+                    borderRadius: 6,
+                    border: `1px solid ${active ? COLORS.primary : COLORS.borderMuted}`,
+                    background: active ? `${COLORS.primary}18` : COLORS.surface,
+                    color: active ? COLORS.primary : COLORS.textSecondary,
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: isBusy ? 'not-allowed' : 'pointer',
+                  }}
+                  {...(!isBusy ? btnHover(active ? `${COLORS.primary}24` : COLORS.surfaceAlt, active ? `${COLORS.primary}18` : COLORS.surface) : {})}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!isCircle && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+            <p style={{ fontSize: '10px', color: COLORS.textSecondary }}>
+              演示速度
+            </p>
+            <span style={{ fontSize: '10px', color: COLORS.textDark, fontFamily: 'monospace', fontWeight: 600 }}>
+              {speedPercentLabel}
+            </span>
+          </div>
+          <Slider
+            value={[speed]}
+            min={0.25}
+            max={2}
+            step={0.05}
+            disabled={isBusy}
+            onValueChange={([next]) => setSpeed(next)}
+            onValueCommit={([next]) => setSpeed(next)}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+            <span style={{ fontSize: '9px', color: COLORS.textDisabled }}>慢</span>
+            <span style={{ fontSize: '9px', color: COLORS.textDisabled }}>快</span>
+          </div>
+        </div>
+      )}
+
       {/* Slider */}
       <div style={{ marginBottom: 10 }}>
         <Slider
@@ -282,26 +395,26 @@ export function EccentricityPanel() {
       <div style={{ display: 'flex', gap: 6 }}>
         <button
           onClick={handlePlay}
-          disabled={isCircle || isAnimating}
+          disabled={!canPlay}
           style={{
             flex: 1,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
             padding: '5px 0',
             borderRadius: 6,
             fontSize: '11px', fontWeight: 600,
-            border: 'none', cursor: isCircle || isAnimating ? 'not-allowed' : 'pointer',
-            background: isCircle || isAnimating ? COLORS.border : COLORS.primary,
-            color:      isCircle || isAnimating ? COLORS.textDisabled : COLORS.textPrimary,
+            border: 'none', cursor: canPlay ? 'pointer' : 'not-allowed',
+            background: canPlay ? COLORS.primary : COLORS.border,
+            color:      canPlay ? COLORS.textPrimary : COLORS.textDisabled,
             transition: 'background 0.15s',
           }}
-          {...(!(isCircle || isAnimating) ? btnHover(COLORS.primaryHover, COLORS.primary) : {})}
+          {...(canPlay ? btnHover(COLORS.primaryHover, COLORS.primary) : {})}
         >
           <Play size={11} />
-          播放
+          {isPaused ? '继续' : `播放 ${sweepRangeBounds(sweepRange, currentE).label}`}
         </button>
 
         <button
-          onClick={handleStop}
+          onClick={handlePause}
           disabled={!isAnimating}
           style={{
             flex: 1,
@@ -310,11 +423,31 @@ export function EccentricityPanel() {
             borderRadius: 6,
             fontSize: '11px', fontWeight: 600,
             border: 'none', cursor: !isAnimating ? 'not-allowed' : 'pointer',
-            background: !isAnimating ? COLORS.border : COLORS.error,
+            background: !isAnimating ? COLORS.border : COLORS.warning,
             color:      !isAnimating ? COLORS.textDisabled : COLORS.white,
             transition: 'background 0.15s',
           }}
-          {...(isAnimating ? btnHover(COLORS.errorDark, COLORS.error) : {})}
+          {...(isAnimating ? btnHover('#D97706', COLORS.warning) : {})}
+        >
+          <Pause size={11} />
+          暂停
+        </button>
+
+        <button
+          onClick={handleStop}
+          disabled={playState === 'idle'}
+          style={{
+            flex: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+            padding: '5px 0',
+            borderRadius: 6,
+            fontSize: '11px', fontWeight: 600,
+            border: 'none', cursor: playState === 'idle' ? 'not-allowed' : 'pointer',
+            background: playState === 'idle' ? COLORS.border : COLORS.error,
+            color:      playState === 'idle' ? COLORS.textDisabled : COLORS.white,
+            transition: 'background 0.15s',
+          }}
+          {...(playState !== 'idle' ? btnHover(COLORS.errorDark, COLORS.error) : {})}
         >
           <Square size={11} />
           停止

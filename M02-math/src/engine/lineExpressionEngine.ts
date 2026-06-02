@@ -90,10 +90,11 @@ function extractExpr(raw: string, form: EquationForm): string | null {
  */
 export function formatEquationDisplay(raw: string): string {
   return raw
-    // Remove * between letter and letter/( — "a*x" → "ax", "a*sin(" → "asin("
-    .replace(/([a-zA-Z])\*([a-zA-Z(])/g, '$1$2')
-    // Remove * between digit and letter — "2*x" → "2x"
-    .replace(/(\d)\*([a-zA-Z])/g, '$1$2')
+    .replace(/\u2212/g, '-')
+    // Remove * only for coefficient-to-variable cases:
+    //   "a*x" → "ax", "2*x" → "2x", "sqrt(2)*x" → "sqrt(2)x"
+    // Keep function calls such as "a*sin(x)" readable instead of "asin(x)".
+    .replace(/([0-9A-Za-z_.)\]])\*([xyXY])/g, '$1$2')
     // Normalize spacing around + and -
     .replace(/\s*\+\s*/g, ' + ')
     .replace(/\s*-\s*/g, ' - ')

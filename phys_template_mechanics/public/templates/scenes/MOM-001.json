@@ -31,7 +31,7 @@
       "label": "球体 #1",
       "position": {
         "x": -4.2,
-        "y": 1.86
+        "y": 2.06
       },
       "angle": 0,
       "isStatic": false,
@@ -40,14 +40,14 @@
       "friction": 0,
       "restitution": 1,
       "initialVelocity": {
-        "x": 5,
+        "x": 3,
         "y": 0
       },
       "initialAcceleration": {
         "x": 0,
         "y": 0
       },
-      "radius": 0.3
+      "radius": 0.5
     },
     {
       "id": "body-ball-right",
@@ -55,7 +55,7 @@
       "label": "球体 #2",
       "position": {
         "x": 1,
-        "y": 1.86
+        "y": 2.06
       },
       "angle": 0,
       "isStatic": false,
@@ -71,12 +71,13 @@
         "x": 0,
         "y": 0
       },
-      "radius": 0.3
+      "radius": 0.5
     }
   ],
   "joints": [],
   "forces": [],
   "settings": {
+    "energyConservation": true,
     "gravity": {
       "x": 0,
       "y": -10

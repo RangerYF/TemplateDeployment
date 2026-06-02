@@ -72,6 +72,37 @@ function getGroupDatasetLabel(groupName: string, dataKey: string): string {
   }
 }
 
+function computeStableRange(values: number[], symmetric = false): { min: number; max: number } | undefined {
+  const finiteValues = values.filter((value) => Number.isFinite(value))
+  if (finiteValues.length === 0) return undefined
+
+  const rawMin = Math.min(...finiteValues)
+  const rawMax = Math.max(...finiteValues)
+
+  if (symmetric) {
+    const bound = Math.max(Math.abs(rawMin), Math.abs(rawMax), 0.5)
+    const padded = Math.max(0.2, bound * 0.12)
+    return {
+      min: -(bound + padded),
+      max: bound + padded,
+    }
+  }
+
+  if (Math.abs(rawMax - rawMin) < 1e-6) {
+    const padding = Math.max(0.2, Math.abs(rawMax) * 0.15, 0.2)
+    return {
+      min: rawMin - padding,
+      max: rawMax + padding,
+    }
+  }
+
+  const padding = Math.max(0.12, (rawMax - rawMin) * 0.12)
+  return {
+    min: rawMin - padding,
+    max: rawMax + padding,
+  }
+}
+
 export function TimeSeriesChart({ dataKey, yLabel }: Props) {
   const frameHistory = useAnalysisStore(s => s.frameHistory)
   const activeDataSourceIds = useAnalysisStore(s => s.activeDataSourceIds)
@@ -297,6 +328,28 @@ export function TimeSeriesChart({ dataKey, yLabel }: Props) {
     return { labels, datasets }
   }, [frameHistory, activeDataSourceIds, dynamicBodies, dataKey, isEnergy, isVelocityComponents, analysisGroups])
 
+  const yRange = useMemo(() => {
+    const allValues = data.datasets.flatMap((dataset) =>
+      dataset.data.map((value) => (typeof value === 'number' ? value : Number(value))),
+    )
+    const selectedDynamicBodies = dynamicBodies.filter((body) => activeDataSourceIds.has(body.id))
+    const maxInitialComponent = selectedDynamicBodies.reduce((max, body) => {
+      const vx = Math.abs(body.initialVelocity?.x ?? 0)
+      const vy = Math.abs(body.initialVelocity?.y ?? 0)
+      return Math.max(max, vx, vy)
+    }, 0)
+
+    if (dataKey === 'vx' || dataKey === 'vy' || isVelocityComponents) {
+      return computeStableRange([...allValues, -maxInitialComponent, maxInitialComponent], true)
+    }
+
+    if (dataKey === 'displacement') {
+      return computeStableRange(allValues, false)
+    }
+
+    return undefined
+  }, [activeDataSourceIds, data.datasets, dataKey, dynamicBodies, isVelocityComponents])
+
   // 图内竖线标注：时间回溯游标 + 碰撞线（p-t）
   const annotations = useMemo<Record<string, AnnotationOptions>>(() => {
     const result: Record<string, AnnotationOptions> = {}
@@ -410,6 +463,17 @@ export function TimeSeriesChart({ dataKey, yLabel }: Props) {
       y: {
         title: { display: true, text: yLabel, font: { size: 11 } },
         ticks: { font: { size: 10 } },
+        min: yRange?.min,
+        max: yRange?.max,
+        afterDataLimits: (axis) => {
+          const range = axis.max - axis.min
+          const minRange = Math.max(0.1, Math.abs(axis.max) * 0.01)
+          if (range < minRange) {
+            const mid = (axis.max + axis.min) / 2
+            axis.min = mid - minRange / 2
+            axis.max = mid + minRange / 2
+          }
+        },
       },
     },
     plugins: {
@@ -433,7 +497,7 @@ export function TimeSeriesChart({ dataKey, yLabel }: Props) {
       mode: 'index' as const,
       intersect: false,
     },
-  }), [yLabel, annotations])
+  }), [annotations, yLabel, yRange?.max, yRange?.min])
 
   return (
     <div style={{ flex: 1, minWidth: 0, padding: '4px 8px' }}>

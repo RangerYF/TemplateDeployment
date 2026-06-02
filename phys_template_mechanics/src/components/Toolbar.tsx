@@ -130,6 +130,32 @@ export function Toolbar() {
         : phase === 'stoppedLocked' ? '已停止'
           : '待播放'
 
+  const primaryActionLabel =
+    phase === 'playing' ? '暂停仿真'
+      : phase === 'paused' ? '继续仿真'
+        : phase === 'stoppedLocked' ? '重新开始'
+          : '开始仿真'
+
+  const primaryActionTip =
+    phase === 'playing' ? '暂停仿真'
+      : phase === 'paused' ? '继续仿真'
+        : phase === 'stoppedLocked' ? '重新开始'
+          : '开始仿真'
+
+  const handlePrimaryAction = () => {
+    if (!hasHandlers) return
+    if (phase === 'playing') {
+      handlers?.pause()
+      return
+    }
+    if (phase === 'stoppedLocked') {
+      handlers?.reset()
+      handlers?.play()
+      return
+    }
+    handlers?.play()
+  }
+
   const handleJump = () => {
     if (!canJump) return
     const clamped = normalizeNumberInput(jumpInput, { min: 0, max: maxTime })
@@ -178,22 +204,13 @@ export function Toolbar() {
         style={{ backgroundColor: COLORS.border }}
       />
 
-      <Tip text={phase === 'paused' ? '继续仿真' : '开始仿真'} position="bottom">
+      <Tip text={primaryActionTip} position="bottom">
         <IconControlButton
-          icon={<Play size={14} />}
-          label={phase === 'ready' ? '开始仿真' : '继续仿真'}
+          icon={phase === 'playing' ? <Pause size={14} /> : <Play size={14} />}
+          label={primaryActionLabel}
           active={phase === 'playing'}
-          enabled={canPlay}
-          onClick={() => handlers?.play()}
-        />
-      </Tip>
-      <Tip text="暂停仿真" position="bottom">
-        <IconControlButton
-          icon={<Pause size={14} />}
-          label="暂停仿真"
-          active={phase === 'paused'}
-          enabled={canPause}
-          onClick={() => handlers?.pause()}
+          enabled={hasHandlers && (canPlay || canPause || phase === 'stoppedLocked')}
+          onClick={handlePrimaryAction}
         />
       </Tip>
       <Tip text="结束仿真" position="bottom">
@@ -279,7 +296,7 @@ export function Toolbar() {
       </span>
 
       <div className="ml-1 flex items-center gap-1.5 flex-shrink-0">
-        <div className="hidden xl:flex items-center gap-1 rounded-full px-1.5 py-1" style={{
+        <div className="hidden lg:flex items-center gap-1 rounded-full px-1.5 py-1" style={{
           border: `1px solid ${COLORS.borderStrong}`,
           backgroundColor: COLORS.white,
         }}>

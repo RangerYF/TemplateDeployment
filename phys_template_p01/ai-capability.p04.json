@@ -1,0 +1,207 @@
+{
+  "templateKey": "p04",
+  "aiLevel": "L2",
+  "supportsAiBuild": true,
+  "description": "P04 电路实验台。基于 12 个高中物理电学实验预设场景（伏安法测电阻、半偏法、测电源 EMF 与内阻、欧姆表原理、惠斯通电桥、电动机电路、灯泡非线性电阻等），通过结构化 operations 加载预设、修改电源电动势/电阻/开关等参数、选中实体。",
+  "supportedIntents": [
+    "load-preset",
+    "set-param",
+    "set-params",
+    "select-entity"
+  ],
+  "operations": [
+    {
+      "type": "loadPreset",
+      "description": "加载 P04 电路预设场景。payload: { presetId: string }。可用 presetId（共 12 个）：P04-CIR-EXP001-voltammetry-internal（伏安法·安培计内接）、P04-CIR-EXP002-voltammetry-external（伏安法·安培计外接）、P04-CIR-EXP003-half-deflection-ammeter（半偏法测电流计）、P04-CIR-EXP003-half-deflection-voltmeter（半偏法测电压表内阻）、P04-CIR-EXP004-measure-emf-r（测电源 EMF 与内阻·滑变）、P04-CIR-EXP004-measure-emf-r-divider（测电源 EMF·分压式）、P04-CIR-EXP005-ohmmeter（欧姆表原理）、P04-CIR-EXP006-multi-range-ohmmeter（多量程欧姆表）、P04-CIR-EXP006-wheatstone-bridge（惠斯通电桥）、P04-CIR-EXP007-voltammetry-compare（伏安法内/外接法对比）、P04-CIR-EXP008-bulb-circuit（灯泡非线性电阻）、P04-CIR-EXP009-motor-circuit（电动机功率分解）。",
+      "payloadSchema": {
+        "presetId": { "type": "string" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户要求加载某个电路实验场景、切换到某个标准实验、按场景名/实验名加载，例如 “演示伏安法”、“演示惠斯通电桥”、“切换到灯泡电路”。",
+      "doNotUseWhen": "用户只想微调当前场景的参数时使用 setParam/setParams，不要重新加载预设。"
+    },
+    {
+      "type": "setParam",
+      "description": "修改当前预设的单个参数。payload: { key: string, value: number | boolean | string }。key 必须出现在当前预设的 paramGroups 中（每个预设的参数集不同），常见 key：emf（电动势 V）、r（电源内阻 Ω）、Rx（待测电阻 Ω）、R1/R2/R3/R4（电桥臂电阻 Ω）、Ig（电流计满偏电流 A）、Rg（电流计内阻 Ω）、ammeterRange/voltmeterRange（量程）、rA/rV（电流表/电压表内阻 Ω）、maxR（滑变最大值 Ω）、sliderRatio（滑变滑片比例 0~1）、Rhalf/R'（半偏值 Ω）、Rcoil（电机线圈电阻 Ω）、backEmf（反电动势 V）、Ur/Pr（额定电压/功率）、Rc（冷态电阻）、switchClosed/switchMain/switchHalf（开关闭合状态 boolean）、loadR（负载电阻）、adjRatio/rangeSelect（量程旋钮）、fault（故障类型）、showIdealModel/showErrorDerivation（教学辅助显示）。",
+      "payloadSchema": {
+        "key": { "type": "string" },
+        "paramKey": { "type": "string" },
+        "value": { "type": "number" }
+      },
+      "useWhen": "用户要求修改某个具体参数，例如 “电动势改成 8V”、“把开关闭合”、“滑变调到 50%”、“待测电阻设为 100 欧”。",
+      "doNotUseWhen": "需要修改多个参数时优先使用 setParams；切换实验场景使用 loadPreset。"
+    },
+    {
+      "type": "setParams",
+      "description": "批量修改当前预设的多个参数。payload: { values: { [key: string]: number | boolean | string } }。values 中的 key 必须存在于当前预设的 paramGroups 中，不存在的 key 会被跳过并写入 warnings。",
+      "payloadSchema": {
+        "values": { "type": "object" }
+      },
+      "useWhen": "用户一次性给出多个参数，例如 “电动势 6V，内阻 0.5Ω，开关闭合”、“R1=100, R2=1000, R3=500”。",
+      "doNotUseWhen": "只改一个参数时使用 setParam。"
+    },
+    {
+      "type": "selectEntity",
+      "description": "选中场景中的实体以高亮显示。payload: { entityId: string | null }。entityId 必须是当前场景中存在的实体 ref，例如 source-1、switch-1、bulb-1、R1、R2、R3、R4-box、galv-1、ammeter-1、voltmeter-1、motor-1 等。传入 null 取消选中。",
+      "payloadSchema": {
+        "entityId": { "type": "string" },
+        "id": { "type": "string" }
+      },
+      "useWhen": "用户要求关注/高亮/聚焦某个电路元件，例如 “看一下电源”、“选中灯泡”、“高亮 R3”。",
+      "doNotUseWhen": "用户没有明确指向某个元件时不要主动选中。"
+    }
+  ],
+  "payloadSchema": {
+    "simulation": {
+      "type": "object",
+      "description": "P04 仿真状态。结构性切换场景必须使用 loadPreset operation，不要直接手写 scene 树。",
+      "risk": "high",
+      "children": {
+        "ui": {
+          "type": "object",
+          "description": "UI 状态。AI 通过 setParam/setParams/selectEntity operations 修改，不要直接 patch。",
+          "risk": "medium",
+          "children": {
+            "paramValues": {
+              "type": "object",
+              "description": "当前预设的参数值映射 { key: value }。AI 应使用 setParam/setParams operations 修改。",
+              "risk": "medium"
+            },
+            "selectedEntityId": {
+              "type": "string",
+              "description": "当前选中实体的 ID。AI 应使用 selectEntity operation 修改。",
+              "risk": "low"
+            }
+          }
+        }
+      }
+    }
+  },
+  "constraints": [
+    "AI 输出只能是 JSON 对象，允许包含 operations、patch、explanation、warnings，不能包含 envelope。",
+    "结构性切换场景必须使用 loadPreset operation，不要直接手写 scene、entities、relations。",
+    "P04 只处理电路实验，不要输出 P08（电磁场）、P13（电磁感应）或其它学科的预设/operation。",
+    "presetId 必须从 capability 描述列出的 12 个 P04 预设中选择，不要使用 P08/P13 预设。",
+    "setParam 的 key 必须出现在当前预设的 paramGroups 中；如果用户要求的参数当前预设没有，应在 warnings 中说明，不要伪造。",
+    "开关类参数（switchClosed/switchMain/switchHalf）的 value 必须是 boolean。",
+    "电动势 emf 通常在 1~12V 范围内；内阻 r 通常在 0~5Ω；电阻 Rx/R1/R2/R3/R4 通常在 10~10000Ω 范围内，超出物理合理性时给 warnings。",
+    "operations 必须最小充分；单个 operation 可满足时不要额外添加。",
+    "用户要求“演示某实验”时，先 loadPreset 切换到对应场景，必要时再 setParams 调整参数。",
+    "entityId 必须来自当前场景的 aiContext，切换预设后实体 ID 集合会变化，跨预设的 selectEntity 必须在 loadPreset 之后。"
+  ],
+  "examples": [
+    {
+      "instruction": "演示伏安法测电阻的安培计外接法。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP002-voltammetry-external" }
+      ],
+      "patch": {},
+      "explanation": "已加载安培计外接法预设，电流表读数为干路电流，电压表读数为待测电阻两端电压。"
+    },
+    {
+      "instruction": "切换到惠斯通电桥实验，把 R1 设为 200 欧，R2 设为 1000 欧。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP006-wheatstone-bridge" },
+        { "type": "setParams", "values": { "R1": 200, "R2": 1000 } }
+      ],
+      "patch": {},
+      "explanation": "已加载惠斯通电桥并设置桥臂电阻 R1=200Ω、R2=1000Ω。"
+    },
+    {
+      "instruction": "演示灯泡电路，电动势改成 4.5V。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP008-bulb-circuit" },
+        { "type": "setParam", "key": "emf", "value": 4.5 }
+      ],
+      "patch": {},
+      "explanation": "已加载灯泡电路并将电动势设为 4.5V，灯泡两端电压低于额定电压 3.8V 时灯泡偏暗。"
+    },
+    {
+      "instruction": "把开关断开。",
+      "operations": [
+        { "type": "setParam", "key": "switchClosed", "value": false }
+      ],
+      "patch": {},
+      "explanation": "已断开电路主开关。"
+    },
+    {
+      "instruction": "加载半偏法测电流计内阻，并把电源电动势设为 3V、半偏电阻 R' 设为 1500 欧。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP003-half-deflection-ammeter" },
+        { "type": "setParams", "values": { "emf": 3, "Rhalf": 1500 } }
+      ],
+      "patch": {},
+      "explanation": "已加载半偏法电流计预设并设置电动势与半偏电阻。"
+    },
+    {
+      "instruction": "演示测电源 EMF 与内阻实验，使用分压式接法。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP004-measure-emf-r-divider" }
+      ],
+      "patch": {},
+      "explanation": "已加载分压式测电源 EMF 与内阻实验，可在不同滑变滑片比例下读取 U-I 数据并拟合。"
+    },
+    {
+      "instruction": "切换到欧姆表原理实验，把待测电阻 Rx 调成 50 欧。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP005-ohmmeter" },
+        { "type": "setParam", "key": "Rx", "value": 50 }
+      ],
+      "patch": {},
+      "explanation": "已加载欧姆表原理并设置待测电阻 50Ω，观察电流计偏转角度与电阻刻度关系。"
+    },
+    {
+      "instruction": "高亮电源元件。",
+      "operations": [
+        { "type": "selectEntity", "entityId": "source-1" }
+      ],
+      "patch": {},
+      "explanation": "已选中电源 source-1。"
+    },
+    {
+      "instruction": "把滑动变阻器调到 30% 位置。",
+      "operations": [
+        { "type": "setParam", "key": "sliderRatio", "value": 0.3 }
+      ],
+      "patch": {},
+      "explanation": "已设置滑变滑片比例为 0.3（左端 0、右端 1）。"
+    },
+    {
+      "instruction": "演示电动机电路，反电动势设为 4V。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP009-motor-circuit" },
+        { "type": "setParam", "key": "backEmf", "value": 4 }
+      ],
+      "patch": {},
+      "explanation": "已加载电动机电路并设置反电动势 4V，电源功率 = 反电动势功率（机械功率）+ 焦耳热。"
+    },
+    {
+      "instruction": "演示伏安法内接外接对比实验。",
+      "operations": [
+        { "type": "loadPreset", "presetId": "P04-CIR-EXP007-voltammetry-compare" }
+      ],
+      "patch": {},
+      "explanation": "已加载伏安法内接/外接对比，可对比两种接法的系统误差。"
+    },
+    {
+      "instruction": "把待测电阻设成 5000 欧。",
+      "operations": [
+        { "type": "setParam", "key": "Rx", "value": 5000 },
+        { "type": "setParam", "key": "R3", "value": 5000 }
+      ],
+      "patch": {},
+      "explanation": "已尝试设置 Rx 和 R3 为 5000Ω。当前预设若不包含其中某个 key，会在 warnings 中提示并跳过。",
+      "warnings": ["如果当前场景不使用 Rx 或 R3，对应 setParam 会被跳过；如需精确控制，请先确认当前预设。"]
+    }
+  ],
+  "planningRules": [
+    "先判断用户目标是切换实验场景（loadPreset）、调整参数（setParam/setParams）、还是高亮元件（selectEntity）。",
+    "如果用户既要切换实验又要调参，先 loadPreset 再 setParams，因为参数键集与预设绑定。",
+    "选择 presetId 时优先匹配实验名称的核心动词与对象（如 “伏安法外接” → voltammetry-external，“惠斯通电桥” → wheatstone-bridge）。",
+    "setParam 的 key 必须基于当前 aiContext 中的 paramGroups；不确定时使用 setParams 让后端 warnings 提示跳过项。",
+    "selectEntity 必须在 loadPreset 之后；entityId 集合随预设变化。",
+    "P04 全部预设的视角都是 circuit，不需要切换视角。",
+    "电路参数有物理合理范围（电动势 1~12V、内阻 0~5Ω、电阻 10~10000Ω 等），超出范围时给 warnings。",
+    "不要为多步指令拆出冗余 operations，单个 setParams 能完成的不要拆成多个 setParam。"
+  ]
+}

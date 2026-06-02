@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>物理模板库前端重构方案</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'neutral',flowchart:{useMaxWidth:true},gantt:{useMaxWidth:true}});</script>
+<style>
+:root{--bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--primary-lt:#eff6ff;--success:#16a34a;--success-lt:#f0fdf4;--warn:#d97706;--warn-lt:#fffbeb;--danger:#dc2626;--danger-lt:#fef2f2;--purple:#7c3aed;--purple-lt:#f5f3ff;--teal:#0d9488;--teal-lt:#f0fdfa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:15px;}
+.container{max-width:1200px;margin:0 auto;padding:40px 32px;}
+.header{text-align:center;padding:64px 40px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#2563eb 100%);color:#fff;border-radius:16px;margin-bottom:40px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;inset:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(59,130,246,.15),transparent 50%),radial-gradient(circle at 70% 60%,rgba(124,58,237,.1),transparent 50%);}
+.header h1{font-size:34px;font-weight:700;position:relative;margin-bottom:10px;}
+.header .sub{font-size:16px;opacity:.8;position:relative;}
+.header .meta{margin-top:20px;font-size:13px;opacity:.5;position:relative;}
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;margin-bottom:24px;}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--bg);}
+.sec-n{width:36px;height:36px;background:var(--primary);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.sec-h h2{font-size:22px;font-weight:700;}
+h3{font-size:17px;font-weight:600;margin:24px 0 12px;}
+h4{font-size:15px;font-weight:600;margin:16px 0 8px;color:var(--muted);}
+p{margin-bottom:12px;}
+ul,ol{padding-left:24px;margin-bottom:12px;}
+li{margin-bottom:6px;}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+th{background:var(--bg);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;}
+.tag-b{background:var(--primary-lt);color:var(--primary);}
+.tag-g{background:var(--success-lt);color:var(--success);}
+.tag-o{background:var(--warn-lt);color:var(--warn);}
+.tag-r{background:var(--danger-lt);color:var(--danger);}
+.tag-p{background:var(--purple-lt);color:var(--purple);}
+.tag-t{background:var(--teal-lt);color:var(--teal);}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin:16px 0;}
+.card{border:1px solid var(--border);border-radius:10px;padding:20px;background:var(--surface);}
+.card-t{font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.callout{padding:16px 20px;border-radius:8px;margin:16px 0;border-left:4px solid;}
+.co-i{background:var(--primary-lt);border-color:var(--primary);}
+.co-s{background:var(--success-lt);border-color:var(--success);}
+.co-w{background:var(--warn-lt);border-color:var(--warn);}
+.co-d{background:var(--danger-lt);border-color:var(--danger);}
+.co-t{font-weight:600;margin-bottom:4px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0;}
+.stat{text-align:center;padding:20px;background:var(--bg);border-radius:10px;}
+.stat-v{font-size:28px;font-weight:700;color:var(--primary);}
+.stat-l{font-size:13px;color:var(--muted);margin-top:4px;}
+.score-r{display:flex;align-items:center;gap:12px;margin:8px 0;}
+.score-l{width:120px;font-size:13px;color:var(--muted);flex-shrink:0;}
+.score-b{flex:1;height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
+.score-f{height:100%;border-radius:5px;}
+.score-v{width:40px;font-size:13px;font-weight:600;text-align:right;}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+.pros,.cons{padding:16px;border-radius:8px;}
+.pros{background:var(--success-lt);}.cons{background:var(--danger-lt);}
+.pros h4{color:var(--success);margin-top:0;}.cons h4{color:var(--danger);margin-top:0;}
+.toc{background:var(--bg);border-radius:10px;padding:20px 24px;margin:20px 0;}
+.toc-t{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.toc a{display:block;padding:5px 0;color:var(--primary);text-decoration:none;font-size:14px;}
+.toc a:hover{text-decoration:underline;}
+.compare th:first-child{width:160px;}
+.compare .ca{background:#eff6ff;}.compare .cb{background:#f5f3ff;}
+.mermaid{margin:20px 0;}
+.path-hdr{padding:24px;border-radius:12px;margin:24px 0 16px;color:#fff;}
+.path-a{background:linear-gradient(135deg,#2563eb,#3b82f6);}
+.path-b{background:linear-gradient(135deg,#7c3aed,#a78bfa);}
+.path-hdr h3{color:#fff;margin:0 0 4px;font-size:20px;}
+.path-hdr p{margin:0;opacity:.9;font-size:14px;}
+@media(max-width:768px){.container{padding:20px 16px;}.sec{padding:20px;}.cards{grid-template-columns:1fr;}.pros-cons{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>物理模板库前端重构方案</h1>
+  <div class="sub">以物理学科为试点的教学模板简化与品质升级</div>
+  <div class="meta">智教联思产品技术团队 &middot; 2026-06-02 &middot; V4.1</div>
+</div>
+
+<!-- TOC -->
+<div class="sec">
+  <div class="toc">
+    <div class="toc-t">目录</div>
+    <a href="#s1">1. 用户痛点分析</a>
+    <a href="#s2">2. 模板现状审计</a>
+    <a href="#s3">3. 竞品深度调研</a>
+    <a href="#s4">4. 重构方案对比与选择</a>
+    <a href="#s5">5. 推荐方案详细设计</a>
+    <a href="#s6">6. 视觉品质升级规划</a>
+    <a href="#s7">7. 实施计划</a>
+    <a href="#s8">8. 风险与缓解</a>
+  </div>
+</div>
+
+
+<!-- ===== 1. 用户痛点 ===== -->
+<div class="sec" id="s1">
+  <div class="sec-h"><div class="sec-n">1</div><h2>用户痛点分析</h2></div>
+
+  <p>在上周的物理学科教师回访中，多位一线高中物理教师反馈了使用模板时遇到的核心问题。以下从教师的实际操作路径出发，逐一还原痛点。</p>
+
+  <h3>1.1 操作路径冗长：从打开到开始教学需要7步</h3>
+  <p>以"给学生演示斜面受力分析"为例，教师的实际操作路径为：</p>
+  <ol>
+    <li>打开力学模板 → 进入模块选择Hub页面</li>
+    <li>在6个模块（力分析/运动/振动/波动/动量/能量）中找到"力分析"</li>
+    <li>进入模块概览，选择具体场景</li>
+    <li>进入场景编辑器界面</li>
+    <li>从左侧物体库中拖拽物体（方块/球体/锚点等7种）到画布</li>
+    <li>在右侧属性面板中逐一配置参数（质量、摩擦系数、弹性、尺寸、速度xy、角度、位置xy等12+个字段）</li>
+    <li>从编辑模式切换到运行模式，点击播放</li>
+  </ol>
+  <p>教师期望的操作路径应为：<strong>打开 → 选预设 → 调参 → 运行</strong>，3步以内完成。当前流程中有4步属于"工具学习成本"而非"教学操作"。</p>
+
+  <h3>1.2 参数暴露过多：无法区分哪些影响教学</h3>
+  <p>以力学模板的属性面板为例，一个物体的可配置参数包括：</p>
+  <table>
+    <thead><tr><th>参数</th><th>教学相关性</th><th>教师是否需要调整</th></tr></thead>
+    <tbody>
+      <tr><td>质量</td><td><span class="tag tag-g">核心</span></td><td>几乎每次都调</td></tr>
+      <tr><td>斜面角度</td><td><span class="tag tag-g">核心</span></td><td>几乎每次都调</td></tr>
+      <tr><td>摩擦系数</td><td><span class="tag tag-g">核心</span></td><td>经常调</td></tr>
+      <tr><td>初速度</td><td><span class="tag tag-o">场景相关</span></td><td>部分场景需要</td></tr>
+      <tr><td>弹性系数</td><td><span class="tag tag-o">高级</span></td><td>偶尔调</td></tr>
+      <tr><td>物体宽度/高度</td><td><span class="tag tag-r">无关</span></td><td>几乎不调</td></tr>
+      <tr><td>速度y分量</td><td><span class="tag tag-r">无关</span></td><td>几乎不调</td></tr>
+      <tr><td>精确位置x/y</td><td><span class="tag tag-r">无关</span></td><td>从不调</td></tr>
+      <tr><td>锁定旋转</td><td><span class="tag tag-r">无关</span></td><td>从不调</td></tr>
+      <tr><td>材质类型</td><td><span class="tag tag-r">无关</span></td><td>从不调</td></tr>
+    </tbody>
+  </table>
+  <p>12个参数中仅3个是核心教学参数，其余大部分与教学无关。教师面对全部暴露的参数面板，无法快速判断"哪些需要关注"。</p>
+
+  <h3>1.3 跨模板操作不一致：换模板要重新学习</h3>
+  <p>5个物理模板在交互方式上存在显著差异，教师在不同模板间切换时需要重新适应：</p>
+  <table>
+    <thead><tr><th>交互元素</th><th>力学模板</th><th>统一模拟器</th><th>光学</th><th>热学</th><th>天体</th></tr></thead>
+    <tbody>
+      <tr><td>播放控制位置</td><td>顶部工具栏</td><td>底部时间线</td><td>顶部栏</td><td>侧面板</td><td>右面板</td></tr>
+      <tr><td>参数调整方式</td><td>右侧滑块面板</td><td>右侧面板+画布拖拽</td><td>左侧控件</td><td>左侧面板</td><td>右侧折叠区</td></tr>
+      <tr><td>场景切换</td><td>Hub→模块→场景(3层)</td><td>Hash路由跳页面</td><td>顶部Tab</td><td>侧栏选择</td><td>模型列表</td></tr>
+      <tr><td>框架</td><td>React 19 + Zustand</td><td>React 18 + Radix</td><td>React 18 + Three.js</td><td>Vanilla TS</td><td>React 19 + Zustand</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.4 视觉品质未达预期</h3>
+  <p>各模板的渲染品质差距悬殊：</p>
+  <div class="score-r"><span class="score-l">热学 (physics07)</span><div class="score-b"><div class="score-f" style="width:75%;background:var(--success);"></div></div><span class="score-v">7.5/10</span></div>
+  <div class="score-r"><span class="score-l">天体 (visual_p9)</span><div class="score-b"><div class="score-f" style="width:70%;background:var(--success);"></div></div><span class="score-v">7.0/10</span></div>
+  <div class="score-r"><span class="score-l">光学 (p03)</span><div class="score-b"><div class="score-f" style="width:65%;background:var(--warn);"></div></div><span class="score-v">6.5/10</span></div>
+  <div class="score-r"><span class="score-l">统一模拟器 (p01)</span><div class="score-b"><div class="score-f" style="width:50%;background:var(--warn);"></div></div><span class="score-v">5.0/10</span></div>
+  <div class="score-r"><span class="score-l">力学 (mechanics)</span><div class="score-b"><div class="score-f" style="width:40%;background:var(--danger);"></div></div><span class="score-v">4.0/10</span></div>
+  <p>热学模板使用了径向渐变、高光、bloom后处理等高品质Canvas渲染技术，而力学模板仍为基础线稿风格，缺乏光影、质感和动效。整体未达到"一流可视化教学工具"的品质标准。</p>
+
+  <h3>1.5 痛点总结</h3>
+  <div class="callout co-d">
+    <p style="margin:0;">四大核心痛点的根源是同一个问题：<strong>当前模板按"场景编辑器"的思路设计，面向的是模板开发者而非一线教师。</strong>左侧物体库、多种工具模式、完整的撤销重做系统、十余个内部状态管理模块 —— 这是专业创作工具的架构，不是课堂教学演示工具应有的复杂度。教师需要的是"选场景 → 调参数 → 看效果"的简洁流程，而非从零搭建物理场景的全功能编辑器。</p>
+  </div>
+</div>
+
+
+<!-- ===== 2. 现状审计 ===== -->
+<div class="sec" id="s2">
+  <div class="sec-h"><div class="sec-n">2</div><h2>模板现状审计</h2></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-v">5</div><div class="stat-l">独立仓库</div></div>
+    <div class="stat"><div class="stat-v">~18</div><div class="stat-l">子模板/场景</div></div>
+    <div class="stat"><div class="stat-v">~494</div><div class="stat-l">源文件总数</div></div>
+    <div class="stat"><div class="stat-v">4种</div><div class="stat-l">技术栈</div></div>
+    <div class="stat"><div class="stat-v">~50%</div><div class="stat-l">UI代码重复率</div></div>
+    <div class="stat"><div class="stat-v">0</div><div class="stat-l">共享包</div></div>
+  </div>
+
+  <h3>2.1 各仓库详情</h3>
+  <table>
+    <thead><tr><th>仓库</th><th>包含子模板</th><th>技术栈</th><th>源文件</th><th>物理引擎</th><th>复杂度</th></tr></thead>
+    <tbody>
+      <tr><td><strong>phys_template_mechanics</strong></td><td>P-01力分析、P-02运动、P-05振动、P-06波动、P-12动量、P-14能量</td><td>React 19 + Zustand(12 stores) + planck-js + Tailwind 4</td><td>~140</td><td>planck-js (Box2D)</td><td><span class="tag tag-r">极高</span></td></tr>
+      <tr><td><strong>phys_template_p01</strong></td><td>物理沙盒、P-04电路、P-08电磁场、P-13电磁感应</td><td>React 18 + Zustand + Radix UI + Tailwind 3</td><td>~272</td><td>自研(vec2/geometry)</td><td><span class="tag tag-r">极高</span></td></tr>
+      <tr><td><strong>phys_template_p03</strong></td><td>P-03光学（折射/透镜/双缝/衍射/薄膜 5个模块）</td><td>React 18 + Three.js + SVG</td><td>~15</td><td>无（光线几何）</td><td><span class="tag tag-g">低</span></td></tr>
+      <tr><td><strong>physics07</strong></td><td>P-07热学（布朗运动/气体定律/分子运动/液柱/活塞 5个场景）</td><td>Vanilla TS + pnpm monorepo</td><td>~35</td><td>自研RK4求解器</td><td><span class="tag tag-o">中</span></td></tr>
+      <tr><td><strong>visual_p9</strong></td><td>P-09天体运动与引力</td><td>React 19 + Zustand + Tailwind 3</td><td>~32</td><td>自研轨道力学</td><td><span class="tag tag-g">低</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 代码资产分析</h3>
+  <p>尽管整体架构碎片化，但各模板中存在<strong>可复用的高价值资产</strong>：</p>
+  <table>
+    <thead><tr><th>资产类型</th><th>来源</th><th>复用价值</th></tr></thead>
+    <tbody>
+      <tr><td>2D刚体物理引擎(planck-js封装)</td><td>phys_template_mechanics</td><td><span class="tag tag-g">高</span> — 力学场景的核心计算</td></tr>
+      <tr><td>RK4数值求解器</td><td>physics07 @physics/core</td><td><span class="tag tag-g">高</span> — 通用ODE求解</td></tr>
+      <tr><td>轨道力学计算</td><td>visual_p9</td><td><span class="tag tag-g">高</span> — 天体运动场景</td></tr>
+      <tr><td>Canvas高品质渲染（径向渐变/bloom/3D质感）</td><td>physics07 CanvasManager</td><td><span class="tag tag-g">高</span> — 渲染品质标杆</td></tr>
+      <tr><td>Three.js 3D折射场景</td><td>phys_template_p03</td><td><span class="tag tag-o">中</span> — 光学专用</td></tr>
+      <tr><td>EM域实体/求解器/渲染器注册体系</td><td>phys_template_p01</td><td><span class="tag tag-o">中</span> — 电磁场景架构</td></tr>
+      <tr><td>UI组件(Button/Slider/Switch/Input等)</td><td>3个React模板</td><td><span class="tag tag-r">低</span> — 重复代码，需重建</td></tr>
+    </tbody>
+  </table>
+  <p>物理计算代码（引擎/求解器/力学模型）是最有价值的资产，应在重构中直接提取复用。UI层代码重复率高但质量参差，建议重新构建。</p>
+</div>
+
+
+<!-- ===== 3. 竞品调研 ===== -->
+<div class="sec" id="s3">
+  <div class="sec-h"><div class="sec-n">3</div><h2>竞品深度调研</h2></div>
+
+  <h3>3.1 PhET Interactive Simulations</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:120px;">开发方</th><td>科罗拉多大学（诺贝尔奖得主Carl Wieman创立），20年教育研究沉淀</td></tr>
+      <tr><th>内容规模</th><td>173个精品HTML5互动仿真，覆盖物理/化学/数学/生物/地球科学</td></tr>
+      <tr><th>用户数据</th><td>全球累计使用18亿次，支持132种语言，沉淀3664份教师原创教案</td></tr>
+      <tr><th>核心特点</th><td>游戏化探索、零门槛拖拽操作、参数可调+实时反馈、每个仿真聚焦单一概念</td></tr>
+      <tr><th>交互设计</th><td>3-6个参数、全画布沉浸、卡通风格、打开即可探索</td></tr>
+      <tr><th>设计原则</th><td>基于大量学生访谈的研究驱动设计：控件必须直觉化，不分散对科学概念的注意力</td></tr>
+      <tr><th>短板</th><td>纯人工制作产能极低（20年仅173个）；全球通用无中国教材对齐；仅单点仿真无讲义课件配套</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 火花学院</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:120px;">开发方</th><td>安徽习悦教育科技（火花思维旗下），依托中国科大新媒体研究院</td></tr>
+      <tr><th>核心定位</th><td>K12理科科学可视化教学资源中台，主打动态/立体/交互可视化素材</td></tr>
+      <tr><th>资源体系</th><td>四库：素材库（知识点级交互微件/3D模型/视频）、课件库、微课库、工具库</td></tr>
+      <tr><th>核心特点</th><td>素材制作精良、精准对齐多版本教材（10余种）、PPT插件/客户端多终端分发</td></tr>
+      <tr><th>交互设计</th><td>内容驱动、以观看和轻交互为主（1-3个参数）、暗底精美可视化</td></tr>
+      <tr><th>B端能力</th><td>火花开放平台提供API/SDK，支持按学科/学段授权商业化输出</td></tr>
+      <tr><th>短板</th><td>内容依赖人工制作产能低；仅"可视化观看"无练评闭环；无AI按需生成能力</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 NOBOOK虚拟实验室</h3>
+  <table>
+    <tbody>
+      <tr><th style="width:120px;">核心定位</th><td>深耕国内K12公立校的全学科虚拟实验仿真平台，国内进校覆盖率最高</td></tr>
+      <tr><th>内容规模</th><td>NB物理实验覆盖6大领域、194个经典实验、230+种器材</td></tr>
+      <tr><th>技术壁垒</th><td>自研物理/化学公式实时运算引擎（非预录动画），修改参数实时演算实验结果</td></tr>
+      <tr><th>核心特点</th><td>真实公式驱动的仿真精度；配套中考实验操作测评；26000+所学校/2000+机构</td></tr>
+      <tr><th>交互设计</th><td>深色主题、左侧控制面板+中央画布+右侧器材库、参数5-10个、器材组装模式</td></tr>
+      <tr><th>商业模式</th><td>免费体验+个人订阅(首月9.9元)+学校版(面议)+硬件厂商合作</td></tr>
+      <tr><th>短板</th><td>无AI能力；固定存量库无法按题目生成；<strong>UI老旧、信息密度高、交互繁琐</strong>（教师反馈）；低配设备易卡顿</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.4 竞品核心对比</h3>
+  <table>
+    <thead><tr><th>维度</th><th>PhET</th><th>火花学院</th><th>NOBOOK</th><th>我们当前</th></tr></thead>
+    <tbody>
+      <tr><td><strong>模板粒度</strong></td><td><span class="tag tag-g">单概念仿真</span></td><td><span class="tag tag-g">知识点级微件</span></td><td><span class="tag tag-g">单实验场景</span></td><td><span class="tag tag-r">知识领域级</span></td></tr>
+      <tr><td><strong>可见参数数</strong></td><td>3-6</td><td>1-3</td><td>5-10</td><td>10-20</td></tr>
+      <tr><td><strong>操作步骤数</strong></td><td>1-2步</td><td>1步（观看）</td><td>3-5步</td><td>5-7步</td></tr>
+      <tr><td><strong>学习曲线</strong></td><td>极低</td><td>几乎为零</td><td>中等</td><td>高</td></tr>
+      <tr><td><strong>视觉品质</strong></td><td>卡通清爽一致</td><td>精美3D动画</td><td>拟真但老旧</td><td>参差不齐(4-7.5分)</td></tr>
+      <tr><td><strong>内容产能</strong></td><td>极低（人工精制）</td><td>低（人工制作）</td><td>低（人工存量）</td><td>高（AI+模板）</td></tr>
+      <tr><td><strong>教材对齐</strong></td><td>无</td><td>10余种教材</td><td>全面对齐课标</td><td>可精准对齐</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 竞品短板 = 我方差异化机会</h3>
+  <div class="cards">
+    <div class="card" style="border-left:4px solid var(--teal);"><div class="card-t" style="color:var(--teal);">AI生成能力</div><p style="font-size:14px;margin:0;">三家竞品均依赖人工制作，产能有限、更新慢、长尾知识点覆盖不足。我方AI按需生成+模板兜底，可实现无限增量产出和个性化定制。</p></div>
+    <div class="card" style="border-left:4px solid var(--teal);"><div class="card-t" style="color:var(--teal);">教学全链路</div><p style="font-size:14px;margin:0;">竞品仅提供单点仿真/素材工具，无配套讲义、课件、习题体系。我方可实现"可视化素材+讲义+课件+习题"一站式成套产出。</p></div>
+    <div class="card" style="border-left:4px solid var(--teal);"><div class="card-t" style="color:var(--teal);">题目联动</div><p style="font-size:14px;margin:0;">竞品均为固定存量内容，无法根据具体题目实时生成可视化。我方可实现题目驱动的自动可视化生成。</p></div>
+  </div>
+
+  <div class="callout co-w">
+    <div class="co-t">关键结论</div>
+    <p style="margin:0;">三家竞品无一例外采用<strong>"一个模板/仿真 = 一个具体教学场景"</strong>的粒度设计。这是经过20年教育软件实践验证的设计规律。同时，即便如NOBOOK已按实验粒度拆分，但因信息密度偏高、UI老旧仍被教师批评"繁琐"—— <strong>模板粒度和信息密度必须同时解决</strong>。</p>
+  </div>
+</div>
+
+
+<!-- ===== 4. 方案对比与选择 ===== -->
+<div class="sec" id="s4">
+  <div class="sec-h"><div class="sec-n">4</div><h2>重构方案对比与选择</h2></div>
+
+  <p>基于用户痛点和竞品分析，我们提出两条重构路径，并评估后推荐最终方案。</p>
+
+  <!-- 方案 A -->
+  <div class="path-hdr path-a">
+    <h3>方案 A：在现有模板上渐进优化</h3>
+    <p>保持现有5个仓库的架构不变，通过参数精简、UI统一和视觉升级来改善体验</p>
+  </div>
+
+  <h4>方案A核心思路</h4>
+  <ul>
+    <li><strong>参数精简</strong>：审查每个子模板的所有参数，删除无用参数，将剩余参数分为"核心"和"高级"两层，默认只展示3-5个核心参数</li>
+    <li><strong>UI统一</strong>：提取共享UI组件库，统一播放控制位置、参数面板样式、结果展示方式</li>
+    <li><strong>视觉升级</strong>：引入共享渲染增强工具包，提升Canvas渲染品质（添加渐变、光影、粒子效果）</li>
+    <li><strong>导航简化</strong>：将力学模板的3层导航（Hub→模块→场景）简化为Tab直达</li>
+  </ul>
+
+  <div class="pros-cons">
+    <div class="pros"><h4>优势</h4><ul>
+      <li>改动范围可控，风险低</li>
+      <li>不影响已有部署和bridge协议</li>
+      <li>每个模板可独立改造、独立上线</li>
+      <li>开发周期短（1-2周可出首个改造模板）</li>
+    </ul></div>
+    <div class="cons"><h4>劣势</h4><ul>
+      <li><strong>粒度问题无法解决</strong> — 一个应用内仍需多场景切换</li>
+      <li>技术栈碎片化（4种框架）无法统一</li>
+      <li>长期维护成本未降低</li>
+      <li>与行业竞品的粒度设计不对齐</li>
+      <li>新模板开发仍需从零构建UI+渲染</li>
+    </ul></div>
+  </div>
+
+  <!-- 方案 B -->
+  <div class="path-hdr path-b">
+    <h3>方案 B：构建全新细粒度场景化模板体系</h3>
+    <p>对齐竞品设计范式，全新构建细粒度场景化模板体系，每个模板只聚焦一个具体的教学实验场景</p>
+  </div>
+
+  <h4>方案B核心思路</h4>
+  <ul>
+    <li><strong>细粒度拆分</strong>：一个模板 = 一个教学场景（如"斜面受力分析"、"串联电路"），打开即进入实验</li>
+    <li><strong>共享核心库</strong>：构建统一的UI组件库、渲染引擎、模板外壳，所有场景模板共用</li>
+    <li><strong>复用物理引擎</strong>：从现有模板中提取物理计算代码（planck-js封装、RK4求解器、轨道力学等），集成到新架构</li>
+    <li><strong>统一技术栈</strong>：React + Zustand + Canvas 2D / Three.js，消除技术碎片化</li>
+    <li><strong>视觉品质统一</strong>：统一渲染引擎，确保所有模板达到一流视觉标准</li>
+  </ul>
+
+  <div class="pros-cons">
+    <div class="pros"><h4>优势</h4><ul>
+      <li><strong>从根本上解决粒度问题</strong>，与竞品设计对齐</li>
+      <li>打开即用，操作流程从7步降至3步</li>
+      <li>统一技术栈，消除碎片化</li>
+      <li>共享库复用率极高，新增模板只需写场景配置</li>
+      <li>长期维护成本大幅降低</li>
+      <li>前端品质、渲染效果可从零设计到一流</li>
+    </ul></div>
+    <div class="cons"><h4>劣势</h4><ul>
+      <li>前期工程量较大（需构建共享库+拆分场景）</li>
+      <li>需为新模板定义新的snapshot结构</li>
+      <li>平台侧模板注册需配合调整</li>
+    </ul></div>
+  </div>
+
+  <h3>4.1 双方案全维度对比</h3>
+  <table class="compare">
+    <thead><tr><th>维度</th><th class="ca">方案A：渐进优化</th><th class="cb">方案B：场景化重构</th></tr></thead>
+    <tbody>
+      <tr><td><strong>粒度问题</strong></td><td class="ca">未解决（仍需多场景切换）</td><td class="cb">彻底解决（一模板一场景）</td></tr>
+      <tr><td><strong>参数密度</strong></td><td class="ca">精简+分层可解决</td><td class="cb">粒度拆细天然密度低+分层</td></tr>
+      <tr><td><strong>操作一致性</strong></td><td class="ca">部分改善（共享组件）</td><td class="cb">完全统一（共享shell+布局）</td></tr>
+      <tr><td><strong>视觉品质</strong></td><td class="ca">可提升（共享渲染工具）</td><td class="cb">统一渲染引擎，一致且高品质</td></tr>
+      <tr><td><strong>技术栈</strong></td><td class="ca">4种框架并存</td><td class="cb">统一React+Zustand+Canvas/Three</td></tr>
+      <tr><td><strong>新模板成本</strong></td><td class="ca">高（每个从零构建）</td><td class="cb">低（写场景配置+特有逻辑）</td></tr>
+      <tr><td><strong>长期维护</strong></td><td class="ca">高（5个异构仓库）</td><td class="cb">低（统一架构，改一处全局生效）</td></tr>
+      <tr><td><strong>竞品对齐</strong></td><td class="ca">部分对齐</td><td class="cb">完全对齐</td></tr>
+      <tr><td><strong>跨学科扩展</strong></td><td class="ca">有限</td><td class="cb">共享架构天然支持</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 推荐方案</h3>
+
+  <div class="callout co-s">
+    <div class="co-t">推荐策略：旧模板保留优化 + 全新构建方案B模板体系</div>
+    <p style="margin:0;">综合评估后，推荐以方案B为核心方向：<strong>现有模板按用户反馈做基础优化后保留</strong>（面向进阶用户和沙盒需求），<strong>同时全新开发一套细粒度场景化模板体系</strong>。新模板复用旧模板中高价值的物理引擎代码，前端从零设计，品质大幅提升。</p>
+  </div>
+
+  <p><strong>选择理由</strong>：</p>
+  <ol>
+    <li><strong>方案A无法解决核心矛盾</strong> — 即使参数精简，一个应用内6个场景的切换复杂度仍然存在，这是老师反馈"像编辑器"的根本原因</li>
+    <li><strong>方案B对齐行业验证过的设计范式</strong> — PhET、火花、NOBOOK三家无一例外采用一模板一场景的粒度</li>
+    <li><strong>旧模板保留避免风险</strong> — 不碰已上线的功能和数据，旧模板继续服务进阶用户；新模板做好一个上一个</li>
+    <li><strong>物理引擎代码直接复用</strong> — 旧模板最有价值的资产（物理计算逻辑）不需要重写，直接提取到新架构</li>
+    <li><strong>从零设计前端更高效</strong> — 不受旧模板4种技术栈的约束，统一用现代技术栈构建高品质前端</li>
+  </ol>
+</div>
+
+
+<!-- ===== 5. 推荐方案详细设计 ===== -->
+<div class="sec" id="s5">
+  <div class="sec-h"><div class="sec-n">5</div><h2>推荐方案详细设计</h2></div>
+
+  <h3>5.1 资产流向</h3>
+  <div class="mermaid">
+graph TB
+    subgraph OLD["现有模板（保留 + 基础优化）"]
+        O1["phys_template_mechanics<br/>6个力学子模板"]
+        O2["phys_template_p01<br/>4个电磁子模板"]
+        O3["phys_template_p03<br/>5个光学模块"]
+        O4["physics07<br/>5个热学场景"]
+        O5["visual_p9<br/>天体运动"]
+    end
+
+    subgraph EXTRACT["提取复用的核心资产"]
+        R1["planck-js 2D物理引擎"]
+        R2["RK4 数值求解器"]
+        R3["轨道力学计算"]
+        R4["光线追踪算法"]
+        R5["Canvas高品质渲染技术<br/>(径向渐变/bloom/3D质感)"]
+    end
+
+    subgraph NEW["全新场景化模板体系"]
+        N1["@edumind/core<br/>UI组件+模板外壳+设计tokens"]
+        N2["@edumind/renderer<br/>Canvas 2D增强+Three.js+粒子"]
+        N3["@edumind/physics<br/>统一物理引擎接口"]
+        N4["40-60个场景模板<br/>每个3-5个业务文件"]
+    end
+
+    OLD -->|提取物理引擎| EXTRACT
+    OLD -->|提取渲染技术| EXTRACT
+    EXTRACT --> NEW
+
+    style OLD fill:#fef2f2,stroke:#dc2626
+    style EXTRACT fill:#fffbeb,stroke:#d97706
+    style NEW fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+  </div>
+
+  <h3>5.2 模板拆分标准</h3>
+
+  <p>拆分的核心原则是<strong>"一个模板 = 一个教师可以独立讲授的具体教学场景"</strong>。具体判定标准如下：</p>
+
+  <table>
+    <thead><tr><th>标准</th><th>满足</th><th>不满足</th></tr></thead>
+    <tbody>
+      <tr><td><strong>单一物理场景</strong></td><td>斜面受力分析、薄透镜成像、串联电路</td><td>力的分析与合成（含斜面/悬挂/共点力多场景）</td></tr>
+      <tr><td><strong>无需场景切换</strong></td><td>打开即进入目标实验，无选择页</td><td>需要从列表/Tab中选择具体实验</td></tr>
+      <tr><td><strong>核心参数 ≤ 5个</strong></td><td>质量、角度、摩擦系数（3个）</td><td>同时涉及力学+运动+能量等多维参数</td></tr>
+      <tr><td><strong>教学目标单一</strong></td><td>理解斜面上的力分解</td><td>既要讲力分解又要讲运动规律又要讲能量守恒</td></tr>
+      <tr><td><strong>30秒上手</strong></td><td>教师30秒内能理解所有控件并开始演示</td><td>需要学习工具模式、导航层级、对象拖拽</td></tr>
+    </tbody>
+  </table>
+
+  <h4>拆分粒度示例</h4>
+  <p>以当前力学模板（phys_template_mechanics）为例，按上述标准应拆分到具体场景级别：</p>
+  <table>
+    <thead><tr><th>当前子模板</th><th>当前包含的场景</th><th>拆分后应为独立模板</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4">P-01 力的分析</td><td>斜面受力分析</td><td>独立模板</td></tr>
+      <tr><td>悬挂体受力分析</td><td>独立模板</td></tr>
+      <tr><td>共点力合成</td><td>独立模板</td></tr>
+      <tr><td>力的平衡</td><td>独立模板</td></tr>
+      <tr><td rowspan="3">P-02 运动</td><td>匀变速直线运动</td><td>独立模板</td></tr>
+      <tr><td>抛体运动</td><td>独立模板</td></tr>
+      <tr><td>圆周运动</td><td>独立模板</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:14px;color:var(--muted);">以此类推，其余子模板均需按具体教学场景逐一拆分。</p>
+
+  <h4>拆分规模估算</h4>
+  <p>按照上述标准，现有5个物理应用预计拆分为<strong>40-60个独立场景模板</strong>（具体数量需根据课标知识点逐一梳理后确定）。每个模板仅包含3-5个业务文件，依赖共享核心库运行。</p>
+
+  <div class="callout co-i">
+    <p style="margin:0;">具体的拆分清单将在开发启动时，结合高中物理课标知识点和现有模板内置场景逐一梳理确认。同时保留一个 <strong>P-Sandbox（物理沙盒）</strong>模板，承载自由搭建能力，面向有进阶需求的教师。</p>
+  </div>
+
+  <h3>5.3 新模板体系架构</h3>
+  <div class="mermaid">
+graph TB
+    subgraph CORE["共享核心层（一次构建，全局复用）"]
+        UI["@edumind/ui<br/>统一组件库"]
+        SHELL["@edumind/shell<br/>模板外壳"]
+        REN["@edumind/renderer<br/>渲染引擎"]
+        PHY["@edumind/physics<br/>物理引擎"]
+        BRIDGE["@edumind/bridge<br/>iframe通信"]
+    end
+
+    subgraph TEMPLATES["场景化模板（40-60个）"]
+        T1["斜面受力分析"]
+        T2["悬挂体受力"]
+        T3["匀变速直线运动"]
+        T4["串联电路"]
+        T5["行星轨道运动"]
+        T6["布朗运动"]
+        T7["薄透镜成像"]
+        T8["... 更多场景"]
+    end
+
+    CORE --> TEMPLATES
+
+    style CORE fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style TEMPLATES fill:#f0fdf4,stroke:#16a34a
+  </div>
+
+  <h3>5.4 单个场景模板结构</h3>
+  <p>每个模板极其轻量，仅包含3-5个业务文件：</p>
+  <div class="mermaid">
+graph LR
+    subgraph TPL["templates/incline-force/ (3-5个文件)"]
+        CFG["scene.config.ts<br/>· 参数schema(核心/高级)<br/>· 读数定义"]
+        SCENE["InclineScene.tsx<br/>场景Canvas渲染"]
+        HELP["incline-helpers.ts<br/>斜面力计算"]
+        ENTRY["index.tsx<br/>组装入口"]
+    end
+
+    S["@edumind/shell"] -->|提供TopBar/ParamPanel/PlaybackControls| ENTRY
+    R["@edumind/renderer"] -->|提供Canvas工具/粒子/特效| SCENE
+    P["@edumind/physics"] -->|提供planck封装/求解器| HELP
+
+    style TPL fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+  </div>
+
+  <h3>5.5 物理计算架构：公式直算 + 引擎模拟双模式</h3>
+
+  <p>现有力学模板基于通用物理引擎 Box2D/planck-js 构建，该引擎按真实世界规律模拟物理行为。但高中物理教学中大量使用<strong>理想化条件</strong>（光滑平面、完全弹性碰撞、轻绳不可伸长、理想气体等），通用引擎难以精确实现这些设定，导致教师反馈仿真结果与教科书公式不一致。</p>
+
+  <p>新架构的 @edumind/physics 包提供<strong>两种计算模式</strong>，按场景需求选用：</p>
+
+  <table>
+    <thead><tr><th>模式</th><th>原理</th><th>适用场景</th><th>特点</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag tag-g">公式直算</span></td>
+        <td>直接用物理公式计算结果<br/>F=ma, E=mgh, p=mv, T²=4π²r³/GM 等</td>
+        <td>大部分教学场景（力分析、运动、能量守恒、电路、天体等）</td>
+        <td>结果100%匹配教科书；支持理想化条件（无摩擦、完全弹性等）；参数变化即时出结果</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-o">引擎模拟</span></td>
+        <td>调用 planck-js 等物理引擎<br/>做实时刚体/碰撞/约束模拟</td>
+        <td>需要真实物理行为的特殊场景（多体碰撞演示、复杂约束系统、物理沙盒）</td>
+        <td>行为逼真；支持自由搭建；但无法保证与教科书公式精确一致</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-i">
+    <p style="margin:0;"><strong>设计原则</strong>：教学场景默认使用公式直算模式，确保物理精准性和教科书一致性。引擎模拟模式仅用于沙盒和需要真实碰撞效果的特殊场景。两种模式共用同一套渲染管线，教师无感知差异。</p>
+  </div>
+
+  <h4>现有代码资产的复用策略</h4>
+  <table>
+    <thead><tr><th>资产</th><th>策略</th><th>原因</th></tr></thead>
+    <tbody>
+      <tr><td>RK4 数值求解器</td><td><span class="tag tag-g">直接复用</span></td><td>通用数值求解，与引擎无关，公式直算模式的核心工具</td></tr>
+      <tr><td>轨道力学计算</td><td><span class="tag tag-g">直接复用</span></td><td>自研代码，按公式计算，天然支持理想设定</td></tr>
+      <tr><td>Canvas 渲染技术</td><td><span class="tag tag-o">参考重建</span></td><td>渲染思路（径向渐变/bloom/3D质感）可复用，需适配新架构</td></tr>
+      <tr><td>planck-js 力学模拟</td><td><span class="tag tag-o">场景化决策</span></td><td>沙盒和碰撞演示场景保留使用；理想化教学场景改用公式直算</td></tr>
+      <tr><td>EM 域注册体系</td><td><span class="tag tag-o">参考架构</span></td><td>实体-求解器-渲染器的模式可借鉴，但代码耦合度高需重写</td></tr>
+      <tr><td>UI 组件代码</td><td><span class="tag tag-r">重新构建</span></td><td>跨模板重复率50%但质量参差，不如统一重建</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.6 参数分层策略</h3>
+  <table>
+    <thead><tr><th>层级</th><th>规则</th><th>举例（斜面受力）</th><th>展示方式</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tag-g">核心参数</span></td><td>直接影响核心物理现象，不超过5个</td><td>质量、角度、摩擦系数、显示分力</td><td>默认展示，滑块+数值</td></tr>
+      <tr><td><span class="tag tag-o">高级参数</span></td><td>影响细节，不影响核心理解</td><td>弹性系数、重力加速度、空气阻力</td><td>"高级设置"折叠区</td></tr>
+      <tr><td><span class="tag tag-r">删除参数</span></td><td>纯技术/调试用，与教学无关</td><td>物体宽高、精确坐标、材质、锁定旋转</td><td>直接移除</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.7 渲染技术选型</h3>
+  <table>
+    <thead><tr><th>技术</th><th>角色</th><th>适用场景</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Canvas 2D</strong></td><td>主力渲染技术</td><td>力学矢量、电路、波动曲线、热学粒子等大部分2D仿真</td></tr>
+      <tr><td><strong>Three.js / WebGL</strong></td><td>3D场景专用</td><td>天体运动、电磁场3D可视化、光学折射、分子结构</td></tr>
+      <tr><td><strong>SVG</strong></td><td>标注叠加层</td><td>力矢量标签、电路元件符号、公式标注（叠加在Canvas上）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.8 预期效果</h3>
+  <div class="cards">
+    <div class="card" style="border-top:3px solid var(--danger);">
+      <div class="card-t" style="color:var(--danger);">改造前（当前）</div>
+      <ul style="font-size:14px;">
+        <li>打开→选模块→选场景→拖物体→设12参数→切运行模式→播放（7步）</li>
+        <li>跨模板操作全不一致，4种技术栈</li>
+        <li>视觉品质4.0-7.5分，参差不齐</li>
+        <li>新增模板需从零开发全部代码</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:3px solid var(--success);">
+      <div class="card-t" style="color:var(--success);">改造后（目标）</div>
+      <ul style="font-size:14px;">
+        <li>打开→选预设→调3个参数→运行（3步）</li>
+        <li>所有模板统一交互、统一布局、统一控件</li>
+        <li>视觉品质统一8.5+分，Canvas/Three.js高品质渲染</li>
+        <li>新增模板仅需写3-5个场景配置文件</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== 6. 视觉品质 ===== -->
+<div class="sec" id="s6">
+  <div class="sec-h"><div class="sec-n">6</div><h2>视觉品质升级规划</h2></div>
+
+  <p>目标：所有新模板达到<strong>一流水准</strong>，兼顾观赏性和教学精准性。</p>
+
+  <h3>6.1 各物理主题升级方向</h3>
+  <table>
+    <thead><tr><th>主题</th><th>当前状态</th><th>升级目标</th><th>渲染技术</th></tr></thead>
+    <tbody>
+      <tr><td><strong>力学</strong></td><td>线稿风格，无光影质感</td><td>3D质感物体 + 发光力矢量 + 运动轨迹粒子尾迹</td><td>Canvas 2D增强 / Three.js</td></tr>
+      <tr><td><strong>电路</strong></td><td>功能性元件符号</td><td>电流粒子流动画 + 发光导线 + 3D器件</td><td>Canvas粒子 + SVG元件叠加</td></tr>
+      <tr><td><strong>电磁场</strong></td><td>2D场线/箭头</td><td>3D电磁场线 + 场强色彩映射 + 带电粒子运动</td><td>Three.js (Line2 + 自定义Shader)</td></tr>
+      <tr><td><strong>光学</strong></td><td>SVG多层光晕+局部3D</td><td>全3D光路可视化 + 体积光效果 + 干涉彩虹色</td><td>Three.js ShaderMaterial</td></tr>
+      <tr><td><strong>热学</strong></td><td>已有3D质感和bloom（最高品质）</td><td>升级为GPU粒子系统 + 温度色彩映射</td><td>Three.js InstancedMesh</td></tr>
+      <tr><td><strong>天体</strong></td><td>2D径向渐变+光晕</td><td>3D行星纹理贴图 + 星空粒子系统 + 引力场可视化</td><td>Three.js (SphereGeometry + 环境贴图)</td></tr>
+      <tr><td><strong>波动</strong></td><td>基础波形曲线</td><td>3D波面 + 干涉图样 + 驻波节点高亮</td><td>Three.js PlaneGeometry(顶点位移)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 关键视觉效果</h3>
+  <div class="cards">
+    <div class="card"><div class="card-t">粒子系统</div><p style="font-size:14px;margin:0;">Three.js Points / InstancedMesh。气体分子运动、电流粒子流、碰撞火花、能量转换粒子流。</p></div>
+    <div class="card"><div class="card-t">光影与材质</div><p style="font-size:14px;margin:0;">PBR材质+环境光遮蔽。金属器材(滑轮/弹簧秤)、玻璃质感(棱镜/透镜)、液体表面反射。</p></div>
+    <div class="card"><div class="card-t">后处理效果</div><p style="font-size:14px;margin:0;">EffectComposer / Canvas bloom。力矢量发光、电场线辉光、选中态光晕、运动尾迹。</p></div>
+    <div class="card"><div class="card-t">过渡动画</div><p style="font-size:14px;margin:0;">参数调节平滑变化、场景切换过渡、面板展开收起、预设加载动画。</p></div>
+  </div>
+
+  <h3>6.3 性能约束</h3>
+  <div class="callout co-w">
+    <div class="co-t">性能红线</div>
+    <p style="margin:0;"><strong>60fps</strong>（集显笔记本）| <strong>首屏 &lt; 3s</strong>（校园网）| <strong>内存 &lt; 200MB</strong> | GPU能力检测+Canvas 2D自动降级 | Three.js按需动态导入 | 粒子上限10000 | 纹理KTX2压缩</p>
+  </div>
+</div>
+
+
+<!-- ===== 7. 实施计划 ===== -->
+<div class="sec" id="s7">
+  <div class="sec-h"><div class="sec-n">7</div><h2>实施计划</h2></div>
+
+  <p>物理部分作为试点，<strong>目标2周内完成全部重构</strong>。借助AI辅助开发（Claude Code / Codex）大幅提升生产力。</p>
+
+  <div class="mermaid">
+gantt
+    title 物理模板重构 — 2周冲刺计划
+    dateFormat YYYY-MM-DD
+    axisFormat %m/%d
+
+    section Week 1：基础 + 首批场景
+    共享核心库(UI/Shell/Bridge)           :a1, 2026-06-02, 3d
+    渲染引擎(Canvas增强/Three.js)          :a2, 2026-06-02, 3d
+    物理引擎提取与封装                     :a3, 2026-06-02, 2d
+    力学场景批量开发(~12个)                :b1, 2026-06-05, 3d
+    电磁场景批量开发(~8个)                 :b2, 2026-06-06, 2d
+
+    section Week 2：全量 + 上线
+    光学场景批量开发(~8个)                 :c1, 2026-06-09, 2d
+    热学+天体场景(~8个)                    :c2, 2026-06-09, 2d
+    波动+振动+其余场景(~8个)               :c3, 2026-06-11, 1d
+    集成测试 + 部署联调                    :c5, 2026-06-12, 2d
+    旧模板基础优化(并行)                   :d1, 2026-06-02, 10d
+  </div>
+
+  <h3>7.1 Week 1：基础设施 + 力学/电磁场景</h3>
+  <table>
+    <thead><tr><th>天数</th><th>任务</th><th>产出</th></tr></thead>
+    <tbody>
+      <tr><td>Day 1-3</td><td>并行开发共享核心库（UI组件、模板外壳、渲染引擎、物理引擎接口）</td><td>可复用的共享基础设施</td></tr>
+      <tr><td>Day 3-5</td><td>批量开发力学类场景模板（斜面受力/悬挂受力/共点力合成/匀变速直线运动/抛体运动/碰撞...~12个）+ 电磁类场景（串联电路/并联电路/电磁场/电磁感应...~8个）</td><td>~20个场景模板</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 Week 2：全量铺开 + 上线</h3>
+  <table>
+    <thead><tr><th>天数</th><th>任务</th><th>产出</th></tr></thead>
+    <tbody>
+      <tr><td>Day 6-8</td><td>批量开发剩余场景（光学/热学/天体/波动/振动等~24个），每个模板基于共享库仅需编写3-5个文件</td><td>全部40-60个模板完成</td></tr>
+      <tr><td>Day 9-10</td><td>集成测试、部署联调、平台适配、上线</td><td>物理部分全量上线</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 后续扩展</h3>
+  <p>物理试点完成后，同一架构可直接扩展到化学和数学模板，共享核心库零成本复用。</p>
+</div>
+
+
+<!-- ===== 8. 风险 ===== -->
+<div class="sec" id="s8">
+  <div class="sec-h"><div class="sec-n">8</div><h2>风险与缓解</h2></div>
+
+  <table>
+    <thead><tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr></thead>
+    <tbody>
+      <tr><td><strong>共享库API设计过度</strong></td><td><span class="tag tag-r">高</span></td><td><span class="tag tag-o">中</span></td><td>以首批5个模板的实际需求驱动设计，先最小可用集，再迭代</td></tr>
+      <tr><td><strong>旧模板物理引擎代码耦合度高，提取困难</strong></td><td><span class="tag tag-o">中</span></td><td><span class="tag tag-o">中</span></td><td>优先提取独立的计算模块（求解器/向量/常量），UI耦合部分重写</td></tr>
+      <tr><td><strong>低端校园设备性能不足</strong></td><td><span class="tag tag-r">高</span></td><td><span class="tag tag-o">中</span></td><td>GPU能力检测+Canvas 2D降级方案；在真实校园硬件上测试</td></tr>
+      <tr><td><strong>新旧模板并存期间snapshot不兼容</strong></td><td><span class="tag tag-o">中</span></td><td><span class="tag tag-g">低</span></td><td>新模板定义新的snapshot schema；旧模板保留作为fallback</td></tr>
+      <tr><td><strong>2周工期紧张</strong></td><td><span class="tag tag-o">中</span></td><td><span class="tag tag-o">中</span></td><td>共享库架构设计精简，不过度抽象；AI辅助开发提升效率；新模板做好一个上一个</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout co-s" style="margin-top:24px;">
+    <div class="co-t">总结</div>
+    <p style="margin:0;">本方案通过<strong>"保留旧模板 + 全新构建场景化模板体系"</strong>的策略，在不影响现有功能的前提下，从根本上解决教师反馈的四大痛点 —— 模板粒度过大、参数过载、操作不一致、视觉品质不够。新体系复用旧模板的物理引擎资产，采用统一的Canvas/Three.js高品质渲染引擎和标准化的UI组件库，实现"打开即用、3步操作、一流视觉"的目标。物理部分计划2周内完成全量上线，完成后可直接扩展至化学和数学学科。</p>
+  </div>
+</div>
+
+
+<!-- Footer -->
+<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">
+  <p>智教联思 &middot; 物理模板库前端重构方案 V4.1</p>
+  <p>2026-06-02</p>
+</div>
+
+</div>
+</body>
+</html>

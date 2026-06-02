@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { COLORS } from '@/styles/tokens';
 import {
   type VoltageResistanceCurvePoint,
@@ -8,6 +8,7 @@ import {
   type VoltageResistanceMethodReading,
 } from '@/domains/em/logic/voltage-resistance-method';
 import { useVoltageResistanceMethod } from './useVoltageResistanceMethod';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 interface VoltageResistanceMethodPageProps {
   onBack: () => void;
@@ -56,6 +57,16 @@ export function VoltageResistanceMethodPage({
   const [state, setState] = useState<VoltageResistanceMethodPageState>(DEFAULT_STATE);
   const { result, curve, chartMaxRx, activeReading, inactiveReading } =
     useVoltageResistanceMethod(state);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-voltage-resistance-method', {
+    getSnapshot: () => ({ state }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{ state: Partial<VoltageResistanceMethodPageState> }>;
+      if (value.state) {
+        setState((previous) => ({ ...previous, ...value.state }));
+      }
+    },
+  }), [state]);
 
   const setParam = (key: keyof VoltageResistanceMethodPageState, value: number | string) => {
     setState((prev) => ({ ...prev, [key]: value }));

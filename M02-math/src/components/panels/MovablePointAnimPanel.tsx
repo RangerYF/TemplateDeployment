@@ -201,10 +201,18 @@ export function MovablePointAnimPanel() {
         }}>
           t = {point.params.t.toFixed(4)}
         </p>
+        <p style={{
+          fontSize: '11px',
+          color: COLORS.textSecondary,
+          margin: '8px 0 0',
+          lineHeight: 1.5,
+        }}>
+          这个点会始终附着在当前图形上，可手动拖动，也可按下面的按钮让它自动沿曲线运动。
+        </p>
       </div>
 
       {/* ── Step controls ────────────────────────────────────────────────── */}
-      <Section label="帧进控制">
+      <Section label="手动移动">
         <div style={{ display: 'flex', gap: '4px' }}>
           <StepBtn disabled={isPlaying} onClick={() => handleStep(-STEP_DELTA * 10)}>
             <SkipBack size={11} />
@@ -224,7 +232,7 @@ export function MovablePointAnimPanel() {
       </Section>
 
       {/* ── Animation controls ───────────────────────────────────────────── */}
-      <Section label="自动播放">
+      <Section label="自动运动">
         {/* Duration */}
         <div style={{ marginBottom: '10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>

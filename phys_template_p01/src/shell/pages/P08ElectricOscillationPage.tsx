@@ -3,6 +3,7 @@ import { Select } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 interface Props {
   onBack: () => void;
@@ -186,6 +187,53 @@ export function P08ElectricOscillationPage({ onBack }: Props) {
   const [showParticles, setShowParticles] = useState(true);
   const [showDirectionGuide, setShowDirectionGuide] = useState(true);
   const [animationPhase, setAnimationPhase] = useState(0);
+
+  useEffect(() => registerPageSnapshotAdapter('p08-electric-oscillation', {
+    getSnapshot: () => ({
+      particleCount,
+      speed,
+      amplitude,
+      frequency,
+      fieldDirectionMode,
+      showFieldArrows,
+      showTrajectories,
+      showParticles,
+      showDirectionGuide,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        particleCount: number;
+        speed: number;
+        amplitude: number;
+        frequency: number;
+        fieldDirectionMode: FieldDirectionMode;
+        showFieldArrows: boolean;
+        showTrajectories: boolean;
+        showParticles: boolean;
+        showDirectionGuide: boolean;
+      }>;
+      if (typeof value.particleCount === 'number') setParticleCount(value.particleCount);
+      if (typeof value.speed === 'number') setSpeed(value.speed);
+      if (typeof value.amplitude === 'number') setAmplitude(value.amplitude);
+      if (typeof value.frequency === 'number') setFrequency(value.frequency);
+      if (value.fieldDirectionMode) setFieldDirectionMode(value.fieldDirectionMode);
+      if (typeof value.showFieldArrows === 'boolean') setShowFieldArrows(value.showFieldArrows);
+      if (typeof value.showTrajectories === 'boolean') setShowTrajectories(value.showTrajectories);
+      if (typeof value.showParticles === 'boolean') setShowParticles(value.showParticles);
+      if (typeof value.showDirectionGuide === 'boolean') setShowDirectionGuide(value.showDirectionGuide);
+      setAnimationPhase(0);
+    },
+  }), [
+    amplitude,
+    fieldDirectionMode,
+    frequency,
+    particleCount,
+    showDirectionGuide,
+    showFieldArrows,
+    showParticles,
+    showTrajectories,
+    speed,
+  ]);
 
   useEffect(() => {
     let frameId = 0;

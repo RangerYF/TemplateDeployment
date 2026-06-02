@@ -1,5 +1,6 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { COLORS } from '@/styles/tokens';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 import {
   buildHalfDeflectionCurve,
   calculateAmmeterHalfDeflection,
@@ -83,6 +84,45 @@ export function HalfDeflectionComparisonView({ onBack }: Props) {
   const [mode, setMode] = useState<HalfDeflectionMode>('ammeter');
   const [paramsByMode, setParamsByMode] = useState<Record<HalfDeflectionMode, HalfDeflectionPageParams>>(DEFAULT_PARAMS);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [ammeterBranchClosed, setAmmeterBranchClosed] = useState(false);
+  const [voltmeterBypassClosed, setVoltmeterBypassClosed] = useState(true);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-half-deflection-comparison', {
+    getSnapshot: () => ({
+      mode,
+      paramsByMode,
+      showAdvanced,
+      ammeterBranchClosed,
+      voltmeterBypassClosed,
+    }),
+    loadSnapshot: (snapshot) => {
+      const value = snapshot as Partial<{
+        mode: HalfDeflectionMode;
+        paramsByMode: Partial<Record<HalfDeflectionMode, Partial<HalfDeflectionPageParams>>>;
+        showAdvanced: boolean;
+        ammeterBranchClosed: boolean;
+        voltmeterBypassClosed: boolean;
+      }>;
+      if (value.paramsByMode) {
+        setParamsByMode((prev) => ({
+          ammeter: { ...prev.ammeter, ...value.paramsByMode?.ammeter },
+          voltmeter: { ...prev.voltmeter, ...value.paramsByMode?.voltmeter },
+        }));
+      }
+      if (value.mode) {
+        setMode(value.mode);
+      }
+      if (typeof value.showAdvanced === 'boolean') {
+        setShowAdvanced(value.showAdvanced);
+      }
+      if (typeof value.ammeterBranchClosed === 'boolean') {
+        setAmmeterBranchClosed(value.ammeterBranchClosed);
+      }
+      if (typeof value.voltmeterBypassClosed === 'boolean') {
+        setVoltmeterBypassClosed(value.voltmeterBypassClosed);
+      }
+    },
+  }), [ammeterBranchClosed, mode, paramsByMode, showAdvanced, voltmeterBypassClosed]);
 
   const params = paramsByMode[mode];
 
@@ -177,6 +217,10 @@ export function HalfDeflectionComparisonView({ onBack }: Props) {
           params={params}
           result={result}
           onApplyHalfResistance={applyHalfResistance}
+          ammeterBranchClosed={ammeterBranchClosed}
+          onChangeAmmeterBranchClosed={setAmmeterBranchClosed}
+          voltmeterBypassClosed={voltmeterBypassClosed}
+          onChangeVoltmeterBypassClosed={setVoltmeterBypassClosed}
         />
         <HalfRightPanel mode={mode} result={result} />
       </div>
@@ -322,11 +366,19 @@ function HalfCenterPanel({
   params,
   result,
   onApplyHalfResistance,
+  ammeterBranchClosed,
+  onChangeAmmeterBranchClosed,
+  voltmeterBypassClosed,
+  onChangeVoltmeterBypassClosed,
 }: {
   mode: HalfDeflectionMode;
   params: HalfDeflectionPageParams;
   result: HalfDeflectionViewResult;
   onApplyHalfResistance: (value: number) => void;
+  ammeterBranchClosed: boolean;
+  onChangeAmmeterBranchClosed: (value: boolean) => void;
+  voltmeterBypassClosed: boolean;
+  onChangeVoltmeterBypassClosed: (value: boolean) => void;
 }) {
   const readingLabel = mode === 'ammeter' ? 'I' : 'U';
   const readingText = mode === 'ammeter' ? formatCurrent : formatVoltage;
@@ -339,11 +391,15 @@ function HalfCenterPanel({
           <StandardAmmeterCircuitCard
             result={result}
             onApplyHalfResistance={onApplyHalfResistance}
+            branchClosed={ammeterBranchClosed}
+            onBranchClosedChange={onChangeAmmeterBranchClosed}
           />
         ) : (
           <StandardVoltmeterCircuitCard
             result={result}
             onApplyHalfResistance={onApplyHalfResistance}
+            bypassClosed={voltmeterBypassClosed}
+            onBypassClosedChange={onChangeVoltmeterBypassClosed}
           />
         )}
         <ComparisonCard
@@ -602,11 +658,14 @@ function CircuitDetailCard({ title, children }: { title: string; children: React
 function StandardAmmeterCircuitCard({
   result,
   onApplyHalfResistance,
+  branchClosed,
+  onBranchClosedChange,
 }: {
   result: HalfDeflectionViewResult;
   onApplyHalfResistance: (value: number) => void;
+  branchClosed: boolean;
+  onBranchClosedChange: (value: boolean) => void;
 }) {
-  const [branchClosed, setBranchClosed] = useState(false);
   const circuitWidth = 440;
   const circuitHeight = 280;
   const activeResult = branchClosed ? result.current : result.baseline;
@@ -651,7 +710,7 @@ function StandardAmmeterCircuitCard({
         { value: 'closed', label: 'S2 闭合' },
       ]}
       activeValue={branchClosed ? 'closed' : 'open'}
-      onChange={(value) => setBranchClosed(value === 'closed')}
+      onChange={(value) => onBranchClosedChange(value === 'closed')}
       conclusion={
         <>
           <div className="text-[11px]" style={{ color: pageStyle.secondary, lineHeight: 1.7 }}>
@@ -862,11 +921,14 @@ function StandardAmmeterCircuitCard({
 function StandardVoltmeterCircuitCard({
   result,
   onApplyHalfResistance,
+  bypassClosed,
+  onBypassClosedChange,
 }: {
   result: HalfDeflectionViewResult;
   onApplyHalfResistance: (value: number) => void;
+  bypassClosed: boolean;
+  onBypassClosedChange: (value: boolean) => void;
 }) {
-  const [bypassClosed, setBypassClosed] = useState(true);
   const circuitWidth = 440;
   const circuitHeight = 280;
   const isBalanced = !bypassClosed && result.current.isHalfDeflection;
@@ -914,7 +976,7 @@ function StandardVoltmeterCircuitCard({
         { value: 'open', label: 'S2 断开' },
       ]}
       activeValue={bypassClosed ? 'closed' : 'open'}
-      onChange={(value) => setBypassClosed(value === 'closed')}
+      onChange={(value) => onBypassClosedChange(value === 'closed')}
       conclusion={
         <>
           <div className="text-[11px]" style={{ color: pageStyle.secondary, lineHeight: 1.7 }}>

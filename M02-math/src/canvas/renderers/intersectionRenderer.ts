@@ -1,6 +1,7 @@
 import type { Viewport } from '@/canvas/Viewport';
 import type { FunctionIntersection } from '@/engine/functionIntersection';
 import type { FunctionEntry } from '@/types';
+import { LabelPlacer } from '@/canvas/renderers/labelStrategy';
 import { COLORS } from '@/styles/colors';
 
 function roundRectPath(
@@ -62,6 +63,7 @@ export function renderIntersections(
   viewport: Viewport,
 ): void {
   ctx.save();
+  const placer = new LabelPlacer(viewport.width, viewport.height);
 
   intersections.forEach((intersection, index) => {
     if (
@@ -78,6 +80,7 @@ export function renderIntersections(
     const [cx, cy] = viewport.toCanvas(intersection.mathX, intersection.mathY);
 
     drawHalfRing(ctx, cx, cy, 7, fn1?.color ?? COLORS.warning, fn2?.color ?? COLORS.warning);
+    placer.reserve(cx, cy, 11, 11);
 
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     ctx.beginPath();
@@ -96,31 +99,45 @@ export function renderIntersections(
     const label = `X${index + 1}`;
     const coordText = `${label} (${formatCoord(intersection.mathX)}, ${formatCoord(intersection.mathY)})`;
 
-    ctx.font = '10px monospace';
+    ctx.font = '700 11px monospace';
     const textWidth = ctx.measureText(coordText).width;
-    const boxW = textWidth + 12;
-    const boxH = 18;
-    let boxX = cx + 10;
-    let boxY = cy - boxH - 10;
+    const boxW = textWidth + 16;
+    const boxH = 22;
+    const placed = placer.place({
+      text: coordText,
+      anchorX: cx,
+      anchorY: cy,
+      textWidth: boxW,
+      textHeight: boxH,
+      offset: 16,
+      preferredDir: index % 2 === 0 ? 1 : 7,
+    });
+    const centerX = placed?.x ?? Math.min(Math.max(cx + boxW / 2 + 16, boxW / 2 + 6), viewport.width - boxW / 2 - 6);
+    const centerY = placed?.y ?? Math.min(Math.max(cy - boxH / 2 - 16, boxH / 2 + 6), viewport.height - boxH / 2 - 6);
+    const boxX = centerX - boxW / 2;
+    const boxY = centerY - boxH / 2;
 
-    if (boxX + boxW > viewport.width - 4) boxX = cx - boxW - 10;
-    if (boxY < 4) boxY = cy + 10;
-
-    boxX = Math.max(4, Math.min(boxX, viewport.width - boxW - 4));
-    boxY = Math.max(4, Math.min(boxY, viewport.height - boxH - 4));
-
-    ctx.fillStyle = 'rgba(255,255,255,0.94)';
-    roundRectPath(ctx, boxX, boxY, boxW, boxH, 5);
+    ctx.fillStyle = 'rgba(17,24,39,0.94)';
+    roundRectPath(ctx, boxX, boxY, boxW, boxH, 7);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(251,191,36,0.75)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(251,191,36,0.95)';
+    ctx.lineWidth = 1.4;
     roundRectPath(ctx, boxX, boxY, boxW, boxH, 5);
     ctx.stroke();
 
-    ctx.fillStyle = COLORS.textPrimary;
+    ctx.fillStyle = '#F9FAFB';
     ctx.textBaseline = 'middle';
-    ctx.fillText(coordText, boxX + 6, boxY + boxH / 2);
+    ctx.fillText(coordText, boxX + 8, boxY + boxH / 2);
+
+    ctx.strokeStyle = 'rgba(251,191,36,0.65)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    const leaderX = centerX + (centerX >= cx ? -boxW / 2 + 4 : boxW / 2 - 4);
+    const leaderY = centerY + (centerY >= cy ? -boxH / 2 + 4 : boxH / 2 - 4);
+    ctx.lineTo(leaderX, leaderY);
+    ctx.stroke();
   });
 
   ctx.restore();

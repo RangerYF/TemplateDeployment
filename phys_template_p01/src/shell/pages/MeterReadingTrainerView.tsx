@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from '@/styles/tokens';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,6 +13,7 @@ import {
   type MeterReadingQuestion,
   type MeterTrainingSpec,
 } from '@/domains/em/logic/meter-reading-trainer';
+import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
 
 const pageStyle = {
   pageBg: COLORS.bgPage,
@@ -64,12 +65,48 @@ export function MeterReadingTrainerView({ onBack }: Props) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [questionIndex, setQuestionIndex] = useState(1);
   const [stats, setStats] = useState<TrainerStats>(INITIAL_STATS);
+  const restoringSnapshotRef = useRef(false);
+
+  useEffect(() => registerPageSnapshotAdapter('p04-meter-reading-trainer', {
+    getSnapshot: () => ({
+      family,
+      readingMode,
+      question,
+      answer,
+      feedback,
+      questionIndex,
+      stats,
+    }),
+    loadSnapshot: (snapshot) => {
+      restoringSnapshotRef.current = true;
+      const value = snapshot as Partial<{
+        family: MeterReadingFamily;
+        readingMode: MeterReadingMode;
+        question: MeterReadingQuestion;
+        answer: string;
+        feedback: FeedbackState | null;
+        questionIndex: number;
+        stats: TrainerStats;
+      }>;
+      if (value.family) setFamily(value.family);
+      if (value.readingMode) setReadingMode(value.readingMode);
+      if (value.question) setQuestion(value.question);
+      if (typeof value.answer === 'string') setAnswer(value.answer);
+      if ('feedback' in value) setFeedback(value.feedback ?? null);
+      if (typeof value.questionIndex === 'number') setQuestionIndex(value.questionIndex);
+      if (value.stats) setStats(value.stats);
+      window.setTimeout(() => {
+        restoringSnapshotRef.current = false;
+      }, 0);
+    },
+  }), [answer, family, feedback, question, questionIndex, readingMode, stats]);
 
   const availableSpecs = useMemo(() => listMeterTrainingSpecs(family), [family]);
   const accuracy =
     stats.total > 0 ? ((stats.correct / stats.total) * 100).toFixed(1) : '0.0';
 
   useEffect(() => {
+    if (restoringSnapshotRef.current) return;
     setQuestion(createMeterReadingQuestion({ family, readingMode }));
     setAnswer('');
     setFeedback(null);

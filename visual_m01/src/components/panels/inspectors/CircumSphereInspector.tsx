@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { Entity, GeometryProperties } from '@/editor/entities/types';
-import { useEntityStore } from '@/editor';
+import { useEntityStore, useHistoryStore, UpdatePropertiesCommand } from '@/editor';
 import { computeCircumscribedSphere } from '@/engine/math/circumscribedSphere';
+import { Switch } from '@/components/ui/switch';
 import { TeX } from '@/components/ui/TeX';
 import { COLORS } from '@/styles/tokens';
 import { registerInspector } from './registry';
@@ -44,6 +45,23 @@ function CircumSphereInspector({ entity }: { entity: Entity }) {
           </div>
         </div>
       )}
+
+      <div className="flex items-center justify-between">
+        <span className="text-sm" style={{ color: COLORS.textMuted }}>显示辅助虚线</span>
+        <Switch
+          checked={!!csEntity.properties.showAuxLines}
+          onCheckedChange={(checked) => {
+            useHistoryStore.getState().execute(
+              new UpdatePropertiesCommand<'circumSphere'>(
+                csEntity.id,
+                { showAuxLines: csEntity.properties.showAuxLines },
+                { showAuxLines: checked },
+                '切换外接球辅助线',
+              ),
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }

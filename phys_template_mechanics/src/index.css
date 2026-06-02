@@ -36,6 +36,11 @@ body {
   min-height: 100vh;
 }
 
+.analysis-tab-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
 .analysis-tab-scroll::-webkit-scrollbar {
   height: 4px;
 }

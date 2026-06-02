@@ -64,10 +64,10 @@ export function useDualCanvas({
     const container = containerRef.current;
     if (!container) return;
 
-    const ro = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      const cssW = Math.floor(width);
-      const cssH = Math.floor(height);
+    const syncCanvasSize = (width?: number, height?: number) => {
+      const rect = container.getBoundingClientRect();
+      const cssW = Math.max(1, Math.floor(width ?? rect.width));
+      const cssH = Math.max(1, Math.floor(height ?? rect.height));
       const dpr  = window.devicePixelRatio || 1;
 
       // Buffer = CSS size × dpr for pixel-perfect rendering
@@ -93,10 +93,27 @@ export function useDualCanvas({
       }
 
       setCanvasSize({ width: cssW, height: cssH });
+    };
+
+    const handleViewportResize = () => {
+      syncCanvasSize();
+    };
+
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      syncCanvasSize(width, height);
     });
 
     ro.observe(container);
-    return () => ro.disconnect();
+    window.addEventListener('resize', handleViewportResize);
+    window.visualViewport?.addEventListener('resize', handleViewportResize);
+    syncCanvasSize();
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', handleViewportResize);
+      window.visualViewport?.removeEventListener('resize', handleViewportResize);
+    };
   }, []);
 
   // ── ToolEvent builder (CSS coords, not buffer coords) ─────────────────────

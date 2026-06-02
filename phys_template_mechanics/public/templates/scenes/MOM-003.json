@@ -1,6 +1,6 @@
 {
   "id": "template-scene-mom-003",
-  "name": "MOM-003 部分弹性碰撞",
+  "name": "MOM-003 一般碰撞",
   "bodies": [
     {
       "id": "ground",
@@ -31,7 +31,7 @@
       "label": "球体 #1",
       "position": {
         "x": -3.2,
-        "y": 0.3
+        "y": 0.5
       },
       "angle": 0,
       "isStatic": false,
@@ -40,14 +40,14 @@
       "friction": 0,
       "restitution": 0.5,
       "initialVelocity": {
-        "x": 6,
+        "x": 3,
         "y": 0
       },
       "initialAcceleration": {
         "x": 0,
         "y": 0
       },
-      "radius": 0.3
+      "radius": 0.5
     },
     {
       "id": "body-ball-right",
@@ -55,7 +55,7 @@
       "label": "球体 #2",
       "position": {
         "x": 0.6,
-        "y": 0.3
+        "y": 0.5
       },
       "angle": 0,
       "isStatic": false,
@@ -71,7 +71,7 @@
         "x": 0,
         "y": 0
       },
-      "radius": 0.3
+      "radius": 0.5
     }
   ],
   "joints": [],
