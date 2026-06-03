@@ -100,7 +100,7 @@ export class SceneManager {
     );
     this.composer.addPass(this.bloomPass);
     this.composer.addPass(new OutputPass());
-    this.composer.addPass(new SMAAPass(pw, ph));
+    this.composer.addPass(new SMAAPass());
   }
 
   setSunPosition(x: number, y: number) {
