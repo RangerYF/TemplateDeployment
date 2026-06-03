@@ -6,6 +6,9 @@ import { registerTemplateBridge } from './templateBridge';
 
 registerTemplateBridge();
 
+const savedTheme = localStorage.getItem('edumind-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

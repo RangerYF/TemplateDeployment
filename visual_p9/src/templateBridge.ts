@@ -134,7 +134,6 @@ function validateUIPayload(value: unknown, errors: string[]): void {
     errors.push('payload.ui 缺失或非法');
     return;
   }
-  if (!isRecord(value.layout)) errors.push('payload.ui.layout 必须是对象');
   if (!isRecord(value.viewport)) errors.push('payload.ui.viewport 必须是对象');
 }
 

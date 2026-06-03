@@ -194,6 +194,7 @@ function renderFrame(
   viewport: ViewportSnapshot,
   showVectors: boolean,
   showAreaSectors: boolean,
+  stars: Star[],
 ) {
   ctx.clearRect(0, 0, width, height);
 
@@ -204,7 +205,7 @@ function renderFrame(
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, width, height);
 
-  for (const star of makeStars(width, height)) {
+  for (const star of stars) {
     ctx.fillStyle = `rgba(255,255,255,${star.alpha})`;
     ctx.beginPath();
     ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -228,6 +229,8 @@ function renderFrame(
 export function OrbitCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dragRef = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  const starsRef = useRef<Star[]>([]);
+  const lastSizeRef = useRef({ w: 0, h: 0 });
   const viewport = useUIStore((state) => state.viewport);
   const setViewport = useUIStore((state) => state.setViewport);
   const model = useActiveModel();
@@ -261,21 +264,41 @@ export function OrbitCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const ratio = window.devicePixelRatio || 1;
+
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
-      const ratio = window.devicePixelRatio || 1;
       const width = Math.max(320, rect.width);
       const height = Math.max(320, rect.height);
-      canvas.width = Math.floor(width * ratio);
-      canvas.height = Math.floor(height * ratio);
+      if (lastSizeRef.current.w !== width || lastSizeRef.current.h !== height) {
+        starsRef.current = makeStars(width, height);
+        lastSizeRef.current = { w: width, h: height };
+      }
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      renderFrame(ctx, frame, width, height, viewport, showVectors, showAreaSectors);
+      renderFrame(ctx, frame, width, height, viewport, showVectors, showAreaSectors, starsRef.current);
     };
 
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const rect = entry.contentRect;
+        const width = Math.max(320, rect.width);
+        const height = Math.max(320, rect.height);
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+      }
+      draw();
+    });
+
+    // Initial size setup
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(320, rect.width);
+    const height = Math.max(320, rect.height);
+    canvas.width = Math.floor(width * ratio);
+    canvas.height = Math.floor(height * ratio);
+
     draw();
-    const resizeObserver = new ResizeObserver(draw);
     resizeObserver.observe(canvas);
     return () => resizeObserver.disconnect();
   }, [frame, showAreaSectors, showVectors, viewport]);

@@ -1,0 +1,1054 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>全屏物理可视化教学统一模板</title>
+  <style>
+    :root {
+      --bg: oklch(99% 0.002 240);
+      --surface: oklch(100% 0 0);
+      --fg: oklch(18% 0.012 250);
+      --muted: oklch(54% 0.012 250);
+      --border: oklch(92% 0.005 250);
+      --accent: oklch(58% 0.18 255);
+      --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      --ok: oklch(62% 0.15 150);
+      --warn: oklch(72% 0.15 72);
+      --danger: oklch(61% 0.17 25);
+      --violet: oklch(61% 0.16 285);
+      --shadow: 0 18px 56px oklch(18% 0.012 250 / .07);
+      --shadow-soft: 0 10px 34px oklch(18% 0.012 250 / .055);
+      --mode: var(--accent);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      text-rendering: geometricPrecision;
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 10%, color-mix(in oklch, var(--accent) 8%, transparent), transparent 30%),
+        linear-gradient(180deg, white, oklch(97% 0.004 245));
+    }
+
+    button { font: inherit; }
+
+    .app {
+      height: 100vh;
+      padding: clamp(12px, 1.55vw, 24px);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+    }
+
+    .topbar {
+      min-height: 68px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 18px;
+      align-items: center;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: color-mix(in oklch, var(--surface) 90%, transparent);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid color-mix(in oklch, var(--mode) 36%, var(--border));
+      border-radius: 8px;
+      color: var(--mode);
+      background: color-mix(in oklch, var(--mode) 7%, white);
+      font-family: var(--font-mono);
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin: 0; }
+
+    h1 {
+      font-size: clamp(20px, 2vw, 29px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      text-wrap: pretty;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .mono,
+    .mode-btn,
+    .label,
+    .readout,
+    .chip,
+    .step-index,
+    .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(92px, 1fr));
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: oklch(98% 0.003 245);
+    }
+
+    .mode-btn {
+      height: 42px;
+      border: 0;
+      border-right: 1px solid var(--border);
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .mode-btn:last-child { border-right: 0; }
+
+    .mode-btn[aria-selected="true"] {
+      color: var(--fg);
+      background: var(--surface);
+      box-shadow: inset 0 -2px 0 var(--mode);
+    }
+
+    .status {
+      display: flex;
+      gap: 8px;
+      justify-content: end;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface);
+      white-space: nowrap;
+    }
+
+    .chip.live {
+      color: var(--fg);
+      border-color: color-mix(in oklch, var(--mode) 38%, var(--border));
+      background: color-mix(in oklch, var(--mode) 7%, white);
+    }
+
+    .shell {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
+      gap: 12px;
+    }
+
+    .stage,
+    .side {
+      min-height: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .lesson-head {
+      min-height: 78px;
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(320px, .58fr);
+      gap: 22px;
+      align-items: end;
+      padding: 18px 22px 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--surface), oklch(99% 0.002 240));
+    }
+
+    .lesson-kicker {
+      margin-bottom: 8px;
+      color: var(--mode);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-weight: 760;
+    }
+
+    h2 {
+      font-size: clamp(32px, 3.9vw, 64px);
+      line-height: .96;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .lesson-copy {
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .canvas {
+      position: relative;
+      min-height: 0;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        linear-gradient(0deg, transparent 31px, oklch(92% 0.005 250 / .78) 32px, transparent 33px),
+        linear-gradient(90deg, transparent 31px, oklch(92% 0.005 250 / .78) 32px, transparent 33px),
+        linear-gradient(180deg, oklch(99% 0.002 240), white);
+      background-size: 32px 32px, 32px 32px, auto;
+    }
+
+    .canvas.dark {
+      color: white;
+      background:
+        radial-gradient(circle at 50% 44%, color-mix(in oklch, var(--mode) 23%, transparent), transparent 35%),
+        repeating-linear-gradient(90deg, oklch(100% 0 0 / .035) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(0deg, oklch(100% 0 0 / .026) 0 1px, transparent 1px 34px),
+        oklch(10% 0.018 250);
+    }
+
+    .canvas::before {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--mode) 8%, transparent);
+      filter: blur(60px);
+      z-index: -1;
+    }
+
+    .hud {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .hud-card {
+      width: min(390px, 38%);
+      display: grid;
+      gap: 8px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: color-mix(in oklch, var(--surface) 88%, transparent);
+      backdrop-filter: blur(16px);
+    }
+
+    .canvas.dark .hud-card {
+      border-color: oklch(100% 0 0 / .14);
+      background: oklch(100% 0 0 / .07);
+    }
+
+    .hud-card strong {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .hud-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .canvas.dark .hud-card span { color: oklch(84% 0.025 250); }
+
+    .readout-stack {
+      display: grid;
+      grid-template-columns: repeat(2, 112px);
+      gap: 8px;
+      align-self: start;
+    }
+
+    .kpi {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: color-mix(in oklch, var(--surface) 88%, transparent);
+      backdrop-filter: blur(16px);
+    }
+
+    .canvas.dark .kpi {
+      border-color: oklch(100% 0 0 / .14);
+      background: oklch(100% 0 0 / .07);
+    }
+
+    .kpi-label { color: var(--muted); }
+    .canvas.dark .kpi-label { color: oklch(84% 0.025 250); }
+
+    .kpi strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--mode);
+      font-size: 21px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 86px 34px 30px;
+    }
+
+    .shape { position: absolute; display: block; }
+
+    .incline {
+      left: 7%;
+      right: 7%;
+      bottom: 35%;
+      height: 2px;
+      background: currentColor;
+      transform: rotate(-10deg);
+      transform-origin: left;
+      opacity: .82;
+    }
+
+    .cart {
+      left: 40%;
+      bottom: 45%;
+      width: clamp(96px, 8vw, 142px);
+      height: clamp(60px, 5vw, 86px);
+      border: 1px solid currentColor;
+      border-radius: 8px;
+      background: color-mix(in oklch, var(--mode) 11%, white);
+      transform: rotate(-10deg);
+      box-shadow: 0 22px 60px color-mix(in oklch, var(--mode) 16%, transparent);
+    }
+
+    .ball {
+      width: var(--size);
+      height: var(--size);
+      left: var(--x);
+      top: var(--y);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 28%, white, transparent 28%),
+        color-mix(in oklch, var(--mode) 26%, white);
+      border: 1px solid color-mix(in oklch, var(--mode) 42%, var(--border));
+      box-shadow: 0 24px 70px color-mix(in oklch, var(--mode) 20%, transparent);
+    }
+
+    .trail {
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: 2px;
+      background: color-mix(in oklch, var(--mode) 46%, transparent);
+    }
+
+    .arrow {
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: 2px;
+      background: var(--mode);
+      transform: rotate(var(--r));
+      transform-origin: left;
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -5px;
+      border-left: 10px solid var(--mode);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+    }
+
+    .orbit {
+      inset: var(--inset);
+      border: 1px solid color-mix(in oklch, var(--mode) 50%, white);
+      border-radius: 50%;
+      transform: rotate(var(--r));
+      opacity: .68;
+    }
+
+    .sun {
+      left: 48%;
+      top: 44%;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 72px oklch(72% 0.15 72 / .44);
+    }
+
+    .planet {
+      left: 70%;
+      top: 29%;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--mode);
+      box-shadow: 0 0 34px color-mix(in oklch, var(--mode) 40%, transparent);
+    }
+
+    .graph {
+      inset: 12% 9% 10%;
+      border-left: 1px solid var(--muted);
+      border-bottom: 1px solid var(--muted);
+    }
+
+    .graph::before,
+    .graph::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(22deg, transparent 0 44%, var(--mode) 44.2% 45.1%, transparent 45.4%),
+        linear-gradient(148deg, transparent 0 61%, var(--ok) 61.2% 62%, transparent 62.3%);
+    }
+
+    .wire {
+      inset: 16% 14%;
+      border: 3px solid currentColor;
+      border-radius: 12px;
+    }
+
+    .battery {
+      left: 16%;
+      top: 38%;
+      width: 52px;
+      height: 86px;
+      border-left: 5px solid var(--mode);
+      border-right: 11px solid var(--mode);
+      background: var(--surface);
+    }
+
+    .resistor {
+      right: 17%;
+      top: 35%;
+      width: 120px;
+      height: 48px;
+      border: 1px solid currentColor;
+      border-radius: 7px;
+      background: color-mix(in oklch, var(--mode) 9%, white);
+    }
+
+    .wave {
+      left: 8%;
+      right: 8%;
+      top: 48%;
+      height: 120px;
+      background:
+        radial-gradient(ellipse at 8% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%),
+        radial-gradient(ellipse at 24% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%),
+        radial-gradient(ellipse at 40% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%),
+        radial-gradient(ellipse at 56% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%),
+        radial-gradient(ellipse at 72% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%),
+        radial-gradient(ellipse at 88% 50%, transparent 40%, var(--mode) 41% 43%, transparent 44%);
+      opacity: .62;
+    }
+
+    .field-line {
+      position: absolute;
+      inset: var(--inset);
+      border: 1px solid color-mix(in oklch, var(--mode) 42%, var(--border));
+      border-radius: 50%;
+      opacity: .35;
+    }
+
+    .lesson-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--border);
+      background: oklch(99% 0.002 240);
+    }
+
+    .step {
+      min-height: 70px;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      padding: 12px 18px;
+      border-right: 1px solid var(--border);
+    }
+
+    .step:last-child { border-right: 0; }
+    .step-index { color: var(--mode); }
+    .step strong { font-size: 14px; }
+    .step span:last-child { color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+    .side {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .panel {
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      display: grid;
+      gap: 13px;
+    }
+
+    .panel h3 {
+      font-size: 16px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .label { color: var(--mode); font-weight: 760; }
+
+    .objective {
+      display: grid;
+      gap: 9px;
+    }
+
+    .objective strong {
+      font-size: 20px;
+      line-height: 1.15;
+      text-wrap: pretty;
+    }
+
+    .objective p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .formula {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: oklch(99% 0.002 240);
+      font-size: 25px;
+      line-height: 1.1;
+    }
+
+    .controls {
+      display: grid;
+      gap: 15px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+    }
+
+    .control-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .readout { color: var(--mode); }
+
+    .range {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--mode) 0 var(--v), var(--border) var(--v) 100%);
+    }
+
+    .mode-list {
+      display: grid;
+      gap: 11px;
+      align-content: start;
+    }
+
+    .architecture-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .architecture-card strong {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .architecture-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .architecture-item {
+      min-height: 50px;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: oklch(99% 0.002 240);
+    }
+
+    .architecture-item span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--mode);
+    }
+
+    .architecture-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .same-shell {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .same-shell span {
+      border: 1px solid color-mix(in oklch, var(--mode) 26%, var(--border));
+      border-radius: 999px;
+      padding: 6px 8px;
+      color: var(--mode);
+      background: color-mix(in oklch, var(--mode) 6%, white);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 14px;
+      background: oklch(99% 0.002 240);
+    }
+
+    .action {
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .action.primary {
+      border-color: color-mix(in oklch, var(--mode) 42%, var(--border));
+      background: var(--mode);
+      color: white;
+    }
+
+    .template-view { display: none; }
+    .template-view.active { display: contents; }
+
+    .template-view .scene > * { opacity: .98; }
+
+    @media (max-width: 1180px) {
+      body { overflow: auto; }
+      .app { min-height: 100vh; height: auto; }
+      .topbar { grid-template-columns: 1fr; }
+      .mode-switch { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .shell { grid-template-columns: 1fr; }
+      .stage { min-height: 780px; }
+      .side { min-height: auto; }
+    }
+
+    @media (max-width: 720px) {
+      .app { padding: 10px; }
+      .mode-switch { grid-template-columns: 1fr; }
+      .mode-btn { border-right: 0; border-bottom: 1px solid var(--border); }
+      .mode-btn:last-child { border-bottom: 0; }
+      .lesson-head { grid-template-columns: 1fr; }
+      .hud { display: grid; }
+      .hud-card,
+      .readout-stack { width: 100%; grid-template-columns: 1fr 1fr; }
+      .scene { inset: 180px 18px 34px; }
+      .lesson-steps { grid-template-columns: 1fr; }
+      .step { border-right: 0; border-bottom: 1px solid var(--border); }
+      .step:last-child { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" data-od-id="fullscreen-physics-template-system">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">Φ</div>
+        <div>
+          <h1>高中物理可视化教学统一模板</h1>
+          <p class="subtitle">一个模板占据全屏；五种教学类型共用同一套上手逻辑。</p>
+        </div>
+      </div>
+      <nav class="mode-switch" aria-label="切换全屏模板类型">
+        <button class="mode-btn" data-template="concept" aria-selected="true">Concept</button>
+        <button class="mode-btn" data-template="experiment" aria-selected="false">Experiment</button>
+        <button class="mode-btn" data-template="simulation" aria-selected="false">Simulation</button>
+        <button class="mode-btn" data-template="data" aria-selected="false">Data</button>
+        <button class="mode-btn" data-template="inquiry" aria-selected="false">Inquiry</button>
+      </nav>
+      <div class="status">
+        <span class="chip live">Full-screen template</span>
+        <span class="chip" id="mode-chip">讲解型</span>
+      </div>
+    </header>
+
+    <section class="shell">
+      <section class="stage" aria-label="当前全屏教学模板">
+        <div class="lesson-head">
+          <div>
+            <div class="lesson-kicker" id="lesson-kicker">01 · Concept Template</div>
+            <h2 id="lesson-title">把受力分析，变成一眼能懂的模型。</h2>
+          </div>
+          <p class="lesson-copy" id="lesson-copy">当前只展示一套全屏模板。顶部切换其他类型时，画布、目标、变量和步骤会一起变化，但布局位置保持一致。</p>
+        </div>
+
+        <section class="canvas" id="canvas" data-od-id="active-physics-canvas">
+          <div class="hud">
+            <div class="hud-card">
+              <span class="label" id="hud-label">Live explanation</span>
+              <strong id="hud-title">沿斜面方向的合力决定加速度。</strong>
+              <span id="hud-copy">老师先展示力的方向，再逐步打开公式和数值，避免学生一开始被符号淹没。</span>
+            </div>
+            <div class="readout-stack">
+              <div class="kpi"><span class="kpi-label" id="kpi-a-label">Angle</span><strong id="kpi-a">32°</strong></div>
+              <div class="kpi"><span class="kpi-label" id="kpi-b-label">Accel.</span><strong id="kpi-b">2.8</strong></div>
+            </div>
+          </div>
+
+          <div class="scene" id="scene-concept">
+            <i class="field-line" style="--inset: 12% 16%"></i>
+            <i class="field-line" style="--inset: 23% 25%"></i>
+            <i class="shape incline"></i>
+            <i class="shape cart"></i>
+            <i class="shape arrow" style="--x: 50%; --y: 44%; --w: 150px; --r: -10deg"></i>
+            <i class="shape arrow" style="--x: 56%; --y: 44%; --w: 112px; --r: 78deg"></i>
+          </div>
+
+          <div class="scene template-view" id="scene-experiment">
+            <i class="shape trail" style="--x: 10%; --y: 48%; --w: 230px"></i>
+            <i class="shape trail" style="--x: 56%; --y: 48%; --w: 160px"></i>
+            <i class="shape ball" style="--x: 34%; --y: 38%; --size: clamp(84px, 8vw, 132px)"></i>
+            <i class="shape ball" style="--x: 57%; --y: 40%; --size: clamp(72px, 7vw, 112px)"></i>
+            <i class="shape arrow" style="--x: 22%; --y: 50%; --w: 142px; --r: 0deg"></i>
+          </div>
+
+          <div class="scene template-view" id="scene-simulation">
+            <i class="shape orbit" style="--inset: 8% 12%; --r: -12deg"></i>
+            <i class="shape orbit" style="--inset: 22% 28%; --r: 22deg"></i>
+            <i class="shape sun"></i>
+            <i class="shape planet"></i>
+            <i class="shape arrow" style="--x: 58%; --y: 40%; --w: 132px; --r: -34deg"></i>
+          </div>
+
+          <div class="scene template-view" id="scene-data">
+            <i class="shape graph"></i>
+            <i class="shape ball" style="--x: 18%; --y: 62%; --size: 14px"></i>
+            <i class="shape ball" style="--x: 34%; --y: 53%; --size: 14px"></i>
+            <i class="shape ball" style="--x: 50%; --y: 44%; --size: 14px"></i>
+            <i class="shape ball" style="--x: 66%; --y: 35%; --size: 14px"></i>
+          </div>
+
+          <div class="scene template-view" id="scene-inquiry">
+            <i class="shape wire"></i>
+            <i class="shape battery"></i>
+            <i class="shape resistor"></i>
+            <i class="shape wave"></i>
+          </div>
+        </section>
+
+        <footer class="lesson-steps" aria-label="课堂步骤">
+          <div class="step"><span class="step-index" id="step-1-index">01 · Observe</span><strong id="step-1-title">先看现象</strong><span id="step-1-copy">播放模型，不急着给完整公式。</span></div>
+          <div class="step"><span class="step-index" id="step-2-index">02 · Mark</span><strong id="step-2-title">标出关键量</strong><span id="step-2-copy">只出现当前解释需要的变量。</span></div>
+          <div class="step"><span class="step-index" id="step-3-index">03 · Change</span><strong id="step-3-title">改变一个参数</strong><span id="step-3-copy">让学生看到结果如何随之变化。</span></div>
+          <div class="step"><span class="step-index" id="step-4-index">04 · Conclude</span><strong id="step-4-title">固化结论</strong><span id="step-4-copy">公式、图形和语言保持一致。</span></div>
+        </footer>
+      </section>
+
+      <aside class="side" aria-label="当前模板控制台">
+        <section class="panel">
+          <h3>本节目标</h3>
+          <div class="objective">
+            <span class="label" id="objective-label">Core question</span>
+            <strong id="objective-title">物体为什么沿斜面加速？</strong>
+            <p id="objective-copy">统一模板只保留一个核心问题，老师和学生都能快速进入画布。</p>
+          </div>
+          <div class="formula" id="formula">a = F<sub>合</sub> / m</div>
+        </section>
+
+        <section class="panel">
+          <h3>变量控制</h3>
+          <div class="controls">
+            <div class="control">
+              <div class="control-top"><span class="label" id="control-1-label">角度 θ</span><span class="readout" id="control-1-value">32°</span></div>
+              <div class="range" id="control-1-range" style="--v: 58%"></div>
+            </div>
+            <div class="control">
+              <div class="control-top"><span class="label" id="control-2-label">质量 m</span><span class="readout" id="control-2-value">1.2 kg</span></div>
+              <div class="range" id="control-2-range" style="--v: 44%"></div>
+            </div>
+            <div class="control">
+              <div class="control-top"><span class="label" id="control-3-label">摩擦 μ</span><span class="readout" id="control-3-value">0.18</span></div>
+              <div class="range" id="control-3-range" style="--v: 30%"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel mode-list" aria-label="五种模板说明">
+          <h3>架构一致性</h3>
+          <div class="architecture-card">
+            <strong id="architecture-title">同一套壳，当前是概念讲解。</strong>
+            <div class="architecture-grid">
+              <div class="architecture-item"><span class="mono">Canvas</span><p id="arch-canvas">模型和力的方向优先出现。</p></div>
+              <div class="architecture-item"><span class="mono">Goal</span><p id="arch-goal">只保留一个核心问题。</p></div>
+              <div class="architecture-item"><span class="mono">Controls</span><p id="arch-controls">三个变量，课堂可即时调节。</p></div>
+              <div class="architecture-item"><span class="mono">Flow</span><p id="arch-flow">观察、标注、改变、总结。</p></div>
+            </div>
+            <div class="same-shell">
+              <span class="mono">同顶部</span>
+              <span class="mono">同侧栏</span>
+              <span class="mono">同变量区</span>
+              <span class="mono">同步骤条</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button class="action">Reset</button>
+          <button class="action primary">Play</button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const templates = {
+      concept: {
+        mode: 'oklch(58% 0.18 255)',
+        chip: '讲解型',
+        kicker: '01 · Concept Template',
+        title: '把受力分析，变成一眼能懂的模型。',
+        copy: '单个全屏模板承载完整课堂节奏：主画布解释模型，右侧只放目标和三个变量。',
+        canvasDark: false,
+        hudLabel: 'Live explanation',
+        hudTitle: '沿斜面方向的合力决定加速度。',
+        hudCopy: '老师先展示力的方向，再逐步打开公式和数值，避免学生一开始被符号淹没。',
+        kpiA: ['Angle', '32°'],
+        kpiB: ['Accel.', '2.8'],
+        objective: ['Core question', '物体为什么沿斜面加速？', '先建立受力模型，再把分力、合力和加速度联系起来。'],
+        formula: 'a = F<sub>合</sub> / m',
+        architecture: ['同一套壳，当前是概念讲解。', '模型和力的方向优先出现。', '只保留一个核心问题。', '三个变量，课堂可即时调节。', '观察、标注、改变、总结。'],
+        controls: [['角度 θ', '32°', '58%'], ['质量 m', '1.2 kg', '44%'], ['摩擦 μ', '0.18', '30%']],
+        steps: [['01 · Observe', '先看现象', '播放模型，不急着给完整公式。'], ['02 · Mark', '标出关键量', '只出现当前解释需要的变量。'], ['03 · Change', '改变一个参数', '让学生看到结果如何随之变化。'], ['04 · Conclude', '固化结论', '公式、图形和语言保持一致。']]
+      },
+      experiment: {
+        mode: 'oklch(62% 0.15 150)',
+        chip: '实验型',
+        kicker: '02 · Experiment Template',
+        title: '变量实验只保留一个动作：改一次，看一次。',
+        copy: '适合小球碰撞、弹簧振子、抛体运动。学生不用学习新界面，只需要控制变量。',
+        canvasDark: false,
+        hudLabel: 'Controlled variable',
+        hudTitle: '只改变恢复系数，观察碰撞后速度差异。',
+        hudCopy: '实验型模板把读数和变量绑定在同一视线范围内，适合课堂快速复跑。',
+        kpiA: ['Elasticity', '0.82'],
+        kpiB: ['ΔEk', '-14%'],
+        objective: ['Lab question', '碰撞前后动量为什么近似守恒？', '保留质量和初速度，改变恢复系数，观察速度与能量损失。'],
+        formula: 'p₁ + p₂ ≈ p₁′ + p₂′',
+        architecture: ['同一套壳，当前是变量实验。', '碰撞轨迹和结果读数优先。', '问题围绕控制变量展开。', '仍然只有三个核心变量。', '设定、预测、运行、对比。'],
+        controls: [['质量 m₁', '2.0 kg', '62%'], ['速度 v₁', '4.2 m/s', '74%'], ['恢复系数 e', '0.82', '82%']],
+        steps: [['01 · Set', '设定变量', '锁定质量，只改一个参数。'], ['02 · Predict', '先做预测', '学生判断碰后速度方向。'], ['03 · Run', '运行实验', '播放碰撞并保留轨迹。'], ['04 · Compare', '对比读数', '把速度和能量变化对齐。']]
+      },
+      simulation: {
+        mode: 'oklch(72% 0.15 72)',
+        chip: '仿真型',
+        kicker: '03 · Simulation Template',
+        title: '让过程占据全屏，文字退到边缘。',
+        copy: '适合天体运行、波的传播、电磁场线。画布优先，解释层只在关键时刻出现。',
+        canvasDark: true,
+        hudLabel: 'Orbit simulation',
+        hudTitle: '速度方向轻微改变，轨道形态立即变化。',
+        hudCopy: '沉浸型模板用深色画布强调连续过程，让学生先形成空间直觉。',
+        kpiA: ['Time', '128d'],
+        kpiB: ['Speed', '29.8'],
+        objective: ['Simulation question', '为什么同样的引力会产生不同轨道？', '用速度、中心质量和时间倍率解释轨道变化，而不是先背结论。'],
+        formula: 'F = GMm / r²',
+        architecture: ['同一套壳，当前是沉浸仿真。', '过程画布最大化，说明退后。', '问题围绕轨道变化展开。', '变量仍在右侧固定位置。', '进入、暂停、调节、解释。'],
+        controls: [['中心质量', '1.0 M', '68%'], ['初速度', '29.8 km/s', '46%'], ['时间倍率', '12x', '76%']],
+        steps: [['01 · Enter', '进入场景', '先看完整轨迹。'], ['02 · Pause', '暂停关键帧', '停在速度方向变化处。'], ['03 · Tune', '调整速度', '观察轨道开合。'], ['04 · Explain', '解释轨道', '把空间直觉转成公式。']]
+      },
+      data: {
+        mode: 'oklch(61% 0.17 25)',
+        chip: '数据型',
+        kicker: '04 · Data Template',
+        title: '从动画到图像，只隔一个采样动作。',
+        copy: '适合速度-时间图、伏安特性曲线、能量变化曲线。现象在画布，解释在数据。',
+        canvasDark: false,
+        hudLabel: 'Fit result',
+        hudTitle: '直线斜率就是加速度。',
+        hudCopy: '数据型模板把采样、拟合、异常点和结论放在同一张图里，降低读图门槛。',
+        kpiA: ['R²', '.997'],
+        kpiB: ['Slope', '1.9'],
+        objective: ['Analysis question', '图像的斜率为什么能代表加速度？', '让学生从采样点出发，看到拟合线如何指向物理量。'],
+        formula: 'slope = Δv / Δt',
+        architecture: ['同一套壳，当前是数据分析。', '图表和采样点占主画布。', '问题围绕读图方法展开。', '采样和拟合作为三个控件。', '采样、画图、拟合、读数。'],
+        controls: [['采样间隔', '0.2 s', '36%'], ['噪声水平', 'Low', '22%'], ['拟合区间', 'Linear', '70%']],
+        steps: [['01 · Sample', '采样', '从动画提取数据点。'], ['02 · Plot', '画图', '把数据投到坐标系。'], ['03 · Fit', '拟合', '显示趋势线与误差。'], ['04 · Read', '解释斜率', '把数学量翻译成物理量。']]
+      },
+      inquiry: {
+        mode: 'oklch(61% 0.16 285)',
+        chip: '探究型',
+        kicker: '05 · Inquiry Template',
+        title: '给学生一个任务，而不是一段说明书。',
+        copy: '适合小组课堂和自主学习。模板把预测、操作、验证、提交固定成同一条路径。',
+        canvasDark: false,
+        hudLabel: 'Mission',
+        hudTitle: '怎样让灯泡变亮，但电流不过载？',
+        hudCopy: '探究型模板用任务驱动界面，学生先写预测，再通过变量控制验证。',
+        kpiA: ['Current', '0.48A'],
+        kpiB: ['State', 'Safe'],
+        objective: ['Mission question', '如何找出安全工作区间？', '调电压和电阻，观察亮度与电流限制之间的关系。'],
+        formula: 'I = U / R',
+        architecture: ['同一套壳，当前是学生探究。', '任务对象在画布中持续可见。', '问题以任务目标呈现。', '变量限制学生操作范围。', '读题、预测、验证、提交。'],
+        controls: [['电压 U', '6 V', '58%'], ['电阻 R', '12 Ω', '66%'], ['安全阈值', '0.5 A', '48%']],
+        steps: [['01 · Read', '读任务', '明确限制条件。'], ['02 · Guess', '写预测', '先判断电流变化。'], ['03 · Verify', '验证', '运行三组参数。'], ['04 · Submit', '提交结论', '给出安全区间。']]
+      }
+    };
+
+    const ids = {
+      chip: document.getElementById('mode-chip'),
+      kicker: document.getElementById('lesson-kicker'),
+      title: document.getElementById('lesson-title'),
+      copy: document.getElementById('lesson-copy'),
+      canvas: document.getElementById('canvas'),
+      hudLabel: document.getElementById('hud-label'),
+      hudTitle: document.getElementById('hud-title'),
+      hudCopy: document.getElementById('hud-copy'),
+      kpiALabel: document.getElementById('kpi-a-label'),
+      kpiA: document.getElementById('kpi-a'),
+      kpiBLabel: document.getElementById('kpi-b-label'),
+      kpiB: document.getElementById('kpi-b'),
+      objectiveLabel: document.getElementById('objective-label'),
+      objectiveTitle: document.getElementById('objective-title'),
+      objectiveCopy: document.getElementById('objective-copy'),
+      formula: document.getElementById('formula'),
+      architectureTitle: document.getElementById('architecture-title'),
+      archCanvas: document.getElementById('arch-canvas'),
+      archGoal: document.getElementById('arch-goal'),
+      archControls: document.getElementById('arch-controls'),
+      archFlow: document.getElementById('arch-flow')
+    };
+
+    function setTemplate(name) {
+      const t = templates[name];
+      document.documentElement.style.setProperty('--mode', t.mode);
+      ids.chip.textContent = t.chip;
+      ids.kicker.textContent = t.kicker;
+      ids.title.textContent = t.title;
+      ids.copy.textContent = t.copy;
+      ids.canvas.classList.toggle('dark', t.canvasDark);
+      ids.hudLabel.textContent = t.hudLabel;
+      ids.hudTitle.textContent = t.hudTitle;
+      ids.hudCopy.textContent = t.hudCopy;
+      ids.kpiALabel.textContent = t.kpiA[0];
+      ids.kpiA.textContent = t.kpiA[1];
+      ids.kpiBLabel.textContent = t.kpiB[0];
+      ids.kpiB.textContent = t.kpiB[1];
+      ids.objectiveLabel.textContent = t.objective[0];
+      ids.objectiveTitle.textContent = t.objective[1];
+      ids.objectiveCopy.textContent = t.objective[2];
+      ids.formula.innerHTML = t.formula;
+      ids.architectureTitle.textContent = t.architecture[0];
+      ids.archCanvas.textContent = t.architecture[1];
+      ids.archGoal.textContent = t.architecture[2];
+      ids.archControls.textContent = t.architecture[3];
+      ids.archFlow.textContent = t.architecture[4];
+
+      t.controls.forEach((control, index) => {
+        const i = index + 1;
+        document.getElementById(`control-${i}-label`).textContent = control[0];
+        document.getElementById(`control-${i}-value`).textContent = control[1];
+        document.getElementById(`control-${i}-range`).style.setProperty('--v', control[2]);
+      });
+
+      t.steps.forEach((step, index) => {
+        const i = index + 1;
+        document.getElementById(`step-${i}-index`).textContent = step[0];
+        document.getElementById(`step-${i}-title`).textContent = step[1];
+        document.getElementById(`step-${i}-copy`).textContent = step[2];
+      });
+
+      document.querySelectorAll('.scene').forEach(scene => {
+        scene.classList.toggle('template-view', scene.id !== `scene-${name}`);
+        scene.classList.toggle('active', scene.id === `scene-${name}`);
+      });
+
+      document.querySelectorAll('.mode-btn').forEach(button => {
+        button.setAttribute('aria-selected', String(button.dataset.template === name));
+      });
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(button => {
+      button.addEventListener('click', () => setTemplate(button.dataset.template));
+    });
+  </script>
+</body>
+</html>

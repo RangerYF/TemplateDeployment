@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>斜面受力分析 - 双风格原型</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --text: #162033;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --primary: #2563eb;
+      --primary-soft: #e8f0ff;
+      --green: #16a34a;
+      --orange: #f97316;
+      --red: #dc2626;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      --radius: 16px;
+      --topbar-h: 64px;
+      --playback-h: 72px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.08), transparent 36%),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .topbar {
+      min-height: var(--topbar-h);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid rgba(217, 224, 234, 0.8);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .title {
+      min-width: 210px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .segmented button,
+    .icon-btn,
+    .preset {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .segmented button {
+      min-width: 78px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    }
+
+    .preset {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .top-spacer {
+      flex: 1;
+    }
+
+    .stage-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) clamp(300px, 28vw, 400px);
+      gap: 18px;
+      padding: 18px;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .stage-card,
+    .panel {
+      border: 1px solid rgba(217, 224, 234, 0.9);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .stage-card {
+      min-height: min(680px, calc(100vh - var(--topbar-h) - var(--playback-h) - 36px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .stage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(248, 250, 252, 0.92);
+    }
+
+    .mode-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.12);
+    }
+
+    .canvas-shell {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+      background: #fff;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .canvas-caption {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      pointer-events: none;
+    }
+
+    .chip {
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      color: #344054;
+      font-size: 12px;
+      font-weight: 650;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .panel {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - var(--topbar-h) - var(--playback-h) - 36px);
+      container-type: inline-size;
+    }
+
+    .panel-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(248, 250, 252, 0.92);
+    }
+
+    .panel-head b {
+      font-size: 14px;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .panel-scroll {
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .section + .section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .value {
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .switch {
+      width: 42px;
+      height: 24px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      padding: 3px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .switch.on {
+      background: var(--primary);
+    }
+
+    .knob {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #fff;
+      transition: transform 0.2s ease;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+    }
+
+    .switch.on .knob {
+      transform: translateX(18px);
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .readout {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+    }
+
+    .readout b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .readout span {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout small {
+      color: var(--muted);
+      font-size: 11px;
+      margin-left: 2px;
+    }
+
+    .formula {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .footer {
+      min-height: var(--playback-h);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      border-top: 1px solid rgba(217, 224, 234, 0.8);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px);
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+      font-size: 17px;
+      font-weight: 780;
+    }
+
+    .icon-btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .time {
+      min-width: 96px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .speed {
+      width: 86px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    @media (max-width: 1023px) {
+      .stage-wrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+      }
+
+      .stage-card {
+        min-height: auto;
+        grid-template-rows: auto clamp(420px, 54vh, 560px);
+      }
+
+      .canvas-shell {
+        min-height: clamp(420px, 54vh, 520px);
+      }
+
+      .panel {
+        max-height: none;
+      }
+
+      .panel-head {
+        display: flex;
+      }
+
+      .panel-scroll {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .section + .section {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+    }
+
+    @container (max-width: 330px) {
+      .readouts {
+        grid-template-columns: 1fr;
+      }
+
+      .readout span {
+        font-size: 18px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+
+      .title {
+        min-width: 100%;
+      }
+
+      .top-spacer {
+        display: none;
+      }
+
+      .stage-wrap {
+        padding: 12px;
+        gap: 12px;
+      }
+
+      .stage-card {
+        min-height: auto;
+        grid-template-rows: auto clamp(300px, 54vh, 390px);
+        border-radius: 14px;
+      }
+
+      .stage-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .panel-scroll {
+        display: block;
+        max-height: 48vh;
+        overflow: auto;
+      }
+
+      .section + .section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .readouts {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 8;
+        min-height: 66px;
+        gap: 10px;
+      }
+
+      .icon-btn {
+        width: 42px;
+        height: 42px;
+      }
+
+      .time {
+        min-width: 74px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .segmented {
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .segmented button {
+        min-width: 0;
+      }
+
+      .preset {
+        max-width: 100%;
+      }
+
+      .readouts {
+        grid-template-columns: 1fr;
+      }
+
+      .stage-card {
+        grid-template-rows: auto 320px;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .canvas-caption {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+      }
+
+      .chip {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+
+      .footer {
+        justify-content: space-between;
+        padding: 10px 12px;
+      }
+
+      .speed {
+        width: 72px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title">
+        <h1>斜面受力分析</h1>
+        <p>同一物理内核，双呈现风格</p>
+      </div>
+      <div class="segmented" aria-label="呈现风格">
+        <button id="diagramBtn" class="active" type="button">配图风</button>
+        <button id="realBtn" type="button">真实风</button>
+      </div>
+      <button class="preset" type="button" id="presetBtn">预设：临界静止</button>
+      <div class="top-spacer"></div>
+      <div class="mode-label"><span class="dot"></span><span id="stateLabel">暂停</span></div>
+    </header>
+
+    <main class="stage-wrap">
+      <section class="stage-card">
+        <div class="stage-header">
+          <div>
+            <div class="mode-label"><span class="dot"></span><span id="styleLabel">题目配图风</span></div>
+          </div>
+          <div class="mode-label" id="motionLabel">物块保持静止</div>
+        </div>
+        <div class="canvas-shell">
+          <canvas id="sceneCanvas"></canvas>
+          <div class="canvas-caption">
+            <span class="chip">m = <span id="chipMass">2.0</span> kg</span>
+            <span class="chip">θ = <span id="chipAngle">30</span>°</span>
+            <span class="chip">μ = <span id="chipMu">0.35</span></span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <b>参数与读数</b>
+          <span>窄屏下自动下沉，不遮挡主画布</span>
+        </div>
+        <div class="panel-scroll">
+          <section class="section">
+            <h2 class="section-title">核心参数</h2>
+            <label class="control">
+              <span class="control-head"><span>物块质量</span><span class="value"><span id="massValue">2.0</span> kg</span></span>
+              <input id="mass" type="range" min="0.5" max="6" step="0.1" value="2" />
+            </label>
+            <label class="control">
+              <span class="control-head"><span>斜面角度</span><span class="value"><span id="angleValue">30</span>°</span></span>
+              <input id="angle" type="range" min="5" max="60" step="1" value="30" />
+            </label>
+            <label class="control">
+              <span class="control-head"><span>摩擦系数</span><span class="value"><span id="muValue">0.35</span></span></span>
+              <input id="mu" type="range" min="0" max="0.8" step="0.01" value="0.35" />
+            </label>
+            <div class="toggle-row">
+            <span>显示辅助分解</span>
+              <div id="componentSwitch" class="switch on" role="switch" aria-checked="true" tabindex="0"><div class="knob"></div></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-title">关键读数</h2>
+            <div class="readouts">
+              <div class="readout"><b>重力沿斜面分量</b><span id="fgParallel">9.8</span><small>N</small></div>
+              <div class="readout"><b>支持力</b><span id="normal">17.0</span><small>N</small></div>
+              <div class="readout"><b>摩擦力</b><span id="friction">5.9</span><small>N</small></div>
+              <div class="readout"><b>合力</b><span id="netForce">3.9</span><small>N</small></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-title">教学关系</h2>
+            <div class="formula">
+              <div>G = mg</div>
+              <div>G<sub>∥</sub> = mg sin θ，G<sub>⊥</sub> = mg cos θ</div>
+              <div>f<sub>max</sub> = μN，若 G<sub>∥</sub> &gt; f<sub>max</sub>，物块沿斜面下滑。</div>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <button id="resetBtn" class="icon-btn" type="button" aria-label="重置">↺</button>
+      <button id="playBtn" class="icon-btn primary" type="button" aria-label="播放">▶</button>
+      <button id="stepBtn" class="icon-btn" type="button" aria-label="单步">▸</button>
+      <select id="speed" class="speed" aria-label="速度倍率">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+      </select>
+      <div class="time"><span id="timeValue">0.00</span> s</div>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('sceneCanvas');
+    const ctx = canvas.getContext('2d');
+    const state = {
+      style: 'diagram',
+      mass: 2,
+      angle: 30,
+      mu: 0.35,
+      showComponents: true,
+      playing: false,
+      time: 0,
+      speed: 1,
+      blockS: 0,
+      blockV: 0,
+      reachedBottom: false,
+      presetIndex: 0,
+    };
+
+    const presets = [
+      { label: '临界静止', mass: 2, angle: 30, mu: 0.58 },
+      { label: '光滑下滑', mass: 2, angle: 28, mu: 0 },
+      { label: '粗糙斜面', mass: 2.5, angle: 35, mu: 0.4 },
+    ];
+
+    const els = {
+      diagramBtn: document.getElementById('diagramBtn'),
+      realBtn: document.getElementById('realBtn'),
+      styleLabel: document.getElementById('styleLabel'),
+      stateLabel: document.getElementById('stateLabel'),
+      motionLabel: document.getElementById('motionLabel'),
+      presetBtn: document.getElementById('presetBtn'),
+      mass: document.getElementById('mass'),
+      angle: document.getElementById('angle'),
+      mu: document.getElementById('mu'),
+      massValue: document.getElementById('massValue'),
+      angleValue: document.getElementById('angleValue'),
+      muValue: document.getElementById('muValue'),
+      chipMass: document.getElementById('chipMass'),
+      chipAngle: document.getElementById('chipAngle'),
+      chipMu: document.getElementById('chipMu'),
+      componentSwitch: document.getElementById('componentSwitch'),
+      fgParallel: document.getElementById('fgParallel'),
+      normal: document.getElementById('normal'),
+      friction: document.getElementById('friction'),
+      netForce: document.getElementById('netForce'),
+      resetBtn: document.getElementById('resetBtn'),
+      playBtn: document.getElementById('playBtn'),
+      stepBtn: document.getElementById('stepBtn'),
+      speed: document.getElementById('speed'),
+      timeValue: document.getElementById('timeValue'),
+    };
+
+    function physics() {
+      const g = 9.8;
+      const theta = state.angle * Math.PI / 180;
+      const weight = state.mass * g;
+      const parallel = weight * Math.sin(theta);
+      const normal = weight * Math.cos(theta);
+      const maxFriction = state.mu * normal;
+      const friction = Math.min(maxFriction, Math.abs(parallel));
+      const net = Math.max(0, parallel - maxFriction);
+      const acceleration = net / state.mass;
+      return { g, theta, weight, parallel, normal, maxFriction, friction, net, acceleration };
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function rampGeometry(w, h) {
+      const margin = Math.min(w, h) * 0.12;
+      const baseY = h * 0.76;
+      const start = { x: margin, y: baseY };
+      const length = Math.min(w * 0.68, h * 0.78);
+      const theta = physics().theta;
+      const end = {
+        x: start.x + length * Math.cos(theta),
+        y: start.y - length * Math.sin(theta),
+      };
+      return { start, end, length, theta, baseY };
+    }
+
+    function blockPosition(geom) {
+      const startS = 0.68;
+      const bottomS = 0.18;
+      const s = Math.max(bottomS, startS - state.blockS / Math.max(geom.length, 1));
+      state.reachedBottom = s <= bottomS + 0.001;
+      return {
+        x: geom.start.x + geom.length * s * Math.cos(geom.theta),
+        y: geom.start.y - geom.length * s * Math.sin(geom.theta),
+        s,
+      };
+    }
+
+    function drawArrow(from, to, color, label, width = 2.2, dash = []) {
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      const head = 10;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - head * Math.cos(angle - Math.PI / 6), to.y - head * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(to.x - head * Math.cos(angle + Math.PI / 6), to.y - head * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      if (label) {
+        ctx.font = '600 13px -apple-system, BlinkMacSystemFont, Segoe UI';
+        ctx.fillText(label, to.x + 8, to.y - 6);
+      }
+      ctx.restore();
+    }
+
+    function drawDiagram(w, h, p) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      const grid = 24;
+      ctx.strokeStyle = '#eef2f7';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += grid) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += grid) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      const geom = rampGeometry(w, h);
+      const pos = blockPosition(geom);
+      const ux = Math.cos(geom.theta);
+      const uy = -Math.sin(geom.theta);
+      const downX = -ux;
+      const downY = -uy;
+      const normalX = -Math.sin(geom.theta);
+      const normalY = -Math.cos(geom.theta);
+
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(geom.start.x, geom.start.y);
+      ctx.lineTo(geom.end.x, geom.end.y);
+      ctx.lineTo(geom.end.x, geom.start.y);
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(geom.start.x, geom.start.y);
+      ctx.lineTo(geom.end.x, geom.end.y);
+      ctx.lineTo(geom.end.x, geom.start.y);
+      ctx.closePath();
+      ctx.clip();
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      for (let i = -h; i < w; i += 10) {
+        ctx.beginPath();
+        ctx.moveTo(i, geom.start.y + 80);
+        ctx.lineTo(i + 140, geom.start.y - 60);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(pos.x, pos.y);
+      ctx.rotate(-geom.theta);
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.fillRect(-28, -23, 56, 36);
+      ctx.strokeRect(-28, -23, 56, 36);
+      ctx.restore();
+
+      const c = { x: pos.x, y: pos.y - 7 };
+      const scale = Math.min(w, h) * 0.008;
+      drawArrow(c, { x: c.x, y: c.y + p.weight * scale }, '#111827', `G=${p.weight.toFixed(1)}N`);
+      drawArrow(c, { x: c.x + normalX * p.normal * scale, y: c.y + normalY * p.normal * scale }, '#111827', `N=${p.normal.toFixed(1)}N`);
+      drawArrow(c, { x: c.x + ux * p.friction * scale, y: c.y + uy * p.friction * scale }, '#111827', `f=${p.friction.toFixed(1)}N`);
+      if (state.showComponents) {
+        drawArrow(c, { x: c.x + downX * p.parallel * scale, y: c.y + downY * p.parallel * scale }, '#111827', `G∥=${p.parallel.toFixed(1)}N`, 1.8, [6, 4]);
+      }
+
+      drawArrow(
+        { x: geom.start.x + 14, y: geom.start.y - 10 },
+        { x: geom.start.x + 86, y: geom.start.y - 10 },
+        '#111827',
+        '下滑方向',
+        1.6,
+      );
+
+      ctx.fillStyle = '#111827';
+      ctx.font = '600 13px -apple-system, BlinkMacSystemFont, Segoe UI';
+      ctx.fillText(`θ=${state.angle}°`, geom.start.x + 42, geom.start.y - 10);
+      ctx.strokeStyle = '#111827';
+      ctx.beginPath();
+      ctx.arc(geom.start.x, geom.start.y, 44, -geom.theta, 0);
+      ctx.stroke();
+    }
+
+    function drawRealistic(w, h, p) {
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#d8ecff');
+      sky.addColorStop(0.62, '#f8fbff');
+      sky.addColorStop(1, '#edf1f5');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      const geom = rampGeometry(w, h);
+      const pos = blockPosition(geom);
+      const ux = Math.cos(geom.theta);
+      const uy = -Math.sin(geom.theta);
+      const downX = -ux;
+      const downY = -uy;
+      const normalX = -Math.sin(geom.theta);
+      const normalY = -Math.cos(geom.theta);
+
+      const ground = ctx.createLinearGradient(0, geom.start.y, 0, h);
+      ground.addColorStop(0, '#cad7bf');
+      ground.addColorStop(1, '#8fa17e');
+      ctx.fillStyle = ground;
+      ctx.beginPath();
+      ctx.moveTo(0, geom.start.y + 2);
+      ctx.lineTo(w, geom.start.y + 2);
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      ctx.fill();
+
+      const ramp = ctx.createLinearGradient(geom.start.x, geom.start.y, geom.end.x, geom.end.y);
+      ramp.addColorStop(0, '#8b5a2b');
+      ramp.addColorStop(0.45, '#c48a45');
+      ramp.addColorStop(1, '#6f421d');
+      ctx.fillStyle = ramp;
+      ctx.beginPath();
+      ctx.moveTo(geom.start.x, geom.start.y);
+      ctx.lineTo(geom.end.x, geom.end.y);
+      ctx.lineTo(geom.end.x, geom.start.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(88,52,22,0.38)';
+      ctx.lineWidth = 2;
+      for (let i = -80; i < geom.length + 80; i += 18) {
+        const x1 = geom.start.x + i * Math.cos(geom.theta);
+        const y1 = geom.start.y - i * Math.sin(geom.theta);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1 - 3);
+        ctx.lineTo(x1 + 180 * Math.cos(geom.theta), y1 - 180 * Math.sin(geom.theta) + 4);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(64,38,16,0.55)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(pos.x + 14, pos.y + 26);
+      ctx.rotate(-geom.theta);
+      ctx.fillStyle = 'rgba(15,23,42,0.22)';
+      ctx.filter = 'blur(8px)';
+      ctx.fillRect(-34, -10, 74, 18);
+      ctx.restore();
+      ctx.filter = 'none';
+
+      drawStoneBlock(pos.x, pos.y, geom.theta);
+
+      const c = { x: pos.x, y: pos.y - 10 };
+      const scale = Math.min(w, h) * 0.008;
+      glowArrow(c, { x: c.x, y: c.y + p.weight * scale }, '#7f1d1d', '重力');
+      glowArrow(c, { x: c.x + normalX * p.normal * scale, y: c.y + normalY * p.normal * scale }, '#0f766e', '支持力');
+      glowArrow(c, { x: c.x + ux * p.friction * scale, y: c.y + uy * p.friction * scale }, '#92400e', '摩擦力');
+      if (state.showComponents) {
+        glowArrow(c, { x: c.x + downX * p.parallel * scale, y: c.y + downY * p.parallel * scale }, '#166534', '沿斜面分量');
+      }
+    }
+
+    function glowArrow(from, to, color, label) {
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 7;
+      drawArrow(from, to, color, label, 2.6);
+      ctx.restore();
+    }
+
+    function drawStoneBlock(x, y, theta) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-theta);
+      const points = [
+        [-34, -29], [-12, -36], [18, -31], [35, -18],
+        [31, 10], [12, 22], [-18, 19], [-36, 5],
+      ];
+      const stone = ctx.createRadialGradient(-10, -16, 8, 4, -6, 54);
+      stone.addColorStop(0, '#d8d4ca');
+      stone.addColorStop(0.45, '#9e9a91');
+      stone.addColorStop(1, '#5f5d57');
+      ctx.fillStyle = stone;
+      ctx.beginPath();
+      points.forEach(([px, py], index) => {
+        if (index === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(49,46,43,0.58)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-22, -12);
+      ctx.lineTo(-2, -18);
+      ctx.lineTo(20, -11);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(40,38,35,0.25)';
+      ctx.beginPath();
+      ctx.moveTo(-18, 7);
+      ctx.lineTo(6, 2);
+      ctx.lineTo(24, 9);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function roundRect(context, x, y, width, height, radius) {
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.arcTo(x + width, y, x + width, y + height, radius);
+      context.arcTo(x + width, y + height, x, y + height, radius);
+      context.arcTo(x, y + height, x, y, radius);
+      context.arcTo(x, y, x + width, y, radius);
+      context.closePath();
+    }
+
+    function draw() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const p = physics();
+      if (state.style === 'diagram') {
+        drawDiagram(w, h, p);
+      } else {
+        drawRealistic(w, h, p);
+      }
+      updateLabels(p);
+    }
+
+    function updateLabels(p) {
+      els.massValue.textContent = state.mass.toFixed(1);
+      els.angleValue.textContent = state.angle.toFixed(0);
+      els.muValue.textContent = state.mu.toFixed(2);
+      els.chipMass.textContent = state.mass.toFixed(1);
+      els.chipAngle.textContent = state.angle.toFixed(0);
+      els.chipMu.textContent = state.mu.toFixed(2);
+      els.fgParallel.textContent = p.parallel.toFixed(1);
+      els.normal.textContent = p.normal.toFixed(1);
+      els.friction.textContent = p.friction.toFixed(1);
+      els.netForce.textContent = p.net.toFixed(1);
+      els.timeValue.textContent = state.time.toFixed(2);
+      els.stateLabel.textContent = state.playing ? '运行中' : '暂停';
+      els.playBtn.textContent = state.playing ? 'Ⅱ' : '▶';
+      els.motionLabel.textContent = state.reachedBottom
+        ? '物块已到达斜面底端'
+        : p.net > 0.02
+          ? `沿斜面下滑，a=${p.acceleration.toFixed(2)} m/s²`
+          : '物块保持静止';
+      els.styleLabel.textContent = state.style === 'diagram' ? '黑白题目配图风' : '真实物体风';
+    }
+
+    function syncInputs() {
+      els.mass.value = state.mass;
+      els.angle.value = state.angle;
+      els.mu.value = state.mu;
+      els.componentSwitch.classList.toggle('on', state.showComponents);
+      els.componentSwitch.setAttribute('aria-checked', String(state.showComponents));
+      els.diagramBtn.classList.toggle('active', state.style === 'diagram');
+      els.realBtn.classList.toggle('active', state.style === 'realistic');
+      draw();
+    }
+
+    function resetMotion() {
+      state.time = 0;
+      state.blockS = 0;
+      state.blockV = 0;
+      state.reachedBottom = false;
+    }
+
+    function applyPreset() {
+      state.presetIndex = (state.presetIndex + 1) % presets.length;
+      const preset = presets[state.presetIndex];
+      state.mass = preset.mass;
+      state.angle = preset.angle;
+      state.mu = preset.mu;
+      els.presetBtn.textContent = `预设：${preset.label}`;
+      resetMotion();
+      syncInputs();
+    }
+
+    function step(dt) {
+      const p = physics();
+      if (state.reachedBottom) {
+        state.blockV = 0;
+        state.playing = false;
+        return;
+      }
+      if (p.net > 0.02) {
+        state.blockV += p.acceleration * dt * 18;
+        state.blockS += state.blockV * dt * 18;
+        const rect = canvas.getBoundingClientRect();
+        const geom = rampGeometry(rect.width, rect.height);
+        const maxTravel = geom.length * (0.68 - 0.18);
+        if (state.blockS >= maxTravel) {
+          state.blockS = maxTravel;
+          state.blockV = 0;
+          state.reachedBottom = true;
+          state.playing = false;
+        }
+      }
+      state.time += dt;
+    }
+
+    let last = performance.now();
+    function animate(now) {
+      const dt = Math.min((now - last) / 1000, 0.04) * state.speed;
+      last = now;
+      if (state.playing) step(dt);
+      draw();
+      requestAnimationFrame(animate);
+    }
+
+    els.diagramBtn.addEventListener('click', () => {
+      state.style = 'diagram';
+      syncInputs();
+    });
+    els.realBtn.addEventListener('click', () => {
+      state.style = 'realistic';
+      syncInputs();
+    });
+    els.presetBtn.addEventListener('click', applyPreset);
+    els.mass.addEventListener('input', (e) => { state.mass = Number(e.target.value); resetMotion(); draw(); });
+    els.angle.addEventListener('input', (e) => { state.angle = Number(e.target.value); resetMotion(); draw(); });
+    els.mu.addEventListener('input', (e) => { state.mu = Number(e.target.value); resetMotion(); draw(); });
+    els.componentSwitch.addEventListener('click', () => { state.showComponents = !state.showComponents; syncInputs(); });
+    els.componentSwitch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        state.showComponents = !state.showComponents;
+        syncInputs();
+      }
+    });
+    els.playBtn.addEventListener('click', () => { state.playing = !state.playing; draw(); });
+    els.resetBtn.addEventListener('click', () => { state.playing = false; resetMotion(); draw(); });
+    els.stepBtn.addEventListener('click', () => { state.playing = false; step(1 / 30); draw(); });
+    els.speed.addEventListener('change', (e) => { state.speed = Number(e.target.value); });
+    window.addEventListener('resize', resizeCanvas);
+    if ('ResizeObserver' in window) {
+      const observer = new ResizeObserver(() => resizeCanvas());
+      observer.observe(canvas);
+    }
+
+    syncInputs();
+    resizeCanvas();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

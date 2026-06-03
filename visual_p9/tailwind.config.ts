@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import { COLORS } from "./src/styles/colors";
 import typography from "@tailwindcss/typography";
 
 const config: Config = {
@@ -11,22 +10,22 @@ const config: Config = {
     extend: {
       colors: {
         eduMind: {
-          primary: COLORS.primary,
-          primaryHover: COLORS.primaryHover,
-          primaryLight: COLORS.primaryLight,
-          dark: COLORS.dark,
-          neutral: COLORS.neutral,
-          light: COLORS.light,
-          lightAlt: COLORS.lightAlt,
-          border: COLORS.border,
-          white: COLORS.white,
-          placeholder: COLORS.placeholder,
-          success: COLORS.success,
-          successAlt: COLORS.successAlt,
-          warning: COLORS.warning,
-          error: COLORS.error,
-          danger: COLORS.dangerAlt,
-          info: COLORS.info,
+          primary: "#32D583",
+          primaryHover: "#28B86D",
+          primaryLight: "#32D583",
+          dark: "#1A1A1E",
+          neutral: "#6B6B70",
+          light: "#FAFAF9",
+          lightAlt: "#F5F5F5",
+          border: "#E5E5E5",
+          white: "#FFFFFF",
+          placeholder: "#A0A0A0",
+          success: "#10B981",
+          successAlt: "#52C41A",
+          warning: "#F59E0B",
+          error: "#EF4444",
+          danger: "#F5222D",
+          info: "#3B82F6",
         },
       },
       borderRadius: {

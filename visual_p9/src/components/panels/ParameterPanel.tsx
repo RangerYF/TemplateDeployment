@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { useActiveModel, useActiveParams, useSimulationStore } from '@/store/simulationStore';
-import { COLORS } from '@/styles/tokens';
 import { formatValue, joinScientific, parseNumericInput, splitScientific } from '@/lib/utils/format';
 import type { ParameterSpec } from '@/data/celestialData';
 
@@ -93,7 +92,7 @@ function ScientificInput({
     setExpDraft(String(updated.exponent));
   }, [coeffDraft, expDraft, min, max, onCommit, initParts.exponent]);
 
-  const inputStyle = { background: COLORS.bgMuted };
+  const inputStyle = { background: 'var(--theme-surface-hover)' };
 
   return (
     <div className="flex items-center gap-1">
@@ -107,7 +106,7 @@ function ScientificInput({
         onBlur={commitCoeff}
         onKeyDown={(e) => { if (e.key === 'Enter') commitCoeff(); }}
       />
-      <span className="shrink-0 text-[11px]" style={{ color: COLORS.textMuted }}>×10^</span>
+      <span className="shrink-0 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>×10^</span>
       <Input
         className="h-7 w-[52px] px-2 py-0 text-center text-xs"
         style={inputStyle}
@@ -178,15 +177,15 @@ export function ParameterPanel() {
         return (
           <div key={field.key} className="space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs" style={{ color: COLORS.textMuted }}>
+              <Label className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                 {field.label}
               </Label>
-              <span className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>
+              <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
                 {formatValue(value, field.unit, scientific)}
               </span>
             </div>
             {isFixedValue ? (
-              <div className="rounded-xl border px-3 py-2 text-xs" style={{ borderColor: COLORS.border, background: COLORS.bgMuted, color: COLORS.textMuted }}>
+              <div className="rounded-xl border px-3 py-2 text-xs" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-surface-hover)', color: 'var(--theme-text-muted)' }}>
                 固定参数：{formatValue(clampedValue, field.unit, scientific)}
               </div>
             ) : (
@@ -215,13 +214,13 @@ export function ParameterPanel() {
                     step={field.step}
                     onCommit={(next) => setParam(field.key, next)}
                     className="h-7 w-full px-2 py-0 text-xs"
-                    style={{ background: COLORS.bgMuted }}
+                    style={{ background: 'var(--theme-surface-hover)' }}
                   />
                 )}
               </div>
             )}
             {hint && (
-              <p className="text-[11px]" style={{ color: COLORS.textPlaceholder }}>{hint}</p>
+              <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{hint}</p>
             )}
           </div>
         );

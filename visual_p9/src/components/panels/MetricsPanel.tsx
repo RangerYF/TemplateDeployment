@@ -1,36 +1,51 @@
 import { buildFrame } from '@/engine/orbitalMechanics';
 import { useActiveParams, useSimulationStore } from '@/store/simulationStore';
-import { COLORS } from '@/styles/tokens';
 
 export function MetricsPanel() {
-  const modelId = useSimulationStore((state) => state.currentModelId);
-  const elapsedSeconds = useSimulationStore((state) => state.elapsedSeconds);
-  const phase = useSimulationStore((state) => state.hohmannPhase);
-  const ignitionAngle = useSimulationStore((state) => state.hohmannIgnitionAngle);
+  const { currentModelId, elapsedSeconds, hohmannPhase, hohmannIgnitionAngle } =
+    useSimulationStore();
   const params = useActiveParams();
-  const metrics = buildFrame(modelId, params, elapsedSeconds, phase, ignitionAngle).metrics;
+  const frame = buildFrame(
+    currentModelId,
+    params,
+    elapsedSeconds,
+    hohmannPhase,
+    hohmannIgnitionAngle,
+  );
+  const { metrics } = frame;
 
   return (
-    <div className="space-y-3">
-      <div>
-        <h4 className="text-sm font-semibold" style={{ color: COLORS.text }}>{metrics.title}</h4>
-        <p className="mt-1 text-xs leading-relaxed" style={{ color: COLORS.textMuted }}>{metrics.insight}</p>
-      </div>
-      <div className="space-y-1.5">
-        {metrics.values.map((item) => (
-          <div
-            key={`${item.label}-${item.value}`}
-            className="rounded-xl border px-3 py-2"
-            style={{ borderColor: COLORS.border, background: COLORS.bg }}
+    <div className="space-y-1">
+      {metrics.values.map((v, i) => (
+        <div
+          key={i}
+          className="flex items-center justify-between py-1.5"
+          style={{
+            borderBottom:
+              i < metrics.values.length - 1
+                ? '1px solid var(--theme-border)'
+                : 'none',
+          }}
+        >
+          <span className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
+            {v.label}
+          </span>
+          <span
+            className="text-sm font-semibold tabular-nums"
+            style={{ color: 'var(--theme-text)' }}
           >
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs" style={{ color: COLORS.textMuted }}>{item.label}</span>
-              <span className="text-xs font-semibold text-right" style={{ color: COLORS.text }}>{item.value}</span>
-            </div>
-            {item.note && <div className="mt-1 text-[11px]" style={{ color: COLORS.textPlaceholder }}>{item.note}</div>}
-          </div>
-        ))}
-      </div>
+            {v.value}
+          </span>
+        </div>
+      ))}
+      {metrics.insight && (
+        <p
+          className="text-xs mt-2 leading-relaxed"
+          style={{ color: 'var(--theme-text-muted)' }}
+        >
+          {metrics.insight}
+        </p>
+      )}
     </div>
   );
 }
