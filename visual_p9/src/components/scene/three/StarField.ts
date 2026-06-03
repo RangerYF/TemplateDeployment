@@ -12,7 +12,7 @@ export class StarField {
 
     // Outer skybox — large inverted sphere with milky way texture
     const outerGeo = new THREE.SphereGeometry(2000, 64, 64);
-    const outerTex = loader.load('/textures/stars_milky.jpg');
+    const outerTex = loader.load(`${import.meta.env.BASE_URL}textures/stars_milky.jpg`);
     outerTex.colorSpace = THREE.SRGBColorSpace;
     const outerMat = new THREE.MeshBasicMaterial({
       map: outerTex,
@@ -24,7 +24,7 @@ export class StarField {
 
     // Inner skybox — semi-transparent overlay for depth
     const innerGeo = new THREE.SphereGeometry(1900, 64, 64);
-    const innerTex = loader.load('/textures/stars_milky.jpg');
+    const innerTex = loader.load(`${import.meta.env.BASE_URL}textures/stars_milky.jpg`);
     innerTex.colorSpace = THREE.SRGBColorSpace;
     const innerMat = new THREE.MeshBasicMaterial({
       map: innerTex,

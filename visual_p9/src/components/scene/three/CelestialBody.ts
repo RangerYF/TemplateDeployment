@@ -28,15 +28,15 @@ export class CelestialBody {
     const geo = new THREE.SphereGeometry(radius, 64, 64);
 
     if (isStar) {
-      const sunTex = loadTexture('/textures/sun.jpg');
+      const sunTex = loadTexture(`${import.meta.env.BASE_URL}textures/sun.jpg`);
       const mat = new THREE.MeshBasicMaterial({
         map: sunTex,
         toneMapped: false,
       });
       this.sphere = new THREE.Mesh(geo, mat);
 
-      const flare0 = loadTexture('/textures/lensflare0.png');
-      const flare2 = loadTexture('/textures/lensflare2.png');
+      const flare0 = loadTexture(`${import.meta.env.BASE_URL}textures/lensflare0.png`);
+      const flare2 = loadTexture(`${import.meta.env.BASE_URL}textures/lensflare2.png`);
       const lensflare = new Lensflare();
       lensflare.addElement(new LensflareElement(flare0, radius * 8, 0, new THREE.Color(0xffffff)));
       lensflare.addElement(new LensflareElement(flare2, radius * 4, 0.1, new THREE.Color(0xffaa44)));
@@ -49,7 +49,7 @@ export class CelestialBody {
 
       if (bodyId === 'earth') {
         mat = new THREE.MeshLambertMaterial({
-          map: loadTexture('/textures/earth_day.jpg'),
+          map: loadTexture(`${import.meta.env.BASE_URL}textures/earth_day.jpg`),
           color: 0xffffff,
         });
       } else {
