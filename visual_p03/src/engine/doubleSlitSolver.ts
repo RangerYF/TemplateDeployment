@@ -192,7 +192,6 @@ export function drawFringePattern(
   const { slitSpacing, slitWidth, screenDistance, wavelength, whiteLight, showColor } = settings;
   const d = slitSpacing * 1e-6;
   const L = screenDistance;
-  const lam = wavelength * 1e-9;
   const a = slitWidth * 1e-6;
   const screenW = 0.04; // physical screen width in metres
   const color = wavelengthToColor(wavelength);

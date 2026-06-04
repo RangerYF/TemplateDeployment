@@ -15,7 +15,6 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { wavelengthToColor } from '@/lib/utils/wavelengthToColor';
 import {
   clamp,
-  fmt,
   drawThinFilmPattern,
   drawThinFilmPlot,
   newtonDiagramLensY,
@@ -248,7 +247,6 @@ export function ThinFilmCanvas({
 }) {
   const { filmType, wavelength, thickness, filmN, lensR, wedgeAngle, wedgeProfile, showIntensity, newtonSampleRatio } = settings;
 
-  const lam = wavelength * 1e-9;
   const color = wavelengthToColor(wavelength);
   const isNewton = filmType === 'newton';
 

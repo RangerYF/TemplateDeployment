@@ -4,8 +4,6 @@
  * Exports all types, constants, experiment specs, and default builder.
  */
 
-import type { Point } from '@/data/refractionData';
-
 // ---------------------------------------------------------------------------
 // Domain types
 // ---------------------------------------------------------------------------

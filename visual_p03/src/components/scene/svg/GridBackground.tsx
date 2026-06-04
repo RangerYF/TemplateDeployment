@@ -4,6 +4,8 @@
  * ViewBox matches the 1000x620 stage coordinate system.
  */
 
+import type { JSX } from 'react';
+
 export function GridBackground() {
   const lines: JSX.Element[] = [];
   for (let x = 0; x <= 1000; x += 50) {

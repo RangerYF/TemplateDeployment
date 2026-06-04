@@ -1,16 +1,14 @@
 import type { RefractionSettings, SolveResult, Point, AngleMark, RaySegment, BoundaryHit } from '@/data/refractionData';
-import { MATERIALS } from '@/data/refractionData';
-import { wavelengthToColor } from '@/lib/utils/wavelengthToColor';
 import {
   deg, rad, fmt, clamp,
-  add, sub, mul, dot, len, norm,
-  pointFromAngle, angleFromVector, angleAgainstNormal,
+  add, sub, mul, len, norm,
+  pointFromAngle, angleAgainstNormal,
   reflect, refract, extendRay,
   intersectRayHorizontal, intersectRayVertical, intersectRayCircle,
   intersectRayRectBoundary, intersectRayHalfBoundary,
   pointInRect, pointInHalfDisk, pointInFiberCore,
-  makeFiberGeometry, fiberCenterY, fiberBoundaryY, fiberBoundaryNormal,
-  findFiberBoundaryHit, uniqueBoundaryHits, makeArcMark,
+  makeFiberGeometry, fiberBoundaryY,
+  findFiberBoundaryHit, makeArcMark,
 } from './refractionGeometry';
 
 // ── Stage constants ─────────────────────────────────────────────────
