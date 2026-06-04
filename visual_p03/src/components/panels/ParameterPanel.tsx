@@ -36,7 +36,6 @@ function SceneSelector() {
 export function ParameterPanel() {
   const settings = useSimulationStore((s) => s.settings);
   const updateSettings = useSimulationStore((s) => s.updateSettings);
-  const resetSettings = useSimulationStore((s) => s.resetSettings);
   const setViewport = useUIStore((s) => s.setViewport);
 
   const shape = settings.shape;

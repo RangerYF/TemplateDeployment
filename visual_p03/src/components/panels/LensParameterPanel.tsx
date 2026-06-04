@@ -7,9 +7,9 @@
 import { useLensStore } from '@/store/lensStore';
 import { useUIStore } from '@/store/uiStore';
 import { Button } from '@/components/ui/button';
-import { resolveObjectDistance, clampLensX, clampScreenX, clamp } from '@/engine/lensSolver';
+import { resolveObjectDistance, clampLensX, clampScreenX } from '@/engine/lensSolver';
 import { LENS_TYPES, SOURCE_TYPES, LENS_STAGE } from '@/data/lensData';
-import type { LensKind, LensSourceType } from '@/data/lensData';
+import type { LensSourceType } from '@/data/lensData';
 import { SectionTitle, ParamSlider, SegSelect, ToggleRow } from './shared';
 
 // ---------------------------------------------------------------------------
@@ -19,7 +19,6 @@ import { SectionTitle, ParamSlider, SegSelect, ToggleRow } from './shared';
 export function LensParameterPanel() {
   const settings = useLensStore((s) => s.settings);
   const updateSettings = useLensStore((s) => s.updateSettings);
-  const resetSettings = useLensStore((s) => s.resetSettings);
   const setViewport = useUIStore((s) => s.setViewport);
 
   const maxObjectDistance = Math.max(

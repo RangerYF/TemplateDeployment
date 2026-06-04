@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { wavelengthToColor } from '@/lib/utils/wavelengthToColor';
 
 /** Section heading — thin uppercase label with optional aside tag */
-export function SectionTitle({ children, aside }: { children: React.ReactNode; aside?: string }) {
+export function SectionTitle({ children, aside }: { children: ReactNode; aside?: string }) {
   return (
     <div className="mb-2 mt-4 flex items-center gap-2 first:mt-0">
       <h4

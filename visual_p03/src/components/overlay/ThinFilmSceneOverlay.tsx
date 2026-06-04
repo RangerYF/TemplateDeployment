@@ -6,7 +6,6 @@
 
 import { useState } from 'react';
 import { useThinFilmStore } from '@/store/thinFilmStore';
-import { FILM_TYPES } from '@/data/thinFilmData';
 import type { ThinFilmExperimentId } from '@/data/thinFilmData';
 
 const glass = {

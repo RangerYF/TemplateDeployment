@@ -6,7 +6,6 @@
 
 import { useState } from 'react';
 import { useLensStore } from '@/store/lensStore';
-import { LENS_TYPES } from '@/data/lensData';
 import type { LensExperimentId } from '@/data/lensData';
 
 const glass = {

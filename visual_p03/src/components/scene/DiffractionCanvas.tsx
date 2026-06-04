@@ -15,7 +15,6 @@ import {
   computeSourceIntensityScale,
   drawDiffractionPattern,
   drawDiffractionPlot,
-  COMPARE_WAVELENGTHS,
 } from '@/engine/diffractionSolver';
 import type { DiffractionSettings } from '@/data/diffractionData';
 
