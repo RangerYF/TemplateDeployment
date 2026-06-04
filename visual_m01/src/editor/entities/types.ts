@@ -62,6 +62,7 @@ export interface SegmentProperties {
   endPointId: string;
   style: { color: string; dashed: boolean };
   label?: string;
+  showLength?: boolean;
   /** 曲线离散点序列（存在时渲染曲线而非直线） */
   curvePoints?: [number, number, number][];
   /** 曲面体线索引（对应 SurfaceResult.lines 的下标，用于 curve 约束） */

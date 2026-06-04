@@ -267,7 +267,9 @@ function UserSegment({
           color={color}
         />
       )}
-      <SegmentLengthLabel startPos={startPos} endPos={endPos} />
+      {props.showLength !== false && (
+        <SegmentLengthLabel startPos={startPos} endPos={endPos} />
+      )}
     </group>
   );
 }

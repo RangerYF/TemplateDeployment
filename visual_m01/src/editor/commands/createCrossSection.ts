@@ -100,6 +100,7 @@ export class CreateCrossSectionCommand implements Command {
             startPointId: startId,
             endPointId: endId,
             style: { color: '#3b82f6', dashed: false },
+            showLength: false,
           });
           innerCommands.push(segCmd);
         }
@@ -127,6 +128,7 @@ export class CreateCrossSectionCommand implements Command {
             startPointId: startId,
             endPointId: endId,
             style: { color: '#3b82f6', dashed: true },
+            showLength: false,
           });
           innerCommands.push(segCmd);
         }
