@@ -49,7 +49,6 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
       const entityHits = intersections.filter((h) => {
         const ud = h.object?.userData;
         if (!ud) return false;
-        if (ud.isSnapPoint) return true;
         const eid = ud.entityId;
         if (!eid) return false;
         const e = entities[eid];
@@ -80,7 +79,9 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
       const preferredType =
         activeTool?.id === 'crossSection' || activeTool?.id === 'drawSegment'
           ? 'point'
-          : undefined;
+          : activeTool?.id === 'pickPoint'
+            ? 'segment'
+            : undefined;
       const targetHit = findTargetHit(event.intersections, penetrate, preferredType);
       return {
         nativeEvent: event.nativeEvent,
@@ -222,12 +223,24 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
       // 拖拽中不更新 hover（由 window 级事件处理）
       if (pointerDownRef.current) return;
 
+      const activeTool = getActiveTool();
       const penetrate = event.nativeEvent.ctrlKey || event.nativeEvent.metaKey;
-      const targetHit = findTargetHit(event.intersections, penetrate);
+      const preferredType = activeTool?.id === 'pickPoint' ? 'segment' : undefined;
+      const targetHit = findTargetHit(event.intersections, penetrate, preferredType);
       const entityId = targetHit?.object?.userData?.entityId ?? null;
       useSelectionStore.getState().setHovered(entityId);
+
+      if (activeTool?.needsHoverMove && activeTool.onPointerMove) {
+        const toolEvent: ToolPointerEvent = {
+          nativeEvent: event.nativeEvent,
+          intersection: targetHit ?? undefined,
+          hitEntityId: targetHit?.object?.userData?.entityId,
+          hitEntityType: targetHit?.object?.userData?.entityType,
+        };
+        activeTool.onPointerMove(toolEvent);
+      }
     },
-    [findTargetHit],
+    [findTargetHit, getActiveTool],
   );
 
   const handlePointerLeave = useCallback(() => {

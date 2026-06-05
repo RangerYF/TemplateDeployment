@@ -43,6 +43,7 @@ export type PointConstraint =
   | { type: 'vertex'; vertexIndex: number }
   | { type: 'edge'; edgeStart: number; edgeEnd: number; t: number }
   | { type: 'curve'; lineIndex: number; t: number }
+  | { type: 'segment'; segmentId: string; t: number }
   | { type: 'coordinate'; coordSystemId: string; coords: [number, number, number] }
   | { type: 'free'; position: [number, number, number] }
   | { type: 'face'; faceId: string; u: number; v: number };

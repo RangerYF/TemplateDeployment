@@ -80,6 +80,17 @@ export function AngleIcon({ size = 18, className, color = 'currentColor' }: Icon
   );
 }
 
+/** 取点 — 线段上标记一个点 */
+export function PickPointIcon({ size = 18, className, color = 'currentColor' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" className={className}>
+      <line x1="4" y1="19" x2="20" y2="5" />
+      <circle cx="12" cy="12" r="3" fill={color} opacity="0.3" stroke={color} strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="1.2" fill={color} />
+    </svg>
+  );
+}
+
 /** 标记距离 — 两端带横线的双向箭头 */
 export function DistanceIcon({ size = 18, className, color = 'currentColor' }: IconProps) {
   return (

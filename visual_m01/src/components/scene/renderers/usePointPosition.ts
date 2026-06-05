@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Entity, PointProperties, PointConstraint, CoordinateSystemProperties } from '@/editor/entities/types';
+import type { Entity, PointProperties, PointConstraint, CoordinateSystemProperties, SegmentProperties } from '@/editor/entities/types';
 import { useEntityStore } from '@/editor/store';
 import { useBuilderResult } from '@/editor/builderCache';
 import type { BuilderResult, Vec3 } from '@/engine/types';
@@ -78,6 +78,23 @@ function computeConstraintPosition(
         p0[0] + constraint.u * (p1[0] - p0[0]) + constraint.v * (p2[0] - p0[0]),
         p0[1] + constraint.u * (p1[1] - p0[1]) + constraint.v * (p2[1] - p0[1]),
         p0[2] + constraint.u * (p1[2] - p0[2]) + constraint.v * (p2[2] - p0[2]),
+      ];
+    }
+    case 'segment': {
+      const segEntity = useEntityStore.getState().getEntity(constraint.segmentId);
+      if (!segEntity || segEntity.type !== 'segment') return null;
+      const segProps = segEntity.properties as SegmentProperties;
+      const startPt = useEntityStore.getState().getEntity(segProps.startPointId);
+      const endPt = useEntityStore.getState().getEntity(segProps.endPointId);
+      if (!startPt || startPt.type !== 'point' || !endPt || endPt.type !== 'point') return null;
+      const startPos = computePointPosition(startPt.properties as PointProperties, result);
+      const endPos = computePointPosition(endPt.properties as PointProperties, result);
+      if (!startPos || !endPos) return null;
+      const t = constraint.t;
+      return [
+        startPos[0] + t * (endPos[0] - startPos[0]),
+        startPos[1] + t * (endPos[1] - startPos[1]),
+        startPos[2] + t * (endPos[2] - startPos[2]),
       ];
     }
     case 'free':

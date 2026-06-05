@@ -2,6 +2,7 @@ import { Undo2, Redo2 } from 'lucide-react';
 import {
   SelectIcon,
   DrawSegmentIcon,
+  PickPointIcon,
   CrossSectionIcon,
   CoordSystemIcon,
   CircumCircleIcon,
@@ -14,6 +15,7 @@ import { useHistoryStore } from '@/editor/store/historyStore';
 const TOOLS = [
   { id: 'select', label: '选择', Icon: SelectIcon },
   { id: 'drawSegment', label: '画线段', Icon: DrawSegmentIcon },
+  { id: 'pickPoint', label: '取点', Icon: PickPointIcon },
   { id: 'crossSection', label: '创建截面', Icon: CrossSectionIcon },
   { id: 'coordSystem', label: '建坐标系', Icon: CoordSystemIcon },
   { id: 'circumCircle', label: '画外接圆', Icon: CircumCircleIcon },

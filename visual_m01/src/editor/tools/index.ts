@@ -7,6 +7,7 @@ export { coordSystemTool } from './coordSystemTool';
 export { circumCircleTool } from './circumCircleTool';
 export { angleTool } from './angleTool';
 export { distanceTool } from './distanceTool';
+export { pickPointTool } from './pickPointTool';
 
 import { useToolStore } from '../store/toolStore';
 import { selectTool } from './selectTool';
@@ -16,6 +17,7 @@ import { coordSystemTool } from './coordSystemTool';
 import { circumCircleTool } from './circumCircleTool';
 import { angleTool } from './angleTool';
 import { distanceTool } from './distanceTool';
+import { pickPointTool } from './pickPointTool';
 
 /**
  * 注册所有 Tool 到 ToolStore，设置默认 activeTool 为 'select'
@@ -30,5 +32,6 @@ export function registerAllTools(): void {
   store.registerTool(circumCircleTool);
   store.registerTool(angleTool);
   store.registerTool(distanceTool);
+  store.registerTool(pickPointTool);
   store.setActiveTool('select');
 }

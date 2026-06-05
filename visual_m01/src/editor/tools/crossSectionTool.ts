@@ -3,8 +3,6 @@ import type { PointProperties } from '../entities/types';
 import { useEntityStore } from '../store/entityStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { useToolStore } from '../store/toolStore';
-import { useHistoryStore } from '../store/historyStore';
-import { CreateEntityCommand } from '../commands/createEntity';
 import { createCrossSectionFromPoints } from '../crossSectionHelper';
 import { useNotificationStore } from '@/components/scene/notificationStore';
 
@@ -28,19 +26,6 @@ export const crossSectionTool: Tool = {
   },
 
   onPointerDown(event: ToolPointerEvent) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ud = (event.intersection as any)?.object?.userData;
-
-    if (ud?.isSnapPoint) {
-      const { geometryId, edgeStart, edgeEnd, t } = ud.snapData as {
-        geometryId: string; edgeStart: number; edgeEnd: number; t: number;
-      };
-      const pointId = getOrCreateEdgePoint(geometryId, edgeStart, edgeEnd, t);
-      if (!pointId || definingPointIds.includes(pointId)) return;
-      addDefiningPoint(pointId);
-      return;
-    }
-
     if (!event.hitEntityId || event.hitEntityType !== 'point') return;
     if (definingPointIds.includes(event.hitEntityId)) return;
     addDefiningPoint(event.hitEntityId);
@@ -85,36 +70,6 @@ function addDefiningPoint(pointId: string) {
       useSelectionStore.getState().clear();
       useNotificationStore.getState().show(result.message);
     }
-  }
-}
-
-function getOrCreateEdgePoint(geometryId: string, edgeStart: number, edgeEnd: number, t: number): string | null {
-  const store = useEntityStore.getState();
-  const existing = store.findPointOnEdge(geometryId, edgeStart, edgeEnd, t);
-  if (existing) return existing.id;
-
-  const label = nextAvailableLabel(store);
-  const cmd = new CreateEntityCommand('point', {
-    builtIn: false,
-    geometryId,
-    constraint: { type: 'edge' as const, edgeStart, edgeEnd, t },
-    label,
-  });
-  useHistoryStore.getState().execute(cmd);
-  return cmd.getCreatedId();
-}
-
-function nextAvailableLabel(store: ReturnType<typeof useEntityStore.getState>): string {
-  const entities = store.entities;
-  const used = new Set<string>();
-  for (const e of Object.values(entities)) {
-    if (e.type === 'point') {
-      used.add((e.properties as PointProperties).label);
-    }
-  }
-  for (let i = 1; ; i++) {
-    const label = `P${i}`;
-    if (!used.has(label)) return label;
   }
 }
 

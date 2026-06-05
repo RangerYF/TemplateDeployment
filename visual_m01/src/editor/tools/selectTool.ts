@@ -1,10 +1,11 @@
 import type { Tool, ToolPointerEvent } from './types';
-import type { PointProperties, FaceProperties, GeometryProperties } from '../entities/types';
+import type { PointProperties, FaceProperties, GeometryProperties, SegmentProperties } from '../entities/types';
 import { useEntityStore } from '../store/entityStore';
 import { useSelectionStore } from '../store/selectionStore';
 import { useToolStore } from '../store/toolStore';
 import { useHistoryStore } from '../store/historyStore';
 import { MovePointCommand } from '../commands/movePoint';
+import { UpdatePropertiesCommand } from '../commands/updateProperties';
 import { DeleteEntityCascadeCommand } from '../commands/deleteEntityCascade';
 import { computePointPosition } from '@/components/scene/renderers/usePointPosition';
 import { getBuilderResult } from '../builderCache';
@@ -21,6 +22,8 @@ let dragPointId: string | null = null;
 let dragBeforeState: [number, number, number] | undefined = undefined;
 /** 面约束拖拽：缓存面平面参数 */
 let dragFacePlane: { normal: [number, number, number]; d: number } | null = null;
+/** 线段约束拖拽：缓存端点位置和初始 t */
+let dragSegmentInfo: { startPos: [number, number, number]; endPos: [number, number, number]; initialT: number } | null = null;
 
 function computeFacePlane(faceId: string): { normal: [number, number, number]; d: number } | null {
   const store = useEntityStore.getState();
@@ -69,6 +72,48 @@ function projectToPlane(
   ];
 }
 
+function computeSegmentEndpoints(segmentId: string): { startPos: [number, number, number]; endPos: [number, number, number] } | null {
+  const store = useEntityStore.getState();
+  const seg = store.getEntity(segmentId);
+  if (!seg || seg.type !== 'segment') return null;
+  const segProps = seg.properties as SegmentProperties;
+  const startPt = store.getEntity(segProps.startPointId);
+  const endPt = store.getEntity(segProps.endPointId);
+  if (!startPt || startPt.type !== 'point' || !endPt || endPt.type !== 'point') return null;
+  const geoEntity = store.getEntity(segProps.geometryId);
+  if (!geoEntity || geoEntity.type !== 'geometry') return null;
+  const geoProps = geoEntity.properties as GeometryProperties;
+  const result = getBuilderResult(segProps.geometryId, geoProps.geometryType, geoProps.params);
+  if (!result) return null;
+  const startPos = computePointPosition(startPt.properties as PointProperties, result);
+  const endPos = computePointPosition(endPt.properties as PointProperties, result);
+  if (!startPos || !endPos) return null;
+  return { startPos: startPos as [number, number, number], endPos: endPos as [number, number, number] };
+}
+
+function projectToSegment(
+  point: [number, number, number],
+  startPos: [number, number, number],
+  endPos: [number, number, number],
+): { t: number; position: [number, number, number] } {
+  const sx = endPos[0] - startPos[0], sy = endPos[1] - startPos[1], sz = endPos[2] - startPos[2];
+  const lenSq = sx * sx + sy * sy + sz * sz;
+  let t = 0.5;
+  if (lenSq > 0) {
+    t = Math.max(0.01, Math.min(0.99,
+      ((point[0] - startPos[0]) * sx + (point[1] - startPos[1]) * sy + (point[2] - startPos[2]) * sz) / lenSq,
+    ));
+  }
+  return {
+    t,
+    position: [
+      startPos[0] + t * (endPos[0] - startPos[0]),
+      startPos[1] + t * (endPos[1] - startPos[1]),
+      startPos[2] + t * (endPos[2] - startPos[2]),
+    ],
+  };
+}
+
 export const selectTool: Tool = {
   id: 'select',
   label: '选择',
@@ -91,6 +136,7 @@ export const selectTool: Tool = {
     dragPointId = null;
     dragBeforeState = undefined;
     dragFacePlane = null;
+    dragSegmentInfo = null;
   },
 
   onPointerDown(event: ToolPointerEvent) {
@@ -109,9 +155,15 @@ export const selectTool: Tool = {
           isDragging = false;
           // 立即禁用 OrbitControls，防止拖拽点时视图跟着动
           useToolStore.getState().setIsDragging(true);
-          // 缓存面约束平面
+          // 缓存约束平面/线段信息
           const constraint = (entity.properties as PointProperties).constraint;
           dragFacePlane = constraint.type === 'face' ? computeFacePlane(constraint.faceId) : null;
+          if (constraint.type === 'segment') {
+            const endpoints = computeSegmentEndpoints(constraint.segmentId);
+            dragSegmentInfo = endpoints ? { ...endpoints, initialT: constraint.t } : null;
+          } else {
+            dragSegmentInfo = null;
+          }
         }
       }
     } else {
@@ -134,7 +186,10 @@ export const selectTool: Tool = {
       const inter = event.intersection as { point?: { x: number; y: number; z: number } };
       if (inter.point) {
         let newPos: [number, number, number] = [inter.point.x, inter.point.y, inter.point.z];
-        if (dragFacePlane) {
+        if (dragSegmentInfo) {
+          const proj = projectToSegment(newPos, dragSegmentInfo.startPos, dragSegmentInfo.endPos);
+          newPos = proj.position;
+        } else if (dragFacePlane) {
           newPos = projectToPlane(newPos, dragFacePlane);
         }
         transientDragState.pointId = dragPointId;
@@ -145,24 +200,50 @@ export const selectTool: Tool = {
 
   onPointerUp(_event: ToolPointerEvent) {
     if (isDragging && dragPointId) {
-      // 从 transientDragState 取最终位置，提交到 store
-      const afterState = transientDragState.position ?? undefined;
-      if (afterState) {
-        // 先写入 store 使状态一致
-        useEntityStore.getState().updateProperties(dragPointId, { positionOverride: afterState });
-      }
-      // 提交 undo command
-      const finalAfterState = afterState ?? dragBeforeState;
-      if (
-        dragBeforeState !== finalAfterState &&
-        JSON.stringify(dragBeforeState) !== JSON.stringify(finalAfterState)
-      ) {
-        const command = new MovePointCommand(
-          dragPointId,
-          dragBeforeState,
-          finalAfterState,
-        );
-        useHistoryStore.getState().execute(command);
+      if (dragSegmentInfo) {
+        // 线段约束拖拽：更新 constraint.t，清除 positionOverride
+        const finalPos = transientDragState.position;
+        if (finalPos) {
+          const proj = projectToSegment(finalPos, dragSegmentInfo.startPos, dragSegmentInfo.endPos);
+          const entity = useEntityStore.getState().getEntity(dragPointId);
+          if (entity?.type === 'point') {
+            const oldConstraint = (entity.properties as PointProperties).constraint;
+            if (oldConstraint.type !== 'segment') return;
+            const newConstraint = { ...oldConstraint, t: proj.t };
+            useEntityStore.getState().updateProperties(dragPointId, {
+              constraint: newConstraint,
+              positionOverride: undefined,
+            });
+            if (dragSegmentInfo.initialT !== proj.t) {
+              const prevConstraint = { ...oldConstraint, t: dragSegmentInfo.initialT };
+              useHistoryStore.getState().execute(
+                new UpdatePropertiesCommand(
+                  dragPointId,
+                  { constraint: prevConstraint, positionOverride: dragBeforeState },
+                  { constraint: newConstraint, positionOverride: undefined },
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        // 非约束拖拽：更新 positionOverride
+        const afterState = transientDragState.position ?? undefined;
+        if (afterState) {
+          useEntityStore.getState().updateProperties(dragPointId, { positionOverride: afterState });
+        }
+        const finalAfterState = afterState ?? dragBeforeState;
+        if (
+          dragBeforeState !== finalAfterState &&
+          JSON.stringify(dragBeforeState) !== JSON.stringify(finalAfterState)
+        ) {
+          const command = new MovePointCommand(
+            dragPointId,
+            dragBeforeState,
+            finalAfterState,
+          );
+          useHistoryStore.getState().execute(command);
+        }
       }
     }
 
@@ -174,6 +255,7 @@ export const selectTool: Tool = {
     dragPointId = null;
     dragBeforeState = undefined;
     dragFacePlane = null;
+    dragSegmentInfo = null;
   },
 
   onKeyDown(event: KeyboardEvent) {

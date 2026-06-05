@@ -3,7 +3,7 @@
  * 供鼠标点击方式和文本指令方式共同复用
  */
 import type { Vec3, PolyhedronResult } from '@/engine/types';
-import type { Entity, PointProperties, GeometryProperties } from './entities/types';
+import type { Entity, PointProperties, SegmentProperties, GeometryProperties } from './entities/types';
 import { useEntityStore } from './store/entityStore';
 import { useHistoryStore } from './store/historyStore';
 import { CreateCrossSectionCommand } from './commands/createCrossSection';
@@ -70,12 +70,18 @@ export function createCrossSectionFromPoints(
     return { success: false, message: '截面与几何体交点不足，无法形成截面' };
   }
 
-  // 去重：将交点转为 PolygonPoint
+  // 去重：将交点转为 PolygonPoint（传入定义点位置用于复用）
+  const definingMap = new Map<string, string>();
+  for (let i = 0; i < pointIds.length; i++) {
+    const p = definingPositions[i];
+    definingMap.set(`${p[0].toFixed(6)},${p[1].toFixed(6)},${p[2].toFixed(6)}`, pointIds[i]);
+  }
   const polygonPoints = resolveIntersections(
     rawIntersections,
     builderResult,
     geometryId,
     entityStore,
+    definingMap,
   );
 
   // 按平面内角度排序
@@ -151,6 +157,24 @@ function resolvePointPosition(
     ];
   }
 
+  if (constraint.type === 'segment') {
+    const seg = _entityStore.getEntity(constraint.segmentId);
+    if (!seg || seg.type !== 'segment') return null;
+    const segProps = seg.properties as SegmentProperties;
+    const startPt = _entityStore.getEntity(segProps.startPointId);
+    const endPt = _entityStore.getEntity(segProps.endPointId);
+    if (!startPt || startPt.type !== 'point' || !endPt || endPt.type !== 'point') return null;
+    const startPos = resolvePointPosition(startPt.properties as PointProperties, builderResult, _entityStore);
+    const endPos = resolvePointPosition(endPt.properties as PointProperties, builderResult, _entityStore);
+    if (!startPos || !endPos) return null;
+    const t = constraint.t;
+    return [
+      startPos[0] + t * (endPos[0] - startPos[0]),
+      startPos[1] + t * (endPos[1] - startPos[1]),
+      startPos[2] + t * (endPos[2] - startPos[2]),
+    ];
+  }
+
   if (constraint.type === 'free') {
     return constraint.position;
   }
@@ -208,6 +232,7 @@ function resolveIntersections(
   builderResult: PolyhedronResult,
   geometryId: string,
   entityStore: ReturnType<typeof useEntityStore.getState>,
+  definingMap?: Map<string, string>,
 ): PolygonPoint[] {
   const EPSILON = 1e-6;
   const result: PolygonPoint[] = [];
@@ -223,6 +248,12 @@ function resolveIntersections(
     return false;
   }
 
+  function findDefiningPointAt(pos: Vec3): string | undefined {
+    if (!definingMap) return undefined;
+    const key = `${pos[0].toFixed(6)},${pos[1].toFixed(6)},${pos[2].toFixed(6)}`;
+    return definingMap.get(key);
+  }
+
   for (const inter of intersections) {
     const a = builderResult.vertices[inter.edgeStart].position;
     const b = builderResult.vertices[inter.edgeEnd].position;
@@ -234,6 +265,12 @@ function resolveIntersections(
 
     if (isDuplicateCoord(pos)) continue;
     addedCoords.push(pos);
+
+    const definingPointId = findDefiningPointAt(pos);
+    if (definingPointId) {
+      result.push({ type: 'reuse', pointId: definingPointId });
+      continue;
+    }
 
     if (inter.t < EPSILON) {
       const existingPoint = entityStore.findPointAtVertex(geometryId, inter.edgeStart);

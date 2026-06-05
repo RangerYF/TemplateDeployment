@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
-import type { Entity, PointProperties } from '@/editor/entities/types';
+import type { Entity, PointProperties, SegmentProperties, GeometryProperties } from '@/editor/entities/types';
 import { useEntityStore, useHistoryStore, UpdatePropertiesCommand } from '@/editor';
-import { useAnimationStore, transientAnimationState } from '@/editor/store/animationStore';
+import { getBuilderResult } from '@/editor/builderCache';
+import { computePointPosition } from '@/components/scene/renderers/usePointPosition';
 import { usePointPosition } from '@/components/scene/renderers/usePointPosition';
 import { Slider } from '@/components/ui/slider';
 import { COLORS } from '@/styles/tokens';
@@ -12,6 +13,7 @@ const CONSTRAINT_LABELS: Record<string, string> = {
   vertex: '顶点',
   edge: '棱上点',
   curve: '曲线上点',
+  segment: '线段上点',
   coordinate: '坐标点',
   free: '自由点',
   face: '面上点',
@@ -107,22 +109,43 @@ function PointInspector({ entity }: { entity: Entity }) {
   }, [entities]);
 
   const isCoordPoint = constraint.type === 'coordinate';
-  const isAnimatable = constraint.type === 'edge' || constraint.type === 'curve';
+  const hasSlider = constraint.type === 'edge' || constraint.type === 'curve' || constraint.type === 'segment';
 
-  // 动画状态
-  const playingPointId = useAnimationStore((s) => s.playingPointId);
-  const animSpeed = useAnimationStore((s) => s.speed);
-  const isPlaying = playingPointId === ptEntity.id;
+  const segmentDisplayInfo = useMemo(() => {
+    if (constraint.type !== 'segment') return null;
+    const seg = entities[constraint.segmentId];
+    if (!seg || seg.type !== 'segment') return null;
+    const segProps = seg.properties as SegmentProperties;
+    const startPt = entities[segProps.startPointId];
+    const endPt = entities[segProps.endPointId];
+    if (!startPt || startPt.type !== 'point' || !endPt || endPt.type !== 'point') return null;
+
+    const startLabel = (startPt.properties as PointProperties).label;
+    const endLabel = (endPt.properties as PointProperties).label;
+
+    let segmentLength: number | null = null;
+    const geoEntity = entities[segProps.geometryId];
+    if (geoEntity && geoEntity.type === 'geometry') {
+      const geoProps = geoEntity.properties as GeometryProperties;
+      const result = getBuilderResult(segProps.geometryId, geoProps.geometryType, geoProps.params);
+      if (result) {
+        const startPos = computePointPosition(startPt.properties as PointProperties, result);
+        const endPos = computePointPosition(endPt.properties as PointProperties, result);
+        if (startPos && endPos) {
+          const dx = endPos[0] - startPos[0], dy = endPos[1] - startPos[1], dz = endPos[2] - startPos[2];
+          segmentLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+      }
+    }
+
+    return { startLabel, endLabel, segmentLength };
+  }, [constraint, entities]);
 
   // t 值编辑（连续操作）
   const beforeTRef = useRef<number | null>(null);
 
   const handleTSliderChange = useCallback((newT: number) => {
-    if (constraint.type !== 'edge' && constraint.type !== 'curve') return;
-    // 手动拖动时自动暂停动画
-    if (useAnimationStore.getState().playingPointId === ptEntity.id) {
-      useAnimationStore.getState().pause();
-    }
+    if (constraint.type !== 'edge' && constraint.type !== 'curve' && constraint.type !== 'segment') return;
     if (beforeTRef.current === null) {
       beforeTRef.current = constraint.t;
     }
@@ -145,69 +168,6 @@ function PointInspector({ entity }: { entity: Entity }) {
     beforeTRef.current = null;
   }, [ptEntity.id, constraint]);
 
-  const handlePlay = useCallback(() => {
-    if (constraint.type !== 'edge' && constraint.type !== 'curve') return;
-    if (isPlaying) {
-      // 暂停：用 transient 的最新 t 值做最终同步和撤销命令
-      const store = useAnimationStore.getState();
-      const initialT = store.initialT;
-      const finalT = transientAnimationState.pointId === ptEntity.id
-        ? transientAnimationState.t
-        : constraint.t;
-      store.pause();
-      // 最终同步到 store
-      useEntityStore.getState().updateProperties(ptEntity.id, {
-        constraint: { ...constraint, t: finalT },
-      });
-      if (initialT !== null && initialT !== finalT) {
-        useHistoryStore.getState().execute(
-          new UpdatePropertiesCommand(
-            ptEntity.id,
-            { constraint: { ...constraint, t: initialT } },
-            { constraint: { ...constraint, t: finalT } },
-          ),
-        );
-      }
-    } else {
-      useAnimationStore.getState().play(ptEntity.id, constraint.t);
-    }
-  }, [ptEntity.id, constraint, isPlaying]);
-
-  const handleReset = useCallback(() => {
-    if (constraint.type !== 'edge' && constraint.type !== 'curve') return;
-    const store = useAnimationStore.getState();
-    const initialT = store.initialT;
-    const wasPlaying = store.playingPointId === ptEntity.id;
-    if (wasPlaying) {
-      store.reset();
-    }
-    // 重置到 t=0.5（中点位置）
-    const resetT = initialT ?? 0.5;
-    if (constraint.t !== resetT) {
-      useHistoryStore.getState().execute(
-        new UpdatePropertiesCommand(
-          ptEntity.id,
-          { constraint },
-          { constraint: { ...constraint, t: resetT } },
-        ),
-      );
-    }
-  }, [ptEntity.id, constraint]);
-
-  const handleSpeedChange = useCallback((newSpeed: number) => {
-    useAnimationStore.getState().setSpeed(newSpeed);
-  }, []);
-
-  const btnStyle: React.CSSProperties = {
-    padding: '3px 10px',
-    borderRadius: 4,
-    border: `1px solid ${COLORS.border}`,
-    background: COLORS.bg,
-    color: COLORS.text,
-    fontSize: 12,
-    cursor: 'pointer',
-  };
-
   return (
     <div className="space-y-2">
       <InspectorHeader
@@ -220,7 +180,9 @@ function PointInspector({ entity }: { entity: Entity }) {
 
       {/* 约束类型 */}
       <div className="text-xs" style={{ color: COLORS.textMuted }}>
-        约束：{CONSTRAINT_LABELS[constraint.type] ?? constraint.type}
+        {segmentDisplayInfo
+          ? `位于线段 ${segmentDisplayInfo.startLabel}${segmentDisplayInfo.endLabel} 上`
+          : `约束：${CONSTRAINT_LABELS[constraint.type] ?? constraint.type}`}
       </div>
 
       {/* 坐标点编辑 — key 驱动外部同步 */}
@@ -239,11 +201,16 @@ function PointInspector({ entity }: { entity: Entity }) {
         </div>
       )}
 
-      {/* t 值编辑 */}
-      {isAnimatable && (constraint.type === 'edge' || constraint.type === 'curve') && (
+      {/* t 值滑块 */}
+      {hasSlider && (constraint.type === 'edge' || constraint.type === 'curve' || constraint.type === 'segment') && (
         <div className="space-y-1">
           <div className="text-sm" style={{ color: COLORS.textMuted }}>
-            参数 t：{constraint.t.toFixed(3)}
+            {constraint.type === 'segment' && segmentDisplayInfo
+              ? `位置：${Math.round(constraint.t * 100)}%` +
+                (segmentDisplayInfo.segmentLength != null
+                  ? `（距 ${segmentDisplayInfo.startLabel} 点 ${(constraint.t * segmentDisplayInfo.segmentLength).toFixed(2)}）`
+                  : '')
+              : `参数 t：${constraint.t.toFixed(3)}`}
           </div>
           <Slider
             value={[constraint.t]}
@@ -256,54 +223,6 @@ function PointInspector({ entity }: { entity: Entity }) {
         </div>
       )}
 
-      {/* 动点控制 */}
-      {isAnimatable && (
-        <div
-          style={{
-            padding: '6px 8px',
-            borderRadius: 6,
-            border: `1px solid ${COLORS.border}`,
-            background: COLORS.bgHover,
-          }}
-          className="space-y-2"
-        >
-          <div className="text-xs font-medium" style={{ color: COLORS.textMuted }}>
-            动点控制
-          </div>
-
-          {/* 播放/暂停 + 重置 */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePlay}
-              style={{
-                ...btnStyle,
-                background: isPlaying ? '#ef4444' : '#3b82f6',
-                color: '#fff',
-                border: 'none',
-              }}
-            >
-              {isPlaying ? '⏸ 暂停' : '▶ 播放'}
-            </button>
-            <button onClick={handleReset} style={btnStyle}>
-              ⏹ 重置
-            </button>
-          </div>
-
-          {/* 速度控制 */}
-          <div className="space-y-1">
-            <div className="text-xs" style={{ color: COLORS.textMuted }}>
-              速度：{animSpeed.toFixed(1)}x
-            </div>
-            <Slider
-              value={[animSpeed]}
-              onValueChange={([v]) => handleSpeedChange(v)}
-              min={0.1}
-              max={3}
-              step={0.1}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

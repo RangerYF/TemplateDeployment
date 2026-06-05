@@ -10,6 +10,7 @@ export interface ToolPointerEvent {
 export interface Tool {
   id: string;
   label: string;
+  needsHoverMove?: boolean;
   onActivate?(): void;
   onDeactivate?(): void;
   onPointerDown?(event: ToolPointerEvent): void;

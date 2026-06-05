@@ -13,7 +13,8 @@ import { useNotificationStore } from './notificationStore';
 import { ModeIndicator } from './ModeIndicator';
 import { TextCommandInput } from './TextCommandInput';
 import { AnimationDriver } from './AnimationDriver';
-import { EdgeSnapOverlay } from './renderers/EdgeSnapOverlay';
+import { PickPointPreview } from './PickPointPreview';
+
 
 // 触发 renderer 自注册（side-effect import）
 import './renderers/GeometryEntityRenderer';
@@ -120,7 +121,6 @@ function SceneContent() {
           <EntityRenderer key={entity.id} entity={entity} />
         ))}
       </group>
-      <EdgeSnapOverlay />
     </ToolEventDispatcher>
   );
 }
@@ -267,6 +267,7 @@ export function Scene3D() {
 
         <CameraAnimator controlsRef={controlsRef} />
         <AnimationDriver />
+        <PickPointPreview />
 
         <gridHelper args={[10, 10, '#ddd', '#eee']} />
       </Canvas>
