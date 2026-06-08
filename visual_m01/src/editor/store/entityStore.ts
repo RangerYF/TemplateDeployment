@@ -68,9 +68,10 @@ function entityReferences(entity: Entity, targetId: string): boolean {
   // face.pointIds
   if (Array.isArray(p.pointIds) && (p.pointIds as string[]).includes(targetId)) return true;
 
-  // face.source.definingPointIds
-  const source = p.source as { definingPointIds?: string[] } | undefined;
+  // face.source.definingPointIds / pointId
+  const source = p.source as { definingPointIds?: string[]; pointId?: string } | undefined;
   if (source?.definingPointIds?.includes(targetId)) return true;
+  if (source?.pointId === targetId) return true;
 
   // coordinateSystem.originPointId
   if (p.originPointId === targetId) return true;

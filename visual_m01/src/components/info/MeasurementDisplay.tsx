@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useEntityStore } from '@/editor';
 import type { Entity } from '@/editor/entities/types';
 import { calculate } from '@/engine/math';
@@ -26,6 +26,46 @@ export function MeasurementDisplay() {
     steps: CalcStep[];
   } | null>(null);
 
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('[data-clickable]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const panel = panelRef.current;
+    if (!panel) return;
+    const parent = panel.parentElement;
+    if (!parent) return;
+
+    let origX: number;
+    let origY: number;
+    if (position) {
+      origX = position.x;
+      origY = position.y;
+    } else {
+      const parentRect = parent.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      origX = panelRect.left - parentRect.left;
+      origY = panelRect.top - parentRect.top;
+    }
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX, origY };
+    panel.setPointerCapture(e.pointerId);
+  }, [position]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    e.preventDefault();
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    setPosition({ x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    dragRef.current = null;
+  }, []);
+
   const result = useMemo(
     () => currentType && currentParams
       ? calculate(currentType, currentParams as unknown as Record<string, number>)
@@ -35,13 +75,20 @@ export function MeasurementDisplay() {
 
   if (!result) return null;
 
+  const posStyle = position
+    ? { left: position.x, top: position.y }
+    : { right: 16, top: 16 };
+
   return (
     <>
       <div
+        ref={panelRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
         style={{
           position: 'absolute',
-          right: 16,
-          top: 16,
+          ...posStyle,
           backgroundColor: COLORS.bg,
           borderRadius: RADIUS.sm,
           boxShadow: SHADOWS.md,
@@ -50,6 +97,9 @@ export function MeasurementDisplay() {
           minWidth: 160,
           zIndex: 10,
           fontSize: 14,
+          cursor: 'grab',
+          userSelect: 'none',
+          touchAction: 'none',
         }}
       >
         <Row
@@ -137,6 +187,7 @@ function Row({
 
   return (
     <div
+      data-clickable
       onClick={onClick}
       style={{
         padding: '4px 0',

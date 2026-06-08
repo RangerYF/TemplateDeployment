@@ -8,6 +8,8 @@ export { circumCircleTool } from './circumCircleTool';
 export { angleTool } from './angleTool';
 export { distanceTool } from './distanceTool';
 export { pickPointTool } from './pickPointTool';
+export { perpendicularPlaneTool } from './perpendicularPlaneTool';
+export { intersectionTool } from './intersectionTool';
 
 import { useToolStore } from '../store/toolStore';
 import { selectTool } from './selectTool';
@@ -18,6 +20,8 @@ import { circumCircleTool } from './circumCircleTool';
 import { angleTool } from './angleTool';
 import { distanceTool } from './distanceTool';
 import { pickPointTool } from './pickPointTool';
+import { perpendicularPlaneTool } from './perpendicularPlaneTool';
+import { intersectionTool } from './intersectionTool';
 
 /**
  * 注册所有 Tool 到 ToolStore，设置默认 activeTool 为 'select'
@@ -33,5 +37,7 @@ export function registerAllTools(): void {
   store.registerTool(angleTool);
   store.registerTool(distanceTool);
   store.registerTool(pickPointTool);
+  store.registerTool(perpendicularPlaneTool);
+  store.registerTool(intersectionTool);
   store.setActiveTool('select');
 }

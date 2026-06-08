@@ -13,6 +13,8 @@ import { calculateTruncatedCone } from './calculators/truncatedCone';
 import { calculateFrustum } from './calculators/frustum';
 import { calculateIsoscelesTetrahedron } from './calculators/isoscelesTetrahedron';
 import { calculateOrthogonalTetrahedron } from './calculators/orthogonalTetrahedron';
+import { calculateObliquePrism } from './calculators/obliquePrism';
+import { calculateObliquePyramid } from './calculators/obliquePyramid';
 
 type Calculator = (params: Record<string, number>) => CalculationResult;
 
@@ -30,6 +32,8 @@ const calculators: Partial<Record<GeometryType, Calculator>> = {
   frustum: calculateFrustum,
   isoscelesTetrahedron: calculateIsoscelesTetrahedron,
   orthogonalTetrahedron: calculateOrthogonalTetrahedron,
+  obliquePrism: calculateObliquePrism,
+  obliquePyramid: calculateObliquePyramid,
 };
 
 /**

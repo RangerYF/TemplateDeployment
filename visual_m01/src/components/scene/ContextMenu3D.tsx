@@ -105,27 +105,104 @@ function useFaceMenuItems(): MenuItem[] {
   const u = (dot22 * dotd1 - dot12 * dotd2) / denom;
   const v = (dot11 * dotd2 - dot12 * dotd1) / denom;
 
+  // 计算所有面顶点的 3D 位置
+  const allFacePositions: [number, number, number][] = [];
+  for (const pid of facePointIds) {
+    const pe = store.getEntity(pid);
+    if (!pe || pe.type !== 'point') continue;
+    const pos = computePointPosition(pe.properties as PointProperties, result);
+    if (pos) allFacePositions.push(pos as [number, number, number]);
+  }
+
+  const posToUV = (pos: [number, number, number]) => {
+    const dx2 = pos[0] - p0[0], dy2 = pos[1] - p0[1], dz2 = pos[2] - p0[2];
+    const dd1 = dx2 * e1x + dy2 * e1y + dz2 * e1z;
+    const dd2 = dx2 * e2x + dy2 * e2y + dz2 * e2z;
+    return {
+      u: (dot22 * dd1 - dot12 * dd2) / denom,
+      v: (dot11 * dd2 - dot12 * dd1) / denom,
+    };
+  };
+
   const allPoints = store.getEntitiesByType('point');
   const existingLabels = allPoints.map((p) => p.properties.label);
+
+  const createFacePoint = (fu: number, fv: number, closeAfter: () => void) => {
+    const labels = [...existingLabels];
+    const label = getNextLabel(labels);
+    const pointProps: PointProperties = {
+      builtIn: false,
+      geometryId: faceProps.geometryId,
+      constraint: { type: 'face', faceId: menu.targetEntityId, u: fu, v: fv },
+      label,
+    };
+    const cmd = new CreateEntityCommand('point', pointProps);
+    useHistoryStore.getState().execute(cmd);
+    closeAfter();
+  };
 
   const items: MenuItem[] = [];
 
   items.push({
     label: '面上取点',
-    action: () => {
-      const labels = [...existingLabels];
-      const label = getNextLabel(labels);
-      const pointProps: PointProperties = {
-        builtIn: false,
-        geometryId: faceProps.geometryId,
-        constraint: { type: 'face', faceId: menu.targetEntityId, u, v },
-        label,
-      };
-      const cmd = new CreateEntityCommand('point', pointProps);
-      useHistoryStore.getState().execute(cmd);
-      closeMenu();
-    },
+    action: () => createFacePoint(u, v, closeMenu),
   });
+
+  // 重心：所有顶点平均
+  if (allFacePositions.length >= 3) {
+    const cx = allFacePositions.reduce((s, p) => s + p[0], 0) / allFacePositions.length;
+    const cy = allFacePositions.reduce((s, p) => s + p[1], 0) / allFacePositions.length;
+    const cz = allFacePositions.reduce((s, p) => s + p[2], 0) / allFacePositions.length;
+    const centroidUV = posToUV([cx, cy, cz]);
+    items.push({
+      label: '取重心',
+      action: () => createFacePoint(centroidUV.u, centroidUV.v, closeMenu),
+    });
+  }
+
+  // 三角形特殊点
+  if (facePointIds.length === 3 && allFacePositions.length === 3) {
+    const a = dot11, b2 = dot12, c = dot22;
+    const det = a * c - b2 * b2;
+
+    if (Math.abs(det) > 1e-12) {
+      // 外心
+      const uCirc = c * (a - b2) / (2 * det);
+      const vCirc = a * (c - b2) / (2 * det);
+      items.push({
+        label: '取外心',
+        action: () => createFacePoint(uCirc, vCirc, closeMenu),
+      });
+
+      // 内心：I = (sideA*p0 + sideB*p1 + sideC*p2) / perimeter
+      const sideA = Math.sqrt(
+        (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2,
+      );
+      const sideB = Math.sqrt(
+        (p0[0] - p2[0]) ** 2 + (p0[1] - p2[1]) ** 2 + (p0[2] - p2[2]) ** 2,
+      );
+      const sideC = Math.sqrt(
+        (p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2 + (p0[2] - p1[2]) ** 2,
+      );
+      const perimeter = sideA + sideB + sideC;
+      if (perimeter > 1e-12) {
+        const uIn = sideB / perimeter;
+        const vIn = sideC / perimeter;
+        items.push({
+          label: '取内心',
+          action: () => createFacePoint(uIn, vIn, closeMenu),
+        });
+      }
+
+      // 垂心：H = p0 + (1-2u_circ)*e1 + (1-2v_circ)*e2
+      const uOrtho = 1 - 2 * uCirc;
+      const vOrtho = 1 - 2 * vCirc;
+      items.push({
+        label: '取垂心',
+        action: () => createFacePoint(uOrtho, vOrtho, closeMenu),
+      });
+    }
+  }
 
   return items;
 }

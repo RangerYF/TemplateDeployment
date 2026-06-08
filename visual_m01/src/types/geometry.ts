@@ -1,5 +1,5 @@
 /** 几何体类型 */
-export type GeometryType = 'pyramid' | 'cone' | 'cylinder' | 'cuboid' | 'cube' | 'sphere' | 'regularTetrahedron' | 'cornerTetrahedron' | 'prism' | 'truncatedCone' | 'frustum' | 'isoscelesTetrahedron' | 'orthogonalTetrahedron';
+export type GeometryType = 'pyramid' | 'cone' | 'cylinder' | 'cuboid' | 'cube' | 'sphere' | 'regularTetrahedron' | 'cornerTetrahedron' | 'prism' | 'truncatedCone' | 'frustum' | 'isoscelesTetrahedron' | 'orthogonalTetrahedron' | 'obliquePrism' | 'obliquePyramid';
 
 /** 几何体类型元数据 */
 export interface GeometryMeta {
@@ -22,6 +22,8 @@ export const GEOMETRY_LIST: GeometryMeta[] = [
   { type: 'frustum', label: '棱台', icon: 'Triangle' },
   { type: 'isoscelesTetrahedron', label: '等腰四面体', icon: 'Triangle' },
   { type: 'orthogonalTetrahedron', label: '正交四面体', icon: 'Triangle' },
+  { type: 'obliquePrism', label: '斜棱柱', icon: 'Box' },
+  { type: 'obliquePyramid', label: '斜棱锥', icon: 'Triangle' },
 ];
 
 /** 几何体分组（用于 TopBar 分类显示） */
@@ -31,8 +33,8 @@ export interface GeometryGroup {
 }
 
 export const GEOMETRY_GROUPS: GeometryGroup[] = [
-  { label: '棱柱', types: ['cube', 'cuboid', 'prism'] },
-  { label: '棱锥/棱台', types: ['pyramid', 'frustum'] },
+  { label: '棱柱', types: ['cube', 'cuboid', 'prism', 'obliquePrism'] },
+  { label: '棱锥/棱台', types: ['pyramid', 'frustum', 'obliquePyramid'] },
   { label: '旋转体', types: ['cylinder', 'cone', 'truncatedCone', 'sphere'] },
   { label: '四面体', types: ['regularTetrahedron', 'cornerTetrahedron', 'isoscelesTetrahedron', 'orthogonalTetrahedron'] },
 ];
@@ -112,6 +114,22 @@ export interface OrthogonalTetrahedronParams {
   edgeCD: number; // 对棱 CD 长（与 AB 垂直）
 }
 
+export interface ObliquePrismParams {
+  sides: number;        // 底面边数 3~8
+  sideLength: number;   // 底面边长
+  height: number;       // 高（垂直距离）
+  topOffsetX: number;   // 顶面 X 方向偏移
+  topOffsetZ: number;   // 顶面 Z 方向偏移
+}
+
+export interface ObliquePyramidParams {
+  sides: number;        // 底面边数 3~8
+  sideLength: number;   // 底面边长
+  height: number;       // 高（垂直距离）
+  apexOffsetX: number;  // 顶点 X 方向偏移
+  apexOffsetZ: number;  // 顶点 Z 方向偏移
+}
+
 /** 参数联合类型 */
 export type GeometryParams = {
   pyramid: PyramidParams;
@@ -127,6 +145,8 @@ export type GeometryParams = {
   frustum: FrustumParams;
   isoscelesTetrahedron: IsoscelesTetrahedronParams;
   orthogonalTetrahedron: OrthogonalTetrahedronParams;
+  obliquePrism: ObliquePrismParams;
+  obliquePyramid: ObliquePyramidParams;
 };
 
 /** 默认参数 */
@@ -144,4 +164,6 @@ export const DEFAULT_PARAMS: GeometryParams = {
   frustum: { sides: 4, bottomSideLength: 2, topSideLength: 1, height: 2 },
   isoscelesTetrahedron: { edgeP: 2, edgeQ: 2, edgeR: 2 },
   orthogonalTetrahedron: { edgeAB: 2, edgeCD: 2 },
+  obliquePrism: { sides: 4, sideLength: 2, height: 2, topOffsetX: 1, topOffsetZ: 0 },
+  obliquePyramid: { sides: 4, sideLength: 2, height: 2, apexOffsetX: 1, apexOffsetZ: 0 },
 };

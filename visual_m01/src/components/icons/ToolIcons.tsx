@@ -91,6 +91,31 @@ export function PickPointIcon({ size = 18, className, color = 'currentColor' }: 
   );
 }
 
+/** 垂面 — 线段上的点 + 垂直平面 */
+export function PerpendicularPlaneIcon({ size = 18, className, color = 'currentColor' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <line x1="4" y1="20" x2="20" y2="4" stroke={color} strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="2" fill={color} />
+      <polygon points="6,12 12,7 18,12 12,17" fill={color} opacity="0.2"
+        stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M10.5,13.5 L10.5,11.5 L12.5,11.5" stroke={color} strokeWidth="1" fill="none" />
+    </svg>
+  );
+}
+
+/** 求交点 — 两条交叉线 + 交点 */
+export function IntersectionIcon({ size = 18, className, color = 'currentColor' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" className={className}>
+      <line x1="4" y1="4" x2="20" y2="20" />
+      <line x1="20" y1="4" x2="4" y2="20" />
+      <circle cx="12" cy="12" r="2.5" fill={color} opacity="0.3" stroke={color} strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="1" fill={color} stroke="none" />
+    </svg>
+  );
+}
+
 /** 标记距离 — 两端带横线的双向箭头 */
 export function DistanceIcon({ size = 18, className, color = 'currentColor' }: IconProps) {
   return (

@@ -2,13 +2,22 @@ import { useMemo, useCallback } from 'react';
 import * as THREE from 'three';
 import type { ThreeEvent } from '@react-three/fiber';
 import { Line } from '@react-three/drei';
-import type { Entity, FaceSource } from '@/editor/entities/types';
+import type { Entity, FaceSource, PointProperties, SegmentProperties } from '@/editor/entities/types';
 import { useEntityStore, useSelectionStore } from '@/editor/store';
 import { useBuilderResult } from '@/editor/builderCache';
-import type { Vec3, SurfaceResult } from '@/engine/types';
+import type { Vec3, PolyhedronResult, SurfaceResult } from '@/engine/types';
+import type { PointConstraint } from '@/editor/entities/types';
 import { registerRenderer } from './index';
 import { computePointPosition } from './usePointPosition';
 import { useContextMenuStore } from '../contextMenuStore';
+import {
+  computeEdgeIntersections,
+  dot as vecDot,
+  cross as vecCross,
+  sub as vecSub,
+  vecLen,
+  type Plane,
+} from '@/editor/crossSectionHelper';
 
 const FACE_COLOR = '#9ca3af';
 const FACE_OPACITY = 0.12;
@@ -60,6 +69,10 @@ function FaceEntityRenderer({ entity }: { entity: Entity }) {
 
   if (props.source.type === 'crossSection') {
     return <CrossSectionFace entity={faceEntity} />;
+  }
+
+  if (props.source.type === 'perpendicularPlane') {
+    return <PerpendicularPlaneFace entity={faceEntity} />;
   }
 
   return <GenericFace entity={faceEntity} />;
@@ -291,6 +304,129 @@ function ExtendedPlane({ positions, color }: { positions: Vec3[]; color: string 
         depthWrite={false}
       />
     </mesh>
+  );
+}
+
+// ─── 垂直平面（动态截面） ───
+
+function deriveDirection(
+  constraint: PointConstraint,
+  result: PolyhedronResult,
+  entities: Record<string, Entity>,
+): Vec3 | null {
+  if (constraint.type === 'segment') {
+    const segEntity = entities[constraint.segmentId];
+    if (!segEntity || segEntity.type !== 'segment') return null;
+    const segProps = segEntity.properties as SegmentProperties;
+    const startPt = entities[segProps.startPointId];
+    const endPt = entities[segProps.endPointId];
+    if (!startPt || startPt.type !== 'point' || !endPt || endPt.type !== 'point') return null;
+    const startPos = computePointPosition(startPt.properties as PointProperties, result);
+    const endPos = computePointPosition(endPt.properties as PointProperties, result);
+    if (!startPos || !endPos) return null;
+    return vecSub(endPos, startPos);
+  }
+  if (constraint.type === 'edge') {
+    const va = result.vertices[constraint.edgeStart]?.position;
+    const vb = result.vertices[constraint.edgeEnd]?.position;
+    if (!va || !vb) return null;
+    return vecSub(vb, va);
+  }
+  return null;
+}
+
+function deduplicatePositions(
+  intersections: { edgeStart: number; edgeEnd: number; t: number }[],
+  result: PolyhedronResult,
+): Vec3[] {
+  const EPSILON = 1e-6;
+  const positions: Vec3[] = [];
+  for (const inter of intersections) {
+    const a = result.vertices[inter.edgeStart].position;
+    const b = result.vertices[inter.edgeEnd].position;
+    const pos: Vec3 = [
+      a[0] + inter.t * (b[0] - a[0]),
+      a[1] + inter.t * (b[1] - a[1]),
+      a[2] + inter.t * (b[2] - a[2]),
+    ];
+    const isDuplicate = positions.some((existing) => {
+      const dx = pos[0] - existing[0];
+      const dy = pos[1] - existing[1];
+      const dz = pos[2] - existing[2];
+      return dx * dx + dy * dy + dz * dz < EPSILON * EPSILON;
+    });
+    if (!isDuplicate) positions.push(pos);
+  }
+  return positions;
+}
+
+function sortPositionsByAngle(positions: Vec3[], plane: Plane): void {
+  const n = positions.length;
+  if (n < 3) return;
+  const cx = positions.reduce((s, p) => s + p[0], 0) / n;
+  const cy = positions.reduce((s, p) => s + p[1], 0) / n;
+  const cz = positions.reduce((s, p) => s + p[2], 0) / n;
+  const d0: Vec3 = [positions[0][0] - cx, positions[0][1] - cy, positions[0][2] - cz];
+  const d0Len = vecLen(d0);
+  if (d0Len < 1e-10) return;
+  const u: Vec3 = [d0[0] / d0Len, d0[1] / d0Len, d0[2] / d0Len];
+  const v = vecCross(plane.normal, u);
+  positions.sort((a, b) => {
+    const ax = a[0] - cx, ay = a[1] - cy, az = a[2] - cz;
+    const bx = b[0] - cx, by = b[1] - cy, bz = b[2] - cz;
+    const angleA = Math.atan2(ax * v[0] + ay * v[1] + az * v[2], ax * u[0] + ay * u[1] + az * u[2]);
+    const angleB = Math.atan2(bx * v[0] + by * v[1] + bz * v[2], bx * u[0] + by * u[1] + bz * u[2]);
+    return angleA - angleB;
+  });
+}
+
+function PerpendicularPlaneFace({ entity }: { entity: Entity<'face'> }) {
+  const props = entity.properties;
+  const source = props.source as Extract<FaceSource, { type: 'perpendicularPlane' }>;
+  const result = useBuilderResult(props.geometryId);
+  const entities = useEntityStore((s) => s.entities);
+  const style = useFaceStyle(entity.id, {
+    color: CROSS_SECTION_COLOR,
+    opacity: CROSS_SECTION_OPACITY,
+  });
+
+  const polygon = useMemo(() => {
+    if (!result || result.kind !== 'polyhedron') return null;
+
+    const pointEntity = entities[source.pointId];
+    if (!pointEntity || pointEntity.type !== 'point') return null;
+    const pointProps = pointEntity.properties as PointProperties;
+
+    const throughPos = computePointPosition(pointProps, result);
+    if (!throughPos) return null;
+
+    const direction = deriveDirection(pointProps.constraint, result, entities);
+    if (!direction) return null;
+
+    const len = vecLen(direction);
+    if (len < 1e-10) return null;
+    const normal: Vec3 = [direction[0] / len, direction[1] / len, direction[2] / len];
+    const d = vecDot(normal, throughPos);
+    const plane: Plane = { normal, d };
+
+    const intersections = computeEdgeIntersections(result, plane);
+    if (intersections.length < 3) return null;
+
+    const positions = deduplicatePositions(intersections, result);
+    if (positions.length < 3) return null;
+
+    sortPositionsByAngle(positions, plane);
+    return positions;
+  }, [result, entities, source.pointId]);
+
+  if (!polygon || polygon.length < 3) return null;
+
+  return (
+    <group>
+      <FaceMesh entityId={entity.id} positions={polygon} color={style.color} opacity={style.opacity} />
+      <Line points={[...polygon, polygon[0]]} color={style.color} lineWidth={2} />
+      {props.showPlane && <ExtendedPlane positions={polygon} color={style.color} />}
+    </group>
   );
 }
 

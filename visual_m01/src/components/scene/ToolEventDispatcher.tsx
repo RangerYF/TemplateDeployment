@@ -77,7 +77,7 @@ export function ToolEventDispatcher({ children }: { children: React.ReactNode })
       const penetrate = event.nativeEvent.ctrlKey || event.nativeEvent.metaKey;
       const activeTool = getActiveTool();
       const preferredType =
-        activeTool?.id === 'crossSection' || activeTool?.id === 'drawSegment'
+        activeTool?.id === 'crossSection' || activeTool?.id === 'drawSegment' || activeTool?.id === 'perpendicularPlane'
           ? 'point'
           : activeTool?.id === 'pickPoint'
             ? 'segment'

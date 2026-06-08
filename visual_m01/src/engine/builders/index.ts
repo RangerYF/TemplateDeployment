@@ -13,6 +13,8 @@ import { buildTruncatedCone } from './truncatedCone';
 import { buildFrustum } from './frustum';
 import { buildIsoscelesTetrahedron } from './isoscelesTetrahedron';
 import { buildOrthogonalTetrahedron } from './orthogonalTetrahedron';
+import { buildObliquePrism } from './obliquePrism';
+import { buildObliquePyramid } from './obliquePyramid';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyBuilderFn = (params: any) => BuilderResult;
@@ -31,6 +33,8 @@ const builders: Partial<Record<GeometryType, AnyBuilderFn>> = {
   frustum: buildFrustum,
   isoscelesTetrahedron: buildIsoscelesTetrahedron,
   orthogonalTetrahedron: buildOrthogonalTetrahedron,
+  obliquePrism: buildObliquePrism,
+  obliquePyramid: buildObliquePyramid,
 };
 
 /**

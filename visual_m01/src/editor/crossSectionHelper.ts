@@ -103,14 +103,14 @@ export function createCrossSectionFromPoints(
   return { success: true, message: '已创建截面' };
 }
 
-// ─── 内部辅助函数 ───
+// ─── 共享类型与工具函数 ───
 
-interface Plane {
+export interface Plane {
   normal: Vec3;
   d: number;
 }
 
-interface EdgeIntersection {
+export interface EdgeIntersection {
   edgeStart: number;
   edgeEnd: number;
   t: number;
@@ -199,7 +199,7 @@ function fitPlane(points: Vec3[]): Plane | null {
   return null;
 }
 
-function computeEdgeIntersections(
+export function computeEdgeIntersections(
   result: PolyhedronResult,
   plane: Plane,
 ): EdgeIntersection[] {
@@ -415,15 +415,15 @@ function splitIntoSubFaces(
 
 // ─── 向量工具 ───
 
-function sub(a: Vec3, b: Vec3): Vec3 {
+export function sub(a: Vec3, b: Vec3): Vec3 {
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
 
-function dot(a: Vec3, b: Vec3): number {
+export function dot(a: Vec3, b: Vec3): number {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-function cross(a: Vec3, b: Vec3): Vec3 {
+export function cross(a: Vec3, b: Vec3): Vec3 {
   return [
     a[1] * b[2] - a[2] * b[1],
     a[2] * b[0] - a[0] * b[2],
@@ -431,6 +431,6 @@ function cross(a: Vec3, b: Vec3): Vec3 {
   ];
 }
 
-function vecLen(v: Vec3): number {
+export function vecLen(v: Vec3): number {
   return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }

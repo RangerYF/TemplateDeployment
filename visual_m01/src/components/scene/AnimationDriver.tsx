@@ -34,7 +34,7 @@ export function AnimationDriver() {
 
     const props = entity.properties as PointProperties;
     const { constraint } = props;
-    if (constraint.type !== 'edge' && constraint.type !== 'curve') {
+    if (constraint.type !== 'edge' && constraint.type !== 'curve' && constraint.type !== 'segment') {
       useAnimationStore.getState().pause();
       return;
     }

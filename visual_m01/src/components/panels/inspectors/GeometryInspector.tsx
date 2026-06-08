@@ -19,6 +19,8 @@ const TYPE_LABELS: Record<string, string> = {
   frustum: '棱台',
   isoscelesTetrahedron: '等腰四面体',
   orthogonalTetrahedron: '正交四面体',
+  obliquePrism: '斜棱柱',
+  obliquePyramid: '斜棱锥',
 };
 
 const PARAM_LABELS: Record<string, string> = {
@@ -41,6 +43,10 @@ const PARAM_LABELS: Record<string, string> = {
   edgeAB: '对棱 AB',
   edgeCD: '对棱 CD',
   lateralEdgeLength: '侧棱长',
+  topOffsetX: '顶面偏移X',
+  topOffsetZ: '顶面偏移Z',
+  apexOffsetX: '顶点偏移X',
+  apexOffsetZ: '顶点偏移Z',
 };
 
 function GeometryInspector({ entity }: { entity: Entity }) {

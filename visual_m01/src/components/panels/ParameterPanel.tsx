@@ -76,12 +76,27 @@ const PARAM_FIELDS: Record<string, ParamField[]> = {
     { key: 'edgeAB', label: '对棱 AB', min: 0.5, max: 10, step: 0.1 },
     { key: 'edgeCD', label: '对棱 CD', min: 0.5, max: 10, step: 0.1 },
   ],
+  obliquePrism: [
+    { key: 'sides', label: '底面边数', min: 3, max: 8, step: 1 },
+    { key: 'sideLength', label: '底面边长', min: 0.5, max: 10, step: 0.1 },
+    { key: 'height', label: '高', min: 0.5, max: 10, step: 0.1 },
+    { key: 'topOffsetX', label: '顶面偏移X', min: -5, max: 5, step: 0.1 },
+    { key: 'topOffsetZ', label: '顶面偏移Z', min: -5, max: 5, step: 0.1 },
+  ],
+  obliquePyramid: [
+    { key: 'sides', label: '底面边数', min: 3, max: 8, step: 1 },
+    { key: 'sideLength', label: '底面边长', min: 0.5, max: 10, step: 0.1 },
+    { key: 'height', label: '高', min: 0.5, max: 10, step: 0.1 },
+    { key: 'apexOffsetX', label: '顶点偏移X', min: -5, max: 5, step: 0.1 },
+    { key: 'apexOffsetZ', label: '顶点偏移Z', min: -5, max: 5, step: 0.1 },
+  ],
 };
 
 // ─── 拓扑变化检测 ───
 
 function isTopologyChange(geometryType: GeometryType, oldParams: Record<string, number>, newParams: Record<string, number>): boolean {
-  if (geometryType === 'pyramid' || geometryType === 'prism' || geometryType === 'frustum') {
+  if (geometryType === 'pyramid' || geometryType === 'prism' || geometryType === 'frustum'
+    || geometryType === 'obliquePrism' || geometryType === 'obliquePyramid') {
     return oldParams.sides !== newParams.sides;
   }
   return false;

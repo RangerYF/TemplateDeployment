@@ -13,6 +13,8 @@ import {
   CornerTetrahedronIcon,
   IsoscelesTetrahedronIcon,
   OrthogonalTetrahedronIcon,
+  ObliquePrismIcon,
+  ObliquePyramidIcon,
 } from './GeometryIcons';
 
 /** 几何体类型 → 图标组件映射 */
@@ -30,4 +32,6 @@ export const GEOMETRY_ICON_MAP: Record<GeometryType, React.ComponentType<{ size?
   cornerTetrahedron: CornerTetrahedronIcon,
   isoscelesTetrahedron: IsoscelesTetrahedronIcon,
   orthogonalTetrahedron: OrthogonalTetrahedronIcon,
+  obliquePrism: ObliquePrismIcon,
+  obliquePyramid: ObliquePyramidIcon,
 };

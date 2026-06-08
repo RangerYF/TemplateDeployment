@@ -13,6 +13,8 @@ import type {
   FrustumParams,
   IsoscelesTetrahedronParams,
   OrthogonalTetrahedronParams,
+  ObliquePrismParams,
+  ObliquePyramidParams,
 } from '../../types/geometry';
 
 // ─── EntityType ───
@@ -36,7 +38,8 @@ export interface GeometryProperties {
   geometryType: GeometryType;
   params: CubeParams | CuboidParams | PyramidParams | ConeParams | CylinderParams | SphereParams
     | RegularTetrahedronParams | CornerTetrahedronParams | PrismParams | TruncatedConeParams
-    | FrustumParams | IsoscelesTetrahedronParams | OrthogonalTetrahedronParams;
+    | FrustumParams | IsoscelesTetrahedronParams | OrthogonalTetrahedronParams
+    | ObliquePrismParams | ObliquePyramidParams;
 }
 
 export type PointConstraint =
@@ -74,7 +77,8 @@ export type FaceSource =
   | { type: 'geometry'; faceIndex: number }
   | { type: 'crossSection'; definingPointIds: string[] }
   | { type: 'surface'; surfaceType: 'disk' | 'lateral' | 'sphere'; faceIndex: number }
-  | { type: 'custom' };
+  | { type: 'custom' }
+  | { type: 'perpendicularPlane'; pointId: string };
 
 export interface FaceProperties {
   builtIn: boolean;

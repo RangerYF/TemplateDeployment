@@ -124,7 +124,8 @@ function FaceInspector({ entity }: { entity: Entity }) {
 
   const sourceLabel = source.type === 'geometry' ? '几何体面' :
     source.type === 'crossSection' ? '截面' :
-    source.type === 'surface' ? '曲面' : '自定义面';
+    source.type === 'surface' ? '曲面' :
+    source.type === 'perpendicularPlane' ? '垂面' : '自定义面';
 
   const faceName = pointLabels.join('');
 
@@ -134,8 +135,8 @@ function FaceInspector({ entity }: { entity: Entity }) {
         entity={entity}
         typeName={sourceLabel}
         displayName={faceName || '面'}
-        canDelete={source.type === 'crossSection'}
-        deleteLabel="删除截面"
+        canDelete={source.type === 'crossSection' || source.type === 'perpendicularPlane'}
+        deleteLabel={source.type === 'perpendicularPlane' ? '删除垂面' : '删除截面'}
         canRename={false}
       />
 
@@ -163,8 +164,13 @@ function FaceInspector({ entity }: { entity: Entity }) {
         <CrossSectionDetail source={source} pointLabels={pointLabels} />
       )}
 
-      {/* 显示完整平面（仅截面） */}
-      {source.type === 'crossSection' && (
+      {/* 垂面详情 */}
+      {source.type === 'perpendicularPlane' && (
+        <PerpendicularPlaneDetail source={source} />
+      )}
+
+      {/* 显示完整平面（截面/垂面） */}
+      {(source.type === 'crossSection' || source.type === 'perpendicularPlane') && (
         <div className="flex items-center justify-between">
           <span className="text-sm" style={{ color: COLORS.textMuted }}>显示完整平面</span>
           <Switch
@@ -230,6 +236,24 @@ function FaceInspector({ entity }: { entity: Entity }) {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+function PerpendicularPlaneDetail({
+  source,
+}: {
+  source: Extract<FaceProperties['source'], { type: 'perpendicularPlane' }>;
+}) {
+  const entities = useEntityStore((s) => s.entities);
+  const pointLabel = useMemo(() => {
+    const pt = entities[source.pointId];
+    return pt?.type === 'point' ? (pt.properties as PointProperties).label : '?';
+  }, [entities, source.pointId]);
+
+  return (
+    <div className="text-sm" style={{ color: COLORS.textMuted }}>
+      过点：{pointLabel}
     </div>
   );
 }

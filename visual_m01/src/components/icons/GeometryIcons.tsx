@@ -286,6 +286,52 @@ export function IsoscelesTetrahedronIcon({ size = 18, className }: IconProps) {
   );
 }
 
+/** 斜棱柱 — 顶面右偏的四棱柱 */
+export function ObliquePrismIcon({ size = 18, className }: IconProps) {
+  // Bottom: D(1,16) C(9,16) G(13,12) H(5,12)
+  // Top (shifted right): A(5,7) B(13,7) F(16,3) E(8,3)
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth={SW} strokeLinejoin="round" className={className}>
+      {/* 顶面（全部可见） */}
+      <polygon points="5,7 13,7 16,3 8,3" />
+      {/* 底面可见边 */}
+      <line x1="1" y1="16" x2="9" y2="16" />
+      <line x1="9" y1="16" x2="13" y2="12" />
+      {/* 底面隐藏边 */}
+      <line x1="1" y1="16" x2="5" y2="12" {...HIDDEN} />
+      <line x1="5" y1="12" x2="13" y2="12" {...HIDDEN} />
+      {/* 可见侧棱（斜向） */}
+      <line x1="1" y1="16" x2="5" y2="7" />
+      <line x1="9" y1="16" x2="13" y2="7" />
+      <line x1="13" y1="12" x2="16" y2="3" />
+      {/* 隐藏侧棱 */}
+      <line x1="5" y1="12" x2="8" y2="3" {...HIDDEN} />
+    </svg>
+  );
+}
+
+/** 斜棱锥 — 顶点偏右的四棱锥 */
+export function ObliquePyramidIcon({ size = 18, className }: IconProps) {
+  // Apex shifted right: P(13, 2)
+  // Base: A(2,13) B(8,10) C(16,13) D(10,16)
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth={SW} strokeLinejoin="round" className={className}>
+      {/* 底面可见边 */}
+      <line x1="2" y1="13" x2="10" y2="16" />
+      <line x1="10" y1="16" x2="16" y2="13" />
+      {/* 底面隐藏边 */}
+      <line x1="2" y1="13" x2="8" y2="10" {...HIDDEN} />
+      <line x1="8" y1="10" x2="16" y2="13" {...HIDDEN} />
+      {/* 可见侧棱（顶点偏右） */}
+      <line x1="13" y1="2" x2="2" y2="13" />
+      <line x1="13" y1="2" x2="16" y2="13" />
+      <line x1="13" y1="2" x2="10" y2="16" />
+      {/* 隐藏侧棱 */}
+      <line x1="13" y1="2" x2="8" y2="10" {...HIDDEN} />
+    </svg>
+  );
+}
+
 /** 正交四面体 — 对棱垂直，1条隐藏棱 + 垂直标记 */
 export function OrthogonalTetrahedronIcon({ size = 18, className }: IconProps) {
   // Same base as regular tetrahedron
