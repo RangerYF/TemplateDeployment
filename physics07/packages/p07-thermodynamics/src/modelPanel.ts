@@ -114,12 +114,12 @@ export class ModelPanel {
     return this.toggleStates.get(key) ?? false;
   }
 
-  private createSection(title: string, enLabel: string): HTMLElement {
+  private createSection(title: string, _enLabel?: string): HTMLElement {
     const section = document.createElement('div');
-    section.className = 'sidebar-section';
+    section.className = 'sidebar-subsection';
     const header = document.createElement('div');
-    header.className = 'sidebar-section-title';
-    header.innerHTML = `${title} <span class="en-label">${enLabel}</span>`;
+    header.className = 'sidebar-subsection-title';
+    header.textContent = title;
     section.appendChild(header);
     return section;
   }

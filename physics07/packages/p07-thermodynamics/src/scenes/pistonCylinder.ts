@@ -1,26 +1,268 @@
-import type { ThermoState, SceneModule, RenderContext, StateDisplayData, CalcStep } from '../types';
-import { COLORS, CANVAS_FONTS } from '../theme';
+import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import type { ThermoState, SceneModule, StateDisplayData, CalcStep } from '../types';
 import { clamp } from '../params';
-import { drawBallAtScreen } from '../renderHelpers';
+import { PistonScene3D } from './three/PistonScene3D';
+import { canvasBg, getTheme } from '../themeMode';
+import { speedToColor } from '../theme';
 
 const g = 9.8;
 
-function drawGasMolecules(
-  ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number,
-  count: number, time: number,
-) {
-  if (h < 10 || w < 10) return;
-  for (let i = 0; i < count; i++) {
-    const bx = x + (w * 0.12) + (w * 0.76) * ((i * 0.618 + 0.1) % 1);
-    const by = y + (h * 0.12) + (h * 0.76) * ((i * 0.382 + 0.3) % 1);
-    const jx = Math.sin(time * 2.5 + i * 7.31) * 5;
-    const jy = Math.cos(time * 1.8 + i * 4.97) * 5;
-    const px = clamp(bx + jx, x + 6, x + w - 6);
-    const py = clamp(by + jy, y + 6, y + h - 6);
-    drawBallAtScreen(ctx, px, py, 5, '#42A5F5', { alpha: 0.75 });
-  }
+// ── Three.js overlay (lazy singleton) ───────────────────────────────────────
+let scene3d: PistonScene3D | null = null;
+function ensure3D(container: HTMLElement): PistonScene3D {
+  if (!scene3d) scene3d = new PistonScene3D(container);
+  return scene3d;
 }
 
+// ── World geometry constants ────────────────────────────────────────────────
+const R = 1.6;        // cylinder radius (world units)
+const HALF = 5;       // half cylinder length
+const SPAN = 2 * HALF; // full length
+
+// ── Physics ─────────────────────────────────────────────────────────────────
+interface PCResult {
+  P1: number; P2: number; L2: number; V1: number; V2: number;
+  L2Left: number; L2Right: number;
+}
+
+function solvePC(
+  mode: string, orientation: string,
+  T1: number, T2: number, pistonMass: number,
+  S: number, L1: number, P0: number,
+  params: Record<string, number | string | boolean>,
+): PCResult {
+  if (mode === '中间活塞') {
+    // Horizontal cylinder, closed both ends, ONE free middle piston coupling
+    // two gas columns. Pressure balance (horizontal) → P_left = P_right = P.
+    // Total length conserved: L_left + L_right = 2·L1.
+    const heatPos = String(params.pcHeatPosition) || '左';
+    const P1 = P0; // initial fill pressure (both gases start equal at L1)
+    let L2Left: number, L2Right: number, P2: number;
+    if (heatPos === '两侧') {
+      P2 = P1 * T2 / T1;
+      L2Left = L1;
+      L2Right = L1;
+    } else {
+      // one side heated to T2, the other stays at T1
+      P2 = P1 * (T1 + T2) / (2 * T1);
+      const Lhot = 2 * L1 * T2 / (T1 + T2);
+      const Lcold = 2 * L1 * T1 / (T1 + T2);
+      if (heatPos === '左') { L2Left = Lhot; L2Right = Lcold; }
+      else { L2Left = Lcold; L2Right = Lhot; }
+    }
+    const V1 = 2 * L1 * S;
+    const V2 = (L2Left + L2Right) * S;
+    return { P1, P2, L2: (L2Left + L2Right) / 2, V1, V2, L2Left, L2Right };
+  }
+
+  // Single piston
+  let P1: number;
+  if (orientation === '竖直') {
+    const mgOverS = (pistonMass * g) / (S * 1e-4) / 1000; // kPa
+    P1 = P0 + mgOverS;
+  } else {
+    P1 = P0;
+  }
+  const P2 = P1;                 // free piston → isobaric
+  const L2 = L1 * T2 / T1;       // V/T const
+  return { P1, P2, L2, V1: L1 * S, V2: L2 * S, L2Left: L2, L2Right: L2 };
+}
+
+// ── Temperature → color ──────────────────────────────────────────────────────
+function tempColor(T: number): THREE.Color {
+  const f = clamp((T - 250) / 350, 0, 1); // 250K→0, 600K→1
+  return new THREE.Color().setHSL((1 - f) * 0.62, 0.7, 0.55); // blue→red
+}
+
+// ── 3D part references (rebuilt on layout change) ────────────────────────────
+interface Parts {
+  key: string;
+  rig: THREE.Group;
+  leftGas: THREE.Mesh;
+  rightGas: THREE.Mesh | null;
+  leftParticles: THREE.InstancedMesh;
+  rightParticles: THREE.InstancedMesh | null;
+  piston: THREE.Group;       // for single, the only piston; for middle, the middle piston
+  leftLabel: CSS2DObject;
+  rightLabel: CSS2DObject | null;
+  heatGlow: THREE.PointLight;
+}
+let parts: Parts | null = null;
+
+function labelCss(): string {
+  // NOTE: must include position:absolute — CSS2DObject sets it on the element,
+  // but we overwrite cssText on theme change, so it has to be re-declared here
+  // (otherwise the div reverts to a full-width block).
+  const base = 'position:absolute;user-select:none;padding:3px 9px;border-radius:9px;'
+    + 'font:600 12px Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none;';
+  return base + (getTheme() === 'dark'
+    ? 'color:#e2e8f0;background:rgba(17,24,39,0.82);border:1px solid rgba(255,255,255,0.18);box-shadow:0 1px 4px rgba(0,0,0,0.45)'
+    : 'color:#1a2740;background:rgba(255,255,255,0.86);border:1px solid rgba(80,110,150,0.30);box-shadow:0 1px 4px rgba(0,0,0,0.12)');
+}
+
+function makeLabelDiv(): HTMLDivElement {
+  const d = document.createElement('div');
+  d.style.cssText = labelCss();
+  return d;
+}
+
+function makeMetalTube(): THREE.Mesh {
+  // open glass-metal tube along Y
+  return new THREE.Mesh(
+    new THREE.CylinderGeometry(R, R, SPAN, 56, 1, true),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x7f93ab, metalness: 0.6, roughness: 0.22,
+      transparent: true, opacity: 0.32,
+      side: THREE.DoubleSide, envMapIntensity: 1,
+    }),
+  );
+}
+
+function makeCap(yPos: number): THREE.Mesh {
+  const cap = new THREE.Mesh(
+    new THREE.CylinderGeometry(R + 0.12, R + 0.12, 0.3, 56),
+    new THREE.MeshStandardMaterial({ color: 0x55626f, metalness: 0.85, roughness: 0.3 }),
+  );
+  cap.position.y = yPos;
+  return cap;
+}
+
+function makePiston(): THREE.Group {
+  const grp = new THREE.Group();
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(R - 0.06, R - 0.06, 0.5, 56),
+    new THREE.MeshStandardMaterial({ color: 0xd8dee6, metalness: 0.95, roughness: 0.12 }),
+  );
+  grp.add(disc);
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(R - 0.06, 0.07, 12, 56),
+    new THREE.MeshStandardMaterial({ color: 0x8a96a4, metalness: 0.9, roughness: 0.25 }),
+  );
+  rim.rotation.x = Math.PI / 2;
+  grp.add(rim);
+  return grp;
+}
+
+function makeGas(): THREE.Mesh {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(R - 0.1, R - 0.1, 1, 48, 1, false),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x42a5f5, transparent: true, opacity: 0.22,
+      transmission: 0.4, roughness: 0.5, depthWrite: false,
+    }),
+  );
+  return m;
+}
+
+// Bouncing gas molecules (InstancedMesh) — agitation ∝ temperature.
+function makeParticles(count: number): THREE.InstancedMesh {
+  const geo = new THREE.SphereGeometry(0.13, 10, 10);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x223046, emissiveIntensity: 0.35, roughness: 0.4 });
+  const mesh = new THREE.InstancedMesh(geo, mat, count);
+  const seeds = new Float32Array(count * 6);
+  const col = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const freq = 1.2 + Math.random() * 3;
+    seeds[i * 6 + 0] = Math.random();            // along-axis base [0,1]
+    seeds[i * 6 + 1] = (Math.random() - 0.5);    // radial x
+    seeds[i * 6 + 2] = (Math.random() - 0.5);    // radial z
+    seeds[i * 6 + 3] = freq;                     // freq
+    seeds[i * 6 + 4] = Math.random() * 6.28;     // phase 1
+    seeds[i * 6 + 5] = Math.random() * 6.28;     // phase 2
+    // Cosmetic per-instance "speed" tint (faster agitation → warmer), matching
+    // the 2D scenes' palette. Purely visual — no effect on motion/physics.
+    col.set(speedToColor(clamp((freq - 1.2) / 3, 0, 1)));
+    mesh.setColorAt(i, col);
+  }
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mesh.userData.seeds = seeds;
+  return mesh;
+}
+
+const _pm = new THREE.Matrix4();
+function updateParticles(mesh: THREE.InstancedMesh, y0: number, y1: number, tempFrac: number, time: number): void {
+  const seeds = mesh.userData.seeds as Float32Array;
+  const n = mesh.count;
+  const amp = 0.12 + tempFrac * 0.45;
+  const rad = (R - 0.35);
+  const span = Math.max(0.2, y1 - y0);
+  for (let i = 0; i < n; i++) {
+    const base = seeds[i * 6 + 0], rx = seeds[i * 6 + 1], rz = seeds[i * 6 + 2];
+    const f = seeds[i * 6 + 3], p1 = seeds[i * 6 + 4], p2 = seeds[i * 6 + 5];
+    const y = clamp(y0 + (base * 0.84 + 0.08) * span + Math.sin(time * f + p1) * amp * span * 0.12, y0 + 0.15, y1 - 0.15);
+    const x = clamp(rx * rad * 1.7 + Math.cos(time * f * 0.8 + p2) * amp, -rad, rad);
+    const z = clamp(rz * rad * 1.7 + Math.sin(time * f * 0.7 + p1) * amp, -rad, rad);
+    _pm.makeTranslation(x, y, z);
+    mesh.setMatrixAt(i, _pm);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+}
+
+/** Build the rig for the given layout. axisHorizontal rotates the whole rig. */
+function buildLayout(view: PistonScene3D, key: string, horizontal: boolean, middle: boolean): Parts {
+  PistonScene3D.disposeGroup(view.dyn);
+
+  const rig = new THREE.Group();
+  view.dyn.add(rig);
+  if (horizontal) rig.rotation.z = Math.PI / 2; // Y axis → X axis
+
+  rig.add(makeMetalTube());
+  // caps: closed bottom always; closed top only for middle (both ends sealed)
+  rig.add(makeCap(-HALF));
+  if (middle) rig.add(makeCap(HALF));
+
+  const leftGas = makeGas();
+  rig.add(leftGas);
+  const leftParticles = makeParticles(28);
+  rig.add(leftParticles);
+  let rightGas: THREE.Mesh | null = null;
+  let rightParticles: THREE.InstancedMesh | null = null;
+  if (middle) {
+    rightGas = makeGas(); rig.add(rightGas);
+    rightParticles = makeParticles(28); rig.add(rightParticles);
+  }
+
+  const piston = makePiston();
+  rig.add(piston);
+
+  // labels
+  const leftDiv = makeLabelDiv();
+  const leftLabel = new CSS2DObject(leftDiv);
+  view.dyn.add(leftLabel);
+  let rightLabel: CSS2DObject | null = null;
+  if (middle) {
+    const rd = makeLabelDiv();
+    rightLabel = new CSS2DObject(rd);
+    view.dyn.add(rightLabel);
+  }
+
+  // heat glow light (positioned at heated end during update)
+  const heatGlow = new THREE.PointLight(0xff5522, 0, 14);
+  view.dyn.add(heatGlow);
+
+  // camera framing
+  view.camera.position.set(horizontal ? 0 : 7, horizontal ? 7 : 2, 14);
+  view.controls.target.set(0, 0, 0);
+  view.controls.update();
+
+  return { key, rig, leftGas, rightGas, leftParticles, rightParticles, piston, leftLabel, rightLabel, heatGlow };
+}
+
+/** Position a gas mesh to span [y0, y1] along the local Y axis. */
+function spanGas(mesh: THREE.Mesh, y0: number, y1: number, color: THREE.Color): void {
+  const len = Math.max(0.01, y1 - y0);
+  mesh.scale.y = len;
+  mesh.position.y = (y0 + y1) / 2;
+  (mesh.material as THREE.MeshPhysicalMaterial).color.copy(color);
+}
+
+// map a gas column length (cm) to a fraction of the tube
+function lenFrac(L: number, Lref: number): number {
+  return clamp(L / Lref, 0.04, 0.96);
+}
+
+// ── Scene module ─────────────────────────────────────────────────────────────
 export const pistonCylinderScene: SceneModule = {
   createInitialState() {
     return { t: 0, animProgress: 0 };
@@ -29,40 +271,91 @@ export const pistonCylinderScene: SceneModule = {
   createStepFn() {
     return (_t: number, dt: number, state: ThermoState): ThermoState => {
       const s: ThermoState = { ...state, t: state.t + dt };
-      if (s.animProgress < 1) {
-        s.animProgress = Math.min(1, s.animProgress + dt * 1.2);
-      }
+      if (s.animProgress < 1) s.animProgress = Math.min(1, s.animProgress + dt * 0.7);
       return s;
     };
   },
 
   render(_t, state, rctx, params) {
     const { cm } = rctx;
-    const ctx = cm.ctx;
-    cm.clear(COLORS.canvasBg);
+    const bg = canvasBg();
+    cm.clear(bg);
+    const container = cm.canvas.parentElement;
+    if (!container) return;
+    const view = ensure3D(container);
+    view.setBackground(bg);
+    view.show();
 
     const mode = String(params.pcMode) || '单活塞';
     const orientation = String(params.cylinderOrientation) || '竖直';
+    const middle = mode === '中间活塞';
+    const horizontal = middle || orientation === '水平';
     const T1 = Number(params.pcT1) || 300;
     const T2 = Number(params.pcT2) || 450;
     const pistonMass = Number(params.pcPistonMass) || 1.0;
     const S = Number(params.pcArea) || 10;
     const L1 = Number(params.pcL1) || 20;
     const P0 = Number(params.pcPAtm) || 101;
-
-    const canW = rctx.canvasWidth;
-    const canH = rctx.canvasHeight;
+    const heatPos = String(params.pcHeatPosition) || '左';
     const anim = clamp(state.animProgress || 0, 0, 1);
 
-    if (mode === '双活塞') {
-      renderDualPiston(ctx, canW, canH, params, anim, state.t);
-    } else if (orientation === '竖直') {
-      renderVerticalSingle(ctx, canW, canH, T1, T2, pistonMass, S, L1, P0, anim, state.t);
-    } else {
-      renderHorizontalSingle(ctx, canW, canH, T1, T2, pistonMass, S, L1, P0, anim, state.t);
+    const result = solvePC(mode, orientation, T1, T2, pistonMass, S, L1, P0, params);
+
+    const key = `${mode}|${orientation}|${middle ? heatPos : ''}`;
+    if (!parts || parts.key !== key) {
+      parts = buildLayout(view, key, horizontal, middle);
     }
 
-    drawThermometer(ctx, 30, 60, T1, T2, anim);
+    if (middle) {
+      const Lref = Math.max(L1, result.L2Left, result.L2Right) * 2.1;
+      const lL = L1 + (result.L2Left - L1) * anim;
+      const lR = L1 + (result.L2Right - L1) * anim;
+      const fL = lenFrac(lL, Lref);
+      // piston position: boundary between left and right gas
+      const total = fL + lenFrac(lR, Lref);
+      const pistonY = -HALF + (fL / total) * SPAN;
+      const leftHot = heatPos === '左' || heatPos === '两侧';
+      const rightHot = heatPos === '右' || heatPos === '两侧';
+      const tL = leftHot ? T1 + (T2 - T1) * anim : T1;
+      const tR = rightHot ? T1 + (T2 - T1) * anim : T1;
+      spanGas(parts.leftGas, -HALF, pistonY - 0.25, tempColor(tL));
+      if (parts.rightGas) spanGas(parts.rightGas, pistonY + 0.25, HALF, tempColor(tR));
+      updateParticles(parts.leftParticles, -HALF, pistonY - 0.25, clamp((tL - 250) / 350, 0, 1), state.t);
+      if (parts.rightParticles) updateParticles(parts.rightParticles, pistonY + 0.25, HALF, clamp((tR - 250) / 350, 0, 1), state.t);
+      parts.piston.position.set(0, pistonY, 0);
+      // labels at the gas centres (world space via rig transform)
+      setLabel(parts.leftLabel, parts.rig, (-HALF + pistonY) / 2, `L左=${lL.toFixed(1)}cm`);
+      if (parts.rightLabel) setLabel(parts.rightLabel, parts.rig, (pistonY + HALF) / 2, `L右=${lR.toFixed(1)}cm`);
+      // heat glow at heated side
+      const glowY = leftHot && !rightHot ? -HALF + 0.6 : rightHot && !leftHot ? HALF - 0.6 : 0;
+      parts.heatGlow.intensity = T2 > T1 ? 1.6 * anim : 0;
+      placeAlongRig(parts.heatGlow, parts.rig, glowY, R + 1.2);
+    } else {
+      const Lref = Math.max(L1, result.L2) * 1.7;
+      const L = L1 + (result.L2 - L1) * anim;
+      const f = lenFrac(L, Lref);
+      const pistonY = -HALF + f * SPAN;
+      const T = T1 + (T2 - T1) * anim;
+      spanGas(parts.leftGas, -HALF, pistonY - 0.25, tempColor(T));
+      updateParticles(parts.leftParticles, -HALF, pistonY - 0.25, clamp((T - 250) / 350, 0, 1), state.t);
+      parts.piston.position.set(0, pistonY, 0);
+      setLabel(parts.leftLabel, parts.rig, (-HALF + pistonY) / 2, `L=${L.toFixed(1)}cm`);
+      parts.heatGlow.intensity = T2 > T1 ? 1.6 * anim : 0;
+      placeAlongRig(parts.heatGlow, parts.rig, -HALF + 0.6, R + 1.2);
+    }
+  },
+
+  onLeave() {
+    scene3d?.hide();
+  },
+
+  onThemeChange() {
+    scene3d?.refreshTheme();
+    // Restyle existing label divs (they are only rebuilt on a layout change).
+    if (parts) {
+      parts.leftLabel.element.style.cssText = labelCss();
+      if (parts.rightLabel) parts.rightLabel.element.style.cssText = labelCss();
+    }
   },
 
   getStateDisplay(params): StateDisplayData {
@@ -74,23 +367,21 @@ export const pistonCylinderScene: SceneModule = {
     const S = Number(params.pcArea) || 10;
     const L1 = Number(params.pcL1) || 20;
     const P0 = Number(params.pcPAtm) || 101;
-
-    const result = solvePC(mode, orientation, T1, T2, pistonMass, S, L1, P0, params);
+    const r = solvePC(mode, orientation, T1, T2, pistonMass, S, L1, P0, params);
     const entries: { label: string; value: string; highlight?: boolean }[] = [
-      { label: 'P₁', value: `${result.P1.toFixed(2)} kPa` },
+      { label: 'P₁', value: `${r.P1.toFixed(2)} kPa` },
+      { label: 'P₂', value: `${r.P2.toFixed(2)} kPa`, highlight: mode === '中间活塞' },
     ];
-    if (mode === '双活塞') {
-      entries.push({ label: 'L左₂', value: `${result.L2Left.toFixed(2)} cm`, highlight: true });
-      entries.push({ label: 'L右₂', value: `${result.L2Right.toFixed(2)} cm`, highlight: true });
+    if (mode === '中间活塞') {
+      entries.push({ label: 'L左₂', value: `${r.L2Left.toFixed(2)} cm`, highlight: true });
+      entries.push({ label: 'L右₂', value: `${r.L2Right.toFixed(2)} cm`, highlight: true });
     } else {
-      entries.push({ label: 'L₂', value: `${result.L2.toFixed(2)} cm`, highlight: true });
+      entries.push({ label: 'L₂', value: `${r.L2.toFixed(2)} cm`, highlight: true });
     }
-    entries.push({ label: 'V₂', value: `${result.V2.toFixed(1)} cm³`, highlight: true });
+    entries.push({ label: 'V₂', value: `${r.V2.toFixed(1)} cm³` });
     return {
-      p: result.P1,
-      V: result.V1,
-      T: T1,
-      pvOverT: result.P1 * result.V1 / T1,
+      p: r.P1, V: r.V1, T: T1,
+      pvOverT: r.P1 * r.V1 / T1,
       customEntries: entries,
     };
   },
@@ -104,591 +395,26 @@ export const pistonCylinderScene: SceneModule = {
     const S = Number(params.pcArea) || 10;
     const L1 = Number(params.pcL1) || 20;
     const P0 = Number(params.pcPAtm) || 101;
-
     return buildCalcSteps(mode, orientation, T1, T2, pistonMass, S, L1, P0, params);
   },
 };
 
-interface PCResult {
-  P1: number; P2: number; L2: number; V1: number; V2: number;
-  L2Left: number; L2Right: number;
+// ── label / glow helpers (operate in rig-local Y, account for rig rotation) ───
+function localToWorld(rig: THREE.Group, y: number, radialOffset: number): THREE.Vector3 {
+  const v = new THREE.Vector3(radialOffset, y, 0);
+  return v.applyMatrix4(rig.matrixWorld);
+}
+function setLabel(label: CSS2DObject, rig: THREE.Group, y: number, text: string): void {
+  (label.element as HTMLDivElement).textContent = text;
+  rig.updateWorldMatrix(true, false);
+  label.position.copy(localToWorld(rig, y, R + 0.6));
+}
+function placeAlongRig(obj: THREE.Object3D, rig: THREE.Group, y: number, radialOffset: number): void {
+  rig.updateWorldMatrix(true, false);
+  obj.position.copy(localToWorld(rig, y, radialOffset));
 }
 
-function solvePC(
-  mode: string, orientation: string,
-  T1: number, T2: number, pistonMass: number,
-  S: number, L1: number, P0: number,
-  params: Record<string, number | string | boolean>,
-): PCResult {
-  const Sm2 = S * 1e-4;
-
-  if (mode === '双活塞') {
-    const heatPos = String(params.pcHeatPosition) || '中间';
-    const P1 = P0;
-    let L2Left: number, L2Right: number;
-    if (heatPos === '左') {
-      L2Left = L1 * T2 / T1;
-      L2Right = L1;
-    } else if (heatPos === '右') {
-      L2Left = L1;
-      L2Right = L1 * T2 / T1;
-    } else {
-      L2Left = L1 * T2 / T1;
-      L2Right = L1 * T2 / T1;
-    }
-    const V1 = 2 * L1 * S;
-    const V2 = (L2Left + L2Right) * S;
-    return { P1, P2: P1, L2: (L2Left + L2Right) / 2, V1, V2, L2Left, L2Right };
-  }
-
-  let P1: number;
-  if (orientation === '竖直') {
-    const mgOverS = (pistonMass * g) / Sm2 / 1000;
-    P1 = P0 + mgOverS;
-  } else {
-    P1 = P0;
-  }
-  const P2 = P1;
-  const L2 = L1 * T2 / T1;
-  return { P1, P2, L2, V1: L1 * S, V2: L2 * S, L2Left: L2, L2Right: L2 };
-}
-
-function drawCylinderWalls(
-  ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number,
-) {
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.10)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 3;
-  ctx.fillStyle = COLORS.canvasBg;
-  ctx.fillRect(x, y, w, h);
-  ctx.restore();
-
-  const fillGrad = ctx.createLinearGradient(x, y, x, y + h);
-  fillGrad.addColorStop(0, 'rgba(144,202,249,0.03)');
-  fillGrad.addColorStop(1, 'rgba(144,202,249,0.08)');
-  ctx.fillStyle = fillGrad;
-  ctx.fillRect(x, y, w, h);
-
-  const wallGrad = ctx.createLinearGradient(x, y, x + w, y);
-  wallGrad.addColorStop(0, 'rgba(0,0,0,0.14)');
-  wallGrad.addColorStop(0.04, 'rgba(0,0,0,0.04)');
-  wallGrad.addColorStop(0.96, 'rgba(0,0,0,0.04)');
-  wallGrad.addColorStop(1, 'rgba(0,0,0,0.14)');
-  ctx.fillStyle = wallGrad;
-  ctx.fillRect(x - 3, y, 5, h);
-  ctx.fillRect(x + w - 2, y, 5, h);
-
-  ctx.strokeStyle = COLORS.containerBorder;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(x, y); ctx.lineTo(x, y + h);
-  ctx.lineTo(x + w, y + h); ctx.lineTo(x + w, y);
-  ctx.stroke();
-}
-
-function drawPiston(
-  ctx: CanvasRenderingContext2D, x: number, y: number, w: number,
-  isHorizontal: boolean,
-) {
-  const thickness = 16;
-  const grad = isHorizontal
-    ? ctx.createLinearGradient(x, y, x + thickness, y)
-    : ctx.createLinearGradient(x, y, x, y + thickness);
-  grad.addColorStop(0, '#A1887F');
-  grad.addColorStop(0.3, '#8D6E63');
-  grad.addColorStop(0.7, COLORS.piston);
-  grad.addColorStop(1, '#4E342E');
-
-  if (isHorizontal) {
-    ctx.fillStyle = grad;
-    ctx.fillRect(x, y + 3, thickness, w - 6);
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + 2, y + 6);
-    ctx.lineTo(x + 2, y + w - 6);
-    ctx.stroke();
-  } else {
-    ctx.fillStyle = grad;
-    ctx.fillRect(x + 3, y, w - 6, thickness);
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + 6, y + 2);
-    ctx.lineTo(x + w - 6, y + 2);
-    ctx.stroke();
-    const nubW = 18, nubH = 7;
-    const cx = x + w / 2;
-    ctx.fillStyle = '#6D4C41';
-    ctx.fillRect(cx - nubW / 2, y - nubH, nubW, nubH);
-  }
-}
-
-function drawForceArrow(
-  ctx: CanvasRenderingContext2D, x: number, y1: number, y2: number,
-  color: string, label: string, labelSide: 'left' | 'right',
-) {
-  const down = y2 > y1;
-  const len = Math.abs(y2 - y1);
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 3.5;
-  ctx.beginPath();
-  ctx.moveTo(x, y1);
-  ctx.lineTo(x, y2);
-  ctx.stroke();
-
-  const headLen = Math.min(10, len * 0.35);
-  ctx.beginPath();
-  ctx.moveTo(x - 6, y2 + (down ? -headLen : headLen));
-  ctx.lineTo(x, y2);
-  ctx.lineTo(x + 6, y2 + (down ? -headLen : headLen));
-  ctx.fillStyle = color;
-  ctx.fill();
-
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  const tw = ctx.measureText(label).width;
-  const padH = 6, padV = 4;
-  const lx = labelSide === 'left' ? x - tw / 2 - padH - 12 : x + tw / 2 + padH + 12;
-  const ly = (y1 + y2) / 2;
-
-  ctx.fillStyle = color.replace(')', ',0.1)').replace('rgb(', 'rgba(');
-  ctx.beginPath();
-  ctx.roundRect(lx - tw / 2 - padH, ly - 9 - padV, tw + padH * 2, 18 + padV * 2, 4);
-  ctx.fill();
-  ctx.fillStyle = color;
-  ctx.fillText(label, lx, ly + 5);
-}
-
-function drawForceArrows(
-  ctx: CanvasRenderingContext2D, cx: number, pistonY: number,
-  _P0: number, _pistonMass: number, _S: number, _P1: number,
-) {
-  drawForceArrow(ctx, cx - 24, pistonY - 4, pistonY + 32, COLORS.arrowForce, 'mg', 'left');
-  drawForceArrow(ctx, cx + 24, pistonY - 48, pistonY - 12, COLORS.arrowPressure, 'P₀S', 'right');
-  drawForceArrow(ctx, cx, pistonY + 26, pistonY - 8, COLORS.accentGreen, 'PS', 'left');
-}
-
-function drawHForceArrow(
-  ctx: CanvasRenderingContext2D, x1: number, x2: number, y: number,
-  color: string, label: string, labelAbove: boolean,
-) {
-  const right = x2 > x1;
-  const len = Math.abs(x2 - x1);
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 3.5;
-  ctx.beginPath();
-  ctx.moveTo(x1, y);
-  ctx.lineTo(x2, y);
-  ctx.stroke();
-
-  const headLen = Math.min(10, len * 0.35);
-  ctx.beginPath();
-  ctx.moveTo(x2 + (right ? -headLen : headLen), y - 6);
-  ctx.lineTo(x2, y);
-  ctx.lineTo(x2 + (right ? -headLen : headLen), y + 6);
-  ctx.fillStyle = color;
-  ctx.fill();
-
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  const tw = ctx.measureText(label).width;
-  const padH = 6, padV = 4;
-  const lx = (x1 + x2) / 2;
-  const ly = labelAbove ? y - 18 : y + 18;
-
-  ctx.fillStyle = color.replace(')', ',0.1)').replace('rgb(', 'rgba(');
-  ctx.beginPath();
-  ctx.roundRect(lx - tw / 2 - padH, ly - 9 - padV, tw + padH * 2, 18 + padV * 2, 4);
-  ctx.fill();
-  ctx.fillStyle = color;
-  ctx.fillText(label, lx, ly + 5);
-}
-
-function drawHeatingWaves(
-  ctx: CanvasRenderingContext2D, x: number, y: number, h: number, time: number,
-) {
-  ctx.lineWidth = 2.5;
-  for (let i = 0; i < 3; i++) {
-    const wave_y = y + h * 0.2 + h * 0.3 * i;
-    const alpha = 0.6 + 0.4 * Math.sin(time * 3 + i * 2);
-    ctx.strokeStyle = `rgba(230,81,0,${alpha.toFixed(2)})`;
-    ctx.beginPath();
-    for (let px = 0; px < 40; px++) {
-      const wx = x + px;
-      const wy = wave_y + Math.sin((px + time * 60 + i * 20) * 0.25) * 5;
-      if (px === 0) ctx.moveTo(wx, wy); else ctx.lineTo(wx, wy);
-    }
-    ctx.stroke();
-  }
-}
-
-function renderVerticalSingle(
-  ctx: CanvasRenderingContext2D, canW: number, canH: number,
-  T1: number, T2: number, pistonMass: number,
-  S: number, L1: number, P0: number, anim: number, time: number,
-) {
-  const Sm2 = S * 1e-4;
-  const mgOverS = (pistonMass * g) / Sm2 / 1000;
-  const P1 = P0 + mgOverS;
-  const L2 = L1 * T2 / T1;
-  const animL2 = L1 + (L2 - L1) * anim;
-
-  const cylW = 130;
-  const maxCylH = Math.min(280, canH - 160);
-  const maxL = Math.max(L1, L2, 1) * 1.3;
-  const cylTop = 50;
-  const cylBottom = cylTop + maxCylH;
-
-  function drawCyl(cx: number, gasLen: number, label: string, temp: number, showForces: boolean) {
-    const cylLeft = cx - cylW / 2;
-    const gasPixH = (gasLen / maxL) * maxCylH;
-    const gasTop = cylBottom - gasPixH;
-
-    drawCylinderWalls(ctx, cylLeft, cylTop, cylW, maxCylH);
-
-    // Closed bottom — metallic rim
-    ctx.strokeStyle = COLORS.containerBorder;
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    ctx.moveTo(cylLeft, cylBottom); ctx.lineTo(cylLeft + cylW, cylBottom);
-    ctx.stroke();
-
-    // Heating waves at bottom
-    if (showForces && T2 > T1) {
-      drawHeatingWaves(ctx, cylLeft + cylW / 2 - 20, cylBottom + 6, 24, time);
-    }
-
-    // Gas
-    ctx.fillStyle = COLORS.gasFill;
-    ctx.fillRect(cylLeft + 2, gasTop, cylW - 4, cylBottom - gasTop - 2);
-    drawGasMolecules(ctx, cylLeft + 2, gasTop + 16, cylW - 4, cylBottom - gasTop - 18, 10, time);
-
-    // Piston
-    drawPiston(ctx, cylLeft, gasTop - 16, cylW, false);
-
-    ctx.fillStyle = COLORS.textPrimary;
-    ctx.font = CANVAS_FONTS.annotation;
-    ctx.textAlign = 'center';
-    ctx.fillText(`m=${pistonMass}kg`, cx, gasTop - 22);
-
-    if (showForces) {
-      drawForceArrows(ctx, cx, gasTop, P0, pistonMass, S, P1);
-    }
-
-    // Dimension line
-    ctx.strokeStyle = COLORS.dimensionLine;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(cylLeft + cylW + 14, gasTop);
-    ctx.lineTo(cylLeft + cylW + 14, cylBottom);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.moveTo(cylLeft + cylW + 8, gasTop); ctx.lineTo(cylLeft + cylW + 20, gasTop);
-    ctx.moveTo(cylLeft + cylW + 8, cylBottom); ctx.lineTo(cylLeft + cylW + 20, cylBottom);
-    ctx.stroke();
-    ctx.fillStyle = COLORS.dimensionLine;
-    ctx.font = CANVAS_FONTS.label;
-    ctx.textAlign = 'left';
-    ctx.fillText(`${gasLen.toFixed(1)}cm`, cylLeft + cylW + 22, (gasTop + cylBottom) / 2 + 5);
-
-    // Labels below
-    ctx.fillStyle = COLORS.textPrimary;
-    ctx.font = CANVAS_FONTS.title;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, cx, cylBottom + 26);
-    ctx.font = CANVAS_FONTS.annotation;
-    ctx.fillStyle = COLORS.textSecondary;
-    ctx.fillText(`T = ${temp.toFixed(0)} K`, cx, cylBottom + 44);
-    ctx.fillText(`P = ${P1.toFixed(2)} kPa`, cx, cylBottom + 60);
-    ctx.fillText(`V = ${(gasLen * S).toFixed(1)} cm³`, cx, cylBottom + 76);
-  }
-
-  drawCyl(canW * 0.22, L1, '初始状态', T1, true);
-  drawCyl(canW * 0.55, animL2, T2 > T1 ? '加热后' : '冷却后', T1 + (T2 - T1) * anim, false);
-
-  if (T2 !== T1) {
-    drawTransitionArrow(ctx, canW * 0.35, canW * 0.42, cylTop + maxCylH / 2, T2 > T1 ? '加热' : '冷却');
-  }
-}
-
-function renderHorizontalSingle(
-  ctx: CanvasRenderingContext2D, canW: number, _canH: number,
-  T1: number, T2: number, _pistonMass: number,
-  S: number, L1: number, P0: number, anim: number, time: number,
-) {
-  const L2 = L1 * T2 / T1;
-  const animL2 = L1 + (L2 - L1) * anim;
-
-  const maxCylW = Math.min(300, (canW - 100) / 2);
-  const cylH = 110;
-  const maxL = Math.max(L1, L2, 1) * 1.3;
-
-  function drawHCyl(cx: number, gasLen: number, label: string, temp: number, showForces: boolean) {
-    const hLeft = cx - maxCylW / 2;
-    const hTop = 80;
-    const hBot = hTop + cylH;
-    const gasPixW = (gasLen / maxL) * maxCylW;
-
-    drawCylinderWalls(ctx, hLeft, hTop, maxCylW, cylH);
-
-    // Closed left wall — metallic
-    ctx.strokeStyle = COLORS.containerBorder;
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    ctx.moveTo(hLeft, hTop); ctx.lineTo(hLeft, hBot);
-    ctx.stroke();
-
-    // Heating waves
-    if (T2 > T1) {
-      drawHeatingWaves(ctx, hLeft - 42, hTop + 12, cylH - 24, time);
-    }
-
-    // Gas
-    ctx.fillStyle = COLORS.gasFill;
-    ctx.fillRect(hLeft + 2, hTop + 2, gasPixW - 2, cylH - 4);
-    drawGasMolecules(ctx, hLeft + 4, hTop + 4, gasPixW - 8, cylH - 8, 10, time);
-
-    // Piston
-    drawPiston(ctx, hLeft + gasPixW, hTop, cylH, true);
-
-    // Horizontal force arrows on the piston
-    if (showForces) {
-      const pistonCx = hLeft + gasPixW + 8;
-      const pistonMidY = hTop + cylH / 2;
-      drawHForceArrow(ctx, pistonCx - 40, pistonCx - 4, pistonMidY - 16, COLORS.accentGreen, 'PS', true);
-      drawHForceArrow(ctx, pistonCx + 40, pistonCx + 4, pistonMidY + 16, COLORS.arrowPressure, 'P₀S', false);
-    }
-
-    // Labels
-    ctx.fillStyle = COLORS.textPrimary;
-    ctx.font = CANVAS_FONTS.title;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, cx, hBot + 26);
-    ctx.font = CANVAS_FONTS.annotation;
-    ctx.fillStyle = COLORS.textSecondary;
-    ctx.fillText(`T=${temp.toFixed(0)}K  P=${P0.toFixed(1)}kPa  L=${gasLen.toFixed(1)}cm`, cx, hBot + 44);
-    ctx.fillText(`V=${(gasLen * S).toFixed(1)} cm³`, cx, hBot + 60);
-  }
-
-  drawHCyl(canW * 0.22, L1, '初始状态', T1, true);
-  drawHCyl(canW * 0.58, animL2, T2 > T1 ? '加热后' : '冷却后', T1 + (T2 - T1) * anim, false);
-}
-
-function renderDualPiston(
-  ctx: CanvasRenderingContext2D, canW: number, _canH: number,
-  params: Record<string, number | string | boolean>, anim: number, time: number,
-) {
-  const T1 = Number(params.pcT1) || 300;
-  const T2 = Number(params.pcT2) || 450;
-  const S = Number(params.pcArea) || 10;
-  const L1 = Number(params.pcL1) || 20;
-  const mLeft = Number(params.pcPistonMassLeft) || 1.0;
-  const mRight = Number(params.pcPistonMassRight) || 1.0;
-  const heatPos = String(params.pcHeatPosition) || '中间';
-
-  const result = solvePC('双活塞', '', T1, T2, 0, S, L1, Number(params.pcPAtm) || 101, params);
-  const animLLeft = L1 + (result.L2Left - L1) * anim;
-  const animLRight = L1 + (result.L2Right - L1) * anim;
-
-  const frameW = Math.min(300, (canW - 60) / 2);
-  const frameH = 110;
-  const pistonW = 16;
-  const maxHL = Math.max(result.L2Left, result.L2Right, L1, 1) * 1.3;
-
-  function drawDualState(
-    cx: number, leftLen: number, rightLen: number,
-    label: string, leftTemp: number, rightTemp: number, showForces: boolean,
-  ) {
-    const gasPixLeft = (leftLen / maxHL) * (frameW / 2 - pistonW);
-    const gasPixRight = (rightLen / maxHL) * (frameW / 2 - pistonW);
-    const left = cx - frameW / 2;
-    const top = 80;
-    const midX = left + frameW / 2;
-
-    drawCylinderWalls(ctx, left, top, frameW, frameH);
-
-    // Central divider
-    ctx.strokeStyle = COLORS.containerBorder;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(midX, top + 2);
-    ctx.lineTo(midX, top + frameH - 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Left gas
-    ctx.fillStyle = COLORS.gasFill;
-    ctx.fillRect(midX - gasPixLeft, top + 2, gasPixLeft, frameH - 4);
-    drawGasMolecules(ctx, midX - gasPixLeft + 2, top + 4, gasPixLeft - 4, frameH - 8, 6, time);
-
-    // Right gas
-    ctx.fillStyle = COLORS.gasFill;
-    ctx.fillRect(midX, top + 2, gasPixRight, frameH - 4);
-    drawGasMolecules(ctx, midX + 2, top + 4, gasPixRight - 4, frameH - 8, 6, time + 100);
-
-    // Left piston
-    const lpx = midX - gasPixLeft - pistonW;
-    const lGrad = ctx.createLinearGradient(lpx, top, lpx + pistonW, top);
-    lGrad.addColorStop(0, '#4E342E');
-    lGrad.addColorStop(0.3, COLORS.piston);
-    lGrad.addColorStop(0.7, '#8D6E63');
-    lGrad.addColorStop(1, '#A1887F');
-    ctx.fillStyle = lGrad;
-    ctx.fillRect(lpx, top + 3, pistonW, frameH - 6);
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(lpx + pistonW - 2, top + 6);
-    ctx.lineTo(lpx + pistonW - 2, top + frameH - 6);
-    ctx.stroke();
-
-    // Right piston
-    const rpx = midX + gasPixRight;
-    const rGrad = ctx.createLinearGradient(rpx, top, rpx + pistonW, top);
-    rGrad.addColorStop(0, '#A1887F');
-    rGrad.addColorStop(0.3, '#8D6E63');
-    rGrad.addColorStop(0.7, COLORS.piston);
-    rGrad.addColorStop(1, '#4E342E');
-    ctx.fillStyle = rGrad;
-    ctx.fillRect(rpx, top + 3, pistonW, frameH - 6);
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(rpx + 2, top + 6);
-    ctx.lineTo(rpx + 2, top + frameH - 6);
-    ctx.stroke();
-
-    // Heating waves on the correct side
-    if (T2 > T1) {
-      if (heatPos === '左' || heatPos === '中间') {
-        drawHeatingWaves(ctx, left - 42, top + 12, frameH - 24, time);
-      }
-      if (heatPos === '右' || heatPos === '中间') {
-        drawHeatingWaves(ctx, left + frameW + 4, top + 12, frameH - 24, time);
-      }
-    }
-
-    // Force arrows on initial state
-    if (showForces) {
-      const midY = top + frameH / 2;
-      const lpCx = lpx + pistonW / 2;
-      drawHForceArrow(ctx, lpCx - 36, lpCx - 2, midY - 14, COLORS.arrowPressure, 'P₀S', true);
-      drawHForceArrow(ctx, lpCx + 2, lpCx + 30, midY + 14, COLORS.accentGreen, 'PS', false);
-      const rpCx = rpx + pistonW / 2;
-      drawHForceArrow(ctx, rpCx - 30, rpCx - 2, midY - 14, COLORS.accentGreen, 'PS', true);
-      drawHForceArrow(ctx, rpCx + 2, rpCx + 36, midY + 14, COLORS.arrowPressure, 'P₀S', false);
-    }
-
-    // Mass labels
-    ctx.fillStyle = COLORS.textSecondary;
-    ctx.font = CANVAS_FONTS.annotation;
-    ctx.textAlign = 'center';
-    ctx.fillText(`M₁=${mLeft}kg`, lpx + pistonW / 2, top - 10);
-    ctx.fillText(`M₂=${mRight}kg`, rpx + pistonW / 2, top - 10);
-
-    // Temperature labels per side
-    ctx.fillStyle = COLORS.textDim;
-    ctx.font = CANVAS_FONTS.small;
-    ctx.fillText(`${leftTemp.toFixed(0)}K`, midX - gasPixLeft / 2, top + frameH - 8);
-    ctx.fillText(`${rightTemp.toFixed(0)}K`, midX + gasPixRight / 2, top + frameH - 8);
-
-    ctx.fillStyle = COLORS.textPrimary;
-    ctx.font = CANVAS_FONTS.title;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, cx, top + frameH + 26);
-    ctx.font = CANVAS_FONTS.annotation;
-    ctx.fillStyle = COLORS.textSecondary;
-    const totalL = leftLen + rightLen;
-    ctx.fillText(`L左=${leftLen.toFixed(1)}  L右=${rightLen.toFixed(1)}  V=${(totalL*S).toFixed(1)}cm³`, cx, top + frameH + 44);
-  }
-
-  const leftTempInit = T1, rightTempInit = T1;
-  const leftTempFinal = (heatPos === '左' || heatPos === '中间') ? T2 : T1;
-  const rightTempFinal = (heatPos === '右' || heatPos === '中间') ? T2 : T1;
-
-  drawDualState(canW * 0.22, L1, L1, '初始状态', leftTempInit, rightTempInit, true);
-  drawDualState(
-    canW * 0.58, animLLeft, animLRight,
-    T2 > T1 ? '加热后' : '冷却后',
-    leftTempInit + (leftTempFinal - leftTempInit) * anim,
-    rightTempInit + (rightTempFinal - rightTempInit) * anim,
-    false,
-  );
-
-  if (T2 !== T1) {
-    drawTransitionArrow(ctx, canW * 0.37, canW * 0.43, 122, T2 > T1 ? '加热' : '冷却');
-  }
-}
-
-function drawTransitionArrow(
-  ctx: CanvasRenderingContext2D, x1: number, x2: number, y: number, label: string,
-) {
-  ctx.strokeStyle = COLORS.arrowHeating;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(x1, y); ctx.lineTo(x2, y);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x2 - 9, y - 6); ctx.lineTo(x2, y); ctx.lineTo(x2 - 9, y + 6);
-  ctx.fillStyle = COLORS.arrowHeating;
-  ctx.fill();
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = COLORS.arrowHeating;
-  ctx.fillText(label, (x1 + x2) / 2, y - 12);
-}
-
-function drawThermometer(
-  ctx: CanvasRenderingContext2D, x: number, y: number,
-  T1: number, T2: number, anim: number,
-) {
-  const thermW = 20;
-  const thermH = 100;
-  const bulbR = 12;
-  const currentT = T1 + (T2 - T1) * anim;
-  const tMin = 200, tMax = 600;
-  const fill = clamp((currentT - tMin) / (tMax - tMin), 0.05, 0.95);
-
-  ctx.strokeStyle = COLORS.containerBorder;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(x + thermW / 2, y + thermH + bulbR, bulbR, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.strokeRect(x + 2, y, thermW - 4, thermH);
-
-  // Scale marks
-  ctx.strokeStyle = COLORS.textDim;
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const my = y + thermH - 4 - (thermH - 8) * (i / 4);
-    ctx.beginPath();
-    ctx.moveTo(x + thermW - 4, my);
-    ctx.lineTo(x + thermW + 4, my);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = '#E53935';
-  ctx.beginPath();
-  ctx.arc(x + thermW / 2, y + thermH + bulbR, bulbR - 2, 0, Math.PI * 2);
-  ctx.fill();
-
-  const fillH = fill * (thermH - 4);
-  ctx.fillStyle = '#E53935';
-  ctx.fillRect(x + 5, y + thermH - 2 - fillH, thermW - 10, fillH + 2);
-
-  ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  ctx.fillText(`${currentT.toFixed(0)}K`, x + thermW / 2, y - 8);
-}
-
+// ── Calc steps ────────────────────────────────────────────────────────────────
 function buildCalcSteps(
   mode: string, orientation: string,
   T1: number, T2: number, pistonMass: number,
@@ -696,92 +422,50 @@ function buildCalcSteps(
   params: Record<string, number | string | boolean>,
 ): CalcStep[] {
   const steps: CalcStep[] = [];
-  const Sm2 = S * 1e-4;
+  const r = solvePC(mode, orientation, T1, T2, pistonMass, S, L1, P0, params);
 
-  if (mode === '双活塞') {
-    const heatPos = String(params.pcHeatPosition) || '中间';
-    steps.push({ text: '双活塞模型' });
-    steps.push({ text: `外界压强 P₀ = ${P0} kPa` });
-    steps.push({ text: `T₁ = ${T1} K, T₂ = ${T2} K` });
-    steps.push({ text: `每侧初始气柱 L₁ = ${L1} cm, S = ${S} cm²` });
+  if (mode === '中间活塞') {
+    const heatPos = String(params.pcHeatPosition) || '左';
+    steps.push({ text: '中间活塞 · 两段气体被自由活塞耦合' });
+    steps.push({ text: `初始: 两段各 L₁=${L1}cm, 均压 P₁=${P0}kPa` });
     steps.push({ text: `加热位置: ${heatPos}` });
     steps.push({ text: '' });
-    steps.push({ text: '各活塞自由移动，外侧大气压 P₀' });
-    steps.push({ text: '→ 各侧独立等压变化' });
+    steps.push({ text: '① 压强平衡(水平): P左 = P右 = P₂' });
+    steps.push({ text: '② 总长守恒: L左+L右 = 2L₁' });
+    steps.push({ text: '③ 各段状态方程 PL/T = 常数' });
     steps.push({ text: '' });
-
-    let L2Left: number, L2Right: number;
-    if (heatPos === '左') {
-      steps.push({ text: '左侧加热: T₁→T₂，等压膨胀' });
-      L2Left = L1 * T2 / T1;
-      steps.push({ text: `L左₂ = L₁ × T₂/T₁ = ${L1}×${T2}/${T1}` });
-      steps.push({ text: `L左₂ = ${L2Left.toFixed(2)} cm`, highlight: true });
-      steps.push({ text: '' });
-      L2Right = L1;
-      steps.push({ text: '右侧未加热: 温度不变 T₁' });
-      steps.push({ text: `L右₂ = L₁ = ${L1} cm` });
-    } else if (heatPos === '右') {
-      L2Left = L1;
-      steps.push({ text: '左侧未加热: 温度不变 T₁' });
-      steps.push({ text: `L左₂ = L₁ = ${L1} cm` });
-      steps.push({ text: '' });
-      steps.push({ text: '右侧加热: T₁→T₂，等压膨胀' });
-      L2Right = L1 * T2 / T1;
-      steps.push({ text: `L右₂ = L₁ × T₂/T₁ = ${L1}×${T2}/${T1}` });
-      steps.push({ text: `L右₂ = ${L2Right.toFixed(2)} cm`, highlight: true });
+    if (heatPos === '两侧') {
+      steps.push({ text: '两侧同热 → 对称, 活塞不动' });
+      steps.push({ text: `P₂ = P₁·T₂/T₁ = ${r.P2.toFixed(2)} kPa`, highlight: true });
+      steps.push({ text: `L左=L右=L₁=${L1} cm` });
     } else {
-      L2Left = L1 * T2 / T1;
-      L2Right = L2Left;
-      steps.push({ text: '两侧同时加热: T₁→T₂' });
-      steps.push({ text: `L左₂ = L右₂ = L₁ × T₂/T₁ = ${L1}×${T2}/${T1}` });
-      steps.push({ text: `     = ${L2Left.toFixed(2)} cm`, highlight: true });
+      steps.push({ text: `联立解得 P₂ = P₁(T₁+T₂)/(2T₁)` });
+      steps.push({ text: `  = ${P0}×(${T1}+${T2})/(2×${T1})` });
+      steps.push({ text: `  = ${r.P2.toFixed(2)} kPa`, highlight: true });
+      steps.push({ text: '' });
+      steps.push({ text: `L热 = 2L₁T₂/(T₁+T₂) = ${Math.max(r.L2Left, r.L2Right).toFixed(2)} cm`, highlight: true });
+      steps.push({ text: `L冷 = 2L₁T₁/(T₁+T₂) = ${Math.min(r.L2Left, r.L2Right).toFixed(2)} cm`, highlight: true });
     }
-
     steps.push({ text: '' });
-    const V1 = 2 * L1 * S;
-    const V2 = (L2Left + L2Right) * S;
-    steps.push({ text: `V₂ = (L左₂+L右₂)×S = (${L2Left.toFixed(2)}+${L2Right.toFixed(2)})×${S}` });
-    steps.push({ text: `V₂ = ${V2.toFixed(1)} cm³`, highlight: true });
-    steps.push({ text: '' });
-    steps.push({ text: `验证: P₀V₁/T₁ = ${(P0*V1/T1).toFixed(4)}` });
-    steps.push({ text: `各侧独立守恒 (等压过程 PV/T = const)` });
+    steps.push({ text: '验证: 两侧压强相等 ✓' });
     return steps;
   }
 
   steps.push({ text: `单活塞 · ${orientation}放置` });
-  steps.push({ text: `P₀ = ${P0} kPa, m = ${pistonMass} kg, S = ${S} cm²` });
+  steps.push({ text: `P₀=${P0}kPa, m=${pistonMass}kg, S=${S}cm²` });
   steps.push({ text: '' });
-
-  let P1: number;
   if (orientation === '竖直') {
-    const mgOverS = (pistonMass * g) / Sm2 / 1000;
-    P1 = P0 + mgOverS;
-    steps.push({ text: `P = P₀ + mg/S` });
+    const mgOverS = (pistonMass * g) / (S * 1e-4) / 1000;
+    steps.push({ text: 'P = P₀ + mg/S' });
     steps.push({ text: `  = ${P0} + ${pistonMass}×${g}/(${S}×10⁻⁴)/1000` });
-    steps.push({ text: `  = ${P0} + ${mgOverS.toFixed(2)} = ${P1.toFixed(2)} kPa` });
+    steps.push({ text: `  = ${P0} + ${mgOverS.toFixed(2)} = ${r.P1.toFixed(2)} kPa`, highlight: true });
   } else {
-    P1 = P0;
     steps.push({ text: `P = P₀ = ${P0} kPa (水平, 重力不影响)` });
   }
-
   steps.push({ text: '' });
-  steps.push({ text: `T₁ = ${T1} K, T₂ = ${T2} K` });
-  steps.push({ text: `L₁ = ${L1} cm` });
-  steps.push({ text: '' });
-  steps.push({ text: '活塞可自由移动 → 等压过程' });
-  steps.push({ text: `P₁ = P₂ = ${P1.toFixed(2)} kPa` });
-  steps.push({ text: '' });
-  steps.push({ text: 'L₂ = L₁ × T₂ / T₁' });
-  const L2 = L1 * T2 / T1;
-  const V1 = L1 * S;
-  const V2 = L2 * S;
-  steps.push({ text: `   = ${L1} × ${T2} / ${T1}` });
-  steps.push({ text: `L₂ = ${L2.toFixed(2)} cm`, highlight: true });
-  steps.push({ text: `V₂ = L₂·S = ${V2.toFixed(1)} cm³` });
-
-  steps.push({ text: '' });
-  steps.push({ text: `验证: PV₁/T₁ = ${(P1*V1/T1).toFixed(4)}` });
-  steps.push({ text: `      PV₂/T₂ = ${(P1*V2/T2).toFixed(4)}` });
-
+  steps.push({ text: '活塞自由 → 等压过程' });
+  steps.push({ text: `L₂ = L₁·T₂/T₁ = ${L1}×${T2}/${T1}` });
+  steps.push({ text: `   = ${r.L2.toFixed(2)} cm`, highlight: true });
+  steps.push({ text: `V₂ = L₂·S = ${r.V2.toFixed(1)} cm³`, highlight: true });
   return steps;
 }

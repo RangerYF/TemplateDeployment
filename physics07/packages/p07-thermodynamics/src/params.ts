@@ -22,7 +22,7 @@ export const paramDefs = defineParams([
     scenes: ['三种气体实验'] },
   { key: 'gasT', label: '温度 T', unit: 'K', min: 100, max: 1000, step: 10, default: 300,
     scenes: ['三种气体实验'] },
-  { key: 'gasV', label: '体积 V', unit: 'L', min: 0.5, max: 50, step: 0.5, default: 2.0,
+  { key: 'gasV', label: '体积 V', unit: 'L', min: 0.5, max: 12, step: 0.5, default: 2.0,
     scenes: ['三种气体实验'] },
   { key: 'gasP', label: '压强 P', unit: 'kPa', min: 10, max: 1000, step: 10, default: 100,
     scenes: ['三种气体实验'] },
@@ -48,7 +48,7 @@ export const paramDefs = defineParams([
 
   // --- Piston-Cylinder ---
   { key: 'pcMode', label: '模型类型', type: 'select', default: '单活塞',
-    options: ['单活塞', '双活塞'],
+    options: ['单活塞', '中间活塞'],
     scenes: ['气缸/双活塞模型'] },
   { key: 'cylinderOrientation', label: '气缸方向', type: 'select', default: '竖直',
     options: ['竖直', '水平'],
@@ -59,12 +59,8 @@ export const paramDefs = defineParams([
     scenes: ['气缸/双活塞模型'] },
   { key: 'pcPistonMass', label: '活塞质量 m', unit: 'kg', min: 0.1, max: 10, step: 0.1, default: 1.0,
     scenes: ['气缸/双活塞模型'] },
-  { key: 'pcPistonMassLeft', label: '左活塞质量 M₁', unit: 'kg', min: 0.1, max: 10, step: 0.1, default: 1.0,
-    scenes: ['气缸/双活塞模型'] },
-  { key: 'pcPistonMassRight', label: '右活塞质量 M₂', unit: 'kg', min: 0.1, max: 10, step: 0.1, default: 1.0,
-    scenes: ['气缸/双活塞模型'] },
-  { key: 'pcHeatPosition', label: '加热位置', type: 'select', default: '中间',
-    options: ['左', '中间', '右'],
+  { key: 'pcHeatPosition', label: '加热位置', type: 'select', default: '左',
+    options: ['左', '右', '两侧'],
     scenes: ['气缸/双活塞模型'] },
   { key: 'pcArea', label: '截面积 S', unit: 'cm²', min: 1, max: 50, step: 1, default: 10,
     scenes: ['气缸/双活塞模型'] },
@@ -85,10 +81,12 @@ export const paramDefs = defineParams([
 ]);
 
 export const sceneParamMap: Record<string, string[]> = {
-  '气体分子微观模拟': ['temperature', 'numParticles', 'containerW', 'containerH', 'showVelocity', 'showDistribution'],
-  '三种气体实验': ['gasFocus', 'gasT', 'gasV', 'gasP'],
-  '液柱密封模型': ['tubeOrientation', 'lcT1', 'lcT2', 'lcL1', 'lcH', 'lcAngle', 'lcArea', 'lcPAtm'],
-  '气缸/双活塞模型': ['pcMode', 'cylinderOrientation', 'pcT1', 'pcT2', 'pcPistonMass', 'pcPistonMassLeft', 'pcPistonMassRight', 'pcHeatPosition', 'pcArea', 'pcL1', 'pcPAtm'],
+  // 显示选项 (showVelocity/showDistribution) 由 sceneConfig.displayToggles 的开关统一承载，
+  // 不再在参数区重复出现复选框。
+  '气体分子微观模拟': ['temperature', 'numParticles', 'containerW', 'containerH'],
+  '三种气体实验': ['gasT', 'gasV'],
+  '液柱密封模型': ['lcT1', 'lcT2', 'lcL1', 'lcH', 'lcAngle', 'lcPAtm'],
+  '气缸/双活塞模型': ['pcT1', 'pcT2', 'pcPistonMass', 'pcHeatPosition', 'pcArea', 'pcL1', 'pcPAtm'],
   '布朗运动': ['brownTemperature', 'brownNumParticles', 'brownRadius', 'trailInterval'],
 };
 

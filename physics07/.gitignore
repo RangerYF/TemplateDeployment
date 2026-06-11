@@ -1,3 +1,16 @@
 node_modules/
 packages/*/node_modules/
+dist/
+
+# tsc build artifacts that must never live next to .ts source
+# (Vite resolves .js before .ts, so stray compiled .js shadow the real source)
+packages/**/src/**/*.js
+packages/**/src/**/*.js.map
+packages/**/src/**/*.d.ts
+packages/**/src/**/*.d.ts.map
+packages/*/vite.config.js
+packages/*/vite.config.js.map
+packages/*/vite.config.d.ts
+packages/*/vite.config.d.ts.map
+*.tsbuildinfo
 

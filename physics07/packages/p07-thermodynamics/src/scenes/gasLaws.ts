@@ -1,5 +1,5 @@
 import type { ThermoState, SceneModule, RenderContext, StateDisplayData } from '../types';
-import { COLORS, CANVAS_FONTS } from '../theme';
+import { COLORS, CANVAS_FONTS, surface, lineInk, shadowInk, gridLine, withAlpha } from '../theme';
 import { clamp, createSeededRandom } from '../params';
 import { drawBallAtScreen } from '../renderHelpers';
 
@@ -24,23 +24,44 @@ interface GasLawProcess {
   relationHint: string;
 }
 
-function buildProcesses(T: number, V: number, P: number): GasLawProcess[] {
-  const nR = P * V / T;
-  const pvConst = nR * T;
-  const vtConst = nR / P;
-  const ptConst = nR / V;
+// Fixed reference amount of gas (nR = pV/T) and the three fixed "held"
+// constants, all consistent at the canonical state p=100 kPa, V=2.0 L, T=300 K.
+//
+// Control mapping (each driver affects ONLY its process — no cross-coupling):
+//   温度 T 滑块 (gasT)  → drives 等压 (V=nR·T/p₀) AND 等容 (p=nR·T/V₀)   [一次加热，两种约束]
+//   体积 V 滑块 (gasV)  → drives 等温 (p=nR·T₀/V)                          [压缩/膨胀]
+//
+// Each process's held constant is a FIXED reference (T₀/p₀/V₀), so its invariant
+// (pV / V·T⁻¹ / p·T⁻¹) is genuinely constant and its curve never rescales —
+// the current-state dot simply slides along a fixed curve.
+const T_ISO_HELD = 300;       // 等温线温度（固定）
+const P_ISOBAR_HELD = 100;    // 等压恒定压强（固定）
+const V_ISOCHOR_HELD = 2.0;   // 等容恒定容积（固定）
+const NR_REF = (P_ISOBAR_HELD * V_ISOCHOR_HELD) / T_ISO_HELD; // ≈ 0.6667
+
+function buildProcesses(gasT: number, gasV: number): GasLawProcess[] {
+  const nR = NR_REF;
+  // 等温: hold T₀, control V (gasV), derive p
+  const isoP = nR * T_ISO_HELD / gasV;
+  const pvConst = nR * T_ISO_HELD;          // fixed → 200
+  // 等压: hold p₀, control T (gasT), derive V
+  const isobV = nR * gasT / P_ISOBAR_HELD;
+  const vtConst = nR / P_ISOBAR_HELD;       // fixed
+  // 等容: hold V₀, control T (gasT), derive p
+  const isocP = nR * gasT / V_ISOCHOR_HELD;
+  const ptConst = nR / V_ISOCHOR_HELD;      // fixed
   return [
     {
       key: 'isothermal',
       title: '等温过程',
-      subtitle: '控制 T 不变',
+      subtitle: '拖体积 V · T 恒定',
       graphTitle: 'p - V 图像',
       color: COLORS.isothermalLine,
-      T,
-      V,
-      P: nR * T / V,
+      T: T_ISO_HELD,
+      V: gasV,
+      P: isoP,
       law: `pV = ${pvConst.toFixed(1)}`,
-      invariant: `T = ${T.toFixed(0)} K`,
+      invariant: `T = ${T_ISO_HELD.toFixed(0)} K`,
       invariantLabel: '等温 pV',
       invariantValue: pvConst,
       xLabel: 'V',
@@ -50,14 +71,14 @@ function buildProcesses(T: number, V: number, P: number): GasLawProcess[] {
     {
       key: 'isobaric',
       title: '等压过程',
-      subtitle: '控制 p 不变',
+      subtitle: '拖温度 T · p 恒定',
       graphTitle: 'V - T 图像',
       color: COLORS.isobaricLine,
-      T,
-      V: nR * T / P,
-      P,
+      T: gasT,
+      V: isobV,
+      P: P_ISOBAR_HELD,
       law: `V/T = ${vtConst.toFixed(4)}`,
-      invariant: `p = ${P.toFixed(0)} kPa`,
+      invariant: `p = ${P_ISOBAR_HELD.toFixed(0)} kPa`,
       invariantLabel: '等压 V/T',
       invariantValue: vtConst,
       xLabel: 'T',
@@ -67,14 +88,14 @@ function buildProcesses(T: number, V: number, P: number): GasLawProcess[] {
     {
       key: 'isochoric',
       title: '等容过程',
-      subtitle: '控制 V 不变',
+      subtitle: '拖温度 T · V 恒定',
       graphTitle: 'p - T 图像',
       color: COLORS.isochoricLine,
-      T,
-      V,
-      P: nR * T / V,
+      T: gasT,
+      V: V_ISOCHOR_HELD,
+      P: isocP,
       law: `p/T = ${ptConst.toFixed(3)}`,
-      invariant: `V = ${V.toFixed(1)} L`,
+      invariant: `V = ${V_ISOCHOR_HELD.toFixed(1)} L`,
       invariantLabel: '等容 p/T',
       invariantValue: ptConst,
       xLabel: 'T',
@@ -112,12 +133,11 @@ export const gasLawsScene: SceneModule = {
     const ctx = cm.ctx;
     cm.clear(COLORS.canvasBg);
 
-    const T = Number(params.gasT) || 300;
-    const V = Number(params.gasV) || 2.0;
-    const P = Number(params.gasP) || 100;
+    const gasT = Number(params.gasT) || 300;
+    const gasV = Number(params.gasV) || 2.0;
     const focus = String(params.gasFocus || '三法对比') as FocusMode;
     const focusKey = focusToKey(focus);
-    const processes = buildProcesses(T, V, P);
+    const processes = buildProcesses(gasT, gasV);
 
     const canW = rctx.canvasWidth;
     const canH = rctx.canvasHeight;
@@ -158,19 +178,26 @@ export const gasLawsScene: SceneModule = {
 
       // Container with drop shadow
       ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.08)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetY = 3;
+      ctx.shadowColor = shadowInk(0.12);
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 4;
       ctx.fillStyle = COLORS.canvasBg;
       ctx.fillRect(left, cylTop, colWidth, cylHeight);
       ctx.restore();
 
-      // Container inner fill gradient
-      const fillGrad = ctx.createLinearGradient(left, cylTop, left, cylTop + cylHeight);
-      fillGrad.addColorStop(0, 'rgba(144,202,249,0.03)');
-      fillGrad.addColorStop(1, 'rgba(144,202,249,0.08)');
-      ctx.fillStyle = fillGrad;
+      // Cylindrical curvature shade (2.5D): darker at the two glass edges,
+      // brighter through the centre — implies a round tube without distorting
+      // the rectangular volume reading.
+      const curveGrad = ctx.createLinearGradient(left, 0, left + colWidth, 0);
+      curveGrad.addColorStop(0, withAlpha(COLORS.moleculeCool, 0.14));
+      curveGrad.addColorStop(0.5, surface(0.05));
+      curveGrad.addColorStop(1, withAlpha(COLORS.moleculeCool, 0.14));
+      ctx.fillStyle = curveGrad;
       ctx.fillRect(left, cylTop, colWidth, cylHeight);
+
+      // Glass specular highlight strip (left-of-centre)
+      ctx.fillStyle = surface(0.5);
+      ctx.fillRect(left + colWidth * 0.26, cylTop + 2, Math.max(2, colWidth * 0.05), cylHeight - 4);
 
       // Container border — thicker
       ctx.strokeStyle = COLORS.containerBorder;
@@ -224,14 +251,26 @@ export const gasLawsScene: SceneModule = {
         const gLeft = left;
         const gBottom = graphTop + graphHeight;
 
-        ctx.fillStyle = 'rgba(0,0,0,0.015)';
+        ctx.fillStyle = surface(0.05);
         ctx.fillRect(gLeft, graphTop, colWidth, graphHeight);
-        ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        ctx.strokeStyle = lineInk(0.14);
         ctx.lineWidth = 1;
         ctx.strokeRect(gLeft, graphTop, colWidth, graphHeight);
 
+        // Interior reference gridlines (quarters) for readability
+        ctx.strokeStyle = gridLine();
+        ctx.lineWidth = 1;
+        for (let q = 1; q <= 3; q++) {
+          const gx = gLeft + (colWidth * q) / 4;
+          const gy = graphTop + (graphHeight * q) / 4;
+          ctx.beginPath();
+          ctx.moveTo(gx, graphTop); ctx.lineTo(gx, gBottom);
+          ctx.moveTo(gLeft, gy); ctx.lineTo(gLeft + colWidth, gy);
+          ctx.stroke();
+        }
+
         // Axes
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.strokeStyle = lineInk(0.4);
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(gLeft, gBottom); ctx.lineTo(gLeft + colWidth, gBottom);
@@ -254,6 +293,7 @@ export const gasLawsScene: SceneModule = {
           }
           ctx.stroke();
           drawAxisLabels(ctx, gLeft, gBottom, colWidth, 'V', 'p');
+          drawAxisTicks(ctx, gLeft, gBottom, colWidth, graphHeight, vMin, vMax, 0, proc.invariantValue / vMin * 1.1, 'L', 'kPa');
         } else if (proc.key === 'isobaric') {
           const tMax = 1500;
           const vMaxGraph = proc.invariantValue * tMax * 1.1;
@@ -262,6 +302,7 @@ export const gasLawsScene: SceneModule = {
           ctx.lineTo(gLeft + colWidth, gBottom - (proc.invariantValue * tMax / vMaxGraph) * graphHeight);
           ctx.stroke();
           drawAxisLabels(ctx, gLeft, gBottom, colWidth, 'T', 'V');
+          drawAxisTicks(ctx, gLeft, gBottom, colWidth, graphHeight, 0, tMax, 0, vMaxGraph, 'K', 'L');
         } else {
           const tMax = 1500;
           const pMaxGraph = proc.invariantValue * tMax * 1.1;
@@ -270,6 +311,7 @@ export const gasLawsScene: SceneModule = {
           ctx.lineTo(gLeft + colWidth, gBottom - (proc.invariantValue * tMax / pMaxGraph) * graphHeight);
           ctx.stroke();
           drawAxisLabels(ctx, gLeft, gBottom, colWidth, 'T', 'p');
+          drawAxisTicks(ctx, gLeft, gBottom, colWidth, graphHeight, 0, tMax, 0, pMaxGraph, 'K', 'kPa');
         }
 
         // Current state dot — larger with glow
@@ -292,7 +334,7 @@ export const gasLawsScene: SceneModule = {
         ctx.fillStyle = COLORS.arrowHeating;
         ctx.fill();
         ctx.restore();
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = surface(1);
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(dotX, dotY, 7, 0, Math.PI * 2);
@@ -307,20 +349,24 @@ export const gasLawsScene: SceneModule = {
   },
 
   getStateDisplay(params): StateDisplayData {
-    const T = Number(params.gasT) || 300;
-    const V = Number(params.gasV) || 2.0;
-    const P = Number(params.gasP) || 100;
+    const gasT = Number(params.gasT) || 300;
+    const gasV = Number(params.gasV) || 2.0;
     const focus = String(params.gasFocus || '三法对比');
-    const processes = buildProcesses(T, V, P);
+    const focusKey = focusToKey(focus);
+    const processes = buildProcesses(gasT, gasV);
+    // Show the focused process's DERIVED state (not the raw sliders), so the
+    // live panel matches the cylinder and pV/T genuinely equals nR (constant).
+    // In compare mode fall back to the isothermal column as a representative.
+    const shown = (focusKey && processes.find(p => p.key === focusKey)) || processes[0];
     return {
-      p: P,
-      V,
-      T,
-      pvOverT: P * V / T,
+      p: shown.P,
+      V: shown.V,
+      T: shown.T,
+      pvOverT: shown.P * shown.V / shown.T,
       customEntries: processes.map(proc => ({
         label: proc.invariantLabel,
         value: proc.invariantValue.toFixed(proc.key === 'isothermal' ? 1 : 4),
-        highlight: focusToKey(focus) == null || focusToKey(focus) === proc.key,
+        highlight: focusKey == null || focusKey === proc.key,
       })),
     };
   },
@@ -328,12 +374,12 @@ export const gasLawsScene: SceneModule = {
 
 function drawLabBackdrop(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const grad = ctx.createLinearGradient(0, 0, width, height);
-  grad.addColorStop(0, 'rgba(239,246,255,0.92)');
-  grad.addColorStop(0.48, '#FFFFFF');
-  grad.addColorStop(1, 'rgba(240,253,244,0.88)');
+  grad.addColorStop(0, withAlpha(COLORS.moleculeCool, 0.08));
+  grad.addColorStop(0.48, surface(0.55));
+  grad.addColorStop(1, withAlpha(COLORS.isobaricLine, 0.07));
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = 'rgba(15,23,42,0.035)';
+  ctx.strokeStyle = gridLine();
   ctx.lineWidth = 1;
   for (let x = 24; x < width; x += 34) {
     ctx.beginPath();
@@ -360,10 +406,10 @@ function drawProcessCard(
   focused: boolean,
 ): void {
   ctx.save();
-  ctx.shadowColor = focused ? adjustAlpha(proc.color, 0.22) : 'rgba(15,23,42,0.10)';
+  ctx.shadowColor = focused ? adjustAlpha(proc.color, 0.22) : shadowInk(0.1);
   ctx.shadowBlur = focused ? 26 : 18;
   ctx.shadowOffsetY = focused ? 10 : 8;
-  ctx.fillStyle = 'rgba(255,255,255,0.86)';
+  ctx.fillStyle = surface(0.86);
   roundRect(ctx, x, y, w, h, 14);
   ctx.fill();
   ctx.restore();
@@ -394,7 +440,7 @@ function drawFocusBanner(
   text: string,
   color: string,
 ): void {
-  ctx.fillStyle = 'rgba(255,255,255,0.82)';
+  ctx.fillStyle = surface(0.82);
   roundRect(ctx, x, y, w, 22, 11);
   ctx.fill();
   ctx.strokeStyle = adjustAlpha(color, 0.20);
@@ -424,10 +470,10 @@ function drawStateStrip(
   ];
   for (let i = 0; i < items.length; i++) {
     const ix = x + 6 + i * itemW;
-    ctx.fillStyle = 'rgba(255,255,255,0.70)';
+    ctx.fillStyle = surface(0.7);
     roundRect(ctx, ix, itemY, itemW - 6, 36, 7);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(15,23,42,0.07)';
+    ctx.strokeStyle = lineInk(0.08);
     ctx.stroke();
     ctx.font = '10px -apple-system, sans-serif';
     ctx.fillStyle = COLORS.textDim;
@@ -489,6 +535,47 @@ function drawGraphCaption(
   ctx.fillStyle = proc.color;
   ctx.textAlign = 'right';
   ctx.fillText(proc.law, x + w - 8, y - 8);
+}
+
+// Numeric tick labels on the two axes (0 / mid / max) so students can read
+// actual values off the graph, not just the curve shape.
+function drawAxisTicks(
+  ctx: CanvasRenderingContext2D,
+  left: number, bottom: number, width: number, height: number,
+  xMin: number, xMax: number, yMin: number, yMax: number,
+  xUnit: string, yUnit: string,
+): void {
+  const fmt = (v: number) => (Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(3));
+  ctx.fillStyle = COLORS.textDim;
+  ctx.font = '9px -apple-system, sans-serif';
+  ctx.textBaseline = 'middle';
+
+  // x ticks at 50% and 100% (skip 0 to avoid origin clutter)
+  ctx.textAlign = 'center';
+  for (const f of [0.5, 1]) {
+    const xv = xMin + (xMax - xMin) * f;
+    const sx = left + width * f;
+    ctx.strokeStyle = lineInk(0.28);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(sx, bottom);
+    ctx.lineTo(sx, bottom + 3);
+    ctx.stroke();
+    ctx.fillText(`${fmt(xv)}${f === 1 ? xUnit : ''}`, sx, bottom + 11);
+  }
+
+  // y ticks at 50% and 100%
+  ctx.textAlign = 'right';
+  for (const f of [0.5, 1]) {
+    const yv = yMin + (yMax - yMin) * f;
+    const sy = bottom - height * f;
+    ctx.strokeStyle = lineInk(0.28);
+    ctx.beginPath();
+    ctx.moveTo(left - 3, sy);
+    ctx.lineTo(left, sy);
+    ctx.stroke();
+    ctx.fillText(`${fmt(yv)}${f === 1 ? yUnit : ''}`, left - 5, sy);
+  }
 }
 
 function drawAxisLabels(ctx: CanvasRenderingContext2D, left: number, bottom: number, width: number, xLabel: string, yLabel: string): void {

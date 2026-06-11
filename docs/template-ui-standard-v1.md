@@ -481,3 +481,96 @@ AI 改造单个模板时，按以下步骤执行：
 - 原功能可继续使用。
 - bridge/snapshot 不被破坏。
 - 桌面和小屏下不出现明显布局溢出。
+
+## 12. P09 标杆实现细则（右栏 / 控件 / 响应式）
+
+第 1-11 节定义"应该长什么样"。本节是**像素级照抄清单**：以 `visual_p9`（天体运动与引力）为唯一标杆，凡 `ExperimentCanvasLayout` 模板的右栏、控件、响应式都按此实现，做到与 P09、P03 完全一致。改造时优先复制本节的精确数值，不要凭感觉近似。
+
+标杆源码位置（出现分歧时以源码为准）：
+- 主题变量：`visual_p9/src/index.css`（`--theme-*`）
+- 设计 token：`visual_p9/src/styles/tokens.ts`（`COLORS` / `RADIUS` / `SHADOWS`）
+- 右栏骨架：`visual_p9/src/components/layout/AppLayout.tsx`
+- 控件：`visual_p9/src/components/ui/{slider,input,button}.tsx`
+- 参数 / 读数：`visual_p9/src/components/panels/{ParameterPanel,MetricsPanel}.tsx`
+
+### 12.1 双强调色规则（最易踩坑，务必先读）
+
+P09 同时存在**两套强调色**，职责不同，不可混用：
+
+| 用途 | 颜色 | 取值（浅 / 暗） | 来源 |
+| --- | --- | --- | --- |
+| **导航强调** = 通顶模块切换 tabs 选中态 | **蓝** | `#2563eb` / `#3b82f6` | `index.css` `--theme-primary` |
+| **控件强调** = 右栏滑块、开关、聚焦环、数字框聚焦、模型按钮选中 | **绿** | `#00C06B`（浅暗一致） | `tokens.ts` `COLORS.primary` |
+
+> 注意：本文件 §8.2 早期写的 `--et-success: #16a34a` 是占位值，**标杆实际控件绿是 `#00C06B`**，以本节为准。学科色（§8.2）只换"控件强调色"的色相（化学青绿、物理蓝、数学紫蓝），**通顶 tabs 始终蓝**、不随学科变。
+
+读数数值默认是**中性文本色**（`--theme-text`），不是绿色；只有需要强调的行（如校验值）才点绿。
+
+### 12.2 精确 token
+
+```css
+/* 颜色（浅色） */
+--theme-primary:        #2563eb;   /* tabs 选中（暗:#3b82f6） */
+--accent-green:         #00C06B;   /* 控件强调，浅暗一致 */
+--track-bg:             #F5F5F7;   /* 滑块未填充轨道（暗: rgba(255,255,255,.12)） */
+--theme-text:           #0f172a;   /* 读数值、正文（暗:#e2e8f0） */
+--theme-text-muted:     #64748b;   /* 标签、参数值、分区标题 */
+--theme-border:         #e2e8f0;   /* 分区/行分隔线（暗: rgba(255,255,255,.08)） */
+--theme-panel-bg:       #ffffff;   /* 右栏底色（暗:#0f1629） */
+--theme-surface-hover:  #f0f2f5;   /* 数字输入框底（暗:#1e293b 档） */
+
+/* 圆角（tokens.ts RADIUS） */
+input: 14px;  sm: 8px;  md: 12px;  full: 9999px;
+
+/* 阴影 */
+shadow-sm: 0 1px 4px rgba(0,0,0,.04);
+```
+
+### 12.3 右栏骨架
+
+- 宽度 **320px**，`border-left`，底色 `--theme-panel-bg`，整体可纵向滚动。
+- 分组用 **`border-b` + `padding:16px`** 分隔（不是玻璃卡片、不是每行卡片）。
+- 分区标题 `<h3>`：`font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; color:--theme-text-muted; margin-bottom:12px`。**不带英文副标签**。
+- 顺序：`实验参数`（模型按钮 + 参数 + 重置按钮）→ 可选 `高级设置`（`<details>`）→ `实时读数`。
+
+### 12.4 控件精确规格（照抄）
+
+**滑块**（`slider.tsx`）— 最易做错，P09 是粗轨大圆头：
+- 轨道 `height:8px`，`border-radius:9999px`，底色 `--track-bg`；已填充段为绿 `--accent-green`。
+- 滑块头 `20px×20px`，**白底 + `2px solid 绿`**，`border-radius:9999px`，`box-shadow:0 1px 4px rgba(0,0,0,.04)`，hover `scale(1.1)`。
+- native `<input type=range>` 落地：input 高 20px、`background:transparent`，轨道画在 `::-webkit-slider-runnable-track`（8px + 填充渐变），thumb `margin-top:-6px` 居中；Firefox 用 `::-moz-range-track/-progress/-thumb`。填充比例用内联 `--fill:<pct>%` 在 input/外部赋值时更新。
+
+**数字输入框**（滑块下方，`input.tsx` + ParameterPanel override）：
+- `height:28px; width:100%; padding:0 8px; font-size:12px; border-radius:14px; border:1px solid 边框; background:surface-hover`。
+- 聚焦：`border-color:绿; box-shadow:0 0 0 3px rgba(0,192,107,.1)`。失焦/回车提交并 clamp 到 min/max，双向同步滑块。
+
+**参数行**（`space-y-1.5`=6px）：上行 `flex justify-between`（标签 `text-xs`=12px muted + 数值 `text-[11px]`=11px muted）→ 整宽滑块 → 数字输入框。参数间距 `space-y-3`=12px。
+
+**重置按钮**（Button `variant=secondary size=sm`）：胶囊 `border-radius:9999px`，底 `bgMuted #F5F5F7`，文字 `--theme-text` 深色，`font-size:13px; padding:8px 14px`，`width:100%`，hover 底变 `#F0F0F0`。
+
+**读数行**（`MetricsPanel`，`space-y-1`=4px）：`flex justify-between; padding:6px 0`，行间 `border-bottom`（最后一行无）；标签 `text-sm`=14px muted；数值 `text-sm font-semibold tabular-nums` **中性色**。底部可接一句 `text-xs` muted 说明。
+
+**模型/分段按钮**：选中态用绿（边框 + `rgba(0,192,107,.12)` 底 + 绿字）；开关 `on` 态绿。
+
+### 12.5 响应式（断点 1024px，照 `AppLayout.tsx`）
+
+- **≥1024px（lg）**：右栏常驻（`width:320`）。
+- **<1024px**：右栏移出文档流，变 `position:fixed` 右侧**滑入抽屉**（`width:min(320px,86vw)`，`translateX` 动画，半透明遮罩 `rgba(0,0,0,.42)`，`-8px 0 28px` 阴影）；右下角 `48px` 圆形 **⚙ 悬浮按钮**唤出；抽屉内 **×** / 点遮罩 / **Esc** 关闭。
+- **<600px**：隐藏标题文字与次要信息给 tab 让位；收紧底部图表高度。
+- TopBar：标题 `min-width:0 + ellipsis` 永不撑破视口；tab 条 `flex:1` 且 `overflow-x:auto` 可横向滚动。
+
+**不变性 / 不白屏铁律**：
+- 画布管理器必须用 `ResizeObserver` 监听容器，尺寸变化时重算 backing store（`canvas.width = w*dpr`），避免拉伸/白屏。
+- 3D 场景（Three.js）除 `show()` 外，也必须 `ResizeObserver` 监听容器，运行时 `setSize + camera.aspect` 跟随，否则窗口/方向变化会变形。
+- 抽屉用覆盖式 `fixed`，不挤压画布，避免开关抽屉触发画布重排。
+
+### 12.6 落地参考
+
+P07（`physics07`，Vanilla TS）已按本节实现，可作为非 React 模板的抄写样板：
+- 主题 + 控件 + 响应式 CSS：`physics07/packages/core/src/styles.css`
+- 右栏骨架 / 抽屉 / FAB：`physics07/packages/core/src/ui/Layout.ts`
+- 参数控件（滑块填充 / 数字框 / reset）：`physics07/packages/core/src/ui/ParameterPanel.ts`
+- 读数行：`physics07/packages/p07-thermodynamics/src/teachingPanel.ts`
+- 3D ResizeObserver：`physics07/packages/p07-thermodynamics/src/scenes/three/PistonScene3D.ts`
+
+P03 / P04 等其它 `ExperimentCanvasLayout` 模板改造时，对照本节逐项核对即可，做到与 P09 一致。

@@ -9,13 +9,7 @@ export const sceneConfigs: Record<SceneName, SceneConfig> = {
     models: [
       { id: 'THM-001', label: '标准容器', paramOverrides: {} },
     ],
-    presets: [
-      { label: '室温氮气', params: { temperature: 300, numParticles: 100, containerW: 200, containerH: 200 } },
-      { label: '高温快速', params: { temperature: 800, numParticles: 200, containerW: 200, containerH: 200 } },
-      { label: '低温缓慢', params: { temperature: 150, numParticles: 50, containerW: 200, containerH: 200 } },
-      { label: '高密度', params: { temperature: 300, numParticles: 400, containerW: 150, containerH: 150 } },
-      { label: '低密度', params: { temperature: 300, numParticles: 30, containerW: 350, containerH: 350 } },
-    ],
+    presets: [],
     displayToggles: [
       { key: 'showVelocity', label: '速度箭头', default: false },
       { key: 'showDistribution', label: '速率分布', default: true },
@@ -48,18 +42,12 @@ export const sceneConfigs: Record<SceneName, SceneConfig> = {
     description: '等温、等压、等容三种典型过程，验证理想气体状态方程',
     modelId: 'THM-010',
     models: [
-      { id: 'THM-010', label: '等温过程', paramOverrides: { gasFocus: '等温过程', gasP: 100, gasV: 0.8, gasT: 300 } },
-      { id: 'THM-020', label: '等压过程', paramOverrides: { gasFocus: '等压过程', gasP: 100, gasV: 2.0, gasT: 600 } },
-      { id: 'THM-021', label: '等容过程', paramOverrides: { gasFocus: '等容过程', gasP: 100, gasV: 2.0, gasT: 600 } },
-      { id: 'THM-030', label: '三法对比', paramOverrides: { gasFocus: '三法对比', gasP: 180, gasV: 4.0, gasT: 450 } },
+      { id: 'THM-010', label: '等温过程', paramOverrides: { gasFocus: '等温过程', gasV: 2.0, gasT: 300 } },
+      { id: 'THM-020', label: '等压过程', paramOverrides: { gasFocus: '等压过程', gasV: 2.0, gasT: 300 } },
+      { id: 'THM-021', label: '等容过程', paramOverrides: { gasFocus: '等容过程', gasV: 2.0, gasT: 300 } },
+      { id: 'THM-030', label: '三法对比', paramOverrides: { gasFocus: '三法对比', gasV: 2.0, gasT: 300 } },
     ],
-    presets: [
-      { label: '基准状态', params: { gasFocus: '三法对比', gasP: 100, gasV: 2.0, gasT: 300 } },
-      { label: '观察等温压缩', params: { gasFocus: '等温过程', gasP: 100, gasV: 0.8, gasT: 300 } },
-      { label: '观察等压升温', params: { gasFocus: '等压过程', gasP: 100, gasV: 2.0, gasT: 600 } },
-      { label: '观察等容升温', params: { gasFocus: '等容过程', gasP: 100, gasV: 2.0, gasT: 600 } },
-      { label: '三法对比', params: { gasFocus: '三法对比', gasP: 180, gasV: 4.0, gasT: 450 } },
-    ],
+    presets: [],
     displayToggles: [],
     teaching: {
       coreValues: [
@@ -98,14 +86,7 @@ export const sceneConfigs: Record<SceneName, SceneConfig> = {
       { id: 'THM-036', label: 'U型管', paramOverrides: { tubeOrientation: 'U型管' } },
       { id: 'THM-037', label: '两端密封', paramOverrides: { tubeOrientation: '两端密封' } },
     ],
-    presets: [
-      { label: '标准竖直', params: { tubeOrientation: '竖直开口向上', lcL1: 20, lcH: 10, lcT1: 300, lcT2: 400 } },
-      { label: '大温差', params: { tubeOrientation: '竖直开口向上', lcL1: 20, lcH: 10, lcT1: 200, lcT2: 500 } },
-      { label: '短气柱', params: { tubeOrientation: '竖直开口向上', lcL1: 8, lcH: 15, lcT1: 300, lcT2: 450 } },
-      { label: '倾斜30°', params: { tubeOrientation: '倾斜开口向上', lcL1: 20, lcH: 10, lcT1: 300, lcT2: 400, lcAngle: 30 } },
-      { label: 'U型管', params: { tubeOrientation: 'U型管', lcL1: 20, lcH: 10, lcT1: 300, lcT2: 400 } },
-      { label: '两端密封', params: { tubeOrientation: '两端密封', lcL1: 20, lcH: 10, lcT1: 300, lcT2: 400 } },
-    ],
+    presets: [],
     displayToggles: [],
     teaching: {
       coreValues: [
@@ -138,35 +119,28 @@ export const sceneConfigs: Record<SceneName, SceneConfig> = {
     models: [
       { id: 'THM-038', label: '竖直单活塞', paramOverrides: { pcMode: '单活塞', cylinderOrientation: '竖直' } },
       { id: 'THM-039', label: '水平单活塞', paramOverrides: { pcMode: '单活塞', cylinderOrientation: '水平' } },
-      { id: 'THM-040', label: '双活塞', paramOverrides: { pcMode: '双活塞' } },
+      { id: 'THM-040', label: '中间活塞', paramOverrides: { pcMode: '中间活塞', pcHeatPosition: '左' } },
     ],
-    presets: [
-      { label: '标准竖直', params: { pcMode: '单活塞', cylinderOrientation: '竖直', pcPistonMass: 1.0, pcArea: 10, pcT1: 300, pcT2: 450 } },
-      { label: '重活塞', params: { pcMode: '单活塞', cylinderOrientation: '竖直', pcPistonMass: 5.0, pcArea: 10, pcT1: 300, pcT2: 450 } },
-      { label: '水平标准', params: { pcMode: '单活塞', cylinderOrientation: '水平', pcPistonMass: 1.0, pcArea: 10, pcT1: 300, pcT2: 450 } },
-      { label: '大面积', params: { pcMode: '单活塞', cylinderOrientation: '竖直', pcPistonMass: 1.0, pcArea: 40, pcT1: 300, pcT2: 450 } },
-      { label: '双活塞对称', params: { pcMode: '双活塞', pcPistonMassLeft: 1.0, pcPistonMassRight: 1.0, pcArea: 10, pcT1: 300, pcT2: 450, pcHeatPosition: '左' } },
-      { label: '双活塞不对称', params: { pcMode: '双活塞', pcPistonMassLeft: 2.0, pcPistonMassRight: 1.0, pcArea: 10, pcT1: 300, pcT2: 450, pcHeatPosition: '左' } },
-    ],
+    presets: [],
     displayToggles: [],
     teaching: {
       coreValues: [
         { label: 'P₀', dynamicKey: 'pcPAtm' },
         { label: 'm', dynamicKey: 'pcPistonMass' },
       ],
-      insight: '活塞可自由移动 → 等压过程；竖直时活塞重力影响气体压强',
+      insight: '单活塞：自由移动→等压；中间活塞：两段气体联立+压强平衡',
       formulas: [
-        '竖直: P = P₀ + mg/S',
-        '水平: P = P₀',
-        'V₁/T₁ = V₂/T₂ （等压）',
-        'L₂ = L₁ · T₂/T₁',
+        '单活塞竖直: P = P₀ + mg/S',
+        '单活塞水平: P = P₀',
+        '中间活塞: P左 = P右（压强平衡）',
+        'L热 = 2L₁T₂/(T₁+T₂), L冷 = 2L₁T₁/(T₁+T₂)',
       ],
-      summary: '活塞可自由移动意味着气体压强恒定（等压过程）。竖直放置时，活塞重力会增加气体压强；水平放置时，活塞重力不影响。双活塞模型需要分析两侧压强平衡。',
+      summary: '单活塞自由移动时气体等压变化，竖直放置时活塞重力增大气压。中间活塞模型：一个自由活塞耦合两段气体，加热一侧推动活塞压缩另一侧，需联立两段状态方程并用压强平衡求解，是常考题型。',
       bullets: [
-        '活塞可自由移动 → 等压过程',
-        '竖直: 活塞重力影响气体压强 P = P₀+mg/S',
-        '水平: P = P₀，重力不影响',
-        '双活塞: 两侧压强平衡是求解关键',
+        '单活塞 → 等压过程，竖直时 P=P₀+mg/S',
+        '中间活塞: 加热一侧→推活塞→压另一侧',
+        '中间活塞核心: 压强平衡 P左=P右 + 总长守恒',
+        '需联立两段气体状态方程求解',
       ],
     },
   },
@@ -179,13 +153,7 @@ export const sceneConfigs: Record<SceneName, SceneConfig> = {
     models: [
       { id: 'THM-041', label: '布朗运动', paramOverrides: {} },
     ],
-    presets: [
-      { label: '标准花粉', params: { brownRadius: 1.0, brownTemperature: 300, brownNumParticles: 200 } },
-      { label: '大颗粒', params: { brownRadius: 5.0, brownTemperature: 300, brownNumParticles: 200 } },
-      { label: '小颗粒', params: { brownRadius: 0.3, brownTemperature: 300, brownNumParticles: 200 } },
-      { label: '高温剧烈', params: { brownRadius: 1.0, brownTemperature: 500, brownNumParticles: 300 } },
-      { label: '低温缓慢', params: { brownRadius: 1.0, brownTemperature: 200, brownNumParticles: 100 } },
-    ],
+    presets: [],
     displayToggles: [
       { key: 'showTrail', label: '运动轨迹', default: true },
     ],

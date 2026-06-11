@@ -56,9 +56,25 @@ export class ParameterPanel {
         input.checked = value as boolean;
       } else {
         input.value = String(value);
+        if (input.type === 'range') {
+          updateSliderFill(input);
+          const num = this.container.querySelector(`[data-num="${key}"]`) as HTMLInputElement | null;
+          if (num) num.value = String(value);
+        }
       }
-      const display = this.container.querySelector(`[data-display="${key}"]`);
-      if (display) display.textContent = String(value);
+      const display = this.container.querySelector(`[data-display="${key}"]`) as HTMLElement | null;
+      if (display) {
+        const n = typeof value === 'number' ? value : parseFloat(String(value));
+        display.textContent = Number.isFinite(n) ? n.toFixed(Math.abs(n) >= 100 || Number.isInteger(n) ? 0 : 1) : String(value);
+      }
+    }
+  }
+
+  /** Restore every parameter to its declared default (does not fire onChange). */
+  reset(): void {
+    for (const def of this.defs) {
+      this.values[def.key] = def.default;
+      this.setValue(def.key, def.default);
     }
   }
 
@@ -91,13 +107,22 @@ export class ParameterPanel {
       unitSpan.textContent = ` (${def.unit})`;
       label.appendChild(unitSpan);
     }
-    row.appendChild(label);
 
     const type = def.type ?? 'range';
 
     if (type === 'range') {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'param-range-wrapper';
+      const decimals = def.step && def.step >= 1 ? 0 : 1;
+      const fmt = (v: number) => v.toFixed(decimals);
+
+      // Top row: label (left) + formatted value (right) — P09 style
+      const head = document.createElement('div');
+      head.className = 'param-row-head';
+      const display = document.createElement('span');
+      display.className = 'param-value';
+      display.dataset.display = def.key;
+      display.textContent = fmt(Number(def.default));
+      head.appendChild(label);
+      head.appendChild(display);
 
       const input = document.createElement('input');
       input.type = 'range';
@@ -108,22 +133,43 @@ export class ParameterPanel {
       input.step = String(def.step ?? 0.1);
       input.value = String(def.default);
 
-      const display = document.createElement('span');
-      display.className = 'param-value';
-      display.dataset.display = def.key;
-      display.textContent = String(def.default);
+      // Editable number input below the slider — P09 style
+      const num = document.createElement('input');
+      num.type = 'number';
+      num.className = 'param-number';
+      num.dataset.num = def.key;
+      num.min = input.min;
+      num.max = input.max;
+      num.step = input.step;
+      num.value = fmt(Number(def.default));
 
-      input.addEventListener('input', () => {
-        const val = parseFloat(input.value);
+      const apply = (raw: number, fromNumber: boolean) => {
+        const lo = parseFloat(input.min);
+        const hi = parseFloat(input.max);
+        const val = Math.min(hi, Math.max(lo, raw));
         this.values[def.key] = val;
-        display.textContent = val.toFixed(def.step && def.step >= 1 ? 0 : 1);
+        input.value = String(val);
+        display.textContent = fmt(val);
+        if (!fromNumber) num.value = fmt(val);
+        updateSliderFill(input);
         this._onChange?.(this.values);
-      });
+      };
 
-      wrapper.appendChild(input);
-      wrapper.appendChild(display);
-      row.appendChild(wrapper);
+      updateSliderFill(input);
+      input.addEventListener('input', () => apply(parseFloat(input.value), false));
+      const commitNum = () => {
+        const parsed = parseFloat(num.value);
+        if (Number.isFinite(parsed)) apply(parsed, true);
+        num.value = fmt(this.values[def.key] as number);
+      };
+      num.addEventListener('blur', commitNum);
+      num.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') commitNum(); });
+
+      row.appendChild(head);
+      row.appendChild(input);
+      row.appendChild(num);
     } else if (type === 'select') {
+      row.appendChild(label);
       const select = document.createElement('select');
       select.className = 'param-select';
       select.dataset.key = def.key;
@@ -141,6 +187,7 @@ export class ParameterPanel {
       });
       row.appendChild(select);
     } else if (type === 'checkbox') {
+      row.appendChild(label);
       const checkWrapper = document.createElement('label');
       checkWrapper.className = 'param-check-wrapper';
       const input = document.createElement('input');
@@ -162,4 +209,13 @@ export class ParameterPanel {
 
 export function defineParams(defs: ParamDef[]): ParamDef[] {
   return defs;
+}
+
+/** Paint the filled (green) portion of a range slider up to its current value (P09 style). */
+function updateSliderFill(input: HTMLInputElement): void {
+  const min = parseFloat(input.min);
+  const max = parseFloat(input.max);
+  const val = parseFloat(input.value);
+  const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
+  input.style.setProperty('--fill', `${pct}%`);
 }

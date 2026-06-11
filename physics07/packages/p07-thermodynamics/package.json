@@ -8,6 +8,10 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@physics/core": "workspace:*"
+    "@physics/core": "workspace:*",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.184.1"
   }
 }

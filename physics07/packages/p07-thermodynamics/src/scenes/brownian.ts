@@ -1,6 +1,6 @@
 import type { GraphTrace } from '@physics/core';
 import type { ThermoState, SceneModule, RenderContext, StateDisplayData } from '../types';
-import { COLORS, CANVAS_FONTS, speedToColor } from '../theme';
+import { COLORS, CANVAS_FONTS, speedToColor, surface, lineInk, shadowInk, withAlpha } from '../theme';
 import { createSeededRandom, clamp } from '../params';
 
 const PARTICLE_R = 0.08;
@@ -73,6 +73,12 @@ export const brownianScene: SceneModule = {
               s[`vx${i}`] -= dvDotN * nx; s[`vy${i}`] -= dvDotN * ny;
               s[`vx${j}`] += dvDotN * nx; s[`vy${j}`] += dvDotN * ny;
             }
+            // separate overlap so molecules don't stick together
+            const overlap = minDist - dist;
+            if (overlap > 0) {
+              s[`px${i}`] -= nx * overlap * 0.5; s[`py${i}`] -= ny * overlap * 0.5;
+              s[`px${j}`] += nx * overlap * 0.5; s[`py${j}`] += ny * overlap * 0.5;
+            }
           }
         }
       }
@@ -134,16 +140,21 @@ export const brownianScene: SceneModule = {
 
     // Container drop shadow
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.12)';
-    ctx.shadowBlur = 16;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowColor = shadowInk(0.14);
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 5;
     ctx.fillStyle = COLORS.canvasBg;
     ctx.fillRect(bx1, by1, bx2 - bx1, by2 - by1);
     ctx.restore();
 
-    // Container inner fill
+    // Container inner fill — glass-box curvature (2.5D): darker glass edges,
+    // brighter centre.
     const cornerR = 8;
-    ctx.fillStyle = 'rgba(144,202,249,0.06)';
+    const boxGrad = ctx.createLinearGradient(bx1, by1, bx2, by1);
+    boxGrad.addColorStop(0, withAlpha(COLORS.moleculeCool, 0.12));
+    boxGrad.addColorStop(0.5, withAlpha(COLORS.moleculeCool, 0.04));
+    boxGrad.addColorStop(1, withAlpha(COLORS.moleculeCool, 0.12));
+    ctx.fillStyle = boxGrad;
     ctx.beginPath();
     ctx.moveTo(bx1 + cornerR, by1);
     ctx.lineTo(bx2 - cornerR, by1);
@@ -156,6 +167,10 @@ export const brownianScene: SceneModule = {
     ctx.arcTo(bx1, by1, bx1 + cornerR, by1, cornerR);
     ctx.closePath();
     ctx.fill();
+
+    // Glass specular highlight strip (left-of-centre)
+    ctx.fillStyle = surface(0.45);
+    ctx.fillRect(bx1 + (bx2 - bx1) * 0.22, by1 + 3, Math.max(2, (bx2 - bx1) * 0.04), by2 - by1 - 6);
 
     // Inner edge glow
     const edgeGrad = ctx.createLinearGradient(bx1, by1, bx1, by1 + 20);
@@ -228,7 +243,7 @@ export const brownianScene: SceneModule = {
         ctx.arc(toSx(state[`trailX${i}`] || 0), toSy(state[`trailY${i}`] || 0), 4.5, 0, Math.PI * 2);
         ctx.fillStyle = COLORS.brownianTrail;
         ctx.fill();
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = surface(1);
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -239,7 +254,7 @@ export const brownianScene: SceneModule = {
     const brownWX = state.brownX || 0;
     const brownWY = state.brownY || 0;
     const br = Math.max(14, brownR * scale);
-    cm.drawBall(brownWX, brownWY, br, '#333333', { glow: true, label: '花粉', labelColor: '#fff' });
+    cm.drawBall(brownWX, brownWY, br, COLORS.brownianParticle, { glow: true, label: '花粉', labelColor: COLORS.canvasBg });
 
     cm.applyBloom(0.15);
 
@@ -251,8 +266,8 @@ export const brownianScene: SceneModule = {
     const legendX = bx2 + 20;
     const legendY = by1 + 8;
     ctx.save();
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillStyle = surface(0.9);
+    ctx.strokeStyle = lineInk(0.1);
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.roundRect(legendX - 8, legendY - 8, 130, 80, 6);
@@ -265,7 +280,7 @@ export const brownianScene: SceneModule = {
 
     ctx.beginPath();
     ctx.arc(legendX + 6, legendY + 8, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = COLORS.brownianParticle;
     ctx.fill();
     ctx.fillStyle = COLORS.textSecondary;
     ctx.font = CANVAS_FONTS.annotation;
@@ -310,12 +325,17 @@ export const brownianScene: SceneModule = {
 
   getStateDisplay(params, state): StateDisplayData {
     const T = Number(params.brownTemperature) || 300;
+    const trailCount = Math.floor(state.trailCount || 0);
+    // displacement from the starting point (the pedagogically meaningful value)
+    const dx = (state.brownX || 0) - (state.trailX0 ?? state.brownX ?? 0);
+    const dy = (state.brownY || 0) - (state.trailY0 ?? state.brownY ?? 0);
+    const disp = Math.sqrt(dx * dx + dy * dy);
     return {
       T,
       customEntries: [
-        { label: '颗粒 X', value: (state.brownX || 0).toFixed(2) },
-        { label: '颗粒 Y', value: (state.brownY || 0).toFixed(2) },
-        { label: '轨迹点数', value: String(Math.floor(state.trailCount || 0)) },
+        { label: '位移 d', value: `${disp.toFixed(2)}`, highlight: true },
+        { label: '颗粒半径', value: `${((Number(state.brownR) || 0.04) / 0.04).toFixed(1)} μm` },
+        { label: '轨迹点数', value: String(trailCount) },
       ],
     };
   },

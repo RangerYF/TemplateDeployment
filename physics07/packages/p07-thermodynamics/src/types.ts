@@ -84,6 +84,12 @@ export interface SceneModule {
   getGraphTraces?(params: Record<string, number | string | boolean>, state: ThermoState): GraphTrace[];
   getStateDisplay?(params: Record<string, number | string | boolean>, state: ThermoState): StateDisplayData;
   getCalcSteps?(params: Record<string, number | string | boolean>, state: ThermoState): CalcStep[];
+  /** Called when switching AWAY from this scene. Lets a scene tear down /
+   *  hide any auxiliary surfaces (e.g. a Three.js WebGL overlay). */
+  onLeave?(): void;
+  /** Called when the colour theme toggles. Lets a scene re-theme resources that
+   *  are not re-read every frame (e.g. a Three.js scene's lights/grid/labels). */
+  onThemeChange?(): void;
 }
 
 /* ===== Teaching / Config types ===== */

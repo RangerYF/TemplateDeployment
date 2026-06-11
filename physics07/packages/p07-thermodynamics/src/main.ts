@@ -14,7 +14,12 @@ import { ModelPanel } from './modelPanel';
 import {
   getDefaultSnapshot, getSnapshot, validateSnapshot, loadSnapshot, setupMessageHandler,
 } from './bridge';
+import { initTheme, toggleTheme, getTheme } from './themeMode';
+import { refreshCanvasColors } from './theme';
+import { TeachingModal } from './teachingModal';
 
+initTheme();
+refreshCanvasColors();
 const app = document.getElementById('app')!;
 const layout = createLayout(app, 'P-07 热力学模拟器');
 
@@ -48,20 +53,65 @@ function updateSubtitle(): void {
 }
 
 // --- Left sidebar: model panel (top) + parameter panel (below) ---
-const modelPanel = new ModelPanel(layout.leftSidebar);
+// IMPORTANT: ModelPanel.setScene() clears its container's innerHTML on every
+// scene switch. It must therefore own a DEDICATED sub-container, otherwise it
+// would wipe out the parameter sliders that live in the same sidebar.
+// === Right sidebar (single column, P09-style): 实验参数 → 实时读数 ===
+// 实验参数: model variants + sliders. Each sub-panel owns its own container
+// because ModelPanel.setScene clears its container's innerHTML.
+// 实验参数 group (section divider, P09 style)
+const paramGroup = document.createElement('div');
+paramGroup.className = 'sidebar-group';
+layout.rightSidebar.appendChild(paramGroup);
+
+const paramsHeader = document.createElement('div');
+paramsHeader.className = 'sidebar-section-title';
+paramsHeader.textContent = '实验参数';
+paramGroup.appendChild(paramsHeader);
+
+const modelPanelContainer = document.createElement('div');
+paramGroup.appendChild(modelPanelContainer);
+const modelPanel = new ModelPanel(modelPanelContainer);
 
 const paramSection = document.createElement('div');
-paramSection.className = 'sidebar-section';
-const paramHeader = document.createElement('div');
-paramHeader.className = 'sidebar-section-title';
-paramHeader.innerHTML = '参数调节 <span class="en-label">PARAMS</span>';
-paramSection.appendChild(paramHeader);
-layout.leftSidebar.appendChild(paramSection);
-
+paramGroup.appendChild(paramSection);
 const panel = new ParameterPanel(paramSection, paramDefs);
 
-// --- Right sidebar: teaching panel ---
-const teachingPanel = new TeachingPanel(layout.rightSidebar);
+const resetBtn = document.createElement('button');
+resetBtn.className = 'sidebar-reset-btn';
+resetBtn.textContent = '重置 · 恢复默认参数';
+paramGroup.appendChild(resetBtn);
+
+// 实时读数 group: live readouts (calc steps moved to the 📖 teaching modal)
+const readoutGroup = document.createElement('div');
+readoutGroup.className = 'sidebar-group';
+layout.rightSidebar.appendChild(readoutGroup);
+
+const readoutsHeader = document.createElement('div');
+readoutsHeader.className = 'sidebar-section-title';
+readoutsHeader.textContent = '实时读数';
+readoutGroup.appendChild(readoutsHeader);
+
+const readoutsContainer = document.createElement('div');
+readoutGroup.appendChild(readoutsContainer);
+const teachingPanel = new TeachingPanel(readoutsContainer);
+
+// --- Teaching modal (📖) for static teaching content ---
+const teachingModal = new TeachingModal();
+layout.teachBtn.addEventListener('click', () => teachingModal.toggle());
+
+// --- Theme toggle ---
+layout.themeBtn.textContent = getTheme() === 'dark' ? '☀️' : '🌙';
+layout.themeBtn.addEventListener('click', () => {
+  const next = toggleTheme();
+  layout.themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+  // Recompute the canvas colour registry from the new theme's CSS vars, then
+  // force a repaint (static scenes are not continuously re-rendered) and let the
+  // 3D scene re-theme its lights/grid/labels.
+  refreshCanvasColors();
+  sceneRegistry[currentScene]?.onThemeChange?.();
+  renderScene(sim.getTime(), sim.getState());
+});
 
 // --- Canvas + Graph ---
 const cm = new CanvasManager({ container: layout.canvas });
@@ -109,8 +159,10 @@ function updateParamVisibility(): void {
   const tubeOrientation = panel.getValue<string>('tubeOrientation');
   const showTiltAngle = currentScene === '液柱密封模型' && isTiltedLiquidColumn(tubeOrientation);
   const pcMode = panel.getValue<string>('pcMode');
-  const showCylOrientation = currentScene === '气缸/双活塞模型' && pcMode === '单活塞';
-  const isDual = pcMode === '双活塞';
+  const pcOrientation = panel.getValue<string>('cylinderOrientation');
+  const isMiddle = pcMode === '中间活塞';
+  // 活塞质量只对"竖直单活塞"有意义 (P = P₀ + mg/S)
+  const showPistonMass = currentScene === '气缸/双活塞模型' && !isMiddle && pcOrientation === '竖直';
 
   const rows = paramSection.querySelectorAll('.param-row');
   for (const row of rows) {
@@ -119,11 +171,8 @@ function updateParamVisibility(): void {
     const key = input.dataset.key!;
     let isVisible = visibleKeys.has(key);
     if (key === 'lcAngle') isVisible = isVisible && showTiltAngle;
-    if (key === 'cylinderOrientation') isVisible = isVisible && showCylOrientation;
-    if (key === 'pcPistonMass') isVisible = isVisible && !isDual;
-    if (key === 'pcPistonMassLeft' || key === 'pcPistonMassRight' || key === 'pcHeatPosition') {
-      isVisible = isVisible && isDual;
-    }
+    if (key === 'pcPistonMass') isVisible = isVisible && showPistonMass;
+    if (key === 'pcHeatPosition') isVisible = isVisible && isMiddle;
     (row as HTMLElement).style.display = isVisible ? '' : 'none';
   }
 }
@@ -160,6 +209,20 @@ modelPanel.onToggleChange = (key, value) => {
   previousParams = panel.getValues();
   renderScene(sim.getTime(), sim.getState());
 };
+
+// --- Reset to default parameters (re-applies the active model's overrides) ---
+resetBtn.addEventListener('click', () => {
+  panel.reset();
+  const config = sceneConfigs[currentScene];
+  const model = config.models.find((m) => m.id === config.modelId) ?? config.models[0];
+  if (model) {
+    for (const [k, v] of Object.entries(model.paramOverrides)) panel.setValue(k, v);
+  }
+  updateParamVisibility();
+  previousParams = panel.getValues();
+  resetSim();
+  playIfSceneWantsMotion();
+});
 
 // --- Render + Step ---
 function createRenderContext(): RenderContext {
@@ -229,9 +292,9 @@ function renderScene(t: number, state: ThermoState): void {
   teachingPanel.updateLiveValues(liveEntries);
   teachingPanel.updateCoreValues(params);
 
-  // Update calc steps
+  // Update calc steps (shown inside the 📖 teaching modal)
   const calcSteps = sceneModule.getCalcSteps?.(params, state) ?? [];
-  teachingPanel.updateCalcSteps(calcSteps);
+  teachingModal.updateCalcSteps(calcSteps);
 
   controls.updateTime(state.t);
 }
@@ -265,6 +328,9 @@ function playIfSceneWantsMotion(): void {
 
 function switchScene(scene: SceneName): void {
   if (scene === currentScene) return;
+  // Let the scene we're leaving tear down any auxiliary surfaces (e.g. the
+  // Three.js WebGL overlay used by the piston scene).
+  sceneRegistry[currentScene]?.onLeave?.();
   currentScene = scene;
   const config = sceneConfigs[scene];
 
@@ -272,6 +338,7 @@ function switchScene(scene: SceneName): void {
   updateSubtitle();
   modelPanel.setScene(config);
   teachingPanel.setScene(config);
+  teachingModal.setScene(config);
   updateParamVisibility();
   updatePlaybackVisibility();
   resetSim();
@@ -455,6 +522,7 @@ updateSceneTabs();
 updateSubtitle();
 modelPanel.setScene(initConfig);
 teachingPanel.setScene(initConfig);
+teachingModal.setScene(initConfig);
 updateParamVisibility();
 updatePlaybackVisibility();
 

@@ -1,7 +1,7 @@
 import type { ThermoState, SceneModule, RenderContext, StateDisplayData, CalcStep } from '../types';
-import { COLORS, CANVAS_FONTS } from '../theme';
+import { COLORS, CANVAS_FONTS, surface, lineInk, shadowInk, gridLine } from '../theme';
 import { clamp, isTiltedLiquidColumn, isNegativePressureLiquidColumn } from '../params';
-import { drawBallAtScreen, drawScreenArrow } from '../renderHelpers';
+import { drawBallAtScreen } from '../renderHelpers';
 
 export const liquidColumnScene: SceneModule = {
   createInitialState() {
@@ -45,17 +45,20 @@ export const liquidColumnScene: SceneModule = {
       drawUTube(ctx, canW, canH, L1, h, result, anim, state.t);
       drawAnalysisCards(ctx, canW * 0.68, 96, canW * 0.25, teaching);
       drawEquationCheck(ctx, canW * 0.68, 310, canW * 0.25, teaching);
-      drawThermometer(ctx, canW * 0.92, 118, T1, T2, anim);
+      drawThermometer(ctx, canW * 0.78, 486, T1, T2, anim);
     } else if (orientation === '两端密封') {
       drawWorktableBackdrop(ctx, canW, canH);
       drawStageTitle(ctx, canW, orientation, teaching);
       drawDualSealedTube(ctx, canW, canH, L1, h, result, anim, state.t);
       drawAnalysisCards(ctx, canW * 0.68, 96, canW * 0.25, teaching);
       drawEquationCheck(ctx, canW * 0.68, 310, canW * 0.25, teaching);
-      drawThermometer(ctx, canW * 0.92, 118, T1, T2, anim);
+      drawThermometer(ctx, canW * 0.78, 486, T1, T2, anim);
     } else {
       drawStandardTubes(ctx, canW, canH, orientation, L1, h, result, anim, angle, area, state.t, P0, T1, T2, teaching);
     }
+
+    // Subtle bloom to match the other scenes' visual warmth.
+    cm.applyBloom(0.09);
   },
 
   getStateDisplay(params, state): StateDisplayData {
@@ -243,7 +246,7 @@ function drawGasMolecules(
     drawBallAtScreen(ctx,
       clamp(bx + jx, x + 6, x + w - 6),
       clamp(by + jy, y + 6, y + h - 6),
-      4, '#42A5F5', { alpha: 0.75 },
+      4, COLORS.moleculeCool, { alpha: 0.75 },
     );
   }
 }
@@ -274,12 +277,12 @@ function drawMercuryGradient(
 
 function drawWorktableBackdrop(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const grad = ctx.createLinearGradient(0, 0, width, height);
-  grad.addColorStop(0, 'rgba(239,246,255,0.90)');
-  grad.addColorStop(0.55, '#FFFFFF');
-  grad.addColorStop(1, 'rgba(240,253,244,0.88)');
+  grad.addColorStop(0, `rgba(59, 130, 246, 0.06)`);
+  grad.addColorStop(0.55, surface(0.55));
+  grad.addColorStop(1, `rgba(16, 185, 129, 0.05)`);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = 'rgba(15,23,42,0.035)';
+  ctx.strokeStyle = gridLine();
   ctx.lineWidth = 1;
   for (let x = 24; x < width; x += 34) {
     ctx.beginPath();
@@ -296,10 +299,10 @@ function drawWorktableBackdrop(ctx: CanvasRenderingContext2D, width: number, hei
 }
 
 function drawStageTitle(ctx: CanvasRenderingContext2D, width: number, orientation: string, teaching: LiquidColumnTeaching): void {
-  ctx.fillStyle = 'rgba(255,255,255,0.84)';
+  ctx.fillStyle = surface(0.84);
   roundRect(ctx, 24, 18, width - 48, 44, 12);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(15,23,42,0.08)';
+  ctx.strokeStyle = lineInk(0.1);
   ctx.stroke();
 
   ctx.fillStyle = COLORS.textPrimary;
@@ -325,10 +328,10 @@ function drawTubeCard(
   color: string,
 ): void {
   ctx.save();
-  ctx.shadowColor = 'rgba(15,23,42,0.10)';
+  ctx.shadowColor = shadowInk(0.1);
   ctx.shadowBlur = 18;
   ctx.shadowOffsetY = 8;
-  ctx.fillStyle = 'rgba(255,255,255,0.82)';
+  ctx.fillStyle = surface(0.82);
   roundRect(ctx, x, y, w, h, 14);
   ctx.fill();
   ctx.restore();
@@ -379,7 +382,7 @@ function drawInfoCard(
   detail: string,
   color: string,
 ): void {
-  ctx.fillStyle = 'rgba(255,255,255,0.86)';
+  ctx.fillStyle = surface(0.86);
   roundRect(ctx, x, y, w, h, 12);
   ctx.fill();
   ctx.strokeStyle = adjustAlpha(color, 0.22);
@@ -441,7 +444,7 @@ function drawMiniResultStrip(
   items: string[],
   color: string,
 ): void {
-  ctx.fillStyle = 'rgba(255,255,255,0.74)';
+  ctx.fillStyle = surface(0.74);
   roundRect(ctx, x, y, w, 36, 9);
   ctx.fill();
   ctx.strokeStyle = adjustAlpha(color, 0.18);
@@ -456,9 +459,31 @@ function drawMiniResultStrip(
   }
 }
 
+// Small translucent pill behind a text label, so overlapping elements stay
+// readable. Returns nothing; draws centered at (cx, cy).
+function drawLabelPill(
+  ctx: CanvasRenderingContext2D, text: string, cx: number, cy: number,
+  color: string, bg = surface(0.88),
+) {
+  ctx.font = CANVAS_FONTS.label;
+  const w = ctx.measureText(text).width + 12;
+  const h = 18;
+  ctx.fillStyle = bg;
+  roundRect(ctx, cx - w / 2, cy - h / 2, w, h, h / 2);
+  ctx.fill();
+  ctx.strokeStyle = adjustAlpha(color, 0.25);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, cx, cy + 0.5);
+}
+
 function drawPressureArrow(
   ctx: CanvasRenderingContext2D, x: number, y: number,
   length: number, direction: 'up' | 'down', label: string, color: string,
+  labelSide: 'left' | 'right' = 'right',
 ) {
   const dy = direction === 'down' ? length : -length;
   ctx.strokeStyle = color;
@@ -477,10 +502,11 @@ function drawPressureArrow(
   ctx.fillStyle = color;
   ctx.fill();
 
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = color;
-  ctx.fillText(label, x, direction === 'down' ? tipY + 18 : tipY - 10);
+  // Label beside the shaft midpoint (with pill bg) — keeps it clear of the
+  // dimension labels and the other pressure arrow.
+  const midY = y + dy / 2;
+  const labelX = labelSide === 'right' ? x + 26 : x - 26;
+  drawLabelPill(ctx, label, labelX, midY, color);
 }
 
 function drawDimensionLine(
@@ -503,10 +529,10 @@ function drawDimensionLine(
   ctx.moveTo(x + offset - 4, y2); ctx.lineTo(x + offset + 4, y2);
   ctx.stroke();
 
-  ctx.fillStyle = COLORS.dimensionLine;
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = side === 'right' ? 'left' : 'right';
-  ctx.fillText(label, x + textOffset, (y1 + y2) / 2 + 4);
+  // Label with a pill background so it stays readable against fills/arrows.
+  const labelW = ctx.measureText(label).width;
+  const lcx = side === 'right' ? x + textOffset + labelW / 2 + 4 : x + textOffset - labelW / 2 - 4;
+  drawLabelPill(ctx, label, lcx, (y1 + y2) / 2, COLORS.dimensionLine);
 }
 
 function drawStandardTubes(
@@ -526,10 +552,10 @@ function drawStandardTubes(
   }
 
   const maxContent = Math.max(L1, result.L2) + h + 8;
-  const tubePixelH = Math.min(canH - 210, 470);
+  const tubePixelH = Math.min(canH - 240, 460);
   const scale = tubePixelH / maxContent;
   const tubeW = 72;
-  const tubeTopY = 96;
+  const tubeTopY = 128;
   const animL2 = L1 + (result.L2 - L1) * anim;
 
   const tube1X = canW * 0.26;
@@ -560,7 +586,7 @@ function drawStandardTubes(
 
   drawAnalysisCards(ctx, canW * 0.69, 96, canW * 0.25, teaching);
   drawEquationCheck(ctx, canW * 0.69, 310, canW * 0.25, teaching);
-  drawThermometer(ctx, canW * 0.92, 118, T1, T2, anim);
+  drawThermometer(ctx, canW * 0.78, 486, T1, T2, anim);
 }
 
 function drawSingleTube(
@@ -587,30 +613,36 @@ function drawSingleTube(
     liqEndY = gasEndY + liqLen * scale;
   }
 
-  // Tube walls with subtle gradient
+  // Tube walls with subtle cylindrical curvature shading (darker glass edges,
+  // lighter centre) — theme-flipped so the edges read on both light and dark.
   const wallGrad = ctx.createLinearGradient(tubeLeft, topY, tubeLeft + tubeW, topY);
-  wallGrad.addColorStop(0, 'rgba(0,0,0,0.12)');
-  wallGrad.addColorStop(0.1, 'rgba(0,0,0,0.04)');
-  wallGrad.addColorStop(0.9, 'rgba(0,0,0,0.04)');
-  wallGrad.addColorStop(1, 'rgba(0,0,0,0.12)');
+  wallGrad.addColorStop(0, lineInk(0.16));
+  wallGrad.addColorStop(0.1, lineInk(0.05));
+  wallGrad.addColorStop(0.9, lineInk(0.05));
+  wallGrad.addColorStop(1, lineInk(0.16));
   ctx.fillStyle = wallGrad;
   ctx.fillRect(tubeLeft - 2, topY, 3, tubePixelH);
   ctx.fillRect(tubeLeft + tubeW - 1, topY, 3, tubePixelH);
 
+  // Draw the three closed walls; leave the OPEN end (top for open-up,
+  // bottom for open-down) without a cap.
   ctx.strokeStyle = COLORS.containerBorder;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(tubeLeft, topY);
-  ctx.lineTo(tubeLeft, bottomY);
-  ctx.lineTo(tubeLeft + tubeW, bottomY);
-  ctx.lineTo(tubeLeft + tubeW, topY);
-  ctx.stroke();
-
   if (isOpenDown) {
-    ctx.beginPath();
-    ctx.moveTo(tubeLeft, topY); ctx.lineTo(tubeLeft + tubeW, topY);
-    ctx.stroke();
+    // closed top, open bottom
+    ctx.moveTo(tubeLeft, bottomY);
+    ctx.lineTo(tubeLeft, topY);
+    ctx.lineTo(tubeLeft + tubeW, topY);
+    ctx.lineTo(tubeLeft + tubeW, bottomY);
+  } else {
+    // closed bottom, open top
+    ctx.moveTo(tubeLeft, topY);
+    ctx.lineTo(tubeLeft, bottomY);
+    ctx.lineTo(tubeLeft + tubeW, bottomY);
+    ctx.lineTo(tubeLeft + tubeW, topY);
   }
+  ctx.stroke();
 
   // Gas fill
   ctx.fillStyle = COLORS.gasFill;
@@ -629,11 +661,11 @@ function drawSingleTube(
   // Pressure arrows — larger
   const arrowX = tubeLeft + tubeW / 2;
   if (!isOpenDown) {
-    drawPressureArrow(ctx, arrowX - 16, liqStartY - 4, 35, 'down', 'P₀', COLORS.arrowPressure);
-    drawPressureArrow(ctx, arrowX + 16, gasStartY + 4, 35, 'up', 'P_gas', COLORS.accentGreen);
+    drawPressureArrow(ctx, arrowX - 14, liqStartY - 4, 32, 'down', 'P₀', COLORS.arrowPressure, 'left');
+    drawPressureArrow(ctx, arrowX + 14, gasStartY + 4, 32, 'up', 'P_gas', COLORS.accentGreen, 'right');
   } else {
-    drawPressureArrow(ctx, arrowX - 16, liqEndY + 4, 35, 'up', 'P₀', COLORS.arrowPressure);
-    drawPressureArrow(ctx, arrowX + 16, gasEndY - 4, 35, 'down', 'P_gas', COLORS.accentGreen);
+    drawPressureArrow(ctx, arrowX - 14, liqEndY + 4, 32, 'up', 'P₀', COLORS.arrowPressure, 'left');
+    drawPressureArrow(ctx, arrowX + 14, gasEndY - 4, 32, 'down', 'P_gas', COLORS.accentGreen, 'right');
   }
 
   // Labels — larger fonts
@@ -656,9 +688,9 @@ function drawHorizontalWorkbench(
 ) {
   drawStageTitle(ctx, canW, '水平', teaching);
   const panelX = canW * 0.08;
-  const panelY = 96;
+  const panelY = 116;
   const panelW = canW * 0.61;
-  const panelH = Math.min(420, canH - 150);
+  const panelH = Math.min(420, canH - 170);
   drawTubeCard(ctx, panelX, panelY - 42, panelW, panelH + 82, '水平玻璃管', '液柱无竖直高度差：P = P₀', COLORS.accentGreen);
 
   const tubeX = panelX + 54;
@@ -673,18 +705,31 @@ function drawHorizontalWorkbench(
   drawHorizontalTube(ctx, tubeX, y1, tubeW, tubeH, scale, L1, h, '初始 T₁', result.P1, L1 * area, time, COLORS.isochoricLine);
   drawHorizontalTube(ctx, tubeX, y2, tubeW, tubeH, scale, animL2, h, '末状态 T₂', result.P2, animL2 * area, time, COLORS.arrowHeating);
 
-  ctx.strokeStyle = COLORS.arrowHeating;
-  ctx.lineWidth = 2;
-  drawScreenArrow(ctx, tubeX + tubeW * 0.72, y1 + tubeH + 28, tubeX + tubeW * 0.72, y2 - 20, COLORS.arrowHeating, 2);
-  ctx.fillStyle = COLORS.arrowHeating;
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'center';
-  ctx.fillText(T2 >= T1 ? '升温：气柱沿管伸长' : '降温：气柱沿管缩短', tubeX + tubeW * 0.72, (y1 + y2) / 2 + 12);
+  // Vertical transition arrow between the two tube states
+  {
+    const ax = tubeX + tubeW * 0.72;
+    const ay1 = y1 + tubeH + 28;
+    const ay2 = y2 - 20;
+    ctx.strokeStyle = COLORS.arrowHeating;
+    ctx.fillStyle = COLORS.arrowHeating;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay1);
+    ctx.lineTo(ax, ay2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ax, ay2);
+    ctx.lineTo(ax - 5, ay2 - 9);
+    ctx.lineTo(ax + 5, ay2 - 9);
+    ctx.closePath();
+    ctx.fill();
+  }
+  drawLabelPill(ctx, T2 >= T1 ? '升温：气柱沿管伸长' : '降温：气柱沿管缩短', tubeX + tubeW * 0.36, (y1 + tubeH + y2) / 2, COLORS.arrowHeating);
 
-  drawLocalFormulaBadge(ctx, tubeX + 22, panelY + 18, '核心判断：P = P₀', '水平液柱不产生竖直液面差', COLORS.accentGreen);
+  // (核心判断 badge removed — redundant with the right-side 压强分析 card.)
   drawAnalysisCards(ctx, canW * 0.71, 96, canW * 0.24, teaching);
   drawEquationCheck(ctx, canW * 0.71, 310, canW * 0.24, teaching);
-  drawThermometer(ctx, canW * 0.91, 116, T1, T2, anim);
+  drawThermometer(ctx, canW * 0.78, 486, T1, T2, anim);
 }
 
 function drawHorizontalTube(
@@ -695,11 +740,20 @@ function drawHorizontalTube(
   const gasW = gasLen * scale;
   const liqW = liqLen * scale;
   const tubeY = y;
+  // Background fill
   roundRect(ctx, x, tubeY, w, tubeH, 8);
-  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.fillStyle = surface(0.72);
   ctx.fill();
+  // Walls: closed (sealed) LEFT end where the gas sits, OPEN right end.
   ctx.strokeStyle = COLORS.containerBorder;
   ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x + w, tubeY);              // top-right (open end — start here)
+  ctx.lineTo(x + 8, tubeY);
+  ctx.arcTo(x, tubeY, x, tubeY + 8, 8);  // left-top corner
+  ctx.lineTo(x, tubeY + tubeH - 8);
+  ctx.arcTo(x, tubeY + tubeH, x + 8, tubeY + tubeH, 8); // left-bottom corner
+  ctx.lineTo(x + w, tubeY + tubeH);      // bottom edge back to open right end
   ctx.stroke();
 
   ctx.fillStyle = COLORS.gasFill;
@@ -707,7 +761,7 @@ function drawHorizontalTube(
   drawGasMolecules(ctx, x + 3, tubeY + 3, gasW, tubeH - 6, 9, time);
   drawMercuryGradient(ctx, x + 3 + gasW, tubeY + 3, liqW, tubeH - 6);
 
-  ctx.strokeStyle = 'rgba(35,45,55,0.28)';
+  ctx.strokeStyle = lineInk(0.28);
   ctx.setLineDash([5, 5]);
   ctx.beginPath();
   ctx.moveTo(x + 3 + gasW + liqW, tubeY + 8);
@@ -715,16 +769,10 @@ function drawHorizontalTube(
   ctx.stroke();
   ctx.setLineDash([]);
 
-  ctx.fillStyle = accent;
-  ctx.font = 'bold 14px -apple-system, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(label, x, tubeY - 16);
-  ctx.fillStyle = COLORS.textSecondary;
-  ctx.font = CANVAS_FONTS.annotation;
-  ctx.fillText(`L = ${gasLen.toFixed(1)} cm`, x + gasW / 2 - 24, tubeY + tubeH + 22);
-  ctx.fillText(`液柱 ${liqLen.toFixed(0)} cm`, x + gasW + liqW / 2 - 28, tubeY + tubeH + 22);
-  ctx.textAlign = 'right';
-  ctx.fillText(`P = ${pGas.toFixed(1)} cmHg   V = ${volume.toFixed(1)} cm³`, x + w, tubeY - 16);
+  drawLabelPill(ctx, label, x + 34, tubeY - 14, accent);
+  drawLabelPill(ctx, `P=${pGas.toFixed(1)}cmHg  V=${volume.toFixed(1)}cm³`, x + w - 96, tubeY - 14, COLORS.textSecondary);
+  drawLabelPill(ctx, `L=${gasLen.toFixed(1)}cm`, x + gasW / 2, tubeY + tubeH + 18, COLORS.dimensionLine);
+  drawLabelPill(ctx, `液柱${liqLen.toFixed(0)}cm`, x + gasW + liqW / 2, tubeY + tubeH + 18, COLORS.textSecondary);
 }
 
 function drawTiltedWorkbench(
@@ -735,27 +783,37 @@ function drawTiltedWorkbench(
 ) {
   drawStageTitle(ctx, canW, orientation, teaching);
   const panelX = canW * 0.07;
-  const panelY = 96;
+  const panelY = 116;
   const panelW = canW * 0.62;
-  const panelH = Math.min(440, canH - 150);
+  const panelH = Math.min(510, canH - 150);
   drawTubeCard(ctx, panelX, panelY - 42, panelW, panelH + 82, '倾斜玻璃管', '压强只取竖直有效高度 hsinθ', COLORS.accentGreen);
 
-  const lenPx = Math.min(560, panelW - 120);
-  const tubeH = 72;
+  // Shorter tubes + larger vertical spacing so the two rotated bars don't
+  // overlap each other (a 30° tilt sweeps a tall diagonal box).
+  const tubeH = 60;
   const rad = angle * Math.PI / 180 * (orientation === '倾斜开口向上' ? -1 : 1);
   const maxLen = Math.max(result.L2, L1) + h + 8;
+  const sinA = Math.abs(Math.sin(rad));
+  const cx = panelX + panelW * 0.45;
+  // Limit length so each tube's vertical sweep stays within its row band.
+  const rowGap = (panelH - 70) / 2;            // vertical room per tube
+  const maxSweep = rowGap - tubeH - 16;        // allowed vertical half-extent*2
+  const lenBySweep = sinA > 0.05 ? maxSweep / sinA : 600;
+  const lenPx = Math.max(180, Math.min(420, panelW - 220, lenBySweep));
   const scale = lenPx / maxLen;
   const animL2 = L1 + (result.L2 - L1) * anim;
-  const cx = panelX + panelW * 0.43;
+  const row1 = panelY + 70 + rowGap * 0.5;
+  const row2 = panelY + 70 + rowGap * 1.5;
 
-  drawTiltedTube(ctx, cx, panelY + 150, lenPx, tubeH, rad, scale, L1, h, '初始 T₁', result.P1, L1 * area, time, COLORS.isochoricLine, angle);
-  drawTiltedTube(ctx, cx, panelY + 318, lenPx, tubeH, rad, scale, animL2, h, '末状态 T₂', result.P2, animL2 * area, time, COLORS.arrowHeating, angle);
+  drawTiltedTube(ctx, cx, row1, lenPx, tubeH, rad, scale, L1, h, '初始 T₁', result.P1, L1 * area, time, COLORS.isochoricLine, angle);
+  drawTiltedTube(ctx, cx, row2, lenPx, tubeH, rad, scale, animL2, h, '末状态 T₂', result.P2, animL2 * area, time, COLORS.arrowHeating, angle);
 
-  const effH = getEffectiveHeight(h, orientation, angle);
-  drawLocalFormulaBadge(ctx, panelX + 24, panelY + 18, `核心判断：h sinθ = ${effH.toFixed(1)} cm`, teaching.pressureFormula, COLORS.accentGreen);
+  // (核心判断 badge removed — the right-side 压强分析 card and stage-title hint
+  //  already show hsinθ; the badge was redundant and collided with the lower
+  //  tube's state label.)
   drawAnalysisCards(ctx, canW * 0.71, 96, canW * 0.24, teaching);
   drawEquationCheck(ctx, canW * 0.71, 310, canW * 0.24, teaching);
-  drawThermometer(ctx, canW * 0.91, 116, T1, T2, anim);
+  drawThermometer(ctx, canW * 0.78, 486, T1, T2, anim);
 }
 
 function drawTiltedTube(
@@ -768,11 +826,20 @@ function drawTiltedTube(
   ctx.rotate(rad);
   const x = -lenPx / 2;
   const y = -tubeH / 2;
+  // Background fill
   roundRect(ctx, x, y, lenPx, tubeH, 8);
-  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.fillStyle = surface(0.72);
   ctx.fill();
+  // Walls: closed (sealed) gas end on the local LEFT, OPEN end on the right.
   ctx.strokeStyle = COLORS.containerBorder;
   ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x + lenPx, y);
+  ctx.lineTo(x + 8, y);
+  ctx.arcTo(x, y, x, y + 8, 8);
+  ctx.lineTo(x, y + tubeH - 8);
+  ctx.arcTo(x, y + tubeH, x + 8, y + tubeH, 8);
+  ctx.lineTo(x + lenPx, y + tubeH);
   ctx.stroke();
   const gasW = gasLen * scale;
   const liqW = liqLen * scale;
@@ -780,11 +847,13 @@ function drawTiltedTube(
   ctx.fillRect(x + 3, y + 3, gasW, tubeH - 6);
   drawGasMolecules(ctx, x + 3, y + 3, gasW, tubeH - 6, 8, time);
   drawMercuryGradient(ctx, x + 3 + gasW, y + 3, liqW, tubeH - 6);
-  ctx.fillStyle = accent;
-  ctx.font = 'bold 14px -apple-system, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(label, x, y - 16);
   ctx.restore();
+
+  // Tube label (drawn unrotated, with pill) at the gas (closed) end so it
+  // never collides with the other tube's text.
+  const closedX = cx + Math.cos(rad) * (-lenPx / 2);
+  const closedY = cy + Math.sin(rad) * (-lenPx / 2);
+  drawLabelPill(ctx, label, closedX, closedY - 22, accent);
 
   const gasEndX = cx + Math.cos(rad) * (-lenPx / 2 + gasLen * scale);
   const gasEndY = cy + Math.sin(rad) * (-lenPx / 2 + gasLen * scale);
@@ -800,14 +869,14 @@ function drawTiltedTube(
   ctx.lineTo(liqEndX, gasEndY);
   ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = COLORS.dimensionLine;
-  ctx.font = CANVAS_FONTS.label;
-  ctx.textAlign = 'left';
-  ctx.fillText(`h = ${liqLen.toFixed(0)} cm`, (gasEndX + liqEndX) / 2 + 8, (gasEndY + liqEndY) / 2 - 8);
-  ctx.fillText(`h sin${angle}°`, liqEndX + 8, (gasEndY + liqEndY) / 2);
-  ctx.fillStyle = COLORS.textSecondary;
-  ctx.font = CANVAS_FONTS.annotation;
-  ctx.fillText(`P = ${pGas.toFixed(1)} cmHg, V = ${volume.toFixed(1)} cm³`, cx - lenPx / 2, cy + tubeH / 2 + 34);
+  // h label near the mercury, hsinθ label offset further out — both with pills,
+  // separated vertically so they don't overlap.
+  drawLabelPill(ctx, `h=${liqLen.toFixed(0)}cm`, (gasEndX + liqEndX) / 2 + 4, (gasEndY + liqEndY) / 2 - 16, COLORS.dimensionLine);
+  drawLabelPill(ctx, `h·sin${angle}°`, liqEndX + 34, liqEndY + 10, COLORS.dimensionLine);
+  // State text below the open end, following the tilt direction.
+  const stateX = cx + Math.cos(rad) * (lenPx / 2) * 0.2;
+  const stateY = cy + Math.abs(Math.sin(rad)) * (lenPx / 2) + tubeH / 2 + 22;
+  drawLabelPill(ctx, `P=${pGas.toFixed(1)}cmHg  V=${volume.toFixed(1)}cm³`, stateX, stateY, COLORS.textSecondary);
 }
 
 function drawLocalFormulaBadge(
@@ -836,8 +905,8 @@ function drawUTube(
   const tubeW = 70;
   const armGap = 110;
   const cx = canW * 0.38;
-  const topY = 118;
-  const armHeight = Math.min(canH - 230, 470);
+  const topY = 132;
+  const armHeight = Math.min(canH - 250, 460);
 
   const leftArmX = cx - armGap / 2 - tubeW;
   const rightArmX = cx + armGap / 2;
@@ -888,11 +957,14 @@ function drawUTube(
   const rightLiqTop = liqBottomY - animHR * scale;
   const deltaH = Math.abs(animHR - animHL);
 
-  // Mercury in U-tube
-  drawMercuryGradient(ctx, leftArmX + 2, leftLiqTop, tubeW - 4, liqBottomY - leftLiqTop);
-  ctx.fillStyle = '#B0B0B0';
-  ctx.fillRect(leftArmX + tubeW - 2, liqBottomY, rightArmX - leftArmX - tubeW + 4, tubeW - 2);
-  drawMercuryGradient(ctx, rightArmX + 2, rightLiqTop, tubeW - 4, liqBottomY - rightLiqTop);
+  // Mercury — ONE continuous body: both arm columns + a full-width bottom
+  // channel that runs through the U-bend connecting them (was a disconnected
+  // flat-grey block before).
+  const channelTopY = liqBottomY; // top of the horizontal bottom channel
+  drawMercuryGradient(ctx, leftArmX + 2, leftLiqTop, tubeW - 4, channelTopY - leftLiqTop);
+  drawMercuryGradient(ctx, rightArmX + 2, rightLiqTop, tubeW - 4, channelTopY - rightLiqTop);
+  // bottom channel spanning both arms, down through the rounded bend
+  drawMercuryGradient(ctx, leftArmX + 2, channelTopY, (rightArmX + tubeW - 2) - (leftArmX + 2), tubeW + 12);
 
   // Gas
   const gasTopY = leftLiqTop - animL2 * scale;
@@ -937,8 +1009,8 @@ function drawDualSealedTube(
   L1: number, h: number, result: LiquidColumnResult, anim: number, time: number,
 ) {
   const tubeW = 88;
-  const topY = 118;
-  const tubePixelH = Math.min(canH - 250, 470);
+  const topY = 132;
+  const tubePixelH = Math.min(canH - 270, 460);
   const cx = canW * 0.38;
 
   const totalContent = L1 * 2 + h;
@@ -990,19 +1062,14 @@ function drawDualSealedTube(
   drawDimensionLine(ctx, tubeLeft + tubeW, liqTopY, liqBottomY, `h=${h}`, 'right');
   drawDimensionLine(ctx, tubeLeft + tubeW, gasBottomStartY, bottomY, `L冷=${animLRight.toFixed(1)}`, 'right');
 
-  // Labels
-  ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = 'bold 14px -apple-system, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('加热端密封气体', cx, (topY + gasTopEndY) / 2 + 4);
-  ctx.fillText('冷端密封气体', cx, (gasBottomStartY + bottomY) / 2 + 4);
+  // Labels (pills so they stay readable over the gas fill / molecules)
+  drawLabelPill(ctx, '加热端密封气体', cx, (topY + gasTopEndY) / 2, COLORS.textPrimary);
+  drawLabelPill(ctx, '冷端密封气体', cx, (gasBottomStartY + bottomY) / 2, COLORS.textPrimary);
+  // "加热" marker inside the top of the tube, clear of the card subtitle.
+  drawLabelPill(ctx, '↑ 加热', cx, topY + 16, COLORS.arrowHeating);
 
-  ctx.fillStyle = COLORS.arrowHeating;
-  ctx.font = CANVAS_FONTS.label;
-  ctx.fillText('↑ 加热', cx, topY - 12);
-
-  drawPressureArrow(ctx, tubeLeft - 28, liqTopY + 8, 34, 'down', 'P热', COLORS.arrowPressure);
-  drawPressureArrow(ctx, tubeLeft + tubeW + 28, liqBottomY - 8, 34, 'up', 'P冷', COLORS.accentGreen);
+  drawPressureArrow(ctx, tubeLeft - 28, liqTopY + 8, 34, 'down', 'P热', COLORS.arrowPressure, 'left');
+  drawPressureArrow(ctx, tubeLeft + tubeW + 28, liqBottomY - 8, 34, 'up', 'P冷', COLORS.accentGreen, 'right');
   drawMiniResultStrip(ctx, panelX + 18, topY + tubePixelH + 78, panelW - 36, [
     `L热=${animLLeft.toFixed(2)} cm`,
     `L冷=${animLRight.toFixed(2)} cm`,
@@ -1030,7 +1097,7 @@ function drawThermometer(
   ctx.strokeRect(x + 3, y, thermW - 6, thermH);
 
   // Scale marks
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.strokeStyle = lineInk(0.18);
   ctx.lineWidth = 0.8;
   for (let i = 0; i <= 4; i++) {
     const markY = y + thermH - (thermH * i / 4);
