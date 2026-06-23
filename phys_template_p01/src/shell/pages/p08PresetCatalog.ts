@@ -7,6 +7,7 @@ export const P08_PRODUCT_CATEGORY = 'P-08';
 interface P08ModuleConfig {
   key: 'electrostatic' | 'particle-electric' | 'magnetostatic' | 'particle-magnetic' | 'combined-field';
   title: string;
+  shortTitle: string;
   summary: string;
   teachingUse: string;
   recommendedPresetId: string;
@@ -18,6 +19,7 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'electrostatic',
     title: '静电场',
+    shortTitle: '静电场',
     summary: '单点电荷、双点电荷与平行板电容器，聚焦电场线、等势线、电势分布和两点电势差。',
     teachingUse: '建议先看“单点电荷场”，再切到“双点电荷场”和“平行板电容器”，把方向、等值线和整体电势高低变化串起来讲。',
     recommendedPresetId: 'P02-EMF001-point-charge-field',
@@ -30,6 +32,7 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'particle-electric',
     title: '带电粒子在电场中',
+    shortTitle: '电场粒子',
     summary: '平行板交变电场中的往返运动、电容器偏转模型与两段式电场，聚焦水平匀速、竖直往返、偏转量和出口偏角。',
     teachingUse: '建议先看“平行板交变电场中的粒子往返运动”，再切到“两段式电场模型”把入口速度与偏转串起来，最后用“电容器偏转模型”做单段偏转对比。',
     recommendedPresetId: 'P02-EMF013-two-stage-efield',
@@ -42,6 +45,7 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'magnetostatic',
     title: '静磁场',
+    shortTitle: '静磁场',
     summary: '长直导线、圆形电流、螺线管磁感线，以及导线在外磁场中的安培力方向演示。',
     teachingUse: '建议先看“长直导线磁场”，再切到“螺线管磁场”和“安培力方向演示”完成定则与受力方向串讲。',
     recommendedPresetId: 'P02-EMF021-wire-bfield',
@@ -55,6 +59,7 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'particle-magnetic',
     title: '带电粒子在磁场中',
+    shortTitle: '磁场粒子',
     summary: '洛伦兹力圆周运动、直线/圆形边界、平移圆、旋转圆、放缩圆，以及磁聚焦与磁发散。',
     teachingUse: '建议先看“洛伦兹力圆周运动”，再进入直线/圆形边界，以及平移圆/旋转圆/放缩圆和磁聚焦/磁发散的成对对比。',
     recommendedPresetId: 'P02-EM003-cyclotron-motion',
@@ -72,6 +77,7 @@ export const P08_MODULES: readonly P08ModuleConfig[] = [
   {
     key: 'combined-field',
     title: '复合场',
+    shortTitle: '复合场',
     summary: '速度选择器、回旋加速器、电磁流量计，以及静电场 / 重力场圆周运动临界模型。',
     teachingUse: '建议先看“速度选择器”，再切到“回旋加速器”、“电磁流量计”和“静电场 / 重力场圆周运动临界”。',
     recommendedPresetId: 'P02-EMF041-velocity-selector',
@@ -106,6 +112,17 @@ const P08_HIDDEN_HOME_PRESET_IDS = new Set<string>([
 export const P08_PRESET_IDS: Set<string> = new Set(
   P08_MODULES.flatMap((module) => module.presetIds),
 );
+
+export const P08_SPECIAL_PRESET_IDS: ReadonlySet<string> = new Set([
+  'P02-EMF038-rotation-circle',
+  'P02-EMF011-efield-acceleration',
+  'P02-EMF037-translation-circle',
+  'P02-EMF039-scaling-circle',
+  'P02-EMF033-magnetic-focusing',
+  'P02-EMF036-magnetic-divergence',
+  'P02-EMF042-cyclotron',
+  'P02-EMF043-em-flowmeter',
+]);
 
 const P08_SCENE_TEACHING_USES: Record<string, string> = {
   'P02-EMF001-point-charge-field': '库仑定律、场强与电势的空间分布。',

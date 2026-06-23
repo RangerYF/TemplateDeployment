@@ -15,10 +15,14 @@ import {
   type MagneticFieldDirection,
   type MagneticSharedParams,
 } from './p08MagneticDiagramUtils';
+import { AppLayout } from '@/shell/layout/AppLayout';
+import { useP08SpecialPageNav } from '@/shell/hooks/useP08SpecialPageNav';
 
 interface Props {
-  onBack: () => void;
+  onSelectPreset: (id: string) => void;
 }
+
+const PRESET_ID = 'P02-EMF033-magnetic-focusing';
 
 const PAGE_WIDTH = 1340;
 const PAGE_HEIGHT = 660;
@@ -31,7 +35,8 @@ const CARD_RIGHT = { x: 696, y: 88 };
 const SYMBOL_SPACING = 30;
 const TRAJECTORY_COLORS = ['#DC2626', '#2563EB', '#D97706', '#0F766E', '#7C3AED', '#0891B2', '#BE185D', '#0EA5E9'];
 
-export function P08MagneticFocusDivergencePage({ onBack }: Props) {
+export function P08MagneticFocusDivergencePage({ onSelectPreset }: Props) {
+  const { tabs, handleSelectTab, moduleSelector } = useP08SpecialPageNav(PRESET_ID, onSelectPreset);
   const [fieldDirection, setFieldDirection] = useState<MagneticFieldDirection>('into');
   const [chargeSign, setChargeSign] = useState<1 | -1>(1);
   const [particleCount, setParticleCount] = useState(7);
@@ -132,91 +137,71 @@ export function P08MagneticFocusDivergencePage({ onBack }: Props) {
     [fieldRadius],
   );
 
-  const pageTitle = '磁聚焦和磁发散';
-
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: COLORS.bgPage }}>
-      <aside
-        className="flex w-[328px] shrink-0 flex-col overflow-y-auto border-r px-4 py-4"
-        style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg }}
-      >
-        <button
-          onClick={onBack}
-          className="mb-3 text-left text-xs transition-opacity hover:opacity-70"
-          style={{ color: COLORS.textSecondary }}
-        >
-          ← 返回 P-08
-        </button>
-        <h1 className="text-lg font-semibold" style={{ color: COLORS.text }}>
-          {pageTitle}
-        </h1>
-        <p className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-          左右并排对比“一点发散成平行”与“平行入射，会聚于一点”。本页固定采用“轨道半径 = 磁场半径”的课堂前提，不再单独调 `v₀ / B / q / m`。
-        </p>
-
-        <section className="mt-5 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>交互参数</h2>
-          <div className="mt-4 space-y-4">
-            <Field label="磁场方向">
-              <Select
-                value={fieldDirection}
-                onChange={(event) => setFieldDirection(event.target.value === 'out' ? 'out' : 'into')}
-                options={[
-                  { value: 'into', label: '入屏 ×' },
-                  { value: 'out', label: '出屏 ·' },
-                ]}
-              />
-            </Field>
-            <Field label="粒子电荷">
-              <Select
-                value={chargeSign > 0 ? 'positive' : 'negative'}
-                onChange={(event) => setChargeSign(event.target.value === 'negative' ? -1 : 1)}
-                options={[
-                  { value: 'positive', label: '正电荷' },
-                  { value: 'negative', label: '负电荷' },
-                ]}
-              />
-            </Field>
-            <SliderField label="粒子数量" value={particleCount} unit="条" min={4} max={10} step={1} onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>显示选项</h2>
-          <div className="mt-4 space-y-3">
-            <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
-            <ToggleRow label="显示圆心" checked={showCenters} onChange={setShowCenters} />
-            <ToggleRow label="显示公式" checked={showFormula} onChange={setShowFormula} />
-            <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>几何约束</h2>
-          <div className="mt-3 space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
-            <Metric label="参考半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
-            <Metric label="场区半径" value="固定与轨道半径一致" />
-            <Metric label="画面重点" value="一点发散成平行 / 平行入射会聚一点" />
-          </div>
-        </section>
-      </aside>
-
-      <main className="min-w-0 flex-1 overflow-auto p-5">
-        <section
-          className="rounded-[28px] border p-5"
-          style={{
-            borderColor: COLORS.border,
-            backgroundColor: COLORS.bg,
-            boxShadow: SHADOWS.md,
-          }}
-        >
+    <AppLayout
+      title="P-08 电磁场模拟器"
+      tabs={tabs}
+      activeTabId={PRESET_ID}
+      onSelectTab={handleSelectTab}
+      moduleSelector={moduleSelector}
+      pageStyle={{ background: COLORS.bgPage }}
+      sidebar={
+        <div className="flex h-full flex-col">
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>核心参数</h2>
+            <div className="space-y-4">
+              <Field label="磁场方向">
+                <Select
+                  value={fieldDirection}
+                  onChange={(event) => setFieldDirection(event.target.value === 'out' ? 'out' : 'into')}
+                  options={[
+                    { value: 'into', label: '入屏 ×' },
+                    { value: 'out', label: '出屏 ·' },
+                  ]}
+                />
+              </Field>
+              <Field label="粒子电荷">
+                <Select
+                  value={chargeSign > 0 ? 'positive' : 'negative'}
+                  onChange={(event) => setChargeSign(event.target.value === 'negative' ? -1 : 1)}
+                  options={[
+                    { value: 'positive', label: '正电荷' },
+                    { value: 'negative', label: '负电荷' },
+                  ]}
+                />
+              </Field>
+              <SliderField label="粒子数量" value={particleCount} unit="条" min={4} max={10} step={1} onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
+            </div>
+          </section>
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>显示选项</h2>
+            <div className="space-y-3">
+              <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
+              <ToggleRow label="显示圆心" checked={showCenters} onChange={setShowCenters} />
+              <ToggleRow label="显示公式" checked={showFormula} onChange={setShowFormula} />
+              <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
+            </div>
+          </section>
+          <section className="p-4">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>几何约束</h2>
+            <div className="space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
+              <Metric label="参考半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
+              <Metric label="场区半径" value="固定与轨道半径一致" />
+              <Metric label="画面重点" value="一点发散成平行 / 平行入射会聚一点" />
+            </div>
+          </section>
+        </div>
+      }
+    >
+      <div className="flex-1 overflow-auto p-5">
+        <section className="rounded-[28px] border p-5" style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg, boxShadow: SHADOWS.md }}>
           <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-base font-semibold" style={{ color: COLORS.text }}>
                 磁聚焦和磁发散
               </h2>
               <p className="mt-1 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-                左侧固定展示“一点发散成平行”，右侧固定展示“平行入射，会聚于一点”。为了保证课堂图形清楚，本页直接把“回旋半径 = 场区半径”作为约束，不再展示额外参数。
+                左侧固定展示"一点发散成平行"，右侧固定展示"平行入射，会聚于一点"。为了保证课堂图形清楚，本页直接把"回旋半径 = 场区半径"作为约束，不再展示额外参数。
               </p>
             </div>
             {showFormula && (
@@ -270,8 +255,8 @@ export function P08MagneticFocusDivergencePage({ onBack }: Props) {
             />
           </svg>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 

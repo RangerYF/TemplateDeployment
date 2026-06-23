@@ -1,6 +1,9 @@
 export { App } from './App';
 export { MainLayout } from './layout/MainLayout';
+export { AppLayout } from './layout/AppLayout';
+export { TopBar } from './layout/TopBar';
 export { ParamPanel } from './panels/ParamPanel';
 export { InfoPanel } from './panels/InfoPanel';
+export { RightSidebar } from './panels/RightSidebar';
 export { CanvasContainer } from './canvas/CanvasContainer';
 export { TimelineBar } from './timeline/TimelineBar';

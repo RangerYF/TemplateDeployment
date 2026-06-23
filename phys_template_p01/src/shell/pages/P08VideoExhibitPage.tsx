@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 
 interface Props {
-  onBack: () => void;
+  onSelectPreset: (id: string) => void;
   presetId: string;
 }
 
@@ -45,7 +45,7 @@ const VIDEO_CONFIGS: Record<string, VideoConfig> = {
   },
 };
 
-export function P08VideoExhibitPage({ onBack, presetId }: Props) {
+export function P08VideoExhibitPage({ onSelectPreset, presetId }: Props) {
   const config = useMemo(() => VIDEO_CONFIGS[presetId] ?? VIDEO_CONFIGS['P02-EMF042-cyclotron']!, [presetId]);
 
   return (
@@ -58,7 +58,7 @@ export function P08VideoExhibitPage({ onBack, presetId }: Props) {
         }}
       >
         <button
-          onClick={onBack}
+          onClick={() => onSelectPreset('P02-EMF041-velocity-selector')}
           className="text-left text-xs transition-opacity hover:opacity-70"
           style={{ color: COLORS.textSecondary }}
         >

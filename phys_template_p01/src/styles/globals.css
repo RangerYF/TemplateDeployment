@@ -2,10 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────────────────────
+   P09 对齐主题变量(第1轮:仅浅色;dark-ready,后续轮追加 [data-theme="dark"] + 开关)
+   双强调色规则:
+     --theme-primary (#2563eb 蓝) = 顶栏场景 tab 选中态(导航强调)
+     --accent-green  (#00C06B 绿) = 右栏控件(滑块/输入/开关),== styles/tokens.ts COLORS.primary
+   说明:tokens.ts / colors.ts(#32D583,仅 Tailwind 遗留)本轮不改;新布局组件直接用下列 var。
+   ────────────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --theme-bg: #f6f8fb;
+  --theme-surface: #ffffff;
+  --theme-surface-hover: #f0f2f5;
+  --theme-border: #e2e8f0;
+  --theme-text: #0f172a;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #64748b;
+  --theme-primary: #2563eb;
+  --theme-primary-hover: #1d4ed8;
+  --theme-primary-light: #eff6ff;
+  --theme-success: #16a34a;
+  --theme-success-light: #dcfce7;
+  --accent-green: #00C06B;
+  --accent-green-focus: rgba(0, 192, 107, 0.1);
+  --track-bg: #F5F5F7;
+  --theme-panel-bg: #ffffff;
+  --theme-topbar-bg: #ffffff;
+  --theme-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --theme-radius: 8px;
+  --theme-radius-lg: 12px;
+}
+
 html,
 body,
 #root {
   height: 100%;
+  overflow: hidden;
 }
 
 body {

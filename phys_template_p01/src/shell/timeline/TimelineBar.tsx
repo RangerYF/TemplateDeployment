@@ -138,7 +138,7 @@ interface PlaybackControlsModel {
   handleClearTrajectory: () => void;
 }
 
-function usePlaybackControls(): PlaybackControlsModel {
+export function usePlaybackControls(): PlaybackControlsModel {
   const status = useSimulationStore((s) => s.simulationState.status);
   const currentTime = useSimulationStore((s) => s.simulationState.timeline.currentTime);
   const duration = useSimulationStore((s) => s.simulationState.timeline.duration);

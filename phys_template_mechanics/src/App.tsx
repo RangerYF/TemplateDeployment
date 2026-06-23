@@ -224,7 +224,11 @@ function App() {
     }
     return (
       <ToastProvider>
-        <EditorLayout moduleId={group.module} sceneId={route.sceneId} />
+        <EditorLayout
+          moduleId={group.module}
+          sceneId={route.sceneId}
+          onSelectScene={openScene}
+        />
       </ToastProvider>
     )
   }

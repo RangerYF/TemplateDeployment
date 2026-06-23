@@ -4,6 +4,8 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
+import { AppLayout } from '@/shell/layout/AppLayout';
+import { useP08SpecialPageNav } from '@/shell/hooks/useP08SpecialPageNav';
 import {
   buildRectFieldSymbolPositions,
   buildRotationTrajectories,
@@ -18,8 +20,10 @@ import {
 } from './p08MagneticDiagramUtils';
 
 interface Props {
-  onBack: () => void;
+  onSelectPreset: (id: string) => void;
 }
+
+const PRESET_ID = 'P02-EMF038-rotation-circle';
 
 const SVG_WIDTH = 880;
 const SVG_HEIGHT = 620;
@@ -46,7 +50,8 @@ const TRAJECTORY_COLORS = [
 const FORMULA_TEXT = 'R = m v₀ / (|q| B)';
 const FORMULA_NOTE = '同一 v₀、m、|q|、B 下，所有轨迹半径相同';
 
-export function P08RotationCirclePage({ onBack }: Props) {
+export function P08RotationCirclePage({ onSelectPreset }: Props) {
+  const { tabs, handleSelectTab, moduleSelector } = useP08SpecialPageNav(PRESET_ID, onSelectPreset);
   const [fieldDirection, setFieldDirection] = useState<MagneticFieldDirection>('into');
   const [chargeSign, setChargeSign] = useState<1 | -1>(1);
   const [speed, setSpeed] = useState(2.2);
@@ -182,28 +187,17 @@ export function P08RotationCirclePage({ onBack }: Props) {
   }, [particleCount, trajectories]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: COLORS.bgPage }}>
-      <aside
-        className="flex w-[332px] shrink-0 flex-col overflow-y-auto border-r px-4 py-4"
-        style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg }}
-      >
-        <button
-          onClick={onBack}
-          className="mb-3 text-left text-xs transition-opacity hover:opacity-70"
-          style={{ color: COLORS.textSecondary }}
-        >
-          ← 返回 P-08
-        </button>
-
-        <h1 className="text-lg font-semibold" style={{ color: COLORS.text }}>
-          中心全向发射的完整旋转圆
-        </h1>
-        <p className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-          所有粒子从画布中央同一点 P 向各个方向射入匀强磁场；不同发射方向只改变圆心位置，每条轨迹都显示为完整圆。
-        </p>
-
-        <section className="mt-5 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>核心参数</h2>
+    <AppLayout
+      title="P-08 电磁场模拟器"
+      tabs={tabs}
+      activeTabId={PRESET_ID}
+      onSelectTab={handleSelectTab}
+      moduleSelector={moduleSelector}
+      pageStyle={{ background: COLORS.bgPage }}
+      sidebar={
+        <div className="flex h-full flex-col">
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>核心参数</h2>
           <div className="mt-4 space-y-4">
             <Field label="磁场方向">
               <Select
@@ -231,34 +225,35 @@ export function P08RotationCirclePage({ onBack }: Props) {
             <SliderField label="质量 m" value={mass} unit="kg" min={0.02} max={0.3} step={0.01} onChange={setMass} precision={2} />
             <SliderField label="粒子数量" value={particleCount} unit="个" min={4} max={12} step={1} onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
           </div>
-        </section>
+          </section>
 
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>显示选项</h2>
-          <div className="mt-4 space-y-3">
-            <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
-            <ToggleRow label="显示轨道圆心" checked={showCenters} onChange={setShowCenters} />
-            <ToggleRow label="显示公式" checked={showFormula} onChange={setShowFormula} />
-            <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>结果解读</h2>
-          <div className="mt-3 space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
-            <Metric label="共同轨道半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
-            <Metric label="当前旋转方向" value={rotationDirectionLabel} />
-            <Metric label="当前高亮轨迹" value={highlighted ? `${highlighted.launchAngleDeg.toFixed(0)}° 方向` : '—'} />
-            <Metric label="趋势总结" value="v₀↑ 或 m↑ → R↑" />
-            <Metric label="趋势总结" value="B↑ 或 |q|↑ → R↓" />
-            <div className="mt-3 rounded-2xl px-3 py-3 text-[12px]" style={{ backgroundColor: COLORS.primaryLight, color: COLORS.textSecondary, lineHeight: 1.75 }}>
-              不同发射方向只改变圆心位置，不改变半径大小。
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>显示选项</h2>
+            <div className="space-y-3">
+              <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
+              <ToggleRow label="显示轨道圆心" checked={showCenters} onChange={setShowCenters} />
+              <ToggleRow label="显示公式" checked={showFormula} onChange={setShowFormula} />
+              <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
             </div>
-          </div>
-        </section>
-      </aside>
+          </section>
 
-      <main className="min-w-0 flex-1 overflow-auto p-5">
+          <section className="p-4">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>结果解读</h2>
+            <div className="space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
+              <Metric label="共同轨道半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
+              <Metric label="当前旋转方向" value={rotationDirectionLabel} />
+              <Metric label="当前高亮轨迹" value={highlighted ? `${highlighted.launchAngleDeg.toFixed(0)}° 方向` : '—'} />
+              <Metric label="趋势总结" value="v₀↑ 或 m↑ → R↑" />
+              <Metric label="趋势总结" value="B↑ 或 |q|↑ → R↓" />
+              <div className="mt-3 rounded-2xl px-3 py-3 text-[12px]" style={{ backgroundColor: COLORS.primaryLight, color: COLORS.textSecondary, lineHeight: 1.75 }}>
+                不同发射方向只改变圆心位置，不改变半径大小。
+              </div>
+            </div>
+          </section>
+        </div>
+      }
+    >
+      <div className="flex-1 overflow-auto p-5">
         <section
           className="rounded-[30px] border p-5"
           style={{
@@ -421,8 +416,8 @@ export function P08RotationCirclePage({ onBack }: Props) {
             </text>
           </svg>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 

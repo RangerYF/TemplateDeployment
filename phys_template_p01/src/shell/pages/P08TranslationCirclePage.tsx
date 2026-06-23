@@ -4,6 +4,8 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
+import { AppLayout } from '@/shell/layout/AppLayout';
+import { useP08SpecialPageNav } from '@/shell/hooks/useP08SpecialPageNav';
 import {
   buildRectFieldSymbolPositions,
   computeOrbitRadius,
@@ -15,8 +17,10 @@ import {
 } from './p08MagneticDiagramUtils';
 
 interface Props {
-  onBack: () => void;
+  onSelectPreset: (id: string) => void;
 }
+
+const PRESET_ID = 'P02-EMF037-translation-circle';
 
 interface TranslationTrack {
   source: { x: number; y: number };
@@ -87,7 +91,8 @@ function buildTranslationTracks(options: {
   });
 }
 
-export function P08TranslationCirclePage({ onBack }: Props) {
+export function P08TranslationCirclePage({ onSelectPreset }: Props) {
+  const { tabs, handleSelectTab, moduleSelector } = useP08SpecialPageNav(PRESET_ID, onSelectPreset);
   const [fieldDirection, setFieldDirection] = useState<MagneticFieldDirection>('into');
   const [chargeSign, setChargeSign] = useState<1 | -1>(1);
   const [speed, setSpeed] = useState(2);
@@ -206,77 +211,68 @@ export function P08TranslationCirclePage({ onBack }: Props) {
   const directionLabel = chargeSign * (fieldDirection === 'out' ? 1 : -1) > 0 ? '顺时针偏转' : '逆时针偏转';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: COLORS.bgPage }}>
-      <aside
-        className="flex w-[336px] shrink-0 flex-col overflow-y-auto border-r px-4 py-4"
-        style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg }}
-      >
-        <button
-          onClick={onBack}
-          className="mb-3 text-left text-xs transition-opacity hover:opacity-70"
-          style={{ color: COLORS.textSecondary }}
-        >
-          ← 返回 P-08
-        </button>
-        <h1 className="text-lg font-semibold" style={{ color: COLORS.text }}>
-          平移圆模型
-        </h1>
-        <p className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-          同速度、同荷质比、同磁场下，粒子从左侧不同位置进入磁场时，会形成一组半径相同、彼此平移的圆弧轨迹。
-        </p>
+    <AppLayout
+      title="P-08 电磁场模拟器"
+      tabs={tabs}
+      activeTabId={PRESET_ID}
+      onSelectTab={handleSelectTab}
+      moduleSelector={moduleSelector}
+      pageStyle={{ background: COLORS.bgPage }}
+      sidebar={
+        <div className="flex h-full flex-col">
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>核心参数</h2>
+            <div className="space-y-4">
+              <Field label="磁场方向">
+                <Select
+                  value={fieldDirection}
+                  onChange={(event) => setFieldDirection(event.target.value === 'out' ? 'out' : 'into')}
+                  options={[
+                    { value: 'into', label: '入屏 ×' },
+                    { value: 'out', label: '出屏 ·' },
+                  ]}
+                />
+              </Field>
+              <Field label="粒子电荷">
+                <Select
+                  value={chargeSign > 0 ? 'positive' : 'negative'}
+                  onChange={(event) => setChargeSign(event.target.value === 'negative' ? -1 : 1)}
+                  options={[
+                    { value: 'positive', label: '正电荷' },
+                    { value: 'negative', label: '负电荷' },
+                  ]}
+                />
+              </Field>
+              <SliderField label="共同速度 v" value={speed} unit="m/s" min={0.8} max={4.8} step={0.1} onChange={setSpeed} />
+              <SliderField label="磁感应强度 B" value={fieldMagnitude} unit="T" min={0.3} max={2.6} step={0.1} onChange={setFieldMagnitude} />
+              <SliderField label="电荷量 |q|" value={chargeMagnitude} unit="C" min={0.02} max={0.2} step={0.01} onChange={setChargeMagnitude} precision={2} />
+              <SliderField label="质量 m" value={mass} unit="kg" min={0.02} max={0.3} step={0.01} onChange={setMass} precision={2} />
+              <SliderField label="粒子数量" value={particleCount} unit="个" min={3} max={8} step={1} onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
+              <SliderField label="入射点间距" value={entrySpacing} unit="px" min={42} max={78} step={2} onChange={setEntrySpacing} precision={0} />
+            </div>
+          </section>
 
-        <section className="mt-5 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>核心参数</h2>
-          <div className="mt-4 space-y-4">
-            <Field label="磁场方向">
-              <Select
-                value={fieldDirection}
-                onChange={(event) => setFieldDirection(event.target.value === 'out' ? 'out' : 'into')}
-                options={[
-                  { value: 'into', label: '入屏 ×' },
-                  { value: 'out', label: '出屏 ·' },
-                ]}
-              />
-            </Field>
-            <Field label="粒子电荷">
-              <Select
-                value={chargeSign > 0 ? 'positive' : 'negative'}
-                onChange={(event) => setChargeSign(event.target.value === 'negative' ? -1 : 1)}
-                options={[
-                  { value: 'positive', label: '正电荷' },
-                  { value: 'negative', label: '负电荷' },
-                ]}
-              />
-            </Field>
-            <SliderField label="共同速度 v" value={speed} unit="m/s" min={0.8} max={4.8} step={0.1} onChange={setSpeed} />
-            <SliderField label="磁感应强度 B" value={fieldMagnitude} unit="T" min={0.3} max={2.6} step={0.1} onChange={setFieldMagnitude} />
-            <SliderField label="电荷量 |q|" value={chargeMagnitude} unit="C" min={0.02} max={0.2} step={0.01} onChange={setChargeMagnitude} precision={2} />
-            <SliderField label="质量 m" value={mass} unit="kg" min={0.02} max={0.3} step={0.01} onChange={setMass} precision={2} />
-            <SliderField label="粒子数量" value={particleCount} unit="个" min={3} max={8} step={1} onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
-            <SliderField label="入射点间距" value={entrySpacing} unit="px" min={42} max={78} step={2} onChange={setEntrySpacing} precision={0} />
-          </div>
-        </section>
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>显示选项</h2>
+            <div className="space-y-3">
+              <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
+              <ToggleRow label="显示轨道圆心" checked={showCenters} onChange={setShowCenters} />
+              <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
+            </div>
+          </section>
 
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>显示选项</h2>
-          <div className="mt-4 space-y-3">
-            <ToggleRow label="显示磁场符号" checked={showFieldSymbols} onChange={setShowFieldSymbols} />
-            <ToggleRow label="显示轨道圆心" checked={showCenters} onChange={setShowCenters} />
-            <ToggleRow label="显示动画粒子" checked={showAnimatedParticles} onChange={setShowAnimatedParticles} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>结果解读</h2>
-          <div className="mt-3 space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
-            <Metric label="共同轨道半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
-            <Metric label="偏转方向" value={directionLabel} />
-            <Metric label="画面重点" value="同半径，只平移不变形" />
-          </div>
-        </section>
-      </aside>
-
-      <main className="min-w-0 flex-1 overflow-auto p-5">
+          <section className="p-4">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>结果解读</h2>
+            <div className="space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
+              <Metric label="共同轨道半径 R" value={`${orbitRadiusPhysical.toFixed(3)} m`} />
+              <Metric label="偏转方向" value={directionLabel} />
+              <Metric label="画面重点" value="同半径，只平移不变形" />
+            </div>
+          </section>
+        </div>
+      }
+    >
+      <div className="flex-1 overflow-auto p-5">
         <section
           className="rounded-[30px] border p-5"
           style={{
@@ -394,8 +390,8 @@ export function P08TranslationCirclePage({ onBack }: Props) {
             </text>
           </svg>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 

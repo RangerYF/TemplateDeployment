@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useSimulationStore } from '@/store';
 import { simulator } from '@/core/engine/simulator';
 import { COLORS } from '@/styles/tokens';
@@ -44,8 +44,9 @@ function SectionTitle({ children }: { children: ReactNode }) {
 
 /**
  * 右侧信息面板 — 读取 PhysicsResult 展示物理数据
+ * variant='aside'(默认)= 旧右栏(自带 aside+头部);'sidebar' = P09 右栏内裸渲染(无 aside/头部)。
  */
-export function InfoPanel({ presetId }: { presetId?: string }) {
+export function InfoPanel({ presetId, variant = 'aside' }: { presetId?: string; variant?: 'aside' | 'sidebar' }) {
   const storeResult = useSimulationStore((s) => s.simulationState.currentResult);
   const duration = useSimulationStore((s) => s.simulationState.timeline.duration);
   const entities = useSimulationStore((s) => s.simulationState.scene.entities);
@@ -124,36 +125,13 @@ export function InfoPanel({ presetId }: { presetId?: string }) {
     hasPointChargeField;
   const theme = p08Summary.isP08 ? getP08SceneTheme(presetId) : null;
   const shellStyle = p08Summary.isP08 ? getP08PanelSurfaceStyle(presetId) : null;
+  const sidebar = variant === 'sidebar';
 
-  return (
-    <aside
-      className="flex h-full flex-col overflow-y-auto"
-      style={{
-        width: 300,
-        minWidth: 280,
-        maxWidth: 320,
-        borderLeft: p08Summary.isP08 ? 'none' : `1px solid ${COLORS.border}`,
-        backgroundColor: COLORS.bg,
-        ...(shellStyle ?? {}),
-      }}
-    >
-      <div
-        className="px-4 py-3 text-sm font-semibold"
-        style={{
-          color: COLORS.text,
-          borderBottom: `1px solid ${theme?.border ?? COLORS.border}`,
-          background: theme
-            ? `linear-gradient(180deg, ${toAlpha(theme.accent, 0.1)} 0%, rgba(255,255,255,0) 100%)`
-            : undefined,
-        }}
-      >
-        物理信息
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4">
+  const body = (
+    <>
         {!hasContent ? (
           <div
-            className="flex h-full items-center justify-center text-xs"
+            className="py-8 text-center text-xs"
             style={{ color: COLORS.textMuted }}
           >
             加载预设后显示物理信息
@@ -236,7 +214,39 @@ export function InfoPanel({ presetId }: { presetId?: string }) {
             )}
           </div>
         )}
+    </>
+  );
+
+  if (sidebar) {
+    return body;
+  }
+
+  return (
+    <aside
+      className="flex h-full flex-col overflow-y-auto"
+      style={{
+        width: 300,
+        minWidth: 280,
+        maxWidth: 320,
+        borderLeft: p08Summary.isP08 ? 'none' : `1px solid ${COLORS.border}`,
+        backgroundColor: COLORS.bg,
+        ...(shellStyle ?? {}),
+      }}
+    >
+      <div
+        className="px-4 py-3 text-sm font-semibold"
+        style={{
+          color: COLORS.text,
+          borderBottom: `1px solid ${theme?.border ?? COLORS.border}`,
+          background: theme
+            ? `linear-gradient(180deg, ${toAlpha(theme.accent, 0.1)} 0%, rgba(255,255,255,0) 100%)`
+            : undefined,
+        }}
+      >
+        物理信息
       </div>
+
+      <div className="flex-1 overflow-y-auto p-4">{body}</div>
     </aside>
   );
 }
@@ -769,8 +779,11 @@ function TwoStageEFieldInfo({
   accelerationField: Entity;
   deflectionField: Entity;
 }) {
-  const screenEntities = useSimulationStore((s) =>
-    Array.from(s.simulationState.scene.entities.values()).filter(isDetectorScreen));
+  const entities = useSimulationStore((s) => s.simulationState.scene.entities);
+  const screenEntities = useMemo(
+    () => Array.from(entities.values()).filter(isDetectorScreen),
+    [entities],
+  );
   const analysis = analyzeTwoStageEField(particle, fields, screenEntities);
   const launch = getPointChargeLaunchState(particle);
   const q = (particle.properties.charge as number) ?? 0;
@@ -940,8 +953,11 @@ function ParticleInEFieldInfo({
   const dir = (efield.properties.direction as { x: number; y: number }) ?? { x: 1, y: 0 };
   const launch = getPointChargeLaunchState(particle);
   const initVel = launch.velocity;
-  const screenEntities = useSimulationStore((s) =>
-    Array.from(s.simulationState.scene.entities.values()).filter(isDetectorScreen));
+  const allEntities = useSimulationStore((s) => s.simulationState.scene.entities);
+  const screenEntities = useMemo(
+    () => Array.from(allEntities.values()).filter(isDetectorScreen),
+    [allEntities],
+  );
 
   const absQ = Math.abs(q);
   const effectiveMagnitude = Math.abs(E);

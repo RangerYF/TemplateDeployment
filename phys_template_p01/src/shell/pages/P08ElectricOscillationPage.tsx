@@ -4,10 +4,14 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { COLORS, SHADOWS } from '@/styles/tokens';
 import { registerPageSnapshotAdapter } from '@/snapshotPageRegistry';
+import { AppLayout } from '@/shell/layout/AppLayout';
+import { useP08SpecialPageNav } from '@/shell/hooks/useP08SpecialPageNav';
 
 interface Props {
-  onBack: () => void;
+  onSelectPreset: (id: string) => void;
 }
+
+const PRESET_ID = 'P02-EMF011-efield-acceleration';
 
 interface ParticleVisual {
   color: string;
@@ -176,7 +180,8 @@ function buildParticleSet(count: number): ParticleVisual[] {
   });
 }
 
-export function P08ElectricOscillationPage({ onBack }: Props) {
+export function P08ElectricOscillationPage({ onSelectPreset }: Props) {
+  const { tabs, handleSelectTab, moduleSelector } = useP08SpecialPageNav(PRESET_ID, onSelectPreset);
   const [particleCount, setParticleCount] = useState(7);
   const [speed, setSpeed] = useState(1.9);
   const [amplitude, setAmplitude] = useState(0.7);
@@ -270,78 +275,59 @@ export function P08ElectricOscillationPage({ onBack }: Props) {
   }, [activeParticles, amplitudePx, frequency, polarity]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: COLORS.bgPage }}>
-      <aside
-        className="flex w-[332px] shrink-0 flex-col overflow-y-auto border-r px-4 py-4"
-        style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg }}
-      >
-        <button
-          onClick={onBack}
-          className="mb-3 text-left text-xs transition-opacity hover:opacity-70"
-          style={{ color: COLORS.textSecondary }}
-        >
-          ← 返回 P-08
-        </button>
-
-        <h1 className="text-lg font-semibold" style={{ color: COLORS.text }}>
-          平行板交变电场中的粒子往返运动
-        </h1>
-        <p className="mt-2 text-sm leading-6" style={{ color: COLORS.textSecondary }}>
-          所有粒子从同一点 P 严格射入极板间，横向速度相同；轨迹差异只来自交变偏转过程本身，而不是不同起点。
-        </p>
-
-        <section className="mt-5 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>核心参数</h2>
-          <div className="mt-4 space-y-4">
-            <Field label="交变起始方向">
-              <Select
-                value={fieldDirectionMode}
-                onChange={(event) => {
-                  setFieldDirectionMode(event.target.value === 'downward-first' ? 'downward-first' : 'upward-first');
-                }}
-                options={[
-                  { value: 'upward-first', label: '先向上偏' },
-                  { value: 'downward-first', label: '先向下偏' },
-                ]}
-              />
-            </Field>
-            <SliderField label="水平速度" value={speed} min={1} max={3.5} step={0.1} unit="格/s" onChange={setSpeed} />
-            <SliderField label="最大往返振幅" value={amplitude} min={0.35} max={1.15} step={0.05} unit="板间比例" onChange={setAmplitude} precision={2} />
-            <SliderField label="交变频率" value={frequency} min={0.6} max={1.8} step={0.1} unit="周期数" onChange={setFrequency} />
-            <SliderField label="粒子数量" value={particleCount} min={3} max={8} step={1} unit="个" onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>显示选项</h2>
-          <div className="mt-4 space-y-3">
-            <ToggleRow label="显示电场方向" checked={showFieldArrows} onChange={setShowFieldArrows} />
-            <ToggleRow label="显示轨迹曲线" checked={showTrajectories} onChange={setShowTrajectories} />
-            <ToggleRow label="显示运动粒子" checked={showParticles} onChange={setShowParticles} />
-            <ToggleRow label="显示速度指引" checked={showDirectionGuide} onChange={setShowDirectionGuide} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border p-4" style={{ borderColor: COLORS.border, boxShadow: SHADOWS.sm }}>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>结果解读</h2>
-          <div className="mt-3 space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
-            <Metric label="共同起点" value="同一点 P 入射" />
-            <Metric label="画面重点" value="水平匀速，竖直往返" />
-            <Metric label="场方向节奏" value={cycleDirection} />
-            <Metric label="适合讲解" value="同起点粒子在交变场中的分段偏转差异" />
-          </div>
-        </section>
-      </aside>
-
-      <main className="min-w-0 flex-1 overflow-auto p-5">
-        <section
-          className="rounded-[30px] border p-5"
-          style={{
-            borderColor: COLORS.border,
-            backgroundColor: COLORS.bg,
-            boxShadow: SHADOWS.md,
-          }}
-        >
+    <AppLayout
+      title="P-08 电磁场模拟器"
+      tabs={tabs}
+      activeTabId={PRESET_ID}
+      onSelectTab={handleSelectTab}
+      moduleSelector={moduleSelector}
+      pageStyle={{ background: COLORS.bgPage }}
+      sidebar={
+        <div className="flex h-full flex-col">
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>核心参数</h2>
+            <div className="space-y-4">
+              <Field label="交变起始方向">
+                <Select
+                  value={fieldDirectionMode}
+                  onChange={(event) => {
+                    setFieldDirectionMode(event.target.value === 'downward-first' ? 'downward-first' : 'upward-first');
+                  }}
+                  options={[
+                    { value: 'upward-first', label: '先向上偏' },
+                    { value: 'downward-first', label: '先向下偏' },
+                  ]}
+                />
+              </Field>
+              <SliderField label="水平速度" value={speed} min={1} max={3.5} step={0.1} unit="格/s" onChange={setSpeed} />
+              <SliderField label="最大往返振幅" value={amplitude} min={0.35} max={1.15} step={0.05} unit="板间比例" onChange={setAmplitude} precision={2} />
+              <SliderField label="交变频率" value={frequency} min={0.6} max={1.8} step={0.1} unit="周期数" onChange={setFrequency} />
+              <SliderField label="粒子数量" value={particleCount} min={3} max={8} step={1} unit="个" onChange={(value) => setParticleCount(Math.round(value))} precision={0} />
+            </div>
+          </section>
+          <section className="border-b p-4" style={{ borderColor: 'var(--theme-border)' }}>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>显示选项</h2>
+            <div className="space-y-3">
+              <ToggleRow label="显示电场方向" checked={showFieldArrows} onChange={setShowFieldArrows} />
+              <ToggleRow label="显示轨迹曲线" checked={showTrajectories} onChange={setShowTrajectories} />
+              <ToggleRow label="显示运动粒子" checked={showParticles} onChange={setShowParticles} />
+              <ToggleRow label="显示速度指引" checked={showDirectionGuide} onChange={setShowDirectionGuide} />
+            </div>
+          </section>
+          <section className="p-4">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.05em' }}>结果解读</h2>
+            <div className="space-y-2 text-sm" style={{ color: COLORS.textSecondary }}>
+              <Metric label="共同起点" value="同一点 P 入射" />
+              <Metric label="画面重点" value="水平匀速，竖直往返" />
+              <Metric label="场方向节奏" value={cycleDirection} />
+              <Metric label="适合讲解" value="同起点粒子在交变场中的分段偏转差异" />
+            </div>
+          </section>
+        </div>
+      }
+    >
+      <div className="flex-1 overflow-auto p-5">
+        <section className="rounded-[30px] border p-5" style={{ borderColor: COLORS.border, backgroundColor: COLORS.bg, boxShadow: SHADOWS.md }}>
           <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-base font-semibold" style={{ color: COLORS.text }}>
@@ -468,12 +454,12 @@ export function P08ElectricOscillationPage({ onBack }: Props) {
               出板后仍保持水平前进
             </text>
             <text x="58" y={SVG_HEIGHT - 38} fontSize="12.5" fill="#475569">
-              教学重点：所有粒子从同一点进入，前段先共线，随后在交变场中逐段分叉；更适合讲“同起点粒子束在板间的分层偏转”。
+              教学重点：所有粒子从同一点进入，前段先共线，随后在交变场中逐段分叉；更适合讲"同起点粒子束在板间的分层偏转"。
             </text>
           </svg>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 
