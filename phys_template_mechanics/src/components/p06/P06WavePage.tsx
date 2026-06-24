@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { ChevronLeft, Pause, Play, RotateCcw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Pause, Play, RotateCcw, X } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
-import { COLORS, RADIUS, SHADOWS } from '@/styles/tokens'
+import { useTheme } from '@/hooks/useTheme'
+import { COLORS, RADIUS } from '@/styles/tokens'
 import {
   DOPPLER_SPEED_PRESETS,
   DEFAULT_DOPPLER_PARAMS,
@@ -30,7 +30,6 @@ import {
   normalizeP06ModuleId,
   normalizePhaseRadians,
   type DopplerParams,
-  type P06ModuleDefinition,
   type StandingHarmonic,
   type StandingParams,
   type SuperpositionMode,
@@ -66,6 +65,34 @@ const PLAYBACK_SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2] as const
 const WAVE_ONE_COLOR = COLORS.info
 const WAVE_TWO_COLOR = COLORS.primary
 const COMBINED_COLOR = COLORS.warning
+
+function IconButton({
+  label,
+  active = false,
+  onClick,
+  children,
+}: {
+  label: string
+  active?: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all hover:opacity-85"
+      style={{
+        background: active ? 'var(--theme-primary)' : 'var(--theme-surface-hover)',
+        color: active ? '#fff' : 'var(--theme-text-secondary)',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
 
 interface P06RuntimeState {
   activeModuleId: ReturnType<typeof normalizeP06ModuleId>
@@ -124,78 +151,48 @@ function PanelCard({
   subtitle,
   children,
   actions,
+  variant = 'card',
 }: {
   title: string
   subtitle?: string
   children: React.ReactNode
   actions?: React.ReactNode
+  variant?: 'card' | 'panel'
 }) {
+  const isPanel = variant === 'panel'
+
   return (
     <section
-      className="rounded-2xl"
+      className={isPanel ? '' : 'rounded-lg'}
       style={{
-        backgroundColor: COLORS.bg,
-        border: `1px solid ${COLORS.border}`,
-        borderRadius: RADIUS.card,
-        boxShadow: SHADOWS.sm,
+        background: isPanel ? 'transparent' : 'var(--theme-panel-bg)',
+        border: isPanel ? 'none' : '1px solid var(--theme-border)',
+        borderBottom: isPanel ? '1px solid var(--theme-border)' : undefined,
+        borderRadius: isPanel ? 0 : RADIUS.sm,
+        boxShadow: 'none',
       }}
     >
-      <div className="flex items-start justify-between gap-3 px-4 py-4 sm:px-5">
+      <div
+        className="flex items-start justify-between gap-3 px-4 py-3"
+        style={{ borderColor: 'var(--theme-border)' }}
+      >
         <div>
-          <h2 className="text-sm font-semibold" style={{ color: COLORS.text }}>
+          <h2
+            className={isPanel ? 'text-xs font-semibold uppercase tracking-[0.08em]' : 'text-sm font-semibold'}
+            style={{ color: isPanel ? 'var(--theme-text-muted)' : 'var(--theme-text)' }}
+          >
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-1 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
+            <p className="mt-1 text-xs leading-5" style={{ color: 'var(--theme-text-secondary)' }}>
               {subtitle}
             </p>
           ) : null}
         </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
-      <div className="px-4 pb-4 sm:px-5 sm:pb-5">{children}</div>
+      <div className="px-4 pb-4">{children}</div>
     </section>
-  )
-}
-
-function ModuleButton({
-  module,
-  active,
-  onClick,
-}: {
-  module: P06ModuleDefinition
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full rounded-2xl px-3.5 py-3 text-left transition-colors"
-      style={{
-        border: `1px solid ${active ? COLORS.primary : COLORS.border}`,
-        backgroundColor: active ? COLORS.primaryLight : COLORS.bg,
-        borderRadius: RADIUS.md,
-      }}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-sm font-semibold" style={{ color: COLORS.text }}>
-          {module.title}
-        </div>
-        <div
-          className="rounded-full px-2 py-0.5 text-[11px] font-medium"
-          style={{
-            backgroundColor: active ? COLORS.primary : COLORS.bgMuted,
-            color: active ? COLORS.white : COLORS.textMuted,
-          }}
-        >
-          {module.coveredModelIds.join(' / ')}
-        </div>
-      </div>
-      <div className="mt-1.5 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
-        {module.subtitle}
-      </div>
-    </button>
   )
 }
 
@@ -222,11 +219,11 @@ function SliderControl({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium" style={{ color: COLORS.text }}>
+          <div className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>
             {label}
           </div>
           {hint ? (
-            <div className="text-[11px] mt-0.5" style={{ color: COLORS.textMuted }}>
+            <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
               {hint}
             </div>
           ) : null}
@@ -234,8 +231,8 @@ function SliderControl({
         <div
           className="rounded-full px-2.5 py-1 text-xs font-semibold"
           style={{
-            backgroundColor: COLORS.bgMuted,
-            color: COLORS.text,
+            background: 'var(--theme-surface-hover)',
+            color: 'var(--theme-text)',
           }}
         >
           {formatNumber(value, step < 1 ? 2 : 0)}
@@ -265,7 +262,7 @@ function SegmentedButtons<T extends string | number>({
   return (
     <div
       className="inline-flex flex-wrap gap-1 rounded-full p-1"
-      style={{ backgroundColor: COLORS.bgMuted }}
+      style={{ background: 'var(--theme-surface-hover)' }}
     >
       {options.map((option) => {
         const active = option.value === value
@@ -276,9 +273,9 @@ function SegmentedButtons<T extends string | number>({
             onClick={() => onChange(option.value)}
             className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
             style={{
-              backgroundColor: active ? COLORS.white : 'transparent',
-              color: active ? COLORS.text : COLORS.textMuted,
-              boxShadow: active ? SHADOWS.sm : 'none',
+              background: active ? 'var(--theme-surface)' : 'transparent',
+              color: active ? 'var(--theme-text)' : 'var(--theme-text-muted)',
+              boxShadow: active ? 'var(--theme-shadow-sm)' : 'none',
             }}
           >
             {option.label}
@@ -298,16 +295,16 @@ function MetricChip({
 }) {
   return (
     <div
-      className="rounded-2xl px-3 py-2"
+      className="rounded-lg px-3 py-2"
       style={{
-        backgroundColor: COLORS.bgMuted,
-        border: `1px solid ${COLORS.border}`,
+        background: 'var(--theme-surface-hover)',
+        border: '1px solid var(--theme-border)',
       }}
     >
-      <div className="text-[11px]" style={{ color: COLORS.textMuted }}>
+      <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
         {label}
       </div>
-      <div className="mt-1 text-sm font-semibold" style={{ color: COLORS.text }}>
+      <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>
         {value}
       </div>
     </div>
@@ -327,8 +324,8 @@ function LegendPill({
     <div
       className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs"
       style={{
-        backgroundColor: COLORS.bgMuted,
-        color: COLORS.textSecondary,
+        background: 'var(--theme-surface-hover)',
+        color: 'var(--theme-text-secondary)',
       }}
     >
       <span
@@ -352,18 +349,109 @@ function AcceptanceCard({
 }) {
   return (
     <div
-      className="rounded-2xl px-3.5 py-3"
+      className="rounded-lg px-3 py-2.5"
       style={{
-        backgroundColor: COLORS.bgMuted,
-        border: `1px solid ${COLORS.border}`,
+        background: 'var(--theme-surface-hover)',
+        border: '1px solid var(--theme-border)',
       }}
     >
-      <div className="text-xs font-semibold" style={{ color: COLORS.text }}>
+      <div className="text-xs font-semibold" style={{ color: 'var(--theme-text)' }}>
         {title}
       </div>
-      <div className="mt-1 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
+      <div className="mt-1 text-xs leading-5" style={{ color: 'var(--theme-text-secondary)' }}>
         {content}
       </div>
+    </div>
+  )
+}
+
+function P06TeachingModal({
+  title,
+  subtitle,
+  formulaContent,
+  teachingContent,
+  sourceContent,
+  onClose,
+}: {
+  title: string
+  subtitle: string
+  formulaContent: React.ReactNode
+  teachingContent: React.ReactNode
+  sourceContent: React.ReactNode
+  onClose: () => void
+}) {
+  const [tab, setTab] = useState<'formula' | 'teaching' | 'source'>('formula')
+  const tabs = [
+    { key: 'formula' as const, label: '公式与关系' },
+    { key: 'teaching' as const, label: '教学要点' },
+    { key: 'source' as const, label: '数据来源' },
+  ]
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0"
+        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+        onClick={onClose}
+        aria-label="关闭教学弹窗"
+      />
+      <section
+        className="relative flex max-h-[80vh] w-[600px] max-w-[90vw] flex-col overflow-hidden rounded-xl border shadow-2xl"
+        style={{
+          background: 'var(--theme-panel-bg)',
+          borderColor: 'var(--theme-border)',
+          color: 'var(--theme-text)',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+        }}
+      >
+        <header className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: 'var(--theme-border)' }}>
+          <div>
+            <div className="text-base font-semibold">{title}</div>
+            <div className="mt-1 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+              {subtitle}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg"
+            style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text-secondary)' }}
+            aria-label="关闭"
+          >
+            <X size={16} />
+          </button>
+        </header>
+        <nav className="flex border-b px-5" style={{ borderColor: 'var(--theme-border)' }}>
+          {tabs.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setTab(item.key)}
+              className="border-b-2 px-3 py-3 text-sm font-semibold"
+              style={{
+                borderColor: tab === item.key ? 'var(--theme-primary)' : 'transparent',
+                color: tab === item.key ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <div className="overflow-y-auto px-5 py-4">
+          {tab === 'formula' ? formulaContent : null}
+          {tab === 'teaching' ? teachingContent : null}
+          {tab === 'source' ? sourceContent : null}
+        </div>
+      </section>
     </div>
   )
 }
@@ -385,8 +473,8 @@ function DisplayOptionToggle({
       onClick={onClick}
       className="w-full rounded-2xl px-3 py-2.5 text-left transition-colors"
       style={{
-        backgroundColor: checked ? COLORS.primaryLight : COLORS.bgMuted,
-        border: `1px solid ${checked ? COLORS.primary : COLORS.border}`,
+        background: checked ? 'var(--theme-primary-light)' : 'var(--theme-surface-hover)',
+        border: `1px solid ${checked ? 'var(--theme-primary)' : 'var(--theme-border)'}`,
       }}
     >
       <div className="flex items-center gap-2.5">
@@ -395,12 +483,12 @@ function DisplayOptionToggle({
             width: 14,
             height: 14,
             borderRadius: 3,
-            border: `1.5px solid ${checked ? COLORS.primary : COLORS.borderStrong}`,
-            backgroundColor: checked ? COLORS.primary : COLORS.bg,
+            border: `1.5px solid ${checked ? 'var(--theme-primary)' : 'var(--theme-border)'}`,
+            background: checked ? 'var(--theme-primary)' : 'var(--theme-surface)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: COLORS.white,
+            color: '#fff',
             fontSize: 10,
             lineHeight: 1,
             flexShrink: 0,
@@ -409,11 +497,11 @@ function DisplayOptionToggle({
           {checked ? '✓' : ''}
         </span>
         <div className="min-w-0">
-          <div className="text-xs font-medium" style={{ color: COLORS.text }}>
+          <div className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>
             {label}
           </div>
           {hint ? (
-            <div className="mt-0.5 text-[11px] leading-4" style={{ color: COLORS.textMuted }}>
+            <div className="mt-0.5 text-[11px] leading-4" style={{ color: 'var(--theme-text-muted)' }}>
               {hint}
             </div>
           ) : null}
@@ -509,7 +597,7 @@ function SingleWaveDisplay({
   compact?: boolean
 }) {
   const width = 920
-  const height = compact ? 220 : 300
+  const height = compact ? 180 : 240
   const paddingX = 42
   const paddingTop = 28
   const paddingBottom = 34
@@ -736,7 +824,7 @@ function SingleOscillationDisplay({
   compact?: boolean
 }) {
   const width = 920
-  const height = compact ? 220 : 260
+  const height = compact ? 170 : 210
   const paddingLeft = 52
   const paddingRight = 24
   const paddingTop = 24
@@ -851,7 +939,7 @@ function SuperpositionWaveDisplay({
 }) {
   const effectiveParams = getEffectiveSuperpositionParams(mode, params)
   const width = 920
-  const height = 320
+  const height = 250
   const paddingX = 42
   const paddingTop = 28
   const paddingBottom = 34
@@ -1007,7 +1095,7 @@ function SuperpositionOscillationDisplay({
   const effectiveParams = getEffectiveSuperpositionParams(mode, params)
   const derived = getSuperpositionDerivedValues(mode, effectiveParams)
   const width = 920
-  const height = 280
+  const height = 220
   const paddingLeft = 52
   const paddingRight = 24
   const paddingTop = 24
@@ -1166,7 +1254,7 @@ function StandingWaveDisplay({
   const derived = getStandingDerivedValues(params)
   const particleXs = getParticleXs(params.particleCount, derived.stringLengthCm)
   const width = 920
-  const height = 330
+  const height = 250
   const paddingX = 42
   const paddingTop = 28
   const paddingBottom = 34
@@ -1350,7 +1438,7 @@ function StandingOscillationDisplay({
 }) {
   const derived = getStandingDerivedValues(params)
   const width = 920
-  const height = 280
+  const height = 220
   const paddingLeft = 52
   const paddingRight = 24
   const paddingTop = 24
@@ -1494,7 +1582,7 @@ function DopplerWavefrontDisplay({
   const derived = getDopplerDerivedValues(params)
   const wavefronts = getDopplerWavefronts(params, timeS, 24)
   const width = 920
-  const height = 330
+  const height = 250
   const paddingX = 42
   const paddingBottom = 34
   const centerX = width * 0.52
@@ -1673,7 +1761,10 @@ function DopplerWavefrontDisplay({
   )
 }
 
-export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePageProps) {
+export function P06WavePage({ moduleId, onChangeModule }: P06WavePageProps) {
+  const { theme, toggleTheme } = useTheme()
+  const [teachingOpen, setTeachingOpen] = useState(false)
+  const [propertyDrawerOpen, setPropertyDrawerOpen] = useState(false)
   const activeModuleId = normalizeP06ModuleId(moduleId)
   const activeModule = P06_MODULES.find((module) => module.id === activeModuleId)
   const [singleParams, setSingleParams] = useState<WaveParams>(DEFAULT_WAVE_PARAMS)
@@ -1729,14 +1820,6 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
       : isSuperpositionModule
         ? '阶段 2：两列波叠加'
         : '阶段 1：一维传播基座'
-  const stageSubtitle = isDopplerModule
-    ? '已接入移动波源、波前圆弧与前密后疏判读。'
-    : isStandingModule
-      ? '已接入入射波、反射波、合成驻波与波节波腹标注。'
-      : isSuperpositionModule
-        ? '已接入分量波 + 合成波 + 选定质点振动图。'
-        : '已接入单波传播、波形平移与横纵波对比。'
-
   const updateFrame = useEffectEvent((deltaSeconds: number) => {
     setTimeS((current) => current + deltaSeconds * playbackRate)
   })
@@ -2077,119 +2160,618 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
     onChangeModule(nextModuleId)
   }
 
+  const resetActiveModuleParams = () => {
+    setTimeS(0)
+    setSelectedIndex(10)
+    setDirection(1)
+    if (isDopplerModule) {
+      setDopplerParams(DEFAULT_DOPPLER_PARAMS)
+      return
+    }
+    if (isStandingModule) {
+      setStandingParams(DEFAULT_STANDING_PARAMS)
+      return
+    }
+    if (isSuperpositionModule) {
+      setSuperpositionParams(DEFAULT_SUPERPOSITION_PARAMS)
+      return
+    }
+    setSingleParams(DEFAULT_WAVE_PARAMS)
+  }
+
+  const compactMetricsContent = isDopplerModule ? (
+    <div className="grid gap-2">
+      <MetricChip
+        label="速度比 vs / v"
+        value={formatNumber(dopplerDerived.sourceSpeedRatio, 2)}
+      />
+      <MetricChip
+        label="前方频率 f前"
+        value={
+          dopplerDerived.frontFrequencyHz === null
+            ? '公式失效'
+            : `${formatNumber(dopplerDerived.frontFrequencyHz, 1)} Hz`
+        }
+      />
+      <MetricChip
+        label="后方频率 f后"
+        value={`${formatNumber(dopplerDerived.backFrequencyHz, 1)} Hz`}
+      />
+      <MetricChip
+        label="波源速度 vs"
+        value={`${formatNumber(dopplerParams.sourceSpeedMs, 0)} m/s`}
+      />
+    </div>
+  ) : isStandingModule ? (
+    <div className="grid gap-2">
+      <MetricChip label="共振模式" value={standingDerived.harmonicLabel} />
+      <MetricChip
+        label="共振频率 fn"
+        value={`${formatNumber(1 / standingDerived.periodS, 2)} Hz`}
+      />
+      <MetricChip
+        label="当前选点振幅"
+        value={`${formatNumber(standingSample.envelopeCm, 2)} cm`}
+      />
+      <MetricChip
+        label="波长 λ"
+        value={`${formatNumber(standingDerived.wavelengthCm, 2)} cm`}
+      />
+    </div>
+  ) : isSuperpositionModule ? (
+    <div className="grid gap-2">
+      {superpositionMode === 'interference' ? (
+        <>
+          <MetricChip
+            label="当前相位差 Δφ"
+            value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
+          />
+          <MetricChip
+            label="当前合成振幅"
+            value={`${formatNumber(interferenceAmplitude, 2)} cm`}
+          />
+          <MetricChip
+            label="当前合成位移"
+            value={`${formatNumber(superpositionSample.combinedCm, 2)} cm`}
+          />
+          <MetricChip
+            label="共同周期 T"
+            value={`${formatNumber(superpositionDerived.wave1.periodS, 2)} s`}
+          />
+        </>
+      ) : (
+        <>
+          <MetricChip
+            label="拍频 f拍"
+            value={`${formatNumber(superpositionDerived.beatFrequencyHz, 2)} Hz`}
+          />
+          <MetricChip
+            label="包络周期"
+            value={Number.isFinite(beatPeriodS) ? `${formatNumber(beatPeriodS, 2)} s` : '频差过小'}
+          />
+          <MetricChip
+            label="当前相位差"
+            value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
+          />
+          <MetricChip
+            label="振幅上界"
+            value={`${formatNumber(superpositionDerived.amplitudeMaxCm, 2)} cm`}
+          />
+        </>
+      )}
+    </div>
+  ) : (
+    <div className="grid gap-2">
+      <MetricChip
+        label="波长 λ"
+        value={`${formatNumber(singleDerived.wavelengthCm, 2)} cm`}
+      />
+      <MetricChip
+        label="周期 T"
+        value={`${formatNumber(singleDerived.periodS, 2)} s`}
+      />
+      {moduleVariant === 'comparison' ? (
+        <>
+          <MetricChip
+            label="横波当前位移"
+            value={`${formatNumber(singleTransverseDisplacement, 2)} cm`}
+          />
+          <MetricChip
+            label="纵波当前位移"
+            value={`${formatNumber(singleLongitudinalDisplacement, 2)} cm`}
+          />
+        </>
+      ) : (
+        <MetricChip
+          label={moduleVariant === 'longitudinal' ? '当前位移 x' : '当前位移 y'}
+          value={`${formatNumber(
+            moduleVariant === 'longitudinal'
+              ? singleLongitudinalDisplacement
+              : singleTransverseDisplacement,
+            2,
+          )} cm`}
+        />
+      )}
+      <MetricChip
+        label="当前相位"
+        value={`${formatNumber(singleSelectedPhase, 2)} rad`}
+      />
+    </div>
+  )
+
+  const fullMetricsContent = isDopplerModule ? (
+    <div className="grid gap-2">
+      <MetricChip
+        label="波源频率 f0"
+        value={`${formatNumber(dopplerParams.sourceFrequencyHz, 0)} Hz`}
+      />
+      <MetricChip
+        label="波速 v"
+        value={`${formatNumber(dopplerParams.waveSpeedMs, 0)} m/s`}
+      />
+      <MetricChip
+        label="波源速度 vs"
+        value={`${formatNumber(dopplerParams.sourceSpeedMs, 0)} m/s`}
+      />
+      <MetricChip
+        label="速度比 vs / v"
+        value={formatNumber(dopplerDerived.sourceSpeedRatio, 2)}
+      />
+      <MetricChip
+        label="前方频率 f前"
+        value={
+          dopplerDerived.frontFrequencyHz === null
+            ? '公式失效'
+            : `${formatNumber(dopplerDerived.frontFrequencyHz, 1)} Hz`
+        }
+      />
+      <MetricChip
+        label="后方频率 f后"
+        value={`${formatNumber(dopplerDerived.backFrequencyHz, 1)} Hz`}
+      />
+      <MetricChip
+        label="前方频率比"
+        value={
+          dopplerDerived.frontRatio === null
+            ? '超过波速'
+            : `${formatNumber(dopplerDerived.frontRatio, 2)}x`
+        }
+      />
+      <MetricChip
+        label="后方频率比"
+        value={`${formatNumber(dopplerDerived.backRatio, 2)}x`}
+      />
+    </div>
+  ) : isStandingModule ? (
+    <div className="grid gap-2">
+      <MetricChip label="共振模式" value={standingDerived.harmonicLabel} />
+      <MetricChip
+        label="共振频率 fn"
+        value={`${formatNumber(1 / standingDerived.periodS, 2)} Hz`}
+      />
+      <MetricChip
+        label="波长 λ"
+        value={`${formatNumber(standingDerived.wavelengthCm, 2)} cm`}
+      />
+      <MetricChip
+        label="周期 T"
+        value={`${formatNumber(standingDerived.periodS, 2)} s`}
+      />
+      <MetricChip label="波节数" value={`${standingNodeCount}`} />
+      <MetricChip label="波腹数" value={`${standingAntinodeCount}`} />
+      <MetricChip
+        label="波腹最大振幅"
+        value={`${formatNumber(standingParams.amplitudeCm * 2, 2)} cm`}
+      />
+      <MetricChip
+        label="当前选点振幅"
+        value={`${formatNumber(standingSample.envelopeCm, 2)} cm`}
+      />
+    </div>
+  ) : isSuperpositionModule ? (
+    <div className="grid gap-2">
+      {superpositionMode === 'interference' ? (
+        <>
+          <MetricChip
+            label="共同波长 λ"
+            value={`${formatNumber(superpositionDerived.wave1.wavelengthCm, 2)} cm`}
+          />
+          <MetricChip
+            label="共同周期 T"
+            value={`${formatNumber(superpositionDerived.wave1.periodS, 2)} s`}
+          />
+          <MetricChip
+            label="当前相位差 Δφ"
+            value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
+          />
+          <MetricChip
+            label="当前合成振幅"
+            value={`${formatNumber(interferenceAmplitude, 2)} cm`}
+          />
+          <MetricChip
+            label="最强相长"
+            value={`${formatNumber(superpositionDerived.amplitudeMaxCm, 2)} cm`}
+          />
+          <MetricChip
+            label="最弱相消"
+            value={`${formatNumber(superpositionDerived.amplitudeMinCm, 2)} cm`}
+          />
+          <MetricChip
+            label="当前合成位移"
+            value={`${formatNumber(superpositionSample.combinedCm, 2)} cm`}
+          />
+          <MetricChip label="稳定性" value="同频 + 相位差恒定 = 稳定干涉" />
+        </>
+      ) : (
+        <>
+          <MetricChip
+            label="波 1 波长 λ1"
+            value={`${formatNumber(superpositionDerived.wave1.wavelengthCm, 2)} cm`}
+          />
+          <MetricChip
+            label="波 2 波长 λ2"
+            value={`${formatNumber(superpositionDerived.wave2.wavelengthCm, 2)} cm`}
+          />
+          <MetricChip
+            label="拍频 f拍"
+            value={`${formatNumber(superpositionDerived.beatFrequencyHz, 2)} Hz`}
+          />
+          <MetricChip
+            label="包络周期"
+            value={Number.isFinite(beatPeriodS) ? `${formatNumber(beatPeriodS, 2)} s` : '频差过小'}
+          />
+          <MetricChip
+            label="当前相位差"
+            value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
+          />
+          <MetricChip
+            label="振幅上界"
+            value={`${formatNumber(superpositionDerived.amplitudeMaxCm, 2)} cm`}
+          />
+          <MetricChip
+            label="振幅下界"
+            value={`${formatNumber(superpositionDerived.amplitudeMinCm, 2)} cm`}
+          />
+          <MetricChip label="稳定性" value="异频叠加 = 图样持续变化" />
+        </>
+      )}
+    </div>
+  ) : (
+    <div className="grid gap-2">
+      <MetricChip
+        label="波长 λ"
+        value={`${formatNumber(singleDerived.wavelengthCm, 2)} cm`}
+      />
+      <MetricChip
+        label="周期 T"
+        value={`${formatNumber(singleDerived.periodS, 2)} s`}
+      />
+      <MetricChip
+        label="角频率 ω"
+        value={`${formatNumber(singleDerived.omegaRad, 2)} rad/s`}
+      />
+      <MetricChip
+        label="波数 k"
+        value={`${formatNumber(singleDerived.waveNumber, 3)} rad/cm`}
+      />
+      {moduleVariant === 'comparison' ? (
+        <>
+          <MetricChip
+            label="横波当前位移"
+            value={`${formatNumber(singleTransverseDisplacement, 2)} cm`}
+          />
+          <MetricChip
+            label="纵波当前位移"
+            value={`${formatNumber(singleLongitudinalDisplacement, 2)} cm`}
+          />
+        </>
+      ) : (
+        <MetricChip
+          label={moduleVariant === 'longitudinal' ? '当前位移 x' : '当前位移 y'}
+          value={`${formatNumber(
+            moduleVariant === 'longitudinal'
+              ? singleLongitudinalDisplacement
+              : singleTransverseDisplacement,
+            2,
+          )} cm`}
+        />
+      )}
+      <MetricChip
+        label="当前相位"
+        value={`${formatNumber(singleSelectedPhase, 2)} rad`}
+      />
+      <MetricChip
+        label="平移距离 Δx"
+        value={`${formatNumber(waveShiftCm, 2)} cm`}
+      />
+      {moduleVariant !== 'comparison' ? (
+        <>
+          <MetricChip label="运动轨迹" value={singleTrajectoryText} />
+          <MetricChip label="平衡位置" value={singleEquilibriumText} />
+          <MetricChip
+            label={moduleVariant === 'longitudinal' ? '振动区间 x' : '振动区间 y'}
+            value={singleMotionRangeText}
+          />
+          <MetricChip
+            label="累计路程 s(0→t)"
+            value={`${formatNumber(singleTravelDistanceCm, 2)} cm`}
+          />
+        </>
+      ) : null}
+    </div>
+  )
+
+  const teachingContent = isDopplerModule ? (
+    <div className="space-y-2.5">
+      <AcceptanceCard
+        title="波前实时绘制"
+        content="持续发出前后方向可辨的圆弧波前，并保持波源向右运动的轨迹语义。"
+      />
+      <AcceptanceCard
+        title="前密后疏"
+        content="波源前方圆弧间距更小、后方更大，对应前方频率升高、后方频率降低。"
+      />
+      <AcceptanceCard
+        title="公式对应"
+        content="输出 f前、f后 与频率比；当 vs 接近或超过 v 时提示经典前方公式失效。"
+      />
+    </div>
+  ) : isStandingModule ? (
+    <div className="space-y-2.5">
+      <AcceptanceCard
+        title="驻波分层可见"
+        content="同时显示入射波、反射波和合成驻波，能清楚看到“驻”的形成。"
+      />
+      <AcceptanceCard
+        title="波节波腹已标注"
+        content="黑点固定表示波节，黄色标记表示波腹，随谐波切换同步变化。"
+      />
+      <AcceptanceCard
+        title="谐波预设"
+        content="提供基频、二次、三次谐波，频率按 fn = nv / 2L 自动重算。"
+      />
+    </div>
+  ) : isSuperpositionModule ? (
+    <div className="space-y-2.5">
+      <AcceptanceCard
+        title="分量波可见"
+        content="波 1、波 2 与合成波同时显示，便于课堂逐层解释“先叠加、后观察”。"
+      />
+      <AcceptanceCard
+        title={superpositionMode === 'interference' ? '稳定干涉' : '不稳定拍'}
+        content={
+          superpositionMode === 'interference'
+            ? '保持同频并调节 Δφ 时，合成波形保持稳定，振幅在相长/相消之间切换。'
+            : '调节 f1 与 f2 后，合成波会随时间起伏，拍频等于 |f1 - f2|。'
+        }
+      />
+      <AcceptanceCard
+        title="选定质点联动"
+        content="点击质点后切到该质点的叠加振动图，能直接观察当前合成结果。"
+      />
+    </div>
+  ) : (
+    <div className="space-y-2.5">
+      <AcceptanceCard
+        title="图像对应"
+        content="点击质点后，振动图会切到该质点，且相位随位置变化。"
+      />
+      <AcceptanceCard
+        title="参数联动"
+        content="振幅、频率、波速、质点数和 Δt 会即时重算波长、周期和图像。"
+      />
+      <AcceptanceCard
+        title="概念对比"
+        content="横波/纵波可并排比较，波形平移也能直接看到 Δx = vΔt 的结果。"
+      />
+    </div>
+  )
+
+  const formulaContent = (
+    <div className="space-y-4">
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: 'var(--theme-text-muted)' }}>
+          完整读数
+        </div>
+        {fullMetricsContent}
+      </div>
+      <div className="rounded-lg border px-3 py-2.5 text-sm leading-6" style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', background: 'var(--theme-surface-hover)' }}>
+        {isDopplerModule
+          ? '核心关系：运动波源前方频率升高、后方频率降低；当前读数用于对照 f前、f后 与速度比 vs/v。'
+          : isStandingModule
+            ? '核心关系：两端固定弦满足 fn = n v / 2L，波节固定不动，波腹达到最大振幅。'
+            : isSuperpositionModule
+              ? '核心关系：合成位移等于分量波位移代数和；同频关注相位差，异频关注拍频 |f1-f2|。'
+              : '核心关系：v = λf，T = 1/f；波形图描述空间分布，振动图描述选定质点随时间变化。'}
+      </div>
+    </div>
+  )
+
+  const sourceContent = (
+    <div className="space-y-2 text-sm leading-7" style={{ color: 'var(--theme-text-secondary)' }}>
+      <div>Template：P06 波动与振动</div>
+      <div>Module：{activeModule?.id ?? activeModuleId}</div>
+      <div>Covered IDs：{activeModule?.coveredModelIds.join(' / ') ?? 'P06'}</div>
+      <div>Source：内置波动与振动教学模型参数</div>
+      <div>Snapshot：P06 snapshot bridge 保持原协议</div>
+    </div>
+  )
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: COLORS.bgPage }}>
+    <div className="flex h-screen w-screen flex-col overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
       <header
-        className="border-b"
+        className="flex h-12 shrink-0 items-center gap-2 border-b px-3"
         style={{
-          borderColor: COLORS.border,
-          backgroundColor: COLORS.bg,
-          boxShadow: SHADOWS.sm,
+          background: 'var(--theme-topbar-bg)',
+          borderColor: 'var(--theme-border)',
+          boxShadow: 'var(--theme-shadow-sm)',
+          color: 'var(--theme-text)',
         }}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full"
-              style={{
-                border: `1px solid ${COLORS.border}`,
-                backgroundColor: COLORS.bg,
-                color: COLORS.text,
-              }}
-            >
-              <ChevronLeft size={18} strokeWidth={2.1} />
-            </button>
-            <div>
-              <div className="text-base font-semibold" style={{ color: COLORS.text }}>
-                P06 波动与振动演示台
-              </div>
-              <div className="text-xs" style={{ color: COLORS.textSecondary }}>
-                {stageLabel}
-              </div>
-            </div>
-          </div>
-          <div
-            className="rounded-full px-3 py-1.5 text-xs font-medium"
-            style={{
-              backgroundColor: COLORS.primaryLight,
-              color: COLORS.primary,
-            }}
-          >
-            阶段 1-4 已接入
-          </div>
+        <span className="shrink-0 whitespace-nowrap text-sm font-bold" style={{ color: 'var(--theme-text)' }}>
+          P06 波动与振动
+        </span>
+
+        <nav
+          className="hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto rounded-lg p-0.5 lg:flex"
+          style={{ background: 'var(--theme-surface-hover)' }}
+        >
+          {P06_MODULES.map((module) => {
+            const active = module.id === activeModuleId
+            return (
+              <button
+                key={module.id}
+                type="button"
+                onClick={() => handleSelectModule(module.id)}
+                className="h-7 shrink-0 rounded-md px-2.5 text-xs font-semibold transition-colors"
+                style={
+                  active
+                    ? { background: 'var(--theme-primary)', color: '#fff' }
+                    : { color: 'var(--theme-text-muted)' }
+                }
+                title={`${module.coveredModelIds.join(' / ')} ${module.title}`}
+              >
+                {module.title}
+              </button>
+            )
+          })}
+        </nav>
+
+        <select
+          value={activeModuleId}
+          onChange={(event) => handleSelectModule(event.target.value)}
+          className="h-8 min-w-0 flex-1 rounded-lg border px-2 text-xs font-semibold outline-none lg:hidden"
+          style={{
+            background: 'var(--theme-surface)',
+            borderColor: 'var(--theme-border)',
+            color: 'var(--theme-text)',
+          }}
+          aria-label="选择波动模块"
+        >
+          {P06_MODULES.map((module) => (
+            <option key={module.id} value={module.id}>
+              {module.title}
+            </option>
+          ))}
+        </select>
+
+        <span
+          className="hidden rounded-full px-2.5 py-0.5 text-[11px] font-semibold sm:inline"
+          style={{
+            background: isPlaying ? 'var(--theme-success-light)' : 'var(--theme-primary-light)',
+            color: isPlaying ? 'var(--theme-success)' : 'var(--theme-primary)',
+          }}
+        >
+          {isPlaying ? '运行中' : '已暂停'}
+        </span>
+
+        <div
+          className="hidden rounded-full px-2.5 py-0.5 text-xs font-semibold xl:block"
+          style={{
+            background: 'var(--theme-surface-hover)',
+            color: 'var(--theme-text-secondary)',
+          }}
+        >
+          t = {formatNumber(timeS, 2)} s
         </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <IconButton
+            label={isPlaying ? '暂停演示' : '播放演示'}
+            active={isPlaying}
+            onClick={() => setIsPlaying((current) => !current)}
+          >
+            {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+          </IconButton>
+          <IconButton label="归零" onClick={() => setTimeS(0)}>
+            <RotateCcw size={15} />
+          </IconButton>
+        </div>
+
+        <select
+          value={playbackRate}
+          onChange={(event) => setPlaybackRate(Number(event.target.value) as P06PlaybackRate)}
+          className="hidden h-8 rounded-lg border px-2 text-xs font-semibold outline-none md:block"
+          style={{
+            background: 'var(--theme-surface)',
+            borderColor: 'var(--theme-border)',
+            color: 'var(--theme-text-secondary)',
+          }}
+          aria-label="播放倍率"
+        >
+          {PLAYBACK_SPEED_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {formatNumber(value, value < 1 ? 2 : 1)}x
+            </option>
+          ))}
+        </select>
+
+        <IconButton label={theme === 'light' ? '切换暗色模式' : '切换亮色模式'} onClick={toggleTheme}>
+          <span className="text-sm leading-none">{theme === 'light' ? '🌙' : '☀️'}</span>
+        </IconButton>
+        <IconButton label="教学要点" onClick={() => setTeachingOpen(true)}>
+          <span className="text-sm leading-none">📖</span>
+        </IconButton>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
-        <div className="grid gap-4 xl:grid-cols-[22rem_minmax(0,1fr)]">
-          <aside className="space-y-4">
-            <PanelCard
-              title="演示模块"
-              subtitle="当前已接入 WAV-001 / 002 / 011 / 012 / 021 / 031 / 041 / 051 / 052。"
-            >
-              <div className="space-y-2.5">
-                {P06_MODULES.map((module) => (
-                  <ModuleButton
-                    key={module.id}
-                    module={module}
-                    active={module.id === activeModuleId}
-                    onClick={() => handleSelectModule(module.id)}
-                  />
-                ))}
-              </div>
-            </PanelCard>
-
-            <PanelCard
-              title="播放控制"
-              subtitle="统一控制传播动画时间，便于讲解相位、干涉稳定性和拍现象。"
-              actions={
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <aside
+          className={[
+            'fixed bottom-0 right-0 top-12 z-[90] w-[min(320px,86vw)] shrink-0 flex-col overflow-hidden border-l shadow-2xl transition-transform duration-200 lg:static lg:z-auto lg:flex lg:w-80 lg:translate-x-0 lg:shadow-none',
+            propertyDrawerOpen ? 'flex translate-x-0' : 'hidden translate-x-full lg:flex',
+          ].join(' ')}
+          style={{
+            borderColor: 'var(--theme-border)',
+            background: 'var(--theme-panel-bg)',
+          }}
+        >
+          <div className="border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
                 <div
-                  className="rounded-full px-2.5 py-1 text-xs font-semibold"
-                  style={{
-                    backgroundColor: COLORS.bgMuted,
-                    color: COLORS.text,
-                  }}
+                  className="text-xs font-semibold uppercase tracking-[0.08em]"
+                  style={{ color: 'var(--theme-text-muted)' }}
                 >
-                  t = {formatNumber(timeS, 2)} s
+                  实验参数
                 </div>
-              }
+                <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>
+                  {activeModule?.title ?? '横波传播'}
+                </div>
+                <div className="mt-0.5 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {activeModule?.coveredModelIds.join(' / ')}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPropertyDrawerOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg lg:hidden"
+                style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text-secondary)' }}
+                aria-label="关闭参数面板"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+          <div className="border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
+            <button
+              type="button"
+              onClick={resetActiveModuleParams}
+              className="w-full rounded-full px-3 py-2 text-xs font-semibold transition-colors hover:opacity-85"
+              style={{
+                background: 'var(--track-bg)',
+                color: 'var(--theme-text)',
+              }}
             >
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="dark"
-                  size="sm"
-                  onClick={() => setIsPlaying((current) => !current)}
-                >
-                  {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                  {isPlaying ? '暂停' : '播放'}
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => setTimeS(0)}>
-                  <RotateCcw size={14} />
-                  归零
-                </Button>
-              </div>
+              重置当前模块参数
+            </button>
+          </div>
 
-              <div className="mt-3">
-                <div className="text-xs font-medium mb-2" style={{ color: COLORS.text }}>
-                  播放倍率
-                </div>
-                <SegmentedButtons
-                  options={PLAYBACK_SPEED_OPTIONS.map((value) => ({
-                    value,
-                    label: `${formatNumber(value, value < 1 ? 2 : 1)}x`,
-                  }))}
-                  value={playbackRate}
-                  onChange={setPlaybackRate}
-                />
-              </div>
-            </PanelCard>
-
+          <div className="min-h-0 flex-1 overflow-y-auto">
             {isDopplerModule ? (
               <PanelCard
                 title="多普勒参数"
                 subtitle="保持波源向右运动，用前后频率变化解释波前压缩与拉伸。"
+                variant="panel"
               >
                 <div className="space-y-4">
                   <SliderControl
@@ -2221,7 +2803,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                     hint="建议保持 vs < v，以便使用经典前后频率公式。"
                   />
                   <div>
-                    <div className="text-xs font-medium mb-2" style={{ color: COLORS.text }}>
+                    <div className="text-xs font-medium mb-2" style={{ color: 'var(--theme-text)' }}>
                       预设速度比
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2242,10 +2824,10 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                             }
                             className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
                             style={{
-                              backgroundColor: active ? COLORS.white : COLORS.bgMuted,
-                              color: active ? COLORS.text : COLORS.textMuted,
-                              boxShadow: active ? SHADOWS.sm : 'none',
-                              border: `1px solid ${active ? COLORS.primary : COLORS.border}`,
+                              background: active ? 'var(--theme-primary-light)' : 'var(--theme-surface-hover)',
+                              color: active ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
+                              boxShadow: active ? 'var(--theme-shadow-sm)' : 'none',
+                              border: `1px solid ${active ? 'var(--theme-primary)' : 'var(--theme-border)'}`,
                             }}
                           >
                             {preset.label} ({preset.ratio})
@@ -2260,6 +2842,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
               <PanelCard
                 title="驻波参数"
                 subtitle="按两端固定弦的共振模式组织，频率由 v 与 L 自动确定。"
+                variant="panel"
               >
                 <div className="space-y-4">
                   <SliderControl
@@ -2290,7 +2873,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                     onChange={(value) => setStandingParam('stringLengthCm', value)}
                   />
                   <div>
-                    <div className="text-xs font-medium mb-2" style={{ color: COLORS.text }}>
+                    <div className="text-xs font-medium mb-2" style={{ color: 'var(--theme-text)' }}>
                       共振模式
                     </div>
                     <SegmentedButtons
@@ -2323,6 +2906,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                     ? 'WAV-011：同频叠加，频率自动保持一致。'
                     : 'WAV-012：异频叠加，重点观察拍频与包络变化。'
                 }
+                variant="panel"
               >
                 <div className="space-y-4">
                   <SliderControl
@@ -2401,6 +2985,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
               <PanelCard
                 title="波参数"
                 subtitle="参数直接映射到一维简谐波公式，首版以教学可读性优先。"
+                variant="panel"
               >
                 <div className="space-y-4">
                   <SliderControl
@@ -2464,11 +3049,12 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                   ? '驻波模式下固定为两端反射，保留当前位置选点用于观察振动幅度。'
                   : '可切换传播方向并查看当前选定质点。'
               }
+              variant="panel"
             >
               <div className="space-y-4">
                 {!isStandingModule && !isDopplerModule ? (
                   <div>
-                    <div className="text-xs font-medium mb-2" style={{ color: COLORS.text }}>
+                    <div className="text-xs font-medium mb-2" style={{ color: 'var(--theme-text)' }}>
                       传播方向
                     </div>
                     <SegmentedButtons
@@ -2485,17 +3071,17 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                   <div
                     className="rounded-2xl px-3.5 py-3"
                     style={{
-                      backgroundColor: COLORS.bgMuted,
-                      border: `1px solid ${COLORS.border}`,
+                      background: 'var(--theme-surface-hover)',
+                      border: '1px solid var(--theme-border)',
                     }}
                   >
-                    <div className="text-xs" style={{ color: COLORS.textMuted }}>
+                    <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                       当前波源状态
                     </div>
-                    <div className="mt-1 text-sm font-semibold" style={{ color: COLORS.text }}>
+                    <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>
                       向右运动，速度比 vs / v = {formatNumber(dopplerDerived.sourceSpeedRatio, 2)}
                     </div>
-                    <div className="mt-1 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
+                    <div className="mt-1 text-xs leading-5" style={{ color: 'var(--theme-text-secondary)' }}>
                       右侧波前更密、左侧波前更疏；当前视图固定以波源当前位置为中心。
                     </div>
                   </div>
@@ -2503,17 +3089,17 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                   <div
                     className="rounded-2xl px-3.5 py-3"
                     style={{
-                      backgroundColor: COLORS.bgMuted,
-                      border: `1px solid ${COLORS.border}`,
+                      background: 'var(--theme-surface-hover)',
+                      border: '1px solid var(--theme-border)',
                     }}
                   >
-                    <div className="text-xs" style={{ color: COLORS.textMuted }}>
+                    <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                       当前选中质点
                     </div>
-                    <div className="mt-1 text-sm font-semibold" style={{ color: COLORS.text }}>
+                    <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>
                       第 {currentSelectedIndex + 1} 个，位置 x = {formatNumber(selectedX, 1)} cm
                     </div>
-                    <div className="mt-1 text-xs leading-5" style={{ color: COLORS.textSecondary }}>
+                    <div className="mt-1 text-xs leading-5" style={{ color: 'var(--theme-text-secondary)' }}>
                       点击主视图中的任意质点即可切换。
                     </div>
                   </div>
@@ -2525,6 +3111,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
               <PanelCard
                 title="显示选项"
                 subtitle="控制分量波、合成波、标注和教学辅助箭头的显示。"
+                variant="panel"
               >
                 <div className="space-y-2.5">
                   {canToggleComponents ? (
@@ -2562,14 +3149,23 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                 </div>
               </PanelCard>
             ) : null}
+
+            <PanelCard
+              title="实时读数"
+              subtitle="随播放、选点和参数调整即时更新。"
+              variant="panel"
+            >
+              {compactMetricsContent}
+            </PanelCard>
+          </div>
           </aside>
 
-          <main className="space-y-4">
+        <main className="relative min-w-0 flex-1 overflow-hidden p-4 sm:p-5">
             <PanelCard title={activeModule?.title ?? '横波传播'} subtitle={activeModule?.subtitle}>
               {moduleVariant === 'comparison' ? (
                 <div className="grid gap-4 xl:grid-cols-2">
                   <div className="space-y-3">
-                    <div className="text-xs font-medium" style={{ color: COLORS.text }}>
+                    <div className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>
                       横波：振动方向与传播方向垂直
                     </div>
                     <SingleWaveDisplay
@@ -2593,7 +3189,7 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
                     />
                   </div>
                   <div className="space-y-3">
-                    <div className="text-xs font-medium" style={{ color: COLORS.text }}>
+                    <div className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>
                       纵波：振动方向与传播方向平行
                     </div>
                     <SingleWaveDisplay
@@ -2701,318 +3297,43 @@ export function P06WavePage({ moduleId, onChangeModule, onBack }: P06WavePagePro
               )}
             </PanelCard>
 
-            <PanelCard
-              title={
-                isDopplerModule
-                  ? '多普勒判读与教学读数'
-                  : isStandingModule
-                  ? '驻波判读与教学读数'
-                  : isSuperpositionModule
-                    ? '叠加判读与教学读数'
-                    : '派生量与教学读数'
-              }
-              subtitle={
-                isDopplerModule
-                  ? '用于课堂讲解前后频率变化、速度比与波前前密后疏。'
-                  : isStandingModule
-                  ? '用于课堂讲解固定端驻波、共振条件和波节波腹。'
-                  : isSuperpositionModule
-                  ? '用于课堂讲解“分量波 + 合成波”的稳定干涉与拍现象。'
-                  : '用于课堂讲解“波形图快照”和“单质点振动图”之间的数学对应。'
-              }
+            <button
+              type="button"
+              onClick={() => setPropertyDrawerOpen(true)}
+              className="absolute bottom-4 right-4 z-[58] flex h-12 w-12 items-center justify-center rounded-full shadow-lg lg:hidden"
+              style={{
+                background: 'var(--theme-panel-bg)',
+                border: '1px solid var(--theme-border)',
+                color: 'var(--theme-text-secondary)',
+              }}
+              aria-label="打开参数面板"
             >
-              {isDopplerModule ? (
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricChip
-                    label="波源频率 f₀"
-                    value={`${formatNumber(dopplerParams.sourceFrequencyHz, 0)} Hz`}
-                  />
-                  <MetricChip
-                    label="波速 v"
-                    value={`${formatNumber(dopplerParams.waveSpeedMs, 0)} m/s`}
-                  />
-                  <MetricChip
-                    label="波源速度 vs"
-                    value={`${formatNumber(dopplerParams.sourceSpeedMs, 0)} m/s`}
-                  />
-                  <MetricChip
-                    label="速度比 vs / v"
-                    value={formatNumber(dopplerDerived.sourceSpeedRatio, 2)}
-                  />
-                  <MetricChip
-                    label="前方频率 f前"
-                    value={
-                      dopplerDerived.frontFrequencyHz === null
-                        ? '公式失效'
-                        : `${formatNumber(dopplerDerived.frontFrequencyHz, 1)} Hz`
-                    }
-                  />
-                  <MetricChip
-                    label="后方频率 f后"
-                    value={`${formatNumber(dopplerDerived.backFrequencyHz, 1)} Hz`}
-                  />
-                  <MetricChip
-                    label="前方频率比"
-                    value={
-                      dopplerDerived.frontRatio === null
-                        ? '超过波速'
-                        : `${formatNumber(dopplerDerived.frontRatio, 2)}x`
-                    }
-                  />
-                  <MetricChip
-                    label="后方频率比"
-                    value={`${formatNumber(dopplerDerived.backRatio, 2)}x`}
-                  />
-                </div>
-              ) : isStandingModule ? (
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricChip
-                    label="共振模式"
-                    value={standingDerived.harmonicLabel}
-                  />
-                  <MetricChip
-                    label="共振频率 fₙ"
-                    value={`${formatNumber(1 / standingDerived.periodS, 2)} Hz`}
-                  />
-                  <MetricChip
-                    label="波长 λ"
-                    value={`${formatNumber(standingDerived.wavelengthCm, 2)} cm`}
-                  />
-                  <MetricChip
-                    label="周期 T"
-                    value={`${formatNumber(standingDerived.periodS, 2)} s`}
-                  />
-                  <MetricChip
-                    label="波节数"
-                    value={`${standingNodeCount}`}
-                  />
-                  <MetricChip
-                    label="波腹数"
-                    value={`${standingAntinodeCount}`}
-                  />
-                  <MetricChip
-                    label="波腹最大振幅"
-                    value={`${formatNumber(standingParams.amplitudeCm * 2, 2)} cm`}
-                  />
-                  <MetricChip
-                    label="当前选点振幅"
-                    value={`${formatNumber(standingSample.envelopeCm, 2)} cm`}
-                  />
-                </div>
-              ) : isSuperpositionModule ? (
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {superpositionMode === 'interference' ? (
-                    <>
-                      <MetricChip
-                        label="共同波长 λ"
-                        value={`${formatNumber(superpositionDerived.wave1.wavelengthCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="共同周期 T"
-                        value={`${formatNumber(superpositionDerived.wave1.periodS, 2)} s`}
-                      />
-                      <MetricChip
-                        label="当前相位差 Δφ"
-                        value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
-                      />
-                      <MetricChip
-                        label="当前合成振幅"
-                        value={`${formatNumber(interferenceAmplitude, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="最强相长"
-                        value={`${formatNumber(superpositionDerived.amplitudeMaxCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="最弱相消"
-                        value={`${formatNumber(superpositionDerived.amplitudeMinCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="当前合成位移"
-                        value={`${formatNumber(superpositionSample.combinedCm, 2)} cm`}
-                      />
-                      <MetricChip label="稳定性" value="同频 + 相位差恒定 = 稳定干涉" />
-                    </>
-                  ) : (
-                    <>
-                      <MetricChip
-                        label="波 1 波长 λ₁"
-                        value={`${formatNumber(superpositionDerived.wave1.wavelengthCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="波 2 波长 λ₂"
-                        value={`${formatNumber(superpositionDerived.wave2.wavelengthCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="拍频 f拍"
-                        value={`${formatNumber(superpositionDerived.beatFrequencyHz, 2)} Hz`}
-                      />
-                      <MetricChip
-                        label="包络周期"
-                        value={
-                          Number.isFinite(beatPeriodS)
-                            ? `${formatNumber(beatPeriodS, 2)} s`
-                            : '频差过小'
-                        }
-                      />
-                      <MetricChip
-                        label="当前相位差"
-                        value={`${formatNumber(superpositionRelativePhase, 2)} rad`}
-                      />
-                      <MetricChip
-                        label="振幅上界"
-                        value={`${formatNumber(superpositionDerived.amplitudeMaxCm, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="振幅下界"
-                        value={`${formatNumber(superpositionDerived.amplitudeMinCm, 2)} cm`}
-                      />
-                      <MetricChip label="稳定性" value="异频叠加 = 图样持续变化" />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricChip
-                    label="波长 λ"
-                    value={`${formatNumber(singleDerived.wavelengthCm, 2)} cm`}
-                  />
-                  <MetricChip
-                    label="周期 T"
-                    value={`${formatNumber(singleDerived.periodS, 2)} s`}
-                  />
-                  <MetricChip
-                    label="角频率 ω"
-                    value={`${formatNumber(singleDerived.omegaRad, 2)} rad/s`}
-                  />
-                  <MetricChip
-                    label="波数 k"
-                    value={`${formatNumber(singleDerived.waveNumber, 3)} rad/cm`}
-                  />
-                  {moduleVariant === 'comparison' ? (
-                    <>
-                      <MetricChip
-                        label="横波当前位移"
-                        value={`${formatNumber(singleTransverseDisplacement, 2)} cm`}
-                      />
-                      <MetricChip
-                        label="纵波当前位移"
-                        value={`${formatNumber(singleLongitudinalDisplacement, 2)} cm`}
-                      />
-                    </>
-                  ) : (
-                    <MetricChip
-                      label={moduleVariant === 'longitudinal' ? '当前位移 x' : '当前位移 y'}
-                      value={`${formatNumber(
-                        moduleVariant === 'longitudinal'
-                          ? singleLongitudinalDisplacement
-                          : singleTransverseDisplacement,
-                        2,
-                      )} cm`}
-                    />
-                  )}
-                  <MetricChip
-                    label="当前相位"
-                    value={`${formatNumber(singleSelectedPhase, 2)} rad`}
-                  />
-                  <MetricChip
-                    label="平移距离 Δx"
-                    value={`${formatNumber(waveShiftCm, 2)} cm`}
-                  />
-                  {moduleVariant !== 'comparison' ? (
-                    <>
-                      <MetricChip
-                        label="运动轨迹"
-                        value={singleTrajectoryText}
-                      />
-                      <MetricChip
-                        label="平衡位置"
-                        value={singleEquilibriumText}
-                      />
-                      <MetricChip
-                        label={moduleVariant === 'longitudinal' ? '振动区间 x' : '振动区间 y'}
-                        value={singleMotionRangeText}
-                      />
-                      <MetricChip
-                        label="累计路程 s(0→t)"
-                        value={`${formatNumber(singleTravelDistanceCm, 2)} cm`}
-                      />
-                    </>
-                  ) : null}
-                </div>
-              )}
-            </PanelCard>
+              <span className="text-xl leading-none">⚙</span>
+            </button>
 
-            <PanelCard title={stageLabel} subtitle={stageSubtitle}>
-              {isDopplerModule ? (
-                <div className="grid gap-3 lg:grid-cols-3">
-                  <AcceptanceCard
-                    title="波前实时绘制"
-                    content="主视图会持续发出前后方向可辨的圆弧波前，并保持波源向右运动的轨迹语义。"
-                  />
-                  <AcceptanceCard
-                    title="前密后疏"
-                    content="波源前方圆弧间距更小、后方更大，对应前方频率升高、后方频率降低。"
-                  />
-                  <AcceptanceCard
-                    title="公式对应"
-                    content="已输出 f前、f后 与频率比；当 vs 接近或超过 v 时，会提示经典前方公式失效。"
-                  />
-                </div>
-              ) : isStandingModule ? (
-                <div className="grid gap-3 lg:grid-cols-3">
-                  <AcceptanceCard
-                    title="驻波分层可见"
-                    content="主视图同时显示入射波、反射波和合成驻波，能清楚看到“驻”的形成。"
-                  />
-                  <AcceptanceCard
-                    title="波节波腹已标注"
-                    content="黑点固定表示波节，黄色标记表示波腹，随谐波切换数量和位置会同步变化。"
-                  />
-                  <AcceptanceCard
-                    title="谐波预设"
-                    content="已提供基频、二次、三次谐波，频率按 fₙ = nv / 2L 自动重算。"
-                  />
-                </div>
-              ) : isSuperpositionModule ? (
-                <div className="grid gap-3 lg:grid-cols-3">
-                  <AcceptanceCard
-                    title="分量波可见"
-                    content="波 1、波 2 与合成波同时显示，便于课堂逐层解释“先叠加、后观察”。"
-                  />
-                  <AcceptanceCard
-                    title={superpositionMode === 'interference' ? '稳定干涉' : '不稳定拍'}
-                    content={
-                      superpositionMode === 'interference'
-                        ? '保持同频并调节 Δφ 时，合成波形保持稳定，振幅在相长/相消之间切换。'
-                        : '调节 f₁ 与 f₂ 后，合成波会随时间起伏，拍频等于 |f₁ - f₂|。'
-                    }
-                  />
-                  <AcceptanceCard
-                    title="选定质点联动"
-                    content="点击主视图中的质点后，下方会切到该质点的叠加振动图，能直接观察当前合成结果。"
-                  />
-                </div>
-              ) : (
-                <div className="grid gap-3 lg:grid-cols-3">
-                  <AcceptanceCard
-                    title="图像对应"
-                    content="点击质点后，下方振动图会切到该质点，且相位随位置变化。"
-                  />
-                  <AcceptanceCard
-                    title="参数联动"
-                    content="振幅、频率、波速、质点数和 Δt 会即时重算波长、周期和图像。"
-                  />
-                  <AcceptanceCard
-                    title="概念对比"
-                    content="横波/纵波可并排比较，波形平移也能直接看到 Δx = vΔt 的结果。"
-                  />
-                </div>
-              )}
-            </PanelCard>
-          </main>
-        </div>
+        </main>
       </div>
+
+      {propertyDrawerOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 top-12 z-[80] lg:hidden"
+          style={{ background: 'rgba(0,0,0,0.42)' }}
+          onClick={() => setPropertyDrawerOpen(false)}
+          aria-label="关闭参数面板遮罩"
+        />
+      ) : null}
+
+      {teachingOpen ? (
+        <P06TeachingModal
+          title={activeModule?.title ?? '波动与振动'}
+          subtitle={`${stageLabel} · ${activeModule?.coveredModelIds.join(' / ') ?? 'P06'}`}
+          formulaContent={formulaContent}
+          teachingContent={teachingContent}
+          sourceContent={sourceContent}
+          onClose={() => setTeachingOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }
